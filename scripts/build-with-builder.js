@@ -306,11 +306,21 @@ const skipNative = args.includes('--skip-native');
 const packOnly = args.includes('--pack-only');
 const forceBuild = args.includes('--force');
 
+// Optional electron-builder config override (e.g. the lightweight client variant).
+// Usage: --builder-config packages/desktop/electron-builder.client.yml
+const builderConfigIdx = args.indexOf('--builder-config');
+const builderConfig =
+  builderConfigIdx >= 0 && args[builderConfigIdx + 1]
+    ? args[builderConfigIdx + 1]
+    : 'packages/desktop/electron-builder.yml';
+
 const builderArgs = args
-  .filter((arg) => {
+  .filter((arg, i) => {
     // Filter out 'auto', architecture flags, and special flags
     if (arg === 'auto') return false;
     if (arg === '--skip-vite' || arg === '--skip-native' || arg === '--pack-only' || arg === '--force') return false;
+    if (arg === '--builder-config') return false;
+    if (i === builderConfigIdx + 1 && builderConfigIdx >= 0) return false; // the config path value
     if (archList.includes(arg)) return false;
     if (arg.startsWith('--') && archList.includes(arg.slice(2))) return false;
     return true;
@@ -551,7 +561,7 @@ try {
     cleanupWindowsPackOutput();
   }
 
-  const builderCommand = `bunx electron-builder --config packages/desktop/electron-builder.yml ${builderArgs} ${archFlag} ${nsisInclude} ${publishArg}`;
+  const builderCommand = `bunx electron-builder --config ${builderConfig} ${builderArgs} ${archFlag} ${nsisInclude} ${publishArg}`;
   try {
     buildWithDmgRetry(builderCommand, targetArch);
   } catch (error) {

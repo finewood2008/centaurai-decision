@@ -185,7 +185,16 @@ const isVersionMode = hasCommand('--version') || hasCommand('-v');
  * connects to the chosen REMOTE server (host/port below) instead of using a
  * local backend. Native Electron = secure context → microphone/voice works.
  */
-const isClientMode = process.env.AIONUI_CLIENT === '1' || hasSwitch('client');
+/** A packaged client build ships a `client-mode.flag` marker in its resources,
+ *  so the distributed client launches in client mode without any env/CLI flag. */
+const clientMarkerExists = (): boolean => {
+  try {
+    return fs.existsSync(path.join(process.resourcesPath, 'client-mode.flag'));
+  } catch {
+    return false;
+  }
+};
+const isClientMode = process.env.AIONUI_CLIENT === '1' || hasSwitch('client') || clientMarkerExists();
 let clientBackendHost = '';
 let clientBackendPort = 0;
 
