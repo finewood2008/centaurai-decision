@@ -1,0 +1,47 @@
+{
+  "agentFallbackNotice": "{{original}} 不可用，已自动切换到 {{fallback}}。",
+  "noAgentAvailable": "没有可用的 Main Agent。请登录 Google 或安装 Claude/Codex CLI。是否前往设置？",
+  "noAgentAvailableShort": "没有可用的 Main Agent。点击配置。",
+  "agentTabAutoSwitch": "模型不兼容 Gemini，已自动切换到 {{fallback}}",
+  "autoSwitchToAgent": "Gemini 未配置，正在自动切换到 {{agent}}",
+  "autoSwitchedAgent": "{{from}} 不可用，已自动切换到 {{to}}",
+  "promptExamplesHint": "试试这些可点击的案例提示词：",
+  "selectAssistantHint": "选择一位办公助理开始任务",
+  "directConnect": "直连大模型",
+  "greeting": {
+    "morning": "早上好",
+    "afternoon": "下午好",
+    "evening": "晚上好",
+    "night": "夜深了"
+  },
+  "heroSubtitle": "今天想做点什么？",
+  "recentFiles": {
+    "title": "最近生成的文件",
+    "empty": "暂无生成的文件",
+    "viewAll": "查看全部"
+  },
+  "agentSwitcherLabel": "Agent",
+  "switchedToAgent": "已切换到 {{agent}}",
+  "workspace": {
+    "workInProject": "在项目中工作",
+    "optional": "可选",
+    "clearWorkspace": "清除",
+    "specifyWorkspace": "选择项目文件夹",
+    "searchPlaceholder": "搜索项目…",
+    "noProject": "不使用项目"
+  },
+  "scanning": {
+    "initialMessage": "当前Agent不可用, 正在检测其他可用agent...",
+    "scanningMessage": "正在扫描本地可用agent...",
+    "connectingMessage": "已连接成功，请稍后...",
+    "establishingConnection": "正在建立连接...",
+    "statusQueued": "排队中",
+    "statusTesting": "正在测试延迟...",
+    "statusUnreachable": "不可达",
+    "statusAvailable": "可用"
+  },
+  "coreCapabilities": "核心能力",
+  "assistantsTitle": "办公助理",
+  "addAssistant": "添加助理",
+  "noAssistant": "不使用助理"
+}

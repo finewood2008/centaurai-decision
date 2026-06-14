@@ -1,0 +1,16 @@
+{
+  "title": "專家",
+  "subtitle": "按部門尋找專業專家，按能力關鍵字搜尋，並快速發起面向業務場景的專業對話。",
+  "searchPlaceholder": "搜尋專家",
+  "disabled": "未啟用",
+  "empty": "暫無專家資料。請在終端機執行匯入腳本。",
+  "emptySearch": "沒有符合目前篩選條件的專家。",
+  "departments": {
+    "all": "全部部門"
+  },
+  "stats": {
+    "departments": "{{count}} 個部門",
+    "total": "{{count}} 位專家",
+    "enabled": "{{count}} 位可用"
+  }
+}

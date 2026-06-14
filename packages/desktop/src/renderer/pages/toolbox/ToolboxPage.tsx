@@ -1,0 +1,397 @@
+/**
+ * @license
+ * Copyright 2025 CentaurAI (centaurloop.com)
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { Alert, Button, Empty, Input } from '@arco-design/web-react';
+import {
+  ArrowRight,
+  Avatar,
+  BookOne,
+  Bowl,
+  IdCard,
+  Left,
+  Magic,
+  Picture,
+  PictureOne,
+  Search,
+  ShoppingBag,
+  SmilingFace,
+  Time,
+  Toolkit,
+  Topic,
+} from '@icon-park/react';
+import React, { useCallback, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+import { useAgents } from '@/renderer/hooks/agent/useAgents';
+import type { AgentMetadata } from '@/renderer/utils/model/agentTypes';
+import { ResultPanel } from './components/ResultPanel';
+import { ToolForm } from './components/ToolForm';
+import { checkToolReadiness } from './imageGenReadiness';
+import type { ToolDef, ToolFormValues } from './types';
+import { useToolboxRun } from './useToolboxRun';
+import { useToolboxTools } from './useToolboxTools';
+
+const ICONS: Record<string, React.ComponentType<{ size?: number }>> = {
+  Picture,
+  PictureOne,
+  Topic,
+  Magic,
+  Avatar,
+  SmilingFace,
+  ShoppingBag,
+  IdCard,
+  BookOne,
+  Bowl,
+  Time,
+};
+
+const ToolIcon: React.FC<{ name: string; size?: number }> = ({ name, size }) => {
+  const Cmp = ICONS[name] ?? Picture;
+  return <Cmp size={size} />;
+};
+
+type LastRun = { tool: ToolDef; agent: AgentMetadata | null; values: ToolFormValues };
+type ToolboxCategory = 'all' | ToolDef['category'];
+
+const getToolTitle = (tool: ToolDef, t: (key: string) => string) => tool.titleText ?? t(tool.titleKey);
+const getToolDesc = (tool: ToolDef, t: (key: string) => string) => tool.descText ?? t(tool.descKey);
+
+/** Warm-domain tone palette (clay / gold / green / deep-clay) per BRAND_GUIDE.md. */
+type Tone = { surface: string; icon: string; rail: string; dot: string };
+const TOOL_TONES: Tone[] = [
+  { surface: 'var(--centaur-clay-tint)', icon: 'var(--centaur-clay-deep)', rail: 'var(--centaur-clay)', dot: 'var(--centaur-clay)' },
+  { surface: 'var(--centaur-gold-tint)', icon: 'var(--centaur-gold-deep)', rail: 'var(--centaur-gold)', dot: 'var(--centaur-gold)' },
+  { surface: 'var(--centaur-green-tint)', icon: 'var(--centaur-green)', rail: 'var(--centaur-green)', dot: 'var(--centaur-green)' },
+  { surface: 'var(--centaur-bg-warm)', icon: 'var(--centaur-ink-soft)', rail: 'var(--centaur-clay-deep)', dot: 'var(--centaur-clay-deep)' },
+];
+
+function toneForTool(tool: ToolDef): Tone {
+  let hash = 0;
+  for (const char of tool.id) hash += char.charCodeAt(0);
+  return TOOL_TONES[hash % TOOL_TONES.length];
+}
+
+const ToolCard: React.FC<{
+  tool: ToolDef;
+  onOpen: (tool: ToolDef) => void;
+}> = ({ tool, onOpen }) => {
+  const { t } = useTranslation();
+  const fieldLabels = tool.fields.slice(0, 3).map((field) => t(field.labelKey));
+  const extraFieldCount = Math.max(0, tool.fields.length - fieldLabels.length);
+  const tone = toneForTool(tool);
+  const executorLabel = tool.requires === 'image-model' ? t('toolbox.imageModel') : t('toolbox.agent');
+
+  return (
+    <Button
+      type='text'
+      className='centaur-card centaur-liftable group !h-auto !w-full !overflow-hidden !p-0 !text-left'
+      style={{ borderRadius: 'var(--centaur-radius)' }}
+      onClick={() => onOpen(tool)}
+    >
+      <div className='flex min-h-232px w-full flex-col overflow-hidden'>
+        <div className='relative flex h-90px items-start justify-between gap-12px p-16px' style={{ background: tone.surface }}>
+          <div className='centaur-rail absolute bottom-0 left-0 h-3px w-full' />
+          <div className='flex min-w-0 items-center gap-12px'>
+            <div
+              className='flex h-46px w-46px shrink-0 items-center justify-center rounded-14px'
+              style={{ background: 'var(--centaur-card)', color: tone.icon, boxShadow: 'var(--centaur-shadow-sm)' }}
+            >
+              <ToolIcon name={tool.icon} size={24} />
+            </div>
+            <div className='min-w-0'>
+              <div className='truncate text-16px font-700 leading-22px' style={{ color: 'var(--centaur-ink)' }}>
+                {getToolTitle(tool, t)}
+              </div>
+              <div className='mt-4px flex items-center gap-6px'>
+                <span
+                  className='inline-flex items-center rounded-8px px-7px py-1px text-11px font-500'
+                  style={{ background: 'var(--centaur-card)', color: 'var(--centaur-ink-mute)', border: '1px solid var(--centaur-line)' }}
+                >
+                  {t(`toolbox.categories.${tool.category}`)}
+                </span>
+                {tool.source === 'skill' && (
+                  <span
+                    className='inline-flex items-center rounded-8px px-7px py-1px text-11px font-500'
+                    style={{ background: 'var(--centaur-gold-tint)', color: 'var(--centaur-gold-deep)' }}
+                  >
+                    {t('toolbox.source.skill')}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+          <div
+            className='flex h-30px w-30px shrink-0 items-center justify-center rounded-10px transition-all group-hover:translate-x-2px'
+            style={{ background: 'var(--centaur-card)', color: 'var(--centaur-clay)' }}
+          >
+            <ArrowRight size={15} />
+          </div>
+        </div>
+
+        <div className='flex flex-1 flex-col p-16px'>
+          <div className='min-h-42px text-13px leading-21px line-clamp-2' style={{ color: 'var(--centaur-ink-soft)' }}>
+            {getToolDesc(tool, t)}
+          </div>
+          <div className='mt-12px flex min-h-24px flex-wrap items-center gap-6px'>
+            {fieldLabels.map((label) => (
+              <span
+                key={label}
+                className='inline-flex max-w-120px items-center truncate rounded-8px px-7px py-2px text-11px'
+                style={{ background: 'var(--centaur-bg-warm)', color: 'var(--centaur-ink-soft)' }}
+              >
+                {label}
+              </span>
+            ))}
+            {extraFieldCount > 0 && (
+              <span
+                className='inline-flex items-center rounded-8px px-7px py-2px text-11px'
+                style={{ background: 'var(--centaur-bg-warm)', color: 'var(--centaur-ink-mute)' }}
+              >
+                +{extraFieldCount}
+              </span>
+            )}
+          </div>
+          <div
+            className='mt-auto flex items-center justify-between gap-10px pt-12px'
+            style={{ borderTop: '1px solid var(--centaur-line)' }}
+          >
+            <span className='truncate text-12px' style={{ color: 'var(--centaur-ink-mute)' }}>
+              {executorLabel}
+            </span>
+            <div className='h-8px w-8px shrink-0 rounded-full' style={{ background: tone.dot }} />
+          </div>
+        </div>
+      </div>
+    </Button>
+  );
+};
+
+/** Common AI Toolbox — a grid of practical, form-driven AI tools. */
+const ToolboxPage: React.FC = () => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { agents } = useAgents();
+  const { status, result, error, run, reset } = useToolboxRun();
+
+  const tools = useToolboxTools();
+  const [activeTool, setActiveTool] = useState<ToolDef | null>(null);
+  const [query, setQuery] = useState('');
+  const [category, setCategory] = useState<ToolboxCategory>('all');
+  const lastRunRef = useRef<LastRun | null>(null);
+
+  const filteredTools = tools.filter((tool) => {
+    if (category !== 'all' && tool.category !== category) return false;
+    const keyword = query.trim().toLowerCase();
+    if (!keyword) return true;
+    const title = getToolTitle(tool, t);
+    const desc = getToolDesc(tool, t);
+    return `${title} ${desc}`.toLowerCase().includes(keyword);
+  });
+
+  const imageCount = tools.filter((tool) => tool.category === 'image').length;
+  const textCount = tools.filter((tool) => tool.category === 'text').length;
+
+  const categoryOptions: Array<{ key: ToolboxCategory; label: string; count: number }> = [
+    { key: 'all', label: t('toolbox.categories.all'), count: tools.length },
+    { key: 'image', label: t('toolbox.categories.image'), count: imageCount },
+    { key: 'text', label: t('toolbox.categories.text'), count: textCount },
+  ];
+
+  const readiness = activeTool ? checkToolReadiness(activeTool) : null;
+  const toolReady = !readiness || readiness.ready;
+
+  let readinessAlert: React.ReactNode = null;
+  if (readiness && readiness.ready === false) {
+    const { reasonKey, settingsRoute } = readiness;
+    readinessAlert = (
+      <Alert
+        type='warning'
+        content={t(reasonKey)}
+        action={
+          <Button size='mini' type='text' onClick={() => void navigate(settingsRoute)}>
+            {t('toolbox.goToSettings')}
+          </Button>
+        }
+      />
+    );
+  }
+
+  const openTool = useCallback(
+    (tool: ToolDef) => {
+      reset();
+      lastRunRef.current = null;
+      setActiveTool(tool);
+    },
+    [reset]
+  );
+
+  const closeTool = useCallback(() => setActiveTool(null), []);
+
+  const handleRun = useCallback(
+    (tool: ToolDef, agent: AgentMetadata | null, values: ToolFormValues) => {
+      lastRunRef.current = { tool, agent, values };
+      void run(tool, agent, values);
+    },
+    [run]
+  );
+
+  const handleRegenerate = useCallback(() => {
+    const last = lastRunRef.current;
+    if (last) void run(last.tool, last.agent, last.values);
+  }, [run]);
+
+  const handleOpenConversation = useCallback(
+    (conversationId: string) => {
+      void navigate(`/conversation/${conversationId}`);
+    },
+    [navigate]
+  );
+
+  return (
+    <div className='centaur-brand w-full min-h-full box-border overflow-y-auto'>
+      <div className='mx-auto flex w-full max-w-1280px box-border flex-col gap-20px p-24px'>
+        {!activeTool ? (
+          <>
+            <div className='flex flex-col gap-16px lg:flex-row lg:items-end lg:justify-between'>
+              <div className='flex min-w-0 items-start gap-14px'>
+                <div className='centaur-mark h-52px w-52px shrink-0'>
+                  <Toolkit size={26} />
+                </div>
+                <div className='min-w-0'>
+                  <div className='centaur-eyebrow'>CENTAUR · TOOLKIT</div>
+                  <div className='mt-2px text-26px font-900 leading-32px' style={{ color: 'var(--centaur-ink)' }}>
+                    {t('toolbox.title')}
+                  </div>
+                  <div className='mt-5px max-w-680px text-14px leading-21px' style={{ color: 'var(--centaur-ink-soft)' }}>
+                    {t('toolbox.subtitle')}
+                  </div>
+                </div>
+              </div>
+              <Input
+                allowClear
+                className='w-full lg:!w-360px'
+                value={query}
+                onChange={setQuery}
+                placeholder={t('toolbox.searchPlaceholder')}
+                prefix={<Search size={14} fill='currentColor' />}
+              />
+            </div>
+
+            <div className='grid grid-cols-1 gap-14px md:grid-cols-3'>
+              {[
+                { label: t('toolbox.categories.all'), count: tools.length, icon: <Toolkit size={22} />, tone: 'var(--centaur-clay)', surface: 'var(--centaur-clay-tint)' },
+                { label: t('toolbox.categories.image'), count: imageCount, icon: <Picture size={20} />, tone: 'var(--centaur-gold-deep)', surface: 'var(--centaur-gold-tint)' },
+                { label: t('toolbox.categories.text'), count: textCount, icon: <BookOne size={20} />, tone: 'var(--centaur-green)', surface: 'var(--centaur-green-tint)' },
+              ].map((stat) => (
+                <div key={stat.label} className='centaur-card p-16px' style={{ borderRadius: 'var(--centaur-radius-sm)' }}>
+                  <div className='flex items-center justify-between gap-10px'>
+                    <span className='centaur-eyebrow' style={{ color: 'var(--centaur-ink-mute)' }}>
+                      {stat.label}
+                    </span>
+                    <div
+                      className='flex h-32px w-32px items-center justify-center rounded-10px'
+                      style={{ background: stat.surface, color: stat.tone }}
+                    >
+                      {stat.icon}
+                    </div>
+                  </div>
+                  <div className='mt-12px text-28px font-900 leading-32px' style={{ color: 'var(--centaur-ink)' }}>
+                    {stat.count}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className='flex flex-wrap items-center gap-8px'>
+              {categoryOptions.map((item) => {
+                const active = category === item.key;
+                return (
+                  <Button
+                    key={item.key}
+                    size='small'
+                    type={active ? 'primary' : 'text'}
+                    className='!rounded-full !px-14px'
+                    style={
+                      active
+                        ? { boxShadow: 'var(--centaur-shadow-clay)' }
+                        : { background: 'var(--centaur-card)', color: 'var(--centaur-ink-soft)', border: '1px solid var(--centaur-line)' }
+                    }
+                    onClick={() => setCategory(item.key)}
+                  >
+                    {item.label} · {item.count}
+                  </Button>
+                );
+              })}
+            </div>
+
+            {filteredTools.length > 0 ? (
+              <div className='grid grid-cols-1 gap-16px md:grid-cols-2 xl:grid-cols-3'>
+                {filteredTools.map((tool) => (
+                  <ToolCard key={tool.id} tool={tool} onOpen={openTool} />
+                ))}
+              </div>
+            ) : (
+              <div className='centaur-card py-44px'>
+                <Empty description={t('toolbox.empty')} />
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            <div className='centaur-card sticky top-0 z-2 p-16px' style={{ borderRadius: 'var(--centaur-radius-sm)' }}>
+              <div className='flex flex-col gap-14px sm:flex-row sm:items-center sm:justify-between'>
+                <div className='flex min-w-0 items-center gap-12px'>
+                  <Button shape='circle' icon={<Left />} onClick={closeTool} />
+                  <div
+                    className='flex h-44px w-44px shrink-0 items-center justify-center rounded-14px'
+                    style={{ background: 'var(--centaur-clay-tint)', color: 'var(--centaur-clay-deep)' }}
+                  >
+                    <ToolIcon name={activeTool.icon} size={22} />
+                  </div>
+                  <div className='min-w-0'>
+                    <div className='truncate text-18px font-700 leading-24px' style={{ color: 'var(--centaur-ink)' }}>
+                      {getToolTitle(activeTool, t)}
+                    </div>
+                    <div className='mt-3px truncate text-13px' style={{ color: 'var(--centaur-ink-soft)' }}>
+                      {getToolDesc(activeTool, t)}
+                    </div>
+                  </div>
+                </div>
+                <span
+                  className='inline-flex shrink-0 items-center rounded-8px px-9px py-2px text-12px font-500'
+                  style={{ background: 'var(--centaur-bg-warm)', color: 'var(--centaur-ink-soft)' }}
+                >
+                  {t(`toolbox.categories.${activeTool.category}`)}
+                </span>
+              </div>
+            </div>
+            {readinessAlert}
+            <div className='grid grid-cols-1 gap-20px lg:grid-cols-[400px_minmax(0,1fr)] lg:items-start'>
+              <div className='w-full'>
+                <ToolForm
+                  tool={activeTool}
+                  agents={agents}
+                  running={status === 'running'}
+                  disabled={!toolReady}
+                  onRun={handleRun}
+                />
+              </div>
+              <ResultPanel
+                status={status}
+                result={result}
+                error={error}
+                onOpenConversation={handleOpenConversation}
+                onRegenerate={handleRegenerate}
+              />
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default ToolboxPage;

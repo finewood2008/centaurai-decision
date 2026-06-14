@@ -1,0 +1,209 @@
+/**
+ * CentaurAI Color Scheme — warm domain (centaurloop.com)
+ *
+ * `:root` = 暖米 Warm Cream (default, light). `:root[data-theme='dark']` = 墨夜
+ * Tech Dark (brand tech domain). The 素白 Clean White theme is delivered via the
+ * theme `tokens` channel (see builtinThemes.ts) and overrides `:root` at runtime.
+ *
+ * This file recolors the ENTIRE app: every component that reads the shared
+ * background, text and primary tokens (and the Arco primary ramp) inherits the
+ * brand palette from here.
+ */
+
+/* ============================================================
+   暖米 Warm Cream — Light (default)
+   ============================================================ */
+:root {
+  /* Brand fonts — verbatim from centaurloop.com (--sans / --serif), with the
+     "Noto …CJK SC" family names added so they also resolve on Linux. */
+  --app-font-sans: 'Noto Sans SC', 'Noto Sans CJK SC', 'PingFang SC', -apple-system, BlinkMacSystemFont, 'Microsoft YaHei', sans-serif;
+  --app-font-serif: 'Noto Serif SC', 'Noto Serif CJK SC', 'Songti SC', serif;
+
+  /* AOU brand ramp — soft warm neutral → clay */
+  --aou-1: #f3ece2;
+  --aou-2: #ece2d2;
+  --aou-3: #ddccb4;
+  --aou-4: #ccb591;
+  --aou-5: #b89a6f;
+  --aou-6: #c0755a;
+  --aou-7: #a35c43;
+  --aou-8: #7e4632;
+  --aou-9: #4e2c20;
+  --aou-10: #2c1a12;
+
+  /* Background ramp — exact centaurloop.com cream (--bg / --card / --bg-warm),
+     a SUBTLE warm off-white; the cool 素白 theme is what reads as plain white. */
+  --bg-base: #faf7f2; /* --bg: page background (cream) */
+  --bg-1: #fffdfa; /* --card: card surface */
+  --bg-2: #f3ece2; /* --bg-warm: sidebar / alt fills */
+  --bg-3: #e6dfd4; /* border / divider (≈ --line on cream) */
+  --bg-4: #d8cfc0;
+  --bg-5: #c0b6a6;
+  --bg-6: #8a857d; /* --ink-mute: tertiary / disabled text */
+  --bg-8: #55534f; /* --ink-soft */
+  --bg-9: #393530;
+  --bg-10: #2c2c2e; /* --ink */
+
+  /* Interactive states */
+  --bg-hover: #f3ece2;
+  --bg-active: #ece3d6;
+
+  /* Text */
+  --text-primary: #2c2c2e;
+  --color-text-1: #2c2c2e;
+  --text-secondary: #55534f;
+  --color-text-2: #55534f;
+  --color-text-3: #8a857d;
+  --color-text-4: #b7aea0;
+  --text-disabled: #b7aea0;
+
+  /* Semantic — primary = clay, accents in brand palette */
+  --primary: #c0755a;
+  --success: #5a8a4e;
+  --warning: #cf9326;
+  --danger: #c0492f;
+  --info: #5090e0;
+
+  /* Arco primary ramp → clay (RGB triplets; Arco derives --color-primary-N) */
+  --primary-1: 248, 237, 231;
+  --primary-2: 240, 217, 206;
+  --primary-3: 230, 190, 174;
+  --primary-4: 216, 160, 138;
+  --primary-5: 204, 135, 108;
+  --primary-6: 192, 117, 90;
+  --primary-7: 163, 92, 67;
+  --primary-8: 138, 75, 53;
+  --primary-9: 110, 58, 40;
+  --primary-10: 84, 43, 29;
+  --color-primary-light-1: #f8ede7;
+  --color-primary-light-2: #f0d9ce;
+  --color-primary-light-3: #e6beae;
+  --color-primary-light-4: #d8a08a;
+
+  /* Borders (≈ --line: rgba(44,44,46,0.12) flattened on cream) */
+  --border-base: #e6dfd4;
+  --border-light: #efe9de;
+
+  /* Brand */
+  --brand: #c0755a;
+  --brand-light: #f4e7e0;
+  --brand-hover: #a35c43;
+
+  /* Brand accents (gold thread + tints) — app-wide */
+  --accent-gold: #e8b04b;
+  --accent-gold-deep: #cf9326;
+  --accent-gold-tint: #fbf0d6;
+  --accent-green-tint: #e7efe2;
+
+  /* Message & UI component colors */
+  --message-user-bg: #f4e7e0; /* clay tint */
+  --message-tips-bg: #fbf0d6; /* gold tint */
+  --workspace-btn-bg: #f3ece2;
+
+  /* Special */
+  --fill: #f3ece2;
+  --inverse: #ffffff;
+  --dialog-fill-0: #fffdfa;
+  --text-0: #2c2c2e;
+  --text-white: #ffffff;
+  --fill-0: #fffdfa;
+  --fill-white-to-black: #ffffff;
+  --border-special: var(--bg-3);
+  --color-guid-agent-bar: #f3ece2;
+}
+
+/* ============================================================
+   墨夜 Tech Dark — Dark (brand tech domain)
+   ============================================================ */
+:root[data-theme='dark'] {
+  /* AOU brand ramp — inverted toward system gold */
+  --aou-1: #181828;
+  --aou-2: #242438;
+  --aou-3: #323250;
+  --aou-4: #45456a;
+  --aou-5: #5a5a86;
+  --aou-6: #d4af37;
+  --aou-7: #e0c15a;
+  --aou-8: #c2c2e0;
+  --aou-9: #dcdcf0;
+  --aou-10: #efeffa;
+
+  /* Background ramp — deep space → light ink */
+  --bg-base: #080810;
+  --bg-1: #11111e; /* card / panel */
+  --bg-2: #181828;
+  --bg-3: #242438; /* border / divider */
+  --bg-4: #323250;
+  --bg-5: #45456a;
+  --bg-6: #7878a0; /* tertiary / disabled text */
+  --bg-8: #9a9ac0;
+  --bg-9: #c2c2e0;
+  --bg-10: #e0e0f0;
+
+  /* Interactive states */
+  --bg-hover: #16162a;
+  --bg-active: #1e1e34;
+
+  /* Text */
+  --text-primary: #dcdcf0;
+  --color-text-1: #dcdcf0;
+  --text-secondary: #aeaece;
+  --color-text-2: #aeaece;
+  --color-text-3: #7878a0;
+  --color-text-4: #56566e;
+  --text-disabled: #56566e;
+
+  /* Semantic — primary = system gold, info = brand blue */
+  --primary: #d4af37;
+  --success: #4bb36b;
+  --warning: #e8b04b;
+  --danger: #e06a60;
+  --info: #5090e0;
+
+  /* Arco primary ramp → gold (dark) */
+  --primary-1: 42, 36, 18;
+  --primary-2: 64, 54, 24;
+  --primary-3: 92, 76, 30;
+  --primary-4: 130, 106, 38;
+  --primary-5: 170, 140, 46;
+  --primary-6: 212, 175, 55;
+  --primary-7: 224, 193, 90;
+  --primary-8: 233, 209, 130;
+  --primary-9: 242, 225, 175;
+  --primary-10: 250, 242, 220;
+  --color-primary-light-1: #2a2412;
+  --color-primary-light-2: #3a3018;
+  --color-primary-light-3: #4e4020;
+  --color-primary-light-4: #6a5630;
+
+  /* Borders */
+  --border-base: #242438;
+  --border-light: #181828;
+
+  /* Brand */
+  --brand: #d4af37;
+  --brand-light: #2a2412;
+  --brand-hover: #e0c15a;
+
+  /* Brand accents */
+  --accent-gold: #d4af37;
+  --accent-gold-deep: #e0c15a;
+  --accent-gold-tint: #2a2412;
+  --accent-green-tint: #18241c;
+
+  /* Message & UI component colors */
+  --message-user-bg: #22283a;
+  --message-tips-bg: #181828;
+  --workspace-btn-bg: #16162a;
+
+  /* Special */
+  --fill: #11111e;
+  --inverse: #ffffff;
+  --dialog-fill-0: #181828;
+  --text-0: #dcdcf0;
+  --text-white: #ffffff;
+  --fill-0: rgba(255, 255, 255, 0.06);
+  --fill-white-to-black: #000000;
+  --border-special: #45456a;
+  --color-guid-agent-bar: #181828;
+}

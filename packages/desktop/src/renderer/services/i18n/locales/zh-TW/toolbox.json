@@ -1,0 +1,278 @@
+{
+  "title": "AI工具箱",
+  "subtitle": "常用實用的 AI 工具——填寫表單即可生成。",
+  "agent": "執行 Agent",
+  "agentPlaceholder": "選擇一個 Agent",
+  "noAgent": "沒有可用的 Agent",
+  "generate": "生成",
+  "generating": "生成中…",
+  "fillRequired": "請填寫：{{field}}",
+  "download": "下載",
+  "regenerate": "重新生成",
+  "retry": "重試",
+  "openInConversation": "在對話中開啟",
+  "runFailed": "生成失敗",
+  "noOutput": "沒有生成結果",
+  "resultHint": "填寫表單並點擊「生成」，結果將顯示在這裡。",
+  "formTitle": "工具設定",
+  "resultTitle": "生成結果",
+  "goToSettings": "前往設定",
+  "readiness": {
+    "imageModelMissing": "使用此工具前，請先在設定中設定圖像生成模型。"
+  },
+  "tools": {
+    "textToImage": {
+      "title": "文生圖",
+      "desc": "根據文字提示詞生成圖片。"
+    },
+    "imageEdit": {
+      "title": "圖生圖 / 改圖",
+      "desc": "基於參考圖生成新圖片。"
+    },
+    "poster": {
+      "title": "做海報",
+      "desc": "按標題、風格和配色生成海報。"
+    },
+    "avatar": {
+      "title": "AI 頭像",
+      "desc": "用風格/背景預設生成人物頭像。"
+    },
+    "sticker": {
+      "title": "貼紙表情",
+      "desc": "模切貼紙,粗描邊,白底。"
+    },
+    "product": {
+      "title": "電商商品圖",
+      "desc": "帶背景/角度預設的商品攝影。"
+    },
+    "idPhoto": {
+      "title": "證件照",
+      "desc": "帶底色/著裝預設的證件照。"
+    },
+    "illustration": {
+      "title": "插畫",
+      "desc": "帶藝術風格預設的插畫。"
+    },
+    "food": {
+      "title": "美食攝影",
+      "desc": "帶角度/氛圍預設的美食攝影。"
+    },
+    "photoRestore": {
+      "title": "老照片修復",
+      "desc": "修復增強老照片,可選上色。"
+    }
+  },
+  "fields": {
+    "prompt": {
+      "label": "提示詞",
+      "placeholder": "描述你想要的畫面…"
+    },
+    "ratio": {
+      "label": "畫面比例"
+    },
+    "style": {
+      "label": "風格"
+    },
+    "count": {
+      "label": "生成數量"
+    },
+    "refImages": {
+      "label": "參考圖",
+      "placeholder": "選擇圖片"
+    },
+    "editPrompt": {
+      "label": "修改要求",
+      "placeholder": "描述你想要的修改…"
+    },
+    "posterTitle": {
+      "label": "標題",
+      "placeholder": "海報主標題"
+    },
+    "posterSubtitle": {
+      "label": "副標題",
+      "placeholder": "可選的副標題"
+    },
+    "posterStyle": {
+      "label": "風格"
+    },
+    "colorScheme": {
+      "label": "配色"
+    },
+    "posterSize": {
+      "label": "尺寸"
+    },
+    "posterExtra": {
+      "label": "其他要求",
+      "placeholder": "補充任何細節…"
+    },
+    "avatarSubject": {
+      "label": "人物描述",
+      "placeholder": "年齡、性別、髮型、表情、服飾…"
+    },
+    "avatarStyle": {
+      "label": "風格"
+    },
+    "avatarBackground": {
+      "label": "背景"
+    },
+    "stickerSubject": {
+      "label": "貼紙主體",
+      "placeholder": "如:一隻柴犬、一個卡通女孩…"
+    },
+    "stickerEmotion": {
+      "label": "表情·動作",
+      "placeholder": "如:開心大笑、比心、生氣…"
+    },
+    "productDesc": {
+      "label": "商品描述",
+      "placeholder": "描述商品…"
+    },
+    "productBackground": {
+      "label": "背景"
+    },
+    "productAngle": {
+      "label": "角度"
+    },
+    "idSubject": {
+      "label": "人物描述",
+      "placeholder": "外貌、性別、髮型…"
+    },
+    "idBgColor": {
+      "label": "底色"
+    },
+    "idAttire": {
+      "label": "著裝"
+    },
+    "illustScene": {
+      "label": "畫面描述",
+      "placeholder": "描述畫面…"
+    },
+    "illustStyle": {
+      "label": "藝術風格"
+    },
+    "foodDish": {
+      "label": "菜品描述",
+      "placeholder": "描述菜品…"
+    },
+    "foodAngle": {
+      "label": "角度"
+    },
+    "foodMood": {
+      "label": "氛圍"
+    },
+    "restorePhoto": {
+      "label": "老照片",
+      "placeholder": "上傳需要修復的老照片"
+    },
+    "restoreColorize": {
+      "label": "上色"
+    }
+  },
+  "options": {
+    "ratio": {
+      "square": "方形 1:1",
+      "landscape": "橫版 16:9",
+      "portrait": "直版 9:16",
+      "classic": "經典 4:3",
+      "classicPortrait": "經典直版 3:4"
+    },
+    "style": {
+      "none": "預設",
+      "photorealistic": "寫實",
+      "anime": "動漫",
+      "render3d": "3D 渲染",
+      "watercolor": "水彩",
+      "minimal": "極簡"
+    },
+    "posterStyle": {
+      "business": "商務",
+      "minimal": "極簡",
+      "festive": "節日",
+      "tech": "科技",
+      "retro": "復古"
+    },
+    "colorScheme": {
+      "auto": "自動",
+      "warm": "暖色",
+      "cool": "冷色",
+      "highContrast": "高對比",
+      "soft": "柔和"
+    },
+    "avatarStyle": {
+      "realistic": "寫實",
+      "anime": "動漫",
+      "render3d": "3D",
+      "oil": "油畫",
+      "cyberpunk": "賽博朋克",
+      "lineart": "線條"
+    },
+    "avatarBackground": {
+      "blur": "虛化",
+      "solid": "純色",
+      "scene": "場景"
+    },
+    "productBackground": {
+      "white": "純白",
+      "gray": "淺灰",
+      "wood": "木桌",
+      "marble": "大理石",
+      "scene": "場景"
+    },
+    "productAngle": {
+      "front": "正面",
+      "angle45": "45度",
+      "topdown": "俯拍"
+    },
+    "idBgColor": {
+      "white": "白底",
+      "blue": "藍底",
+      "red": "紅底"
+    },
+    "idAttire": {
+      "formal": "正裝",
+      "professional": "職業裝",
+      "casual": "休閒"
+    },
+    "illustStyle": {
+      "flat": "扁平",
+      "watercolor": "水彩",
+      "painting": "厚塗",
+      "cel": "賽璐璐",
+      "children": "兒童繪本",
+      "pixel": "像素"
+    },
+    "foodAngle": {
+      "angle45": "45度",
+      "topdown": "頂視",
+      "closeup": "特寫"
+    },
+    "foodMood": {
+      "bright": "明亮清新",
+      "dark": "暗調質感",
+      "japanese": "日式",
+      "ins": "Ins風"
+    },
+    "restoreColorize": {
+      "keep": "保持原樣",
+      "colorize": "自動上色"
+    }
+  },
+  "searchPlaceholder": "搜尋工具",
+  "empty": "沒有符合目前篩選條件的工具。",
+  "categories": {
+    "all": "全部",
+    "image": "圖像",
+    "text": "文字"
+  },
+  "stats": {
+    "total": "{{count}} 個工具",
+    "image": "{{count}} 個圖像工具",
+    "text": "{{count}} 個文字工具"
+  },
+  "source": {
+    "skill": "技能"
+  },
+  "imageModel": "圖像模型",
+  "imageModelUnset": "未設定",
+  "imageModelPlaceholder": "選擇圖像模型"
+}

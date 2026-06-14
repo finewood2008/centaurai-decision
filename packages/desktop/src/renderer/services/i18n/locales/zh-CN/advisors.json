@@ -1,0 +1,16 @@
+{
+  "title": "专家",
+  "subtitle": "按部门查找专业专家，按能力关键词搜索，并快速发起面向业务场景的专业对话。",
+  "searchPlaceholder": "搜索专家",
+  "disabled": "未启用",
+  "empty": "暂无专家数据。请在终端运行导入脚本。",
+  "emptySearch": "没有符合当前筛选条件的专家。",
+  "departments": {
+    "all": "全部部门"
+  },
+  "stats": {
+    "departments": "{{count}} 个部门",
+    "total": "{{count}} 位专家",
+    "enabled": "{{count}} 位可用"
+  }
+}
