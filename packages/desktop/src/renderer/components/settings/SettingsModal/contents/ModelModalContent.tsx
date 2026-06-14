@@ -15,8 +15,6 @@ import {
   Tag,
   Switch,
   Tooltip,
-  Tabs,
-  Input,
 } from '@arco-design/web-react';
 import { DeleteFour, Info, Minus, Plus, Write, Heartbeat } from '@icon-park/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -27,11 +25,9 @@ import { isNewApiPlatform, NEW_API_PROTOCOL_OPTIONS } from '@/renderer/utils/mod
 import EditModeModal from '@/renderer/pages/settings/components/EditModeModal';
 import AionScrollArea from '@/renderer/components/base/AionScrollArea';
 import { useProvidersQuery } from '@/renderer/hooks/agent/useModelProviderList';
-import { useConfig } from '@/renderer/hooks/config/useConfig';
 import { isElectronDesktop } from '@/renderer/utils/platform';
 import { useSettingsViewMode } from '../settingsViewContext';
 import { consumePendingDeepLink } from '@/renderer/hooks/system/useDeepLink';
-import type { ImageGenProvider } from '@/common/config/configKeys';
 import '../model-provider.css';
 
 const getProtocolColor = (p: string) => {
@@ -61,329 +57,6 @@ const getProviderState = (p: IProvider) => {
 };
 const isModelEnabled = (p: IProvider, m: string) => !p.model_enabled || p.model_enabled[m] !== false;
 
-// ── Media provider preset lists ──
-
-type PresetProvider = { name: string; base_url: string; hint: string };
-
-const IMG_PRESETS: PresetProvider[] = [
-  { name: '通义万相', base_url: 'https://dashscope.aliyuncs.com/compatible-mode/v1', hint: 'sk-...' },
-  { name: '文心一格 (ERNIE-ViLG)', base_url: 'https://qianfan.baidubce.com/v2', hint: 'bce-...' },
-  { name: '智谱 CogView', base_url: 'https://open.bigmodel.cn/api/paas/v4', hint: 'xxx.' },
-  { name: '豆包/即梦 (Jimeng)', base_url: 'https://ark.cn-beijing.volces.com/api/v3', hint: 'ep-...' },
-  { name: 'SiliconFlow (FLUX)', base_url: 'https://api.siliconflow.cn/v1', hint: 'sk-...' },
-  { name: 'OpenAI DALL·E', base_url: 'https://api.openai.com/v1', hint: 'sk-...' },
-];
-const IMG_KW = [
-  'dall',
-  'flux',
-  'stable',
-  'sdxl',
-  'sd3',
-  'imagen',
-  'image',
-  'midjourney',
-  'wanxiang',
-  'ernie-vilg',
-  'cogview',
-  'kolors',
-  'playground',
-  'pixart',
-  'sana',
-  'jimeng',
-  'qwen-vl',
-  'hunyuan',
-  'kling',
-  'seedream',
-];
-const isImageModelName = (n: string) => IMG_KW.some((k) => n.toLowerCase().includes(k));
-
-const VOICE_PRESETS: PresetProvider[] = [
-  { name: '讯飞星火 (语音)', base_url: 'https://spark-api-open.xf-yun.com/v1', hint: 'appid:key' },
-  { name: '火山引擎 (语音)', base_url: 'https://openspeech.bytedance.com/api/v1', hint: 'appid:token' },
-  { name: '阿里云 (语音)', base_url: 'https://dashscope.aliyuncs.com/compatible-mode/v1', hint: 'sk-...' },
-  { name: 'MiniMax (语音)', base_url: 'https://api.minimax.chat/v1', hint: 'eyJ...' },
-  { name: '腾讯云 (语音)', base_url: 'https://tts.cloud.tencent.com/stream', hint: 'appid:key' },
-];
-const VOICE_KW = [
-  'tts',
-  'speech',
-  'whisper',
-  'voice',
-  'audio',
-  'speaker',
-  'para',
-  'bert-vits',
-  'cosyvoice',
-  'chattts',
-  'fish',
-  'gpt-sovits',
-  'bark',
-  'xtts',
-];
-const isVoiceModelName = (n: string) => VOICE_KW.some((k) => n.toLowerCase().includes(k));
-
-const VIDEO_PRESETS: PresetProvider[] = [
-  { name: '可灵 Kling', base_url: 'https://api.klingai.com/v1', hint: 'ak:sk' },
-  { name: '即梦 Jimeng', base_url: 'https://ark.cn-beijing.volces.com/api/v3', hint: 'ep-...' },
-  { name: '智谱 CogVideo', base_url: 'https://open.bigmodel.cn/api/paas/v4', hint: 'xxx.' },
-  { name: '海螺 Hailuo (MiniMax)', base_url: 'https://api.minimax.chat/v1', hint: 'eyJ...' },
-  { name: 'Vidu', base_url: 'https://api.vidu.cn/v1', hint: 'sk-...' },
-  { name: '通义万相 (视频)', base_url: 'https://dashscope.aliyuncs.com/compatible-mode/v1', hint: 'sk-...' },
-];
-const VIDEO_KW = [
-  'video',
-  'kling',
-  'cogvideo',
-  'hailuo',
-  'vidu',
-  'animate',
-  'sora',
-  'runway',
-  'pika',
-  'luma',
-  'gen',
-  'motion',
-  'wan',
-  'veo',
-];
-const isVideoModelName = (n: string) => VIDEO_KW.some((k) => n.toLowerCase().includes(k));
-
-// ── Reusable media provider tab ──
-
-function MediaProviderTab(props: {
-  configKey: 'tools.imageGenerationProviders' | 'tools.voiceProviders' | 'tools.videoProviders';
-  presets: PresetProvider[];
-  filterFn: (name: string) => boolean;
-  title: string;
-  subtitle: string;
-  readOnly?: boolean;
-}) {
-  const { configKey, presets, filterFn, title, subtitle, readOnly } = props;
-  const [message, messageContext] = Message.useMessage();
-  const [providers, setProviders] = useConfig(configKey);
-  const list = providers ?? [];
-  const [newName, setNewName] = useState('');
-  const [newUrl, setNewUrl] = useState('');
-  const [newKey, setNewKey] = useState('');
-  const [newModel, setNewModel] = useState<Record<string, string>>({});
-  const [fetching, setFetching] = useState<Record<string, boolean>>({});
-  const [presetKeys, setPresetKeys] = useState<Record<string, string>>({});
-
-  const save = useCallback((next: ImageGenProvider[]) => setProviders(next), [setProviders]);
-
-  const addProvider = useCallback(
-    (name: string, url: string, key: string, autoFetch: boolean) => {
-      if (!name.trim() || !url.trim()) return;
-      const id = 'mp_' + Date.now().toString(36);
-      const next = [
-        ...list,
-        { id, name: name.trim(), base_url: url.trim().replace(/\/$/, ''), api_key: key.trim(), models: [] },
-      ];
-      save(next);
-      if (autoFetch) fetchModels(id, url.trim().replace(/\/$/, ''), key.trim());
-    },
-    [list, save]
-  );
-
-  const removeProvider = useCallback((id: string) => save(list.filter((p) => p.id !== id)), [list, save]);
-
-  const addModel = useCallback(
-    (pid: string) => {
-      const mn = (newModel[pid] || '').trim();
-      if (!mn) return;
-      save(list.map((p) => (p.id === pid ? { ...p, models: [...p.models, mn] } : p)));
-      setNewModel((prev) => ({ ...prev, [pid]: '' }));
-    },
-    [newModel, list, save]
-  );
-
-  const removeModel = useCallback(
-    (pid: string, mn: string) => {
-      save(list.map((p) => (p.id === pid ? { ...p, models: p.models.filter((m) => m !== mn) } : p)));
-    },
-    [list, save]
-  );
-
-  const fetchModels = useCallback(
-    async (pid: string, url: string, key: string) => {
-      if (!key.trim()) {
-        message.warning('请填入 API Key');
-        return;
-      }
-      setFetching((prev) => ({ ...prev, [pid]: true }));
-      try {
-        const resp = await fetch(url + '/models', { headers: { Authorization: `Bearer ${key}` } });
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        const json = await resp.json();
-        const allModels: string[] = (json.data || []).map((m: any) => m.id || '').filter(Boolean);
-        const filtered = allModels.filter(filterFn);
-        if (filtered.length === 0) message.info(`未检测到匹配模型（共 ${allModels.length} 个），可手动添加`);
-        else {
-          save(list.map((p) => (p.id === pid ? { ...p, models: [...new Set([...p.models, ...filtered])] } : p)));
-          message.success(`已加载 ${filtered.length} 个模型`);
-        }
-      } catch (e: any) {
-        message.error(`加载失败: ${e.message}`);
-      } finally {
-        setFetching((prev) => ({ ...prev, [pid]: false }));
-      }
-    },
-    [list, save, filterFn, message]
-  );
-
-  const addPreset = useCallback(
-    (p: PresetProvider) => {
-      const key = presetKeys[p.name] || '';
-      if (!key.trim()) {
-        message.warning('请填入 API Key');
-        return;
-      }
-      if (list.find((x) => x.base_url === p.base_url)) {
-        message.warning('已存在');
-        return;
-      }
-      addProvider(p.name, p.base_url, key, true);
-      setPresetKeys((prev) => ({ ...prev, [p.name]: '' }));
-    },
-    [list, presetKeys, addProvider, message]
-  );
-
-  return (
-    <div className='space-y-16px mt-12px'>
-      {messageContext}
-      {!readOnly && (
-        <>
-      {/* Presets */}
-      <div className='rounded-12px border border-solid border-[var(--color-border-2)] bg-[var(--color-bg-2)] p-14px'>
-        <div className='text-15px font-600 text-t-primary mb-10px'>{title}</div>
-        <div className='text-12px text-t-secondary mb-14px'>{subtitle}</div>
-        <div className='space-y-10px'>
-          {presets.map((p) => {
-            const added = list.find((x) => x.base_url === p.base_url);
-            return (
-              <div key={p.name} className='flex items-center gap-10px'>
-                <span className='text-13px text-t-primary w-180px shrink-0'>{p.name}</span>
-                {added ? (
-                  <Tag color='green' className='shrink-0'>
-                    已添加
-                  </Tag>
-                ) : (
-                  <>
-                    <Input
-                      size='small'
-                      placeholder={`API Key (${p.hint})`}
-                      value={presetKeys[p.name] || ''}
-                      onChange={(v) => setPresetKeys((prev) => ({ ...prev, [p.name]: v }))}
-                      className='flex-1'
-                    />
-                    <Button size='small' type='primary' onClick={() => addPreset(p)}>
-                      添加并加载
-                    </Button>
-                  </>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-      {/* Custom */}
-      <div className='rounded-12px border border-dashed border-[var(--color-border-2)] bg-[var(--color-bg-2)] p-14px'>
-        <div className='text-15px font-600 text-t-primary mb-10px'>自定义端点</div>
-        <div className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_1fr_auto] gap-10px items-end'>
-          <Input size='small' placeholder='名称' value={newName} onChange={setNewName} />
-          <Input size='small' placeholder='Base URL' value={newUrl} onChange={setNewUrl} />
-          <Input size='small' placeholder='API Key' value={newKey} onChange={setNewKey} />
-          <Button
-            size='small'
-            type='outline'
-            icon={<Plus size='14' />}
-            disabled={!newName.trim() || !newUrl.trim()}
-            onClick={() => {
-              addProvider(newName, newUrl, newKey, false);
-              setNewName('');
-              setNewUrl('');
-              setNewKey('');
-            }}
-          >
-            添加端点
-          </Button>
-        </div>
-      </div>
-        </>
-      )}
-      {/* Provider list */}
-      {list.length === 0 ? (
-        <div className='text-13px text-t-secondary text-center py-24px rounded-12px border border-dashed border-[var(--color-border-2)]'>
-          暂无 Provider
-        </div>
-      ) : (
-        list.map((provider) => (
-          <div
-            key={provider.id}
-            className='rounded-12px border border-solid border-[var(--color-border-2)] bg-[var(--color-bg-2)] p-14px'
-          >
-            <div className='flex items-center justify-between mb-8px'>
-              <div className='flex items-center gap-8px'>
-                <span className='text-14px font-600 text-t-primary'>{provider.name}</span>
-                {!readOnly && (
-                  <Button
-                    size='mini'
-                    icon={<Heartbeat size='12' />}
-                    loading={fetching[provider.id]}
-                    onClick={() => fetchModels(provider.id, provider.base_url, provider.api_key)}
-                  >
-                    加载模型
-                  </Button>
-                )}
-              </div>
-              {!readOnly && (
-                <Button
-                  size='mini'
-                  status='danger'
-                  icon={<DeleteFour size='12' />}
-                  onClick={() => removeProvider(provider.id)}
-                >
-                  删除
-                </Button>
-              )}
-            </div>
-            <div className='text-11px text-t-secondary mb-8px'>{provider.base_url}</div>
-            <div className='flex flex-wrap gap-6px mb-10px'>
-              {provider.models.length === 0 && (
-                <span className='text-12px text-t-secondary'>{readOnly ? '暂无模型' : '暂无模型，点击"加载模型"自动获取'}</span>
-              )}
-              {provider.models.map((m) => (
-                <Tag key={m} closable={!readOnly} onClose={() => removeModel(provider.id, m)} size='small'>
-                  {m}
-                </Tag>
-              ))}
-            </div>
-            {!readOnly && (
-              <div className='flex gap-8px items-center'>
-                <Input
-                  size='small'
-                  placeholder='手动添加模型'
-                  value={newModel[provider.id] || ''}
-                  onChange={(v) => setNewModel((prev) => ({ ...prev, [provider.id]: v }))}
-                  className='flex-1'
-                />
-                <Button
-                  size='mini'
-                  icon={<Plus size='12' />}
-                  disabled={!newModel[provider.id]?.trim()}
-                  onClick={() => addModel(provider.id)}
-                >
-                  添加
-                </Button>
-              </div>
-            )}
-          </div>
-        ))
-      )}
-    </div>
-  );
-}
-
 // ── Main component ──
 
 const ModelModalContent: React.FC = () => {
@@ -397,7 +70,6 @@ const ModelModalContent: React.FC = () => {
   const [healthCheckLoading, setHealthCheckLoading] = useState<Record<string, boolean>>({});
   const { data, mutate } = useProvidersQuery();
   const [message, messageContext] = Message.useMessage();
-  const [modelTab, setModelTab] = useState('llm');
 
   const persistPlatform = async (platform: IProvider) => {
     if ((data || []).some((x) => x.id === platform.id)) {
@@ -524,7 +196,7 @@ const ModelModalContent: React.FC = () => {
         <div className='flex items-center justify-between gap-8px flex-wrap'>
           <div className='text-20px font-600 text-t-primary leading-34px'>{t('settings.model')}</div>
           <div className='flex items-center gap-8px flex-wrap'>
-            {modelTab === 'llm' && !isReadOnly && (
+            {!isReadOnly && (
               <>
                 <Button
                   type='outline'
@@ -601,9 +273,7 @@ const ModelModalContent: React.FC = () => {
             )}
           </div>
         ) : (
-          <Tabs activeTab={modelTab} onChange={setModelTab} type='line'>
-            <Tabs.TabPane key='llm' title='LLM 模型'>
-              <div className='space-y-16px mt-12px'>
+          <div className='space-y-16px mt-12px'>
                 {(data || []).map((platform: IProvider) => {
                   const key = platform.id;
                   const isExpanded = collapseKey[platform.id] ?? false;
@@ -757,39 +427,7 @@ const ModelModalContent: React.FC = () => {
                     </Collapse>
                   );
                 })}
-              </div>
-            </Tabs.TabPane>
-            <Tabs.TabPane key='image' title='图像模型'>
-              <MediaProviderTab
-                configKey='tools.imageGenerationProviders'
-                presets={IMG_PRESETS}
-                filterFn={isImageModelName}
-                title='常用图像 Provider'
-                subtitle='填入 API Key 自动加载可用图像模型'
-                readOnly={isReadOnly}
-              />
-            </Tabs.TabPane>
-            <Tabs.TabPane key='voice' title='语音模型'>
-              <MediaProviderTab
-                configKey='tools.voiceProviders'
-                presets={VOICE_PRESETS}
-                filterFn={isVoiceModelName}
-                title='常用语音 Provider'
-                subtitle='填入 API Key 自动加载可用语音模型（TTS / STT）'
-                readOnly={isReadOnly}
-              />
-            </Tabs.TabPane>
-            <Tabs.TabPane key='video' title='视频模型'>
-              <MediaProviderTab
-                configKey='tools.videoProviders'
-                presets={VIDEO_PRESETS}
-                filterFn={isVideoModelName}
-                title='常用视频 Provider'
-                subtitle='填入 API Key 自动加载可用视频生成模型'
-                readOnly={isReadOnly}
-              />
-            </Tabs.TabPane>
-          </Tabs>
+          </div>
         )}
       </AionScrollArea>
     </div>
