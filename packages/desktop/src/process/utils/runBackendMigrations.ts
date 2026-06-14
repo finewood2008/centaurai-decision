@@ -17,6 +17,7 @@ import {
 import { BUILTIN_IMAGE_GEN_NAME, type IMcpServer, type IProvider } from '@/common/config/storage';
 import { getBuiltinMcpScriptPath, type ProcessConfig as ProcessConfigType } from './initStorage';
 import { migrateAssistantsToBackend } from './migrateAssistants';
+import { seedBundledExperts } from './seedBundledExperts';
 
 type ConfigFile = typeof ProcessConfigType;
 type MigrationStepResult = boolean;
@@ -380,6 +381,7 @@ const MIGRATION_STEPS: Array<{
     run: async (configFile) => (await ensureBootstrapMcpServersInDb(configFile), true),
   },
   { name: 'migrateAssistantsToBackend', run: async (configFile) => migrateAssistantsToBackend(configFile) },
+  { name: 'seedBundledExperts', run: async (configFile) => seedBundledExperts(configFile) },
 ];
 
 async function syncBuiltinMcpConfig(configFile: ConfigFile): Promise<void> {

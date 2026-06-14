@@ -114,6 +114,9 @@ extraResources:
     to: bundled-aioncore
   - from: resources/hub
     to: hub
+  # Bundled expert library (agency advisors) seeded into the backend on startup
+  - from: resources/experts
+    to: experts
 win:
   target:
     - nsis
