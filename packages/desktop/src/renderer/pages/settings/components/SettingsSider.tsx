@@ -7,6 +7,7 @@ import {
   Cat,
   Communication,
   Computer,
+  Download,
   Earth,
   Info,
   Lightning,
@@ -33,6 +34,7 @@ export const BUILTIN_TAB_IDS = [
   'capabilities',
   'appearance',
   'webui',
+  'client',
   'users',
   'pet',
   'system',
@@ -117,6 +119,12 @@ const SettingsSider: React.FC<{ collapsed?: boolean; tooltipEnabled?: boolean }>
         icon: isDesktop ? <Earth /> : <Communication />,
         path: 'webui',
       },
+      client: {
+        id: 'client',
+        label: t('settings.client'),
+        icon: <Download />,
+        path: 'client',
+      },
       users: {
         id: 'users',
         label: t('settings.users'),
@@ -128,10 +136,12 @@ const SettingsSider: React.FC<{ collapsed?: boolean; tooltipEnabled?: boolean }>
       about: { id: 'about', label: t('settings.about'), icon: <Info />, path: 'about' },
     };
 
-    // Start with ordered builtin IDs, hiding desktop-only tabs in browser mode
-    const result: SiderItem[] = BUILTIN_TAB_IDS.filter((id) => isDesktop || (id !== 'pet' && id !== 'users')).map(
-      (id) => builtinMap[id]
-    );
+    // Start with ordered builtin IDs. 'client' (local-client downloads) is the
+    // mirror image of 'pet'/'users': it only makes sense for LAN/browser users,
+    // so it's hidden on the desktop admin and shown only in browser mode.
+    const result: SiderItem[] = BUILTIN_TAB_IDS.filter((id) =>
+      id === 'client' ? !isDesktop : isDesktop || (id !== 'pet' && id !== 'users')
+    ).map((id) => builtinMap[id]);
 
     // Extension tabs with position anchoring
     const beforeMap = new Map<string, IExtensionSettingsTab[]>();

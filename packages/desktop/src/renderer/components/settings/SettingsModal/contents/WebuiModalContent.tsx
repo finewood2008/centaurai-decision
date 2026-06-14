@@ -552,7 +552,8 @@ const WebuiModalContent: React.FC = () => {
   const displayPassword = getDisplayPassword();
   const displayUsername = status?.adminUsername || 'admin';
 
-  // 浏览器端只显示 Channels 配置，不显示 WebUI 服务配置 / In browser mode, only show Channels config, not WebUI service config
+  // 浏览器端只显示 Channels 配置，不显示 WebUI 服务配置（客户端下载已独立为「本地客户端」页）
+  // In browser mode, only show Channels config (client download lives in its own "Local Client" page)
   if (!isDesktop) {
     return (
       <div className='flex flex-col h-full w-full'>

@@ -1,0 +1,8 @@
+*.exe
+*.msi
+*.zip
+*.dmg
+*.pkg
+*.AppImage
+*.deb
+*.rpm

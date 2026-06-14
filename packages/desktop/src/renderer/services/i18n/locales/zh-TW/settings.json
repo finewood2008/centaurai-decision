@@ -1002,5 +1002,16 @@
     "acpTool": "受管 ACP 執行元件",
     "codexAcp": "Codex ACP 執行元件",
     "claudeAgentAcp": "Claude ACP 執行元件"
-  }
+  },
+  "webui.downloadClient.title": "下載用戶端",
+  "webui.downloadClient.description": "用戶端安裝包由伺服器內建提供。選擇你的系統下載並安裝，安裝後即可用原生用戶端登入（支援語音輸入等瀏覽器受限的功能）。",
+  "webui.downloadClient.download": "下載",
+  "webui.downloadClient.started": "已開始下載",
+  "webui.downloadClient.loadError": "取得用戶端清單失敗，請稍後重試或聯絡管理員。",
+  "webui.downloadClient.empty": "伺服器尚未提供用戶端安裝包，請聯絡管理員。",
+  "webui.downloadClient.recommended": "推薦",
+  "webui.downloadClient.otherOs": "其他系統",
+  "client": "本機用戶端",
+  "webui.downloadClient.latest": "最新",
+  "webui.downloadClient.unknownVersion": "其他版本"
 }

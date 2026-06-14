@@ -14,6 +14,20 @@ import { startWebHost, type WebHostHandle } from '@aionui/web-host';
 import { getDataPath } from './utils';
 
 const WEBUI_CONFIG_FILE = 'webui.config.json';
+
+/**
+ * Resolve the directory that holds the bundled native client installers served
+ * at /api/downloads/*. Honors an explicit AIONUI_INSTALLER_DIR override; in a
+ * packaged app the installers ship via electron-builder extraResources at
+ * `<resources>/client-installers`; in dev they live in the repo's
+ * `resources/client-installers`.
+ */
+function resolveInstallerDir(): string {
+  const override = process.env.AIONUI_INSTALLER_DIR;
+  if (override) return override;
+  if (app.isPackaged) return path.join(process.resourcesPath, 'client-installers');
+  return path.join(process.cwd(), 'resources', 'client-installers');
+}
 const DESKTOP_WEBUI_ENABLED_KEY = 'webui.desktop.enabled';
 const DESKTOP_WEBUI_ALLOW_REMOTE_KEY = 'webui.desktop.allowRemote';
 const DESKTOP_WEBUI_PORT_KEY = 'webui.desktop.port';
@@ -247,6 +261,8 @@ export async function startDesktopWebUI(opts: { port?: number; allowRemote?: boo
     staticDir: path.join(__dirname, '../renderer'),
     port: preferredPort,
     allowRemote,
+    // Native client installers bundled with the server, served at /api/downloads/*.
+    installerDir: resolveInstallerDir(),
     // Must align with the desktop IPC path's backend dataDir (src/index.ts), otherwise
     // users see divergent SQLite state between desktop app and bundled WebUI.
     dataDir: getDataPath(),
