@@ -18,7 +18,7 @@ import type { AvailableAgent, EffectiveAgentInfo } from '../types';
 import type { Assistant } from '@/common/types/agent/assistantTypes';
 import { Message } from '@arco-design/web-react';
 import { Plus, Robot } from '@icon-park/react';
-import React, { useCallback, useLayoutEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { resolveExtensionAssetUrl } from '@/renderer/utils/platform';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -241,13 +241,14 @@ const AssistantSelectionArea: React.FC<AssistantSelectionAreaProps> = ({
     onRegisterOpenDetails(openAssistantDetails);
   }, [onRegisterOpenDetails, openAssistantDetails]);
 
-  // Separate agency assistants from others
+  // Separate agency assistants from others. Disabled experts (toggled off in
+  // settings) are hidden everywhere they're surfaced.
   const isAgency = (a: Assistant) => a.id.startsWith('agency-');
-  const agencyAssistants = useMemo(() => assistants.filter((a) => isAgency(a)), [assistants]);
+  const agencyAssistants = useMemo(
+    () => assistants.filter((a) => isAgency(a) && a.enabled !== false),
+    [assistants]
+  );
   const nonAgencyAssistants = useMemo(() => assistants.filter((a) => !isAgency(a)), [assistants]);
-
-  // Agency department tags (Chinese) — market-first ordering.
-  const agencyDeptNames = EXPERT_DEPT_ORDER;
   const getAgencyDept = (id: string) => {
     const parts = id.replace('agency-', '').split('-');
     const nameMap: Record<string, string> = {
@@ -272,7 +273,21 @@ const AssistantSelectionArea: React.FC<AssistantSelectionAreaProps> = ({
     };
     return nameMap[parts[0]] || nameMap[`${parts[0]}-${parts[1]}`] || parts[0];
   };
+  // Department tabs, market-first ordered, limited to categories that still
+  // have at least one enabled expert. A fully-disabled category has no tab.
+  const agencyDeptNames = useMemo(
+    () => EXPERT_DEPT_ORDER.filter((dept) => agencyAssistants.some((a) => getAgencyDept(a.id) === dept)),
+    [agencyAssistants]
+  );
   const [agencyDeptFilter, setAgencyDeptFilter] = useState<string | null>('市场营销');
+  // Keep a non-null selection valid: if the chosen department was disabled
+  // away, jump to the first remaining one. A null filter (user collapsed the
+  // grid) is left alone.
+  useEffect(() => {
+    if (agencyDeptFilter && agencyDeptNames.length > 0 && !agencyDeptNames.includes(agencyDeptFilter)) {
+      setAgencyDeptFilter(agencyDeptNames[0]);
+    }
+  }, [agencyDeptNames, agencyDeptFilter]);
   const filteredAgency = useMemo(() => {
     if (!agencyDeptFilter) return [];
     return agencyAssistants.filter((a) => getAgencyDept(a.id) === agencyDeptFilter);
