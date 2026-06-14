@@ -2,7 +2,7 @@
  * AdvisorsPage — Full-page catalog of AI industry advisors (agency experts)
  * grouped by department. Clicking an advisor starts a new conversation.
  */
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import AionScrollArea from '@/renderer/components/base/AionScrollArea';
@@ -151,24 +151,34 @@ const AdvisorsPage: React.FC = () => {
   }, [i18n.language]);
 
   const advisors = useMemo(() => fullAssistants.filter((a) => a.id.startsWith('agency-')), [fullAssistants]);
+  // Only enabled experts are surfaced in the catalog. Experts toggled off in
+  // settings are hidden entirely; a category whose experts are all disabled
+  // drops out of the department tabs (groupAgencyByCategory omits empty groups).
+  const enabledAdvisors = useMemo(() => advisors.filter((a) => a.enabled !== false), [advisors]);
 
-  const allAgencyGroups = useMemo(() => groupAgencyByCategory(advisors), [advisors]);
+  const allAgencyGroups = useMemo(() => groupAgencyByCategory(enabledAdvisors), [enabledAdvisors]);
   const departmentNames = useMemo(() => orderDepartments(Object.keys(allAgencyGroups)), [allAgencyGroups]);
 
+  // If the active department vanished (all its experts were disabled), fall
+  // back to the "all" tab so the user isn't left on an empty, unhighlighted tab.
+  useEffect(() => {
+    if (activeDepartment === ALL_DEPARTMENTS) return;
+    if (!departmentNames.includes(activeDepartment)) setActiveDepartment(ALL_DEPARTMENTS);
+  }, [departmentNames, activeDepartment]);
+
   const filteredAdvisors = useMemo(() => {
-    const source = activeDepartment === ALL_DEPARTMENTS ? advisors : (allAgencyGroups[activeDepartment] ?? []);
+    const source = activeDepartment === ALL_DEPARTMENTS ? enabledAdvisors : (allAgencyGroups[activeDepartment] ?? []);
     if (!searchQuery.trim()) return source;
     const q = searchQuery.trim().toLowerCase();
     return source.filter((a) => {
       const { name, desc } = getAdvisorDisplayText(a, localeKey);
       return (name + ' ' + desc).toLowerCase().includes(q);
     });
-  }, [activeDepartment, advisors, allAgencyGroups, searchQuery, localeKey]);
+  }, [activeDepartment, enabledAdvisors, allAgencyGroups, searchQuery, localeKey]);
 
   const agencyGroups = useMemo(() => groupAgencyByCategory(filteredAdvisors), [filteredAdvisors]);
 
   const isSearchVisible = searchExpanded || searchQuery.length > 0;
-  const enabledTotal = advisors.filter((advisor) => advisor.enabled !== false).length;
 
   const handleSelectAdvisor = (advisor: AssistantListItem) => {
     navigate('/guid', {
@@ -180,27 +190,18 @@ const AdvisorsPage: React.FC = () => {
 
   const renderCard = (advisor: AssistantListItem) => {
     const { name, desc } = getAdvisorDisplayText(advisor, localeKey);
-    const enabled = advisor.enabled !== false;
     return (
       <div
         key={advisor.id}
         data-testid={`advisor-card-${advisor.id}`}
-        className={`centaur-card group relative box-border flex h-140px w-full flex-col items-center overflow-hidden px-12px pt-16px pb-12px ${
-          enabled ? 'centaur-liftable cursor-pointer' : 'cursor-not-allowed opacity-60'
-        }`}
+        className='centaur-card centaur-liftable group relative box-border flex h-140px w-full cursor-pointer flex-col items-center overflow-hidden px-12px pt-16px pb-12px'
         style={{ borderRadius: 'var(--centaur-radius-sm)' }}
-        onClick={() => enabled && handleSelectAdvisor(advisor)}
+        onClick={() => handleSelectAdvisor(advisor)}
       >
         <div className='centaur-rail absolute left-0 top-0 h-3px w-full opacity-0 transition-opacity group-hover:opacity-100' />
         {/* Avatar — fixed-height row so names line up across all cards */}
         <div className='relative flex h-44px w-44px shrink-0 items-center justify-center'>
           <AssistantAvatar assistant={advisor} avatarImageMap={{}} size={44} />
-          {!enabled && (
-            <span
-              className='absolute -right-3px -top-3px h-8px w-8px rounded-full'
-              style={{ background: 'var(--centaur-ink-mute)' }}
-            />
-          )}
         </div>
         {/* Name — single line, fixed height */}
         <div
@@ -222,7 +223,6 @@ const AdvisorsPage: React.FC = () => {
 
   const renderDeptSection = (title: string, deptAdvisors: AssistantListItem[]) => {
     if (deptAdvisors.length === 0) return null;
-    const enabledCount = deptAdvisors.filter((a) => a.enabled !== false).length;
     return (
       <section key={title} className='space-y-12px'>
         <div
@@ -237,7 +237,7 @@ const AdvisorsPage: React.FC = () => {
             className='inline-flex items-center rounded-full px-8px py-1px text-11px font-500'
             style={{ background: 'var(--centaur-gold-tint)', color: 'var(--centaur-gold-deep)' }}
           >
-            {enabledCount}/{deptAdvisors.length}
+            {deptAdvisors.length}
           </span>
           <div className='h-1px flex-1' style={{ background: 'var(--centaur-line)' }} />
         </div>
@@ -255,7 +255,7 @@ const AdvisorsPage: React.FC = () => {
     { key: 'total', label: t('advisors.stats.total', { count: advisors.length }) },
     {
       key: 'enabled',
-      label: t('advisors.stats.enabled', { count: enabledTotal }),
+      label: t('advisors.stats.enabled', { count: enabledAdvisors.length }),
       icon: <CheckOne size={12} fill='currentColor' />,
     },
   ];
