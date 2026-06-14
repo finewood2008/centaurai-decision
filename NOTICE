@@ -1,8 +1,19 @@
 CentaurAI AIStation
 Copyright 2025 半人马人工智能（深圳）有限公司 (CentaurAI, centaurloop.com)
+All rights reserved.
 
-This product is licensed under the Apache License, Version 2.0 (the "License");
-a copy of the License is provided in the LICENSE file in this repository.
+CentaurAI AIStation is a proprietary product of 半人马人工智能（深圳）有限公司,
+built as a derivative work upon AionUi. It is dual-licensed:
+
+  - Original code and assets authored by CentaurAI are PROPRIETARY and are NOT
+    open source. They are Copyright 2025 半人马人工智能（深圳）有限公司, all
+    rights reserved, and may not be used, copied, modified, or redistributed
+    without prior written permission.
+
+  - Portions derived from AionUi remain licensed under the Apache License,
+    Version 2.0 (the "License"); a copy of the License is provided in the
+    LICENSE file in this repository, and the original notices are retained in
+    those files (see Attribution below).
 
 ------------------------------------------------------------------------------
 Attribution
