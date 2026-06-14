@@ -1,106 +1,84 @@
 #!/usr/bin/env python3
-"""Generate the CentaurAI app icon (geometric centaur logo) into resources/.
+"""Build the CentaurAI app icon from the brand centaur artwork.
 
-Produces resources/app.png, app_dev.png, app.ico (and app.icns if supported),
-rendered at high resolution with supersampling for smooth rings. The logo is the
-brand mark from centauros-assets/generate.py: gold C-ring + blue horse head +
-gold diamond, on the dark tech-domain background.
+Takes the low-poly centaur logo (white background), keys out the white to
+transparency with a soft edge, trims, centers it on a square canvas with
+padding, and writes resources/app.png / app_dev.png / app.ico / app.icns.
+
+Usage: python3 scripts/gen-app-icon.py [source-image]
 """
-from PIL import Image, ImageDraw
-import math, os
+import os, sys, glob
+from PIL import Image
 
 RES = os.path.join(os.path.dirname(__file__), "..", "resources")
-GOLD = (212, 175, 55)
-BLUE = (80, 144, 224)
-BG_TOP = (10, 12, 22)
-BG_BOTTOM = (20, 16, 40)
 OUT = 1024
-SS = 3  # supersample factor
+PAD = 0.08  # padding fraction on each side
 
 
-def gradient_bg(size):
-    img = Image.new("RGB", (size, size), BG_TOP)
-    d = ImageDraw.Draw(img)
-    for y in range(size):
-        t = y / size
-        r = int(BG_TOP[0] + (BG_BOTTOM[0] - BG_TOP[0]) * t)
-        g = int(BG_TOP[1] + (BG_BOTTOM[1] - BG_TOP[1]) * t)
-        b = int(BG_TOP[2] + (BG_BOTTOM[2] - BG_TOP[2]) * t)
-        d.line([(0, y), (size, y)], fill=(r, g, b))
+def find_source():
+    if len(sys.argv) > 1 and os.path.exists(sys.argv[1]):
+        return sys.argv[1]
+    # default: the centaur artwork the user provided
+    cands = glob.glob("/home/user/桌面/centauros-assets/*MsgID=7589502657397164613*")
+    if cands:
+        return cands[0]
+    raise SystemExit("source image not found; pass it as an argument")
+
+
+def key_out_white(img):
+    """Return RGBA with white background made transparent (soft edge)."""
+    img = img.convert("RGBA")
+    px = img.load()
+    w, h = img.size
+    HI, LO = 250, 232  # min-channel thresholds: >=HI fully transparent, <=LO opaque
+    for y in range(h):
+        for x in range(w):
+            r, g, b, a = px[x, y]
+            mn = min(r, g, b)
+            if mn >= HI:
+                alpha = 0
+            elif mn <= LO:
+                alpha = 255
+            else:
+                alpha = int((HI - mn) / (HI - LO) * 255)
+            px[x, y] = (r, g, b, alpha)
     return img
 
 
-def draw_centaur(draw, cx, cy, s):
-    """Geometric centaur: glow + gold outer ring + C-arc + blue horse head + diamond."""
-    # Soft glow behind the mark
-    for r in range(int(s * 2.0), int(s * 1.5), -2):
-        a = max(0, int(36 * (1 - (r - s * 1.5) / (s * 0.5))))
-        draw.ellipse([cx - r, cy - r, cx + r, cy + r], fill=(20 + a // 5, 30 + a // 5, 64 + a // 5))
-
-    # Outer thin ring
-    r_ring = s * 1.5
-    draw.ellipse([cx - r_ring, cy - r_ring, cx + r_ring, cy + r_ring], outline=GOLD, width=max(2, int(s * 0.03)))
-
-    # Bold C-shaped arc (opening like the brand C)
-    ring_r = s * 1.2
-    arc_w = max(3, int(s * 0.075))
-    pts = []
-    for ang in range(120, 421, 2):
-        rad = math.radians(ang)
-        pts.append((cx + ring_r * math.cos(rad), cy + ring_r * math.sin(rad)))
-    draw.line(pts, fill=GOLD, width=arc_w, joint="curve")
-
-    # Horse head silhouette inside the ring — large & centered so it reads small.
-    hx = cx + s * 0.04
-    hy = cy - s * 0.02
-    head = [
-        (hx - s * 0.30, hy + s * 0.52),  # neck / jaw bottom
-        (hx + s * 0.58, hy + s * 0.06),  # snout
-        (hx + s * 0.22, hy - s * 0.58),  # ear tip
-        (hx - s * 0.20, hy - s * 0.34),  # crown / mane
-    ]
-    draw.polygon(head, fill=BLUE)
-    # Eye
-    ex, ey = hx + s * 0.12, hy - s * 0.06
-    er = max(2, int(s * 0.05))
-    draw.ellipse([ex - er, ey - er, ex + er, ey + er], fill=BG_TOP)
-
-    # Gold diamond accent on the ring (right side)
-    dx, dy = cx + s * 1.35, cy
-    dsz = max(4, int(s * 0.08))
-    draw.polygon([(dx, dy - dsz), (dx + dsz * 2 // 3, dy), (dx, dy + dsz), (dx - dsz * 2 // 3, dy)], fill=GOLD)
-
-
-def render(size):
-    big = size * SS
-    img = gradient_bg(big).convert("RGBA")
-    d = ImageDraw.Draw(img)
-    draw_centaur(d, big // 2, big // 2, s=big * 0.30)
-    return img.resize((size, size), Image.LANCZOS)
-
-
 def main():
-    icon = render(OUT)
-    png_path = os.path.join(RES, "app.png")
-    icon.convert("RGB").save(png_path)
-    icon.convert("RGB").save(os.path.join(RES, "app_dev.png"))
+    src = find_source()
+    print("source:", src)
+    img = key_out_white(Image.open(src))
+
+    bbox = img.getbbox()
+    if bbox:
+        img = img.crop(bbox)
+
+    # Fit into a padded square, preserving aspect ratio.
+    target = int(OUT * (1 - 2 * PAD))
+    w, h = img.size
+    scale = min(target / w, target / h)
+    img = img.resize((max(1, int(w * scale)), max(1, int(h * scale))), Image.LANCZOS)
+
+    canvas = Image.new("RGBA", (OUT, OUT), (0, 0, 0, 0))
+    canvas.paste(img, ((OUT - img.width) // 2, (OUT - img.height) // 2), img)
+
+    canvas.save(os.path.join(RES, "app.png"))
+    canvas.save(os.path.join(RES, "app_dev.png"))
     print("wrote app.png / app_dev.png")
 
-    # Windows .ico (multi-size)
-    icon.save(
+    canvas.save(
         os.path.join(RES, "app.ico"),
         format="ICO",
         sizes=[(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)],
     )
     print("wrote app.ico")
 
-    # macOS .icns (Pillow supports ICNS write in recent versions)
     try:
-        icns = icon.resize((1024, 1024), Image.LANCZOS)
-        icns.save(os.path.join(RES, "app.icns"), format="ICNS")
+        canvas.resize((1024, 1024), Image.LANCZOS).save(os.path.join(RES, "app.icns"), format="ICNS")
         print("wrote app.icns")
     except Exception as e:
-        print("SKIP app.icns (Pillow can't write ICNS here):", e)
+        print("SKIP app.icns:", e)
 
 
 if __name__ == "__main__":
