@@ -35,6 +35,8 @@ export type WebHostOptions = {
   staticDir: string;
   port?: number;
   allowRemote?: boolean;
+  /** Directory of bundled native client installers, served at /api/downloads/*. */
+  installerDir?: string;
   dataDir?: string;
   logDir?: string;
   dirs?: BackendSystemDirs;

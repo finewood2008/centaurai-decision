@@ -1029,5 +1029,16 @@
     "conversation": "Conversation",
     "mcp": "MCP",
     "customAgent": "Custom Agent"
-  }
+  },
+  "webui.downloadClient.title": "Download Client",
+  "webui.downloadClient.description": "The client installer is served by your server. Pick your OS to download and install — the native client unlocks capabilities the browser blocks, such as voice input.",
+  "webui.downloadClient.download": "Download",
+  "webui.downloadClient.started": "Download started",
+  "webui.downloadClient.loadError": "Failed to load the client list. Try again later or contact your admin.",
+  "webui.downloadClient.empty": "No client installer is available on the server yet. Please contact your admin.",
+  "webui.downloadClient.recommended": "Recommended",
+  "webui.downloadClient.otherOs": "Other",
+  "client": "Local Client",
+  "webui.downloadClient.latest": "Latest",
+  "webui.downloadClient.unknownVersion": "Other version"
 }

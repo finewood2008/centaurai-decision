@@ -117,6 +117,9 @@ extraResources:
   # Bundled expert library (agency advisors) seeded into the backend on startup
   - from: resources/experts
     to: experts
+  # Native client installers served by the WebUI at /api/downloads/* (not public)
+  - from: resources/client-installers
+    to: client-installers
 win:
   target:
     - nsis

@@ -13,12 +13,18 @@ import http, { type IncomingMessage, type Server, type ServerResponse } from 'no
 import { networkInterfaces } from 'node:os';
 import net, { type Socket } from 'node:net';
 import serveHandler from 'serve-handler';
+import { handleDownloadGet, handleDownloadsList } from './downloads.js';
 
 export type StaticServerOptions = {
   staticDir: string;
   backendPort: number;
   port?: number;
   allowRemote?: boolean;
+  /**
+   * Directory holding bundled native client installers, served at
+   * /api/downloads/*. Omit to disable the download endpoints (list returns []).
+   */
+  installerDir?: string;
 };
 
 export type StaticServerHandle = {
@@ -134,6 +140,18 @@ export async function startStaticServer(opts: StaticServerOptions): Promise<Stat
     try {
       if (!req.url || !req.method) {
         res.writeHead(400).end();
+        return;
+      }
+
+      // /api/downloads/* — client installer downloads, served LOCALLY from the
+      // bundled installer dir (NOT proxied to aioncore). Must come before the
+      // generic /api/* proxy below.
+      if (req.url.startsWith('/api/downloads/list')) {
+        await handleDownloadsList(res, opts.installerDir);
+        return;
+      }
+      if (req.url.startsWith('/api/downloads/get')) {
+        await handleDownloadGet(req, res, opts.installerDir);
         return;
       }
 

@@ -1030,5 +1030,16 @@
     "conversation": "对话",
     "mcp": "MCP",
     "customAgent": "自定义 Agent"
-  }
+  },
+  "webui.downloadClient.title": "下载客户端",
+  "webui.downloadClient.description": "客户端安装包由服务器内置提供。选择你的系统下载并安装，安装后即可用原生客户端登录（支持语音输入等浏览器受限的能力）。",
+  "webui.downloadClient.download": "下载",
+  "webui.downloadClient.started": "已开始下载",
+  "webui.downloadClient.loadError": "获取客户端列表失败，请稍后重试或联系管理员。",
+  "webui.downloadClient.empty": "服务器暂未提供客户端安装包，请联系管理员。",
+  "webui.downloadClient.recommended": "推荐",
+  "webui.downloadClient.otherOs": "其他系统",
+  "client": "本地客户端",
+  "webui.downloadClient.latest": "最新",
+  "webui.downloadClient.unknownVersion": "其他版本"
 }
