@@ -1,0 +1,36 @@
+CentaurAI AIStation
+Copyright 2025 半人马人工智能（深圳）有限公司 (CentaurAI, centaurloop.com)
+
+This product is licensed under the Apache License, Version 2.0 (the "License");
+a copy of the License is provided in the LICENSE file in this repository.
+
+------------------------------------------------------------------------------
+Attribution
+------------------------------------------------------------------------------
+
+This product is a modified derivative work based on:
+
+    AionUi — https://github.com/iOfficeAI/AionUi
+    Copyright 2025 AionUi (aionui.com)
+    Licensed under the Apache License, Version 2.0.
+
+The original AionUi copyright and license notices are retained in the source
+files derived from AionUi, as required by Section 4 of the Apache License 2.0.
+
+------------------------------------------------------------------------------
+Modifications (Apache License 2.0, Section 4(b))
+------------------------------------------------------------------------------
+
+CentaurAI AIStation has modified the original AionUi work. Notable changes:
+
+  - Rebranding to "CentaurAI AIStation" and the centaurloop.com visual identity
+    (warm-domain color theme, brand fonts, 3 core themes).
+  - Restructured home sections: "办公助理" (office assistants) and "专家"
+    (experts) as separate, parallel sections.
+  - Admin-managed model configuration (desktop-managed, WebUI read-only).
+  - Per-advisor main-agent + builtin-skill mapping for the agency experts.
+  - A LAN distributed client (mDNS auto-discovery + remote connect) so each
+    workstation connects to a central admin server.
+
+This NOTICE file is provided for attribution purposes only and does not modify
+the License. See LICENSE for the full terms.
