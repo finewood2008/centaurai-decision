@@ -6,12 +6,18 @@
 
 import type { IUserRecord } from '@/common/adapter/ipcBridge';
 import { ipcBridge } from '@/common';
+import { ADMIN_FRONTEND_USER_ID } from '@/common/utils/frontendUserScope';
 import { Button, Input, Message, Modal, Popconfirm, Table, Tag, Typography } from '@arco-design/web-react';
 import { Delete, Plus, Refresh, User } from '@icon-park/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 const { Text } = Typography;
+
+const formatDate = (ts: number | null) => {
+  if (!ts) return '-';
+  return new Date(ts).toLocaleString();
+};
 
 const UsersModalContent: React.FC = () => {
   const { t } = useTranslation();
@@ -68,9 +74,9 @@ const UsersModalContent: React.FC = () => {
     }
   };
 
-  const handleDelete = async (userId: string, username: string) => {
+  const handleDelete = async (userId: string) => {
     try {
-      if (username === 'admin') {
+      if (userId === ADMIN_FRONTEND_USER_ID) {
         Message.warning(t('settings.users.cannotDeleteAdmin'));
         return;
       }
@@ -94,11 +100,6 @@ const UsersModalContent: React.FC = () => {
       const msg = err instanceof Error ? err.message : t('settings.users.resetFailed');
       Message.error(msg);
     }
-  };
-
-  const formatDate = (ts: number | null) => {
-    if (!ts) return '-';
-    return new Date(ts).toLocaleString();
   };
 
   const columns = [
@@ -135,8 +136,8 @@ const UsersModalContent: React.FC = () => {
           <Button type='text' size='small' onClick={() => handleResetPassword(record.id)}>
             {t('settings.users.resetPassword')}
           </Button>
-          {record.username !== 'admin' && (
-            <Popconfirm title={t('settings.users.deleteConfirm')} onOk={() => handleDelete(record.id, record.username)}>
+          {record.id !== ADMIN_FRONTEND_USER_ID && (
+            <Popconfirm title={t('settings.users.deleteConfirm')} onOk={() => handleDelete(record.id)}>
               <Button type='text' size='small' status='danger' icon={<Delete />}>
                 {t('settings.users.delete')}
               </Button>
