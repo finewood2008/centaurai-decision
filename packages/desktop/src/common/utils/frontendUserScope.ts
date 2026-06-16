@@ -57,6 +57,43 @@ export function isAdminFrontendUser(userId = getCurrentFrontendUserId()): boolea
   return userId === ADMIN_FRONTEND_USER_ID;
 }
 
+export function isDesktopFrontendRuntime(): boolean {
+  return typeof window !== 'undefined' && Boolean((window as Window & { electronAPI?: unknown }).electronAPI);
+}
+
+export async function resolveCurrentFrontendUserId(): Promise<string> {
+  if (isDesktopFrontendRuntime()) {
+    setCurrentFrontendUserId(ADMIN_FRONTEND_USER_ID);
+    return ADMIN_FRONTEND_USER_ID;
+  }
+
+  if (typeof window === 'undefined') {
+    return getCurrentFrontendUserId();
+  }
+
+  try {
+    const response = await fetch('/api/auth/user', {
+      method: 'GET',
+      credentials: 'include',
+    });
+    if (response.ok) {
+      const data = (await response.json()) as {
+        success?: boolean;
+        user?: { id?: unknown };
+      };
+      const userId = typeof data.user?.id === 'string' ? data.user.id.trim() : '';
+      if (userId) {
+        setCurrentFrontendUserId(userId);
+        return userId;
+      }
+    }
+  } catch {
+    // Keep the last known frontend user when the auth check is temporarily unavailable.
+  }
+
+  return getCurrentFrontendUserId();
+}
+
 export function isChannelConversation(conversation: TChatConversation): boolean {
   return Boolean(conversation.channel_chat_id || (conversation.source && conversation.source !== 'aionui'));
 }
@@ -164,11 +201,35 @@ export function mergeChannelBindings(...sources: ChannelBindings[]): ChannelBind
 }
 
 export function addChannelUserBindingForCurrentUser(bindings: ChannelBindings, channelUserId: string): ChannelBindings {
-  const currentUserId = getCurrentFrontendUserId();
-  const next: ChannelBindings = { ...bindings };
+  return addChannelUserBindingForUser(bindings, getCurrentFrontendUserId(), channelUserId);
+}
+
+export function addChannelUserBindingForUser(
+  bindings: ChannelBindings,
+  frontendUserId: string,
+  channelUserId: string
+): ChannelBindings {
+  const currentUserId = frontendUserId.trim() || ADMIN_FRONTEND_USER_ID;
+  const next = removeChannelUserBindingFromAllUsers(bindings, channelUserId);
   const current = new Set(next[currentUserId] ?? []);
   current.add(channelUserId);
   next[currentUserId] = [...current];
+  return next;
+}
+
+export function removeChannelUserBindingForUser(
+  bindings: ChannelBindings,
+  frontendUserId: string,
+  channelUserId: string
+): ChannelBindings {
+  const currentUserId = frontendUserId.trim() || ADMIN_FRONTEND_USER_ID;
+  const next: ChannelBindings = { ...bindings };
+  const remaining = (next[currentUserId] ?? []).filter((id) => id !== channelUserId);
+  if (remaining.length > 0) {
+    next[currentUserId] = remaining;
+  } else {
+    delete next[currentUserId];
+  }
   return next;
 }
 
@@ -181,6 +242,12 @@ export function removeChannelUserBindingFromAllUsers(bindings: ChannelBindings, 
     }
   });
   return next;
+}
+
+export function getChannelUserBindingOwnerIds(bindings: ChannelBindings, channelUserId: string): string[] {
+  return Object.entries(bindings)
+    .filter(([, userIds]) => userIds.includes(channelUserId))
+    .map(([userId]) => userId);
 }
 
 function readChannelBindings(): ChannelBindings {
@@ -199,8 +266,12 @@ export function removeChannelUserBinding(channelUserId: string): void {
   writeChannelBindings(removeChannelUserBindingFromAllUsers(readChannelBindings(), channelUserId));
 }
 
-function isChannelUserVisibleForCurrentUser(channelUserId: string, bindings: ChannelBindings = readChannelBindings()): boolean {
-  const currentUserId = getCurrentFrontendUserId();
+export function isChannelUserVisibleForUser(
+  channelUserId: string,
+  frontendUserId: string,
+  bindings: ChannelBindings = readChannelBindings()
+): boolean {
+  const currentUserId = frontendUserId.trim() || ADMIN_FRONTEND_USER_ID;
   const boundForCurrent = new Set(bindings[currentUserId] ?? []);
   const allBound = new Set(Object.values(bindings).flat());
 
@@ -209,9 +280,21 @@ function isChannelUserVisibleForCurrentUser(channelUserId: string, bindings: Cha
   return isAdminFrontendUser(currentUserId);
 }
 
+function isChannelUserVisibleForCurrentUser(channelUserId: string, bindings: ChannelBindings = readChannelBindings()): boolean {
+  return isChannelUserVisibleForUser(channelUserId, getCurrentFrontendUserId(), bindings);
+}
+
+export function filterChannelUsersForUser(
+  channelUsers: IChannelUser[],
+  frontendUserId: string,
+  bindings: ChannelBindings = readChannelBindings()
+): IChannelUser[] {
+  return channelUsers.filter((user) => isChannelUserVisibleForUser(user.id, frontendUserId, bindings));
+}
+
 export function filterChannelUsersForCurrentUser(
   channelUsers: IChannelUser[],
   bindings: ChannelBindings = readChannelBindings()
 ): IChannelUser[] {
-  return channelUsers.filter((user) => isChannelUserVisibleForCurrentUser(user.id, bindings));
+  return filterChannelUsersForUser(channelUsers, getCurrentFrontendUserId(), bindings);
 }

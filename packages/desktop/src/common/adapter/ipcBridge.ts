@@ -95,12 +95,14 @@ import {
 import {
   CHANNEL_BINDINGS_STORAGE_KEY,
   type ChannelBindings,
-  addChannelUserBindingForCurrentUser,
-  filterChannelUsersForCurrentUser,
+  addChannelUserBindingForUser,
+  filterChannelUsersForUser,
+  getChannelUserBindingOwnerIds,
   mergeChannelBindings,
   normalizeChannelBindings,
   readLocalChannelBindings,
   removeChannelUserBindingFromAllUsers,
+  resolveCurrentFrontendUserId,
   withCurrentConversationOwner,
   writeLocalChannelBindings,
 } from '../utils/frontendUserScope';
@@ -1793,18 +1795,20 @@ function toChannelSession(raw: RawSession): IChannelSession {
 
 async function readPersistedChannelBindings(): Promise<ChannelBindings> {
   const localBindings = readLocalChannelBindings();
-  const serverSettings = await httpRequest<unknown>(
-    'GET',
-    `/api/settings/client?key=${encodeURIComponent(CHANNEL_BINDINGS_STORAGE_KEY)}`
-  ).catch(() => undefined);
-  if (serverSettings !== undefined && serverSettings !== null) {
-    const serverBindings = normalizeChannelBindings(serverSettings);
+  const serverSettings = await httpRequest<Record<string, unknown>>('GET', '/api/settings/client').catch(
+    () => undefined
+  );
+  if (serverSettings && typeof serverSettings === 'object' && CHANNEL_BINDINGS_STORAGE_KEY in serverSettings) {
+    const serverBindings = normalizeChannelBindings(serverSettings[CHANNEL_BINDINGS_STORAGE_KEY]);
     writeLocalChannelBindings(serverBindings);
     return serverBindings;
   }
 
   const migratedBindings = mergeChannelBindings(localBindings);
   writeLocalChannelBindings(migratedBindings);
+  if (Object.keys(migratedBindings).length > 0) {
+    await writePersistedChannelBindings(migratedBindings);
+  }
   return migratedBindings;
 }
 
@@ -1814,13 +1818,21 @@ async function writePersistedChannelBindings(bindings: ChannelBindings): Promise
 }
 
 async function bindPersistedChannelUserToCurrentUser(channelUserId: string): Promise<void> {
-  const bindings = addChannelUserBindingForCurrentUser(await readPersistedChannelBindings(), channelUserId);
+  const currentUserId = await resolveCurrentFrontendUserId();
+  const bindings = addChannelUserBindingForUser(await readPersistedChannelBindings(), currentUserId, channelUserId);
   await writePersistedChannelBindings(bindings);
 }
 
-async function removePersistedChannelUserBinding(channelUserId: string): Promise<void> {
-  const bindings = removeChannelUserBindingFromAllUsers(await readPersistedChannelBindings(), channelUserId);
-  await writePersistedChannelBindings(bindings);
+async function revokePersistedChannelUserForCurrentUser(channelUserId: string): Promise<void> {
+  const [bindings, currentUserId] = await Promise.all([readPersistedChannelBindings(), resolveCurrentFrontendUserId()]);
+  const bindingOwnerIds = getChannelUserBindingOwnerIds(bindings, channelUserId);
+
+  if (bindingOwnerIds.length > 0 && !bindingOwnerIds.includes(currentUserId)) {
+    throw new Error('Channel user is bound to another user');
+  }
+
+  await httpRequest<void>('POST', '/api/channel/users/revoke', { user_id: channelUserId });
+  await writePersistedChannelBindings(removeChannelUserBindingFromAllUsers(bindings, channelUserId));
 }
 
 export const channel = {
@@ -1869,18 +1881,18 @@ export const channel = {
   getAuthorizedUsers: {
     provider: () => {},
     invoke: async (): Promise<IChannelUser[]> => {
-      const [channelUsers, bindings] = await Promise.all([
+      const [channelUsers, bindings, currentUserId] = await Promise.all([
         httpRequest<RawUser[]>('GET', '/api/channel/users'),
         readPersistedChannelBindings(),
+        resolveCurrentFrontendUserId(),
       ]);
-      return filterChannelUsersForCurrentUser(channelUsers.map(toChannelUser), bindings);
+      return filterChannelUsersForUser(channelUsers.map(toChannelUser), currentUserId, bindings);
     },
   },
   revokeUser: {
     provider: () => {},
     invoke: async ({ user_id }: { user_id: string }): Promise<void> => {
-      await httpRequest<void>('POST', '/api/channel/users/revoke', { user_id });
-      await removePersistedChannelUserBinding(user_id);
+      await revokePersistedChannelUserForCurrentUser(user_id);
     },
   },
   getActiveSessions: withResponseMap(httpGet<RawSession[], void>('/api/channel/sessions'), (raw) =>
@@ -1905,11 +1917,17 @@ export const channel = {
     on: (callback: (user: IChannelUser) => void) => {
       const inner = wsMappedEmitter<IChannelUser>('channel.user-authorized', (raw) => toChannelUser(raw as RawUser));
       return inner.on((user) => {
-        void readPersistedChannelBindings().then((bindings) => {
-          if (filterChannelUsersForCurrentUser([user], bindings).length > 0) {
-            callback(user);
+        void Promise.all([readPersistedChannelBindings(), resolveCurrentFrontendUserId()]).then(
+          ([bindings, currentUserId]) => {
+            const bindingOwnerIds = getChannelUserBindingOwnerIds(bindings, user.id);
+            if (
+              bindingOwnerIds.length > 0 &&
+              filterChannelUsersForUser([user], currentUserId, bindings).length > 0
+            ) {
+              callback(user);
+            }
           }
-        });
+        );
       });
     },
   },
