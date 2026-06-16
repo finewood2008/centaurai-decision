@@ -90,6 +90,8 @@
   },
   "fileAttach.addFiles": "新增檔案",
   "fileAttach.myDevice": "我的裝置",
+  "fileAttach.fromSharedLibrary": "從共享庫添加",
+  "fileAttach.attachSelected": "添加所選 ({{count}})",
   "fileAttach.failed": "上傳失敗",
   "fileAttach.uploading": "上傳中...",
   "fileAttach.uploadSuccess": "上傳成功",

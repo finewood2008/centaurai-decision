@@ -90,6 +90,8 @@
   },
   "fileAttach.addFiles": "Додати файли",
   "fileAttach.myDevice": "Мій пристрій",
+  "fileAttach.fromSharedLibrary": "Додати зі спільної бібліотеки",
+  "fileAttach.attachSelected": "Прикріпити вибране ({{count}})",
   "fileAttach.tooLarge": "Файл перевищує ліміт {{max}} МБ",
   "fileAttach.failed": "Помилка завантаження",
   "fileAttach.uploading": "Завантаження...",

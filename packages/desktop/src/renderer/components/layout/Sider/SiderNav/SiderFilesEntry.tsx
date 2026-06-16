@@ -5,6 +5,7 @@ import React from 'react';
 import { Tooltip } from '@arco-design/web-react';
 import { FolderOpen } from '@icon-park/react';
 import classNames from 'classnames';
+import { useTranslation } from 'react-i18next';
 import type { SiderTooltipProps } from '@renderer/utils/ui/siderTooltip';
 
 interface SiderFilesEntryProps {
@@ -22,7 +23,8 @@ const SiderFilesEntry: React.FC<SiderFilesEntryProps> = ({
   siderTooltipProps,
   onClick,
 }) => {
-  const label = '工作空间';
+  const { t } = useTranslation();
+  const label = t('contentHub.nav.title');
 
   if (collapsed) {
     return (

@@ -90,6 +90,8 @@
   },
   "fileAttach.addFiles": "파일 추가",
   "fileAttach.myDevice": "내 기기",
+  "fileAttach.fromSharedLibrary": "공유 라이브러리에서 추가",
+  "fileAttach.attachSelected": "선택 항목 추가 ({{count}})",
   "fileAttach.failed": "업로드 실패",
   "fileAttach.uploading": "업로드 중...",
   "fileAttach.uploadSuccess": "업로드 성공",

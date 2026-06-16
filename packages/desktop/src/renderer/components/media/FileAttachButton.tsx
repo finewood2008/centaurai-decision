@@ -13,6 +13,7 @@ import { iconColors } from '@/renderer/styles/colors';
 import { isElectronDesktop } from '@/renderer/utils/platform';
 import { FileService } from '@/renderer/services/FileService';
 import type { FileMetadata } from '@/renderer/services/FileService';
+import SharedLibraryPicker from '@/renderer/components/media/SharedLibraryPicker';
 import { emitter } from '@/renderer/utils/emitter';
 import React, { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -86,6 +87,24 @@ const FileAttachButton: React.FC<FileAttachButtonProps> = ({
   const [open, setOpen] = useState(false);
   const [skillsOpen, setSkillsOpen] = useState(false);
   const [mcpOpen, setMcpOpen] = useState(false);
+  const [sharedPickerVisible, setSharedPickerVisible] = useState(false);
+
+  const handleSharedPicked = useCallback(
+    (paths: string[]) => {
+      setSharedPickerVisible(false);
+      if (!onLocalFilesAdded || paths.length === 0) return;
+      onLocalFilesAdded(
+        paths.map((path) => ({
+          name: path.split(/[\\/]/).pop() || path,
+          path,
+          size: 0,
+          type: '',
+          lastModified: 0,
+        }))
+      );
+    },
+    [onLocalFilesAdded]
+  );
 
   const skillNames = loadedSkills ?? conversationContext?.loadedSkills ?? [];
   const mcpStatuses = buildLoadedMcpStatuses(
@@ -292,12 +311,25 @@ const FileAttachButton: React.FC<FileAttachButtonProps> = ({
             setOpen(false);
           }}
         />
+        <MenuItem
+          icon={<FolderOpen theme='outline' size={15} strokeWidth={2.5} />}
+          label={t('common.fileAttach.fromSharedLibrary', { defaultValue: 'Add from shared library' })}
+          onClick={() => {
+            setSharedPickerVisible(true);
+            setOpen(false);
+          }}
+        />
       </div>
     </div>
   );
 
   return (
     <>
+      <SharedLibraryPicker
+        visible={sharedPickerVisible}
+        onCancel={() => setSharedPickerVisible(false)}
+        onConfirm={handleSharedPicked}
+      />
       <Trigger
         popup={() => menu}
         trigger='click'

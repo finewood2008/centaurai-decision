@@ -25,7 +25,7 @@ const TeamIndex = React.lazy(() => import('@renderer/pages/team'));
 const ToolboxPage = React.lazy(() => import('@renderer/pages/toolbox'));
 const WorkbenchPage = React.lazy(() => import('@renderer/pages/workbench'));
 const AdvisorsPage = React.lazy(() => import('@renderer/pages/advisors/AdvisorsPage'));
-const FileArchivePage = React.lazy(() => import('@renderer/pages/FileArchivePage'));
+const ContentHubPage = React.lazy(() => import('@renderer/pages/contentHub'));
 
 const withRouteFallback = (Component: React.LazyExoticComponent<React.ComponentType>) => (
   <Suspense fallback={<AppLoader />}>
@@ -87,7 +87,7 @@ const PanelRoute: React.FC<{ layout: React.ReactElement }> = ({ layout }) => {
           <Route path='/toolbox' element={withRouteFallback(ToolboxPage)} />
           <Route path='/workbench' element={withRouteFallback(WorkbenchPage)} />
           <Route path='/advisors' element={withRouteFallback(AdvisorsPage)} />
-          <Route path='/files' element={withRouteFallback(FileArchivePage)} />
+          <Route path='/files' element={withRouteFallback(ContentHubPage)} />
           <Route path='/scheduled' element={withRouteFallback(ScheduledTasksPage)} />
           <Route path='/scheduled/:job_id' element={withRouteFallback(TaskDetailPage)} />
         </Route>

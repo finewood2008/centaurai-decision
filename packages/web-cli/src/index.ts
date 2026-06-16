@@ -207,6 +207,7 @@ async function runStart(flags: Map<string, string | true>): Promise<void> {
       port,
       allowRemote,
       dataDir,
+      sharedDriveDir: path.join(dataDir, 'sharedDrive'),
       logDir,
       dirs: {
         cacheDir: dataDir,

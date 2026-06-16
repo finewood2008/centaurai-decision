@@ -15,8 +15,9 @@ import { isElectronDesktop } from '@/renderer/utils/platform';
 import type { AvailableAgent } from '../types';
 import type { Assistant } from '@/common/types/agent/assistantTypes';
 import PresetAgentTag, { type AgentSwitcherItem } from './PresetAgentTag';
+import SharedLibraryPicker from '@/renderer/components/media/SharedLibraryPicker';
 import { Button, Checkbox, Dropdown, Menu, Message, Tooltip } from '@arco-design/web-react';
-import { ArrowUp, Lightning, Plus, Shield, UploadOne } from '@icon-park/react';
+import { ArrowUp, FolderOpen, Lightning, Plus, Shield, UploadOne } from '@icon-park/react';
 import React, { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styles from '../index.module.css';
@@ -104,6 +105,7 @@ const GuidActionRow: React.FC<GuidActionRowProps> = ({
   const layout = useLayoutContext();
   const isMobile = layout?.isMobile ?? false;
   const [isPlusDropdownOpen, setIsPlusDropdownOpen] = useState(false);
+  const [sharedPickerVisible, setSharedPickerVisible] = useState(false);
   const modeBackend = effectiveModeAgent || selectedAgent;
   const showModeSwitch = supportsModeSwitch(modeBackend);
   const configOptionCount = (modelSelectorNode ? 1 : 0) + (showModeSwitch ? 1 : 0);
@@ -161,6 +163,8 @@ const GuidActionRow: React.FC<GuidActionRowProps> = ({
             });
         } else if (key === 'device') {
           fileInputRef.current?.click();
+        } else if (key === 'shared-library') {
+          setSharedPickerVisible(true);
         }
       }}
     >
@@ -205,6 +209,12 @@ const GuidActionRow: React.FC<GuidActionRowProps> = ({
           </div>
         </Menu.Item>
       )}
+      <Menu.Item key='shared-library'>
+        <div className='flex items-center gap-8px'>
+          <FolderOpen theme='outline' size='16' fill={iconColors.secondary} style={{ lineHeight: 0 }} />
+          <span>{t('common.fileAttach.fromSharedLibrary')}</span>
+        </div>
+      </Menu.Item>
       {allSkills.length > 0 && (
         <Menu.SubMenu
           key='skills'
@@ -289,6 +299,14 @@ const GuidActionRow: React.FC<GuidActionRowProps> = ({
 
   return (
     <div className={styles.actionRow}>
+      <SharedLibraryPicker
+        visible={sharedPickerVisible}
+        onCancel={() => setSharedPickerVisible(false)}
+        onConfirm={(paths) => {
+          setSharedPickerVisible(false);
+          if (paths.length > 0) onFilesUploaded(paths);
+        }}
+      />
       <div className={styles.actionTools}>
         <div className={styles.actionEntry}>
           <Dropdown trigger='hover' onVisibleChange={setIsPlusDropdownOpen} droplist={menuContent}>

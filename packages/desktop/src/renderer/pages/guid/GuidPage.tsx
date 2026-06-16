@@ -878,7 +878,10 @@ const GuidPage: React.FC = () => {
           </div>
           {!agentSelection.is_presetAgent && (
             <div className={styles.homeShellRail}>
-              <HomeRightRail onViewAllFiles={() => navigate('/files')} />
+              <HomeRightRail
+                onViewAllFiles={() => navigate('/files')}
+                onViewAllShared={() => navigate('/files?tab=shared')}
+              />
             </div>
           )}
         </div>

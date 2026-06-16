@@ -14,6 +14,14 @@ import { networkInterfaces } from 'node:os';
 import net, { type Socket } from 'node:net';
 import serveHandler from 'serve-handler';
 import { handleDownloadGet, handleDownloadsList } from './downloads.js';
+import {
+  handleSharedCategories,
+  handleSharedDownload,
+  handleSharedList,
+  handleSharedPreview,
+  handleSharedRemove,
+  handleSharedUpload,
+} from './shared-drive.js';
 
 export type StaticServerOptions = {
   staticDir: string;
@@ -25,6 +33,11 @@ export type StaticServerOptions = {
    * /api/downloads/*. Omit to disable the download endpoints (list returns []).
    */
   installerDir?: string;
+  /**
+   * Directory hosting the enterprise LAN shared library, served at
+   * /api/shared-drive/*. Omit to disable sharing (list returns []).
+   */
+  sharedDriveDir?: string;
 };
 
 export type StaticServerHandle = {
@@ -86,6 +99,12 @@ function spliceToTcpEndpoint(client: Socket, targetPort: number, initialBytes: B
   client.setNoDelay(true);
   client.setKeepAlive(true);
   client.setTimeout(0);
+  // Pause synchronously: the peek loop just removed its 'data' listener, so
+  // without this any body bytes arriving before `connect` (below) fires would
+  // be emitted to no consumer and lost. Pausing buffers them in the socket;
+  // `client.pipe(upstream)` resumes delivery once upstream is ready. Only large
+  // POST bodies (split across TCP reads) hit this — small ones fit in the peek.
+  client.pause();
   const upstream = net.connect({ host: '127.0.0.1', port: targetPort });
   upstream.setNoDelay(true);
   upstream.setKeepAlive(true);
@@ -152,6 +171,25 @@ export async function startStaticServer(opts: StaticServerOptions): Promise<Stat
       }
       if (req.url.startsWith('/api/downloads/get')) {
         await handleDownloadGet(req, res, opts.installerDir);
+        return;
+      }
+
+      // /api/shared-drive/* — enterprise LAN shared library, served LOCALLY
+      // (NOT proxied to aioncore). Must come before the generic /api/* proxy.
+      if (req.url.startsWith('/api/shared-drive/')) {
+        if (req.url.startsWith('/api/shared-drive/list')) await handleSharedList(req, res, opts.sharedDriveDir);
+        else if (req.url.startsWith('/api/shared-drive/categories'))
+          await handleSharedCategories(res, opts.sharedDriveDir);
+        else if (req.url.startsWith('/api/shared-drive/upload') && req.method === 'POST')
+          await handleSharedUpload(req, res, opts.sharedDriveDir);
+        else if (req.url.startsWith('/api/shared-drive/download')) await handleSharedDownload(req, res, opts.sharedDriveDir);
+        else if (req.url.startsWith('/api/shared-drive/preview')) await handleSharedPreview(req, res, opts.sharedDriveDir);
+        else if (req.url.startsWith('/api/shared-drive/remove') && req.method === 'DELETE')
+          await handleSharedRemove(req, res, opts.sharedDriveDir);
+        else {
+          res.writeHead(404, { 'content-type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'NOT_FOUND' }));
+        }
         return;
       }
 

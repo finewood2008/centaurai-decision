@@ -37,6 +37,8 @@ export type WebHostOptions = {
   allowRemote?: boolean;
   /** Directory of bundled native client installers, served at /api/downloads/*. */
   installerDir?: string;
+  /** Directory hosting the enterprise LAN shared library, served at /api/shared-drive/*. */
+  sharedDriveDir?: string;
   dataDir?: string;
   logDir?: string;
   dirs?: BackendSystemDirs;

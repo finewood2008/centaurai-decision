@@ -1,0 +1,56 @@
+{
+  "nav": {
+    "title": "Central de Conteúdo"
+  },
+  "title": "Central de Conteúdo",
+  "search": {
+    "placeholder": "Pesquisar nome do arquivo..."
+  },
+  "tabs": {
+    "mine": "Meus Arquivos",
+    "byConversation": "Por Conversa",
+    "byType": "Por Tipo",
+    "shared": "Biblioteca Compartilhada"
+  },
+  "type": {
+    "all": "Todos",
+    "image": "Imagens",
+    "document": "Documentos",
+    "code": "Código",
+    "other": "Outros"
+  },
+  "actions": {
+    "open": "Abrir",
+    "copyPath": "Copiar caminho",
+    "download": "Baixar",
+    "showInFolder": "Mostrar na pasta",
+    "shareToTeam": "Compartilhar com a equipe"
+  },
+  "share": {
+    "uploading": "Compartilhando...",
+    "success": "Compartilhado com a equipe",
+    "error": "Falha ao compartilhar",
+    "alreadyShared": "Já compartilhado"
+  },
+  "empty": {
+    "noFiles": "Nenhum arquivo gerado ainda",
+    "noMatch": "Nenhum arquivo correspondente",
+    "loading": "Carregando..."
+  },
+  "shared": {
+    "allVisible": "Visível para todos na LAN",
+    "categories": "Categorias",
+    "all": "Todos",
+    "uncategorized": "Sem categoria",
+    "upload": "Enviar para a biblioteca compartilhada",
+    "download": "Baixar",
+    "empty": "A biblioteca compartilhada está vazia",
+    "comingSoon": "A biblioteca compartilhada estará disponível em breve"
+  },
+  "toast": {
+    "copied": "Copiado",
+    "copyFailed": "Falha ao copiar",
+    "downloadFailed": "Falha ao baixar",
+    "openFailed": "Não é possível abrir"
+  }
+}

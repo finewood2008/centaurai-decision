@@ -1,0 +1,56 @@
+{
+  "nav": {
+    "title": "コンテンツハブ"
+  },
+  "title": "コンテンツハブ",
+  "search": {
+    "placeholder": "ファイル名を検索..."
+  },
+  "tabs": {
+    "mine": "マイファイル",
+    "byConversation": "会話別",
+    "byType": "種類別",
+    "shared": "共有ライブラリ"
+  },
+  "type": {
+    "all": "すべて",
+    "image": "画像",
+    "document": "ドキュメント",
+    "code": "コード",
+    "other": "その他"
+  },
+  "actions": {
+    "open": "開く",
+    "copyPath": "パスをコピー",
+    "download": "ダウンロード",
+    "showInFolder": "フォルダーで表示",
+    "shareToTeam": "チームに共有"
+  },
+  "share": {
+    "uploading": "共有中...",
+    "success": "チームに共有しました",
+    "error": "共有に失敗しました",
+    "alreadyShared": "共有済み"
+  },
+  "empty": {
+    "noFiles": "生成されたファイルはまだありません",
+    "noMatch": "一致するファイルがありません",
+    "loading": "読み込み中..."
+  },
+  "shared": {
+    "allVisible": "LAN内の全員に表示",
+    "categories": "カテゴリー",
+    "all": "すべて",
+    "uncategorized": "未分類",
+    "upload": "共有ライブラリにアップロード",
+    "download": "ダウンロード",
+    "empty": "共有ライブラリは空です",
+    "comingSoon": "共有ライブラリは近日公開予定です"
+  },
+  "toast": {
+    "copied": "コピーしました",
+    "copyFailed": "コピーに失敗しました",
+    "downloadFailed": "ダウンロードに失敗しました",
+    "openFailed": "開けません"
+  }
+}

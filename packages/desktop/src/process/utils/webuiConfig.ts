@@ -263,6 +263,8 @@ export async function startDesktopWebUI(opts: { port?: number; allowRemote?: boo
     allowRemote,
     // Native client installers bundled with the server, served at /api/downloads/*.
     installerDir: resolveInstallerDir(),
+    // Enterprise LAN shared library, served at /api/shared-drive/*.
+    sharedDriveDir: path.join(getDataPath(), 'sharedDrive'),
     // Must align with the desktop IPC path's backend dataDir (src/index.ts), otherwise
     // users see divergent SQLite state between desktop app and bundled WebUI.
     dataDir: getDataPath(),

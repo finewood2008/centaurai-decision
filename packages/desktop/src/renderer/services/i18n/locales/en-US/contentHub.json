@@ -1,0 +1,56 @@
+{
+  "nav": {
+    "title": "Content Hub"
+  },
+  "title": "Content Hub",
+  "search": {
+    "placeholder": "Search file name..."
+  },
+  "tabs": {
+    "mine": "My Files",
+    "byConversation": "By Conversation",
+    "byType": "By Type",
+    "shared": "Shared Library"
+  },
+  "type": {
+    "all": "All",
+    "image": "Images",
+    "document": "Documents",
+    "code": "Code",
+    "other": "Other"
+  },
+  "actions": {
+    "open": "Open",
+    "copyPath": "Copy path",
+    "download": "Download",
+    "showInFolder": "Show in folder",
+    "shareToTeam": "Share to team"
+  },
+  "share": {
+    "uploading": "Sharing...",
+    "success": "Shared to team",
+    "error": "Share failed",
+    "alreadyShared": "Already shared"
+  },
+  "empty": {
+    "noFiles": "No generated files yet",
+    "noMatch": "No matching files",
+    "loading": "Loading..."
+  },
+  "shared": {
+    "allVisible": "Visible to everyone on the LAN",
+    "categories": "Categories",
+    "all": "All",
+    "uncategorized": "Uncategorized",
+    "upload": "Upload to shared library",
+    "download": "Download",
+    "empty": "Shared library is empty",
+    "comingSoon": "Shared library is coming soon"
+  },
+  "toast": {
+    "copied": "Copied",
+    "copyFailed": "Copy failed",
+    "downloadFailed": "Download failed",
+    "openFailed": "Cannot open"
+  }
+}

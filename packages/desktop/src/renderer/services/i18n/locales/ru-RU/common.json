@@ -89,6 +89,8 @@
   },
   "fileAttach.addFiles": "Добавить файлы",
   "fileAttach.myDevice": "Моё устройство",
+  "fileAttach.fromSharedLibrary": "Добавить из общей библиотеки",
+  "fileAttach.attachSelected": "Прикрепить выбранное ({{count}})",
   "fileAttach.failed": "Ошибка загрузки",
   "fileAttach.uploading": "Загрузка...",
   "fileAttach.uploadSuccess": "Загружено успешно",

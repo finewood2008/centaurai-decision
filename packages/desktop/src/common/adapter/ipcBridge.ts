@@ -627,6 +627,56 @@ export const fs = {
 };
 
 // ---------------------------------------------------------------------------
+// Shared drive — enterprise LAN shared library. Served by the web-host static
+// server (NOT proxied to aioncore). NOTE: the admin desktop renderer's
+// getBaseUrl() targets aioncore, NOT the static-server, so shared-drive calls
+// must resolve their own base URL (see SharedDriveService.resolveBase). These
+// types are the shared contract between that service and shared-drive.ts.
+// ---------------------------------------------------------------------------
+
+export type SharedFileEntry = {
+  id: string;
+  name: string;
+  relPath: string;
+  category: string;
+  size: number;
+  mime: string;
+  uploaderId?: string;
+  uploaderName?: string;
+  conversationId?: string;
+  createdAt: number;
+};
+
+export type SharedCategoryEntry = {
+  key: string;
+  label: string;
+  count: number;
+};
+
+export type ShareFromPathInput = {
+  sourcePath: string;
+  name: string;
+  category?: string;
+  uploaderId?: string;
+  uploaderName?: string;
+  conversationId?: string;
+};
+
+// Main-process IPC for the shared library, used by the ADMIN desktop renderer
+// (same machine as the host). This path does NOT require the WebUI server to be
+// running — it reads/writes the local shared-drive dir directly. Browser and
+// distributed clients use the HTTP routes (SharedDriveService) instead.
+export const sharedDriveLocal = {
+  list: bridge.buildProvider<SharedFileEntry[], { category?: string }>('shared-drive.list'),
+  listCategories: bridge.buildProvider<SharedCategoryEntry[], void>('shared-drive.categories'),
+  addFromPath: bridge.buildProvider<{ id: string }, ShareFromPathInput>('shared-drive.add-from-path'),
+  remove: bridge.buildProvider<boolean, { id: string }>('shared-drive.remove'),
+  blobInfo: bridge.buildProvider<{ path: string; name: string; mime: string } | null, { id: string }>(
+    'shared-drive.blob-info'
+  ),
+};
+
+// ---------------------------------------------------------------------------
 // Speech to Text — routed to backend
 // ---------------------------------------------------------------------------
 
