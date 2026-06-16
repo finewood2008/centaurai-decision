@@ -56,6 +56,34 @@ if (isWebUI || isResetPassword) {
   if (typeof process.getuid === 'function' && process.getuid() === 0) {
     app.commandLine.appendSwitch('no-sandbox');
   }
+} else if (process.platform === 'linux') {
+  // Desktop (GUI) mode on Linux: force the X11 Ozone backend (which runs as
+  // XWayland on Wayland sessions). This overrides any
+  // ELECTRON_OZONE_PLATFORM_HINT=wayland set by the launcher — an explicit
+  // --ozone-platform switch takes precedence over the env hint.
+  //
+  // Why this is required: the desktop pet relies on three capabilities that
+  // native Wayland forbids for security/design reasons —
+  //   1. global cursor position via screen.getCursorScreenPoint() — used by
+  //      the drag-follow loop, eye-tracking, and idle-mouse detection;
+  //   2. client-driven absolute window positioning via
+  //      BrowserWindow.setPosition() — used to move the pet while dragging and
+  //      to anchor the confirm bubble;
+  //   3. reading a window's own absolute position via getPosition() — used to
+  //      keep the invisible circular hit-detection window aligned over the
+  //      visible pet sprite.
+  // Under native Wayland getPosition() always returns [0,0], setPosition() is a
+  // no-op on screen, and getCursorScreenPoint() returns window-relative
+  // garbage. The net effect is that the pet cannot be dragged and every click
+  // reaction silently fails (the hit window ends up detached from the sprite).
+  // XWayland honors all three, so the existing pet implementation works
+  // unchanged. See packages/desktop/src/process/pet/*.
+  app.commandLine.appendSwitch('ozone-platform', 'x11');
+
+  // For root user, disable sandbox to prevent crash (mirrors the WebUI branch).
+  if (typeof process.getuid === 'function' && process.getuid() === 0) {
+    app.commandLine.appendSwitch('no-sandbox');
+  }
 }
 
 // ---------------------------------------------------------------------------

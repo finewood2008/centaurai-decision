@@ -1,28 +1,21 @@
 <svg viewBox="-18 -18 58 58" width="500" height="500" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <style>
+      .pet-img { image-rendering: pixelated; image-rendering: crisp-edges; }
       .notif-body {
-        transform-origin: 11px 18px;
+        transform-origin: 10.5px 21px;
         animation: notif-jump 3.5s ease-in-out infinite;
       }
       .notif-shadow {
-        transform-origin: 11px 22.5px;
+        transform-origin: 10.5px 22.8px;
         animation: notif-shadow 3.5s ease-in-out infinite;
       }
-      .notif-arm-l {
-        transform-origin: 3.5px 10.5px;
-        animation: notif-arm-l 3.5s ease-in-out infinite;
-      }
-      .notif-arm-r {
-        transform-origin: 18.5px 10.5px;
-        animation: notif-arm-r 3.5s ease-in-out infinite;
-      }
-      .notif-eye {
-        transform-origin: 11px 11px;
-        animation: notif-eye 3.5s ease-in-out infinite;
+      .notif-bell {
+        transform-origin: 18px 1px;
+        animation: notif-bell 3.5s ease-in-out infinite;
       }
       .notif-alert {
-        transform-origin: 18px 2px;
+        transform-origin: 17px -4px;
         animation: notif-alert 3.5s ease-in-out infinite;
         opacity: 0;
       }
@@ -46,25 +39,13 @@
         40%     { transform: scaleX(1); opacity: 0.35; }
         47%     { transform: scaleX(0.75); opacity: 0.24; }
       }
-      @keyframes notif-arm-l {
+      @keyframes notif-bell {
         0%,100% { transform: rotate(0deg); }
-        18%     { transform: rotate(130deg); }
-        34%     { transform: rotate(90deg); }
-        47%     { transform: rotate(50deg); }
+        18%     { transform: rotate(18deg); }
+        30%     { transform: rotate(-14deg); }
+        42%     { transform: rotate(10deg); }
+        54%     { transform: rotate(-6deg); }
         63%     { transform: rotate(0deg); }
-      }
-      @keyframes notif-arm-r {
-        0%,100% { transform: rotate(0deg); }
-        18%     { transform: rotate(-130deg); }
-        34%     { transform: rotate(-90deg); }
-        47%     { transform: rotate(-50deg); }
-        63%     { transform: rotate(0deg); }
-      }
-      @keyframes notif-eye {
-        0%,6%,100% { transform: translate(0,0) scaleY(1); }
-        3%          { transform: translate(2px,0) scaleY(0.1); }
-        9%          { transform: translate(2px,0) scaleY(1); }
-        63%         { transform: translate(0,0) scaleY(1); }
       }
       @keyframes notif-alert {
         0%    { opacity: 0; transform: scale(0.2); }
@@ -76,25 +57,25 @@
       }
     </style>
   </defs>
-  <!-- exclamation mark pop -->
-  <g class="notif-alert" fill="#FF6B35">
-    <rect x="17" y="-9" width="2" height="5.5" rx="1"/>
-    <rect x="17" y="-2" width="2" height="2" rx="1"/>
+
+  <!-- exclamation mark pop above-right of the head -->
+  <g class="notif-alert" fill="#FF7A1A">
+    <rect x="16" y="-9" width="2" height="5.5" rx="1"/>
+    <rect x="16" y="-2" width="2" height="2" rx="1"/>
   </g>
-  <ellipse class="notif-shadow" cx="11" cy="22.5" rx="4" ry="0.6" fill="#c0c0c0"/>
+
+  <ellipse class="notif-shadow" cx="10.5" cy="22.8" rx="7.2" ry="0.95" fill="#0a1430"/>
+
   <g class="notif-body">
-    <g class="notif-arm-l">
-      <rect x="2" y="9" width="3" height="3" rx="0.5" fill="#8891b8" opacity="0.8" transform="rotate(45 3.5 10.5)"/>
-    </g>
-    <g class="notif-arm-r">
-      <rect x="17" y="9" width="3" height="3" rx="0.5" fill="#8891b8" opacity="0.8" transform="rotate(45 18.5 10.5)"/>
-    </g>
-    <rect x="5" y="6" width="12" height="12" rx="6" fill="#97A0C5"/>
-    <polygon points="11,1 15,7 7,7" fill="#FF6B35"/>
-    <rect x="10" y="2" width="1" height="1" fill="#e8714a"/>
-    <g class="notif-eye">
-      <rect x="10" y="10" width="2" height="2" fill="#111827"/>
-    </g>
-    <path d="M8 13.5 Q11 16.5 14 13.5" stroke="#111827" stroke-width="1" stroke-linecap="round" fill="none"/>
+    <image class="pet-img" href="centaur.png" x="1.9" y="-1" width="17.15" height="24" preserveAspectRatio="xMidYMax meet"/>
+  </g>
+
+  <!-- ringing bell beside/above the head, with red badge -->
+  <g class="notif-bell">
+    <path d="M18 -3.4 C15.3 -3.4 14.5 -1.5 14.5 0.4 C14.5 1.8 14 2.4 13.4 3 L22.6 3 C22 2.4 21.5 1.8 21.5 0.4 C21.5 -1.5 20.7 -3.4 18 -3.4 Z" fill="#FFA64D" stroke="#E0601A" stroke-width="0.4"/>
+    <rect x="17.2" y="-4.6" width="1.6" height="1.4" rx="0.7" fill="#E0601A"/>
+    <ellipse cx="18" cy="4" rx="1.5" ry="1" fill="#FF7A1A"/>
+    <!-- red unread badge -->
+    <circle cx="22" cy="-3" r="1.8" fill="#E8362B"/>
   </g>
 </svg>
