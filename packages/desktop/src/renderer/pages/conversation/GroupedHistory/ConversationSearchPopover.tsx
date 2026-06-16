@@ -6,10 +6,12 @@
 
 import { ipcBridge } from '@/common';
 import type { IMessageSearchItem } from '@/common/types/team/database';
+import { filterConversationsForCurrentUser } from '@/common/utils/frontendUserScope';
 import AionModal from '@/renderer/components/base/AionModal';
 import { usePresetAssistantInfo } from '@/renderer/hooks/agent/usePresetAssistantInfo';
 import { getAgentLogo } from '@/renderer/utils/model/agentLogo';
 import { blockMobileInputFocus, blurActiveElement } from '@/renderer/utils/ui/focus';
+import { buildConversationVisibilityScope } from '@/renderer/utils/user/conversationVisibility';
 import { Empty, Spin, Typography } from '@arco-design/web-react';
 import { Close, CloseSmall, MessageOne, Search } from '@icon-park/react';
 import classNames from 'classnames';
@@ -201,7 +203,16 @@ const ConversationSearchPopover: React.FC<ConversationSearchPopoverProps> = ({
           page_size: PAGE_SIZE,
         });
 
-        setItems((prev) => (append ? [...prev, ...result.items] : result.items));
+        const visibilityScope = await buildConversationVisibilityScope();
+        const visibleConversationIds = new Set(
+          filterConversationsForCurrentUser(
+            result.items.map((item) => item.conversation),
+            visibilityScope
+          ).map((conversation) => conversation.id)
+        );
+        const visibleItems = result.items.filter((item) => visibleConversationIds.has(item.conversation.id));
+
+        setItems((prev) => (append ? [...prev, ...visibleItems] : visibleItems));
         setPage(pageToLoad);
         setHasMore(result.has_more);
       } catch (error) {

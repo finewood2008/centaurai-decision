@@ -23,6 +23,7 @@ const ScheduledTasksPage = React.lazy(() => import('@renderer/pages/cron/Schedul
 const TaskDetailPage = React.lazy(() => import('@renderer/pages/cron/ScheduledTasksPage/TaskDetailPage'));
 const TeamIndex = React.lazy(() => import('@renderer/pages/team'));
 const ToolboxPage = React.lazy(() => import('@renderer/pages/toolbox'));
+const WorkbenchPage = React.lazy(() => import('@renderer/pages/workbench'));
 const AdvisorsPage = React.lazy(() => import('@renderer/pages/advisors/AdvisorsPage'));
 const FileArchivePage = React.lazy(() => import('@renderer/pages/FileArchivePage'));
 
@@ -84,6 +85,7 @@ const PanelRoute: React.FC<{ layout: React.ReactElement }> = ({ layout }) => {
           <Route path='/settings' element={<Navigate to='/settings/model' replace />} />
           <Route path='/test/components' element={withRouteFallback(ComponentsShowcase)} />
           <Route path='/toolbox' element={withRouteFallback(ToolboxPage)} />
+          <Route path='/workbench' element={withRouteFallback(WorkbenchPage)} />
           <Route path='/advisors' element={withRouteFallback(AdvisorsPage)} />
           <Route path='/files' element={withRouteFallback(FileArchivePage)} />
           <Route path='/scheduled' element={withRouteFallback(ScheduledTasksPage)} />

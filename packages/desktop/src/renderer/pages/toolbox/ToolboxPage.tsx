@@ -21,8 +21,9 @@ import {
   Time,
   Toolkit,
   Topic,
+  Workbench,
 } from '@icon-park/react';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useAgents } from '@/renderer/hooks/agent/useAgents';
@@ -46,6 +47,7 @@ const ICONS: Record<string, React.ComponentType<{ size?: number }>> = {
   BookOne,
   Bowl,
   Time,
+  Workbench,
 };
 
 const ToolIcon: React.FC<{ name: string; size?: number }> = ({ name, size }) => {
@@ -55,6 +57,11 @@ const ToolIcon: React.FC<{ name: string; size?: number }> = ({ name, size }) => 
 
 type LastRun = { tool: ToolDef; agent: AgentMetadata | null; values: ToolFormValues };
 type ToolboxCategory = 'all' | ToolDef['category'];
+type ToolboxPageMode = 'toolbox' | 'workbench';
+
+type ToolboxPageProps = {
+  mode?: ToolboxPageMode;
+};
 
 const getToolTitle = (tool: ToolDef, t: (key: string) => string) => tool.titleText ?? t(tool.titleKey);
 const getToolDesc = (tool: ToolDef, t: (key: string) => string) => tool.descText ?? t(tool.descKey);
@@ -62,10 +69,30 @@ const getToolDesc = (tool: ToolDef, t: (key: string) => string) => tool.descText
 /** Warm-domain tone palette (clay / gold / green / deep-clay) per BRAND_GUIDE.md. */
 type Tone = { surface: string; icon: string; rail: string; dot: string };
 const TOOL_TONES: Tone[] = [
-  { surface: 'var(--centaur-clay-tint)', icon: 'var(--centaur-clay-deep)', rail: 'var(--centaur-clay)', dot: 'var(--centaur-clay)' },
-  { surface: 'var(--centaur-gold-tint)', icon: 'var(--centaur-gold-deep)', rail: 'var(--centaur-gold)', dot: 'var(--centaur-gold)' },
-  { surface: 'var(--centaur-green-tint)', icon: 'var(--centaur-green)', rail: 'var(--centaur-green)', dot: 'var(--centaur-green)' },
-  { surface: 'var(--centaur-bg-warm)', icon: 'var(--centaur-ink-soft)', rail: 'var(--centaur-clay-deep)', dot: 'var(--centaur-clay-deep)' },
+  {
+    surface: 'var(--centaur-clay-tint)',
+    icon: 'var(--centaur-clay-deep)',
+    rail: 'var(--centaur-clay)',
+    dot: 'var(--centaur-clay)',
+  },
+  {
+    surface: 'var(--centaur-gold-tint)',
+    icon: 'var(--centaur-gold-deep)',
+    rail: 'var(--centaur-gold)',
+    dot: 'var(--centaur-gold)',
+  },
+  {
+    surface: 'var(--centaur-green-tint)',
+    icon: 'var(--centaur-green)',
+    rail: 'var(--centaur-green)',
+    dot: 'var(--centaur-green)',
+  },
+  {
+    surface: 'var(--centaur-bg-warm)',
+    icon: 'var(--centaur-ink-soft)',
+    rail: 'var(--centaur-clay-deep)',
+    dot: 'var(--centaur-clay-deep)',
+  },
 ];
 
 function toneForTool(tool: ToolDef): Tone {
@@ -92,7 +119,10 @@ const ToolCard: React.FC<{
       onClick={() => onOpen(tool)}
     >
       <div className='flex min-h-232px w-full flex-col overflow-hidden'>
-        <div className='relative flex h-90px items-start justify-between gap-12px p-16px' style={{ background: tone.surface }}>
+        <div
+          className='relative flex h-90px items-start justify-between gap-12px p-16px'
+          style={{ background: tone.surface }}
+        >
           <div className='centaur-rail absolute bottom-0 left-0 h-3px w-full' />
           <div className='flex min-w-0 items-center gap-12px'>
             <div
@@ -108,7 +138,11 @@ const ToolCard: React.FC<{
               <div className='mt-4px flex items-center gap-6px'>
                 <span
                   className='inline-flex items-center rounded-8px px-7px py-1px text-11px font-500'
-                  style={{ background: 'var(--centaur-card)', color: 'var(--centaur-ink-mute)', border: '1px solid var(--centaur-line)' }}
+                  style={{
+                    background: 'var(--centaur-card)',
+                    color: 'var(--centaur-ink-mute)',
+                    border: '1px solid var(--centaur-line)',
+                  }}
                 >
                   {t(`toolbox.categories.${tool.category}`)}
                 </span>
@@ -169,36 +203,201 @@ const ToolCard: React.FC<{
   );
 };
 
+const WorkbenchCard: React.FC<{
+  title: string;
+  desc: string;
+  icon: React.ReactNode;
+  meta: string;
+  chips: string[];
+  onOpen: () => void;
+}> = ({ title, desc, icon, meta, chips, onOpen }) => (
+  <Button
+    type='text'
+    className='centaur-card centaur-liftable group !h-auto !w-full !overflow-hidden !p-0 !text-left'
+    style={{ borderRadius: 'var(--centaur-radius)' }}
+    onClick={onOpen}
+  >
+    <div className='flex min-h-232px w-full flex-col overflow-hidden'>
+      <div
+        className='relative flex h-96px items-start justify-between gap-12px p-16px'
+        style={{ background: 'var(--centaur-clay-tint)' }}
+      >
+        <div className='centaur-rail absolute bottom-0 left-0 h-3px w-full' />
+        <div className='flex min-w-0 items-center gap-12px'>
+          <div
+            className='flex h-46px w-46px shrink-0 items-center justify-center rounded-14px'
+            style={{
+              background: 'var(--centaur-card)',
+              color: 'var(--centaur-clay-deep)',
+              boxShadow: 'var(--centaur-shadow-sm)',
+            }}
+          >
+            {icon}
+          </div>
+          <div className='min-w-0'>
+            <div className='truncate text-16px font-700 leading-22px' style={{ color: 'var(--centaur-ink)' }}>
+              {title}
+            </div>
+            <div
+              className='mt-4px inline-flex items-center rounded-8px px-7px py-1px text-11px font-500'
+              style={{
+                background: 'var(--centaur-card)',
+                color: 'var(--centaur-ink-mute)',
+                border: '1px solid var(--centaur-line)',
+              }}
+            >
+              {meta}
+            </div>
+          </div>
+        </div>
+        <div
+          className='flex h-30px w-30px shrink-0 items-center justify-center rounded-10px transition-all group-hover:translate-x-2px'
+          style={{ background: 'var(--centaur-card)', color: 'var(--centaur-clay)' }}
+        >
+          <ArrowRight size={15} />
+        </div>
+      </div>
+      <div className='flex flex-1 flex-col p-16px'>
+        <div className='min-h-42px text-13px leading-21px line-clamp-2' style={{ color: 'var(--centaur-ink-soft)' }}>
+          {desc}
+        </div>
+        <div className='mt-12px flex min-h-24px flex-wrap items-center gap-6px'>
+          {chips.map((chip) => (
+            <span
+              key={chip}
+              className='inline-flex max-w-126px items-center truncate rounded-8px px-7px py-2px text-11px'
+              style={{ background: 'var(--centaur-bg-warm)', color: 'var(--centaur-ink-soft)' }}
+            >
+              {chip}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  </Button>
+);
+
 /** Common AI Toolbox — a grid of practical, form-driven AI tools. */
-const ToolboxPage: React.FC = () => {
+const ToolboxPage: React.FC<ToolboxPageProps> = ({ mode = 'toolbox' }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { agents } = useAgents();
   const { status, result, error, run, reset } = useToolboxRun();
+  const isWorkbenchMode = mode === 'workbench';
 
   const tools = useToolboxTools();
+  const imageTools = useMemo(() => tools.filter((tool) => tool.category === 'image'), [tools]);
+  const workbenchTools = useMemo(() => tools.filter((tool) => tool.category === 'workbench'), [tools]);
+  const visibleTools = isWorkbenchMode ? workbenchTools : imageTools;
   const [activeTool, setActiveTool] = useState<ToolDef | null>(null);
+  const [imageWorkbenchOpen, setImageWorkbenchOpen] = useState(!isWorkbenchMode);
+  const [activeImageToolId, setActiveImageToolId] = useState<string>('');
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<ToolboxCategory>('all');
   const lastRunRef = useRef<LastRun | null>(null);
 
-  const filteredTools = tools.filter((tool) => {
+  useEffect(() => {
+    setImageWorkbenchOpen(!isWorkbenchMode);
+  }, [isWorkbenchMode]);
+
+  useEffect(() => {
+    if (imageTools.length === 0) {
+      setActiveImageToolId('');
+      return;
+    }
+    if (!activeImageToolId || !imageTools.some((tool) => tool.id === activeImageToolId)) {
+      setActiveImageToolId(imageTools[0].id);
+    }
+  }, [activeImageToolId, imageTools]);
+
+  const activeImageTool = imageTools.find((tool) => tool.id === activeImageToolId) ?? imageTools[0] ?? null;
+
+  const keyword = query.trim().toLowerCase();
+  const imageWorkbenchMatches =
+    !keyword ||
+    [
+      t('toolbox.imageWorkbench.title'),
+      t('toolbox.imageWorkbench.cardDesc'),
+      t('toolbox.imageWorkbench.subtitle'),
+    ]
+      .join(' ')
+      .toLowerCase()
+      .includes(keyword);
+  const showImageWorkbenchCard = isWorkbenchMode && category !== 'workbench' && imageWorkbenchMatches;
+
+  const filteredTools = visibleTools.filter((tool) => {
     if (category !== 'all' && tool.category !== category) return false;
-    const keyword = query.trim().toLowerCase();
     if (!keyword) return true;
     const title = getToolTitle(tool, t);
     const desc = getToolDesc(tool, t);
     return `${title} ${desc}`.toLowerCase().includes(keyword);
   });
 
-  const imageCount = tools.filter((tool) => tool.category === 'image').length;
-  const textCount = tools.filter((tool) => tool.category === 'text').length;
+  const imageCount = isWorkbenchMode ? 1 : visibleTools.filter((tool) => tool.category === 'image').length;
+  const textCount = visibleTools.filter((tool) => tool.category === 'text').length;
+  const workbenchCount = visibleTools.filter((tool) => tool.category === 'workbench').length;
 
   const categoryOptions: Array<{ key: ToolboxCategory; label: string; count: number }> = [
-    { key: 'all', label: t('toolbox.categories.all'), count: tools.length },
+    { key: 'all', label: t('toolbox.categories.all'), count: isWorkbenchMode ? workbenchTools.length + 1 : visibleTools.length },
     { key: 'image', label: t('toolbox.categories.image'), count: imageCount },
     { key: 'text', label: t('toolbox.categories.text'), count: textCount },
-  ];
+    { key: 'workbench', label: t('toolbox.categories.workbench'), count: workbenchCount },
+  ].filter((item) => item.key === 'all' || item.count > 0);
+
+  const statCards = isWorkbenchMode
+    ? [
+        {
+          label: t('toolbox.categories.all'),
+          count: workbenchTools.length + 1,
+          icon: <Workbench size={20} />,
+          tone: 'var(--centaur-clay)',
+          surface: 'var(--centaur-clay-tint)',
+        },
+        {
+          label: t('toolbox.categories.image'),
+          count: 1,
+          icon: <Picture size={20} />,
+          tone: 'var(--centaur-gold-deep)',
+          surface: 'var(--centaur-gold-tint)',
+        },
+        {
+          label: t('toolbox.categories.workbench'),
+          count: workbenchCount,
+          icon: <Workbench size={20} />,
+          tone: 'var(--centaur-clay-deep)',
+          surface: 'var(--centaur-bg-warm)',
+        },
+      ]
+    : [
+        {
+          label: t('toolbox.categories.all'),
+          count: visibleTools.length,
+          icon: <Toolkit size={22} />,
+          tone: 'var(--centaur-clay)',
+          surface: 'var(--centaur-clay-tint)',
+        },
+        {
+          label: t('toolbox.categories.image'),
+          count: imageCount,
+          icon: <Picture size={20} />,
+          tone: 'var(--centaur-gold-deep)',
+          surface: 'var(--centaur-gold-tint)',
+        },
+        {
+          label: t('toolbox.categories.text'),
+          count: textCount,
+          icon: <BookOne size={20} />,
+          tone: 'var(--centaur-green)',
+          surface: 'var(--centaur-green-tint)',
+        },
+      ];
+
+  const headerIcon = isWorkbenchMode ? <Workbench size={26} /> : <Toolkit size={26} />;
+  const headerEyebrow = isWorkbenchMode ? 'CENTAUR · WORKBENCH' : 'CENTAUR · IMAGE WORKBENCH';
+  const headerTitle = isWorkbenchMode ? t('toolbox.workbench.title') : t('toolbox.title');
+  const headerSubtitle = isWorkbenchMode ? t('toolbox.workbench.subtitle') : t('toolbox.subtitle');
+  const searchPlaceholder = isWorkbenchMode ? t('toolbox.workbench.searchPlaceholder') : t('toolbox.searchPlaceholder');
+  const emptyDescription = isWorkbenchMode ? t('toolbox.workbench.empty') : t('toolbox.empty');
 
   const readiness = activeTool ? checkToolReadiness(activeTool) : null;
   const toolReady = !readiness || readiness.ready;
@@ -230,6 +429,27 @@ const ToolboxPage: React.FC = () => {
 
   const closeTool = useCallback(() => setActiveTool(null), []);
 
+  const openImageWorkbench = useCallback(() => {
+    reset();
+    lastRunRef.current = null;
+    setImageWorkbenchOpen(true);
+  }, [reset]);
+
+  const closeImageWorkbench = useCallback(() => {
+    reset();
+    lastRunRef.current = null;
+    setImageWorkbenchOpen(false);
+  }, [reset]);
+
+  const selectImageTool = useCallback(
+    (toolId: string) => {
+      reset();
+      lastRunRef.current = null;
+      setActiveImageToolId(toolId);
+    },
+    [reset]
+  );
+
   const handleRun = useCallback(
     (tool: ToolDef, agent: AgentMetadata | null, values: ToolFormValues) => {
       lastRunRef.current = { tool, agent, values };
@@ -250,23 +470,144 @@ const ToolboxPage: React.FC = () => {
     [navigate]
   );
 
+  const renderImageWorkbench = () => {
+    const imageReadiness = activeImageTool ? checkToolReadiness(activeImageTool) : null;
+    const imageToolReady = !imageReadiness || imageReadiness.ready;
+    const imageReadinessAlert =
+      imageReadiness && imageReadiness.ready === false ? (
+        <Alert
+          type='warning'
+          content={t(imageReadiness.reasonKey)}
+          action={
+            <Button size='mini' type='text' onClick={() => void navigate(imageReadiness.settingsRoute)}>
+              {t('toolbox.goToSettings')}
+            </Button>
+          }
+        />
+      ) : null;
+
+    return (
+      <>
+        <div className='flex flex-col gap-16px lg:flex-row lg:items-end lg:justify-between'>
+          <div className='flex min-w-0 items-start gap-14px'>
+            {isWorkbenchMode && (
+              <Button className='mt-5px' shape='circle' icon={<Left />} onClick={closeImageWorkbench} />
+            )}
+            <div className='centaur-mark h-52px w-52px shrink-0'>
+              <Picture size={26} />
+            </div>
+            <div className='min-w-0'>
+              <div className='centaur-eyebrow'>CENTAUR · IMAGE WORKBENCH</div>
+              <div className='mt-2px text-26px font-900 leading-32px' style={{ color: 'var(--centaur-ink)' }}>
+                {t('toolbox.imageWorkbench.title')}
+              </div>
+              <div className='mt-5px max-w-760px text-14px leading-21px' style={{ color: 'var(--centaur-ink-soft)' }}>
+                {t('toolbox.imageWorkbench.subtitle')}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className='centaur-card p-14px' style={{ borderRadius: 'var(--centaur-radius-sm)' }}>
+          <div className='flex flex-wrap items-center gap-8px'>
+            {imageTools.map((tool) => {
+              const active = activeImageTool?.id === tool.id;
+              return (
+                <Button
+                  key={tool.id}
+                  size='small'
+                  type={active ? 'primary' : 'text'}
+                  className='!rounded-full !px-14px'
+                  style={
+                    active
+                      ? { boxShadow: 'var(--centaur-shadow-clay)' }
+                      : {
+                          background: 'var(--centaur-bg-warm)',
+                          color: 'var(--centaur-ink-soft)',
+                          border: '1px solid var(--centaur-line)',
+                        }
+                  }
+                  onClick={() => selectImageTool(tool.id)}
+                >
+                  {getToolTitle(tool, t)}
+                </Button>
+              );
+            })}
+          </div>
+        </div>
+
+        {activeImageTool ? (
+          <>
+            <div className='centaur-card p-16px' style={{ borderRadius: 'var(--centaur-radius-sm)' }}>
+              <div className='flex min-w-0 items-center gap-12px'>
+                <div
+                  className='flex h-44px w-44px shrink-0 items-center justify-center rounded-14px'
+                  style={{ background: 'var(--centaur-gold-tint)', color: 'var(--centaur-gold-deep)' }}
+                >
+                  <ToolIcon name={activeImageTool.icon} size={22} />
+                </div>
+                <div className='min-w-0'>
+                  <div className='truncate text-18px font-700 leading-24px' style={{ color: 'var(--centaur-ink)' }}>
+                    {getToolTitle(activeImageTool, t)}
+                  </div>
+                  <div className='mt-3px text-13px leading-20px' style={{ color: 'var(--centaur-ink-soft)' }}>
+                    {getToolDesc(activeImageTool, t)}
+                  </div>
+                </div>
+              </div>
+            </div>
+            {imageReadinessAlert}
+            <div className='grid grid-cols-1 gap-20px lg:grid-cols-[400px_minmax(0,1fr)] lg:items-start'>
+              <div className='w-full'>
+                <ToolForm
+                  key={activeImageTool.id}
+                  tool={activeImageTool}
+                  agents={agents}
+                  running={status === 'running'}
+                  disabled={!imageToolReady}
+                  onRun={handleRun}
+                />
+              </div>
+              <ResultPanel
+                status={status}
+                result={result}
+                error={error}
+                onOpenConversation={handleOpenConversation}
+                onRegenerate={handleRegenerate}
+              />
+            </div>
+          </>
+        ) : (
+          <div className='centaur-card py-44px'>
+            <Empty description={t('toolbox.imageWorkbench.empty')} />
+          </div>
+        )}
+      </>
+    );
+  };
+
   return (
     <div className='centaur-brand w-full min-h-full box-border overflow-y-auto'>
       <div className='mx-auto flex w-full max-w-1280px box-border flex-col gap-20px p-24px'>
-        {!activeTool ? (
+        {imageWorkbenchOpen ? (
+          renderImageWorkbench()
+        ) : !activeTool ? (
           <>
             <div className='flex flex-col gap-16px lg:flex-row lg:items-end lg:justify-between'>
               <div className='flex min-w-0 items-start gap-14px'>
                 <div className='centaur-mark h-52px w-52px shrink-0'>
-                  <Toolkit size={26} />
+                  {headerIcon}
                 </div>
                 <div className='min-w-0'>
-                  <div className='centaur-eyebrow'>CENTAUR · TOOLKIT</div>
+                  <div className='centaur-eyebrow'>{headerEyebrow}</div>
                   <div className='mt-2px text-26px font-900 leading-32px' style={{ color: 'var(--centaur-ink)' }}>
-                    {t('toolbox.title')}
+                    {headerTitle}
                   </div>
-                  <div className='mt-5px max-w-680px text-14px leading-21px' style={{ color: 'var(--centaur-ink-soft)' }}>
-                    {t('toolbox.subtitle')}
+                  <div
+                    className='mt-5px max-w-680px text-14px leading-21px'
+                    style={{ color: 'var(--centaur-ink-soft)' }}
+                  >
+                    {headerSubtitle}
                   </div>
                 </div>
               </div>
@@ -275,18 +616,18 @@ const ToolboxPage: React.FC = () => {
                 className='w-full lg:!w-360px'
                 value={query}
                 onChange={setQuery}
-                placeholder={t('toolbox.searchPlaceholder')}
+                placeholder={searchPlaceholder}
                 prefix={<Search size={14} fill='currentColor' />}
               />
             </div>
 
             <div className='grid grid-cols-1 gap-14px md:grid-cols-3'>
-              {[
-                { label: t('toolbox.categories.all'), count: tools.length, icon: <Toolkit size={22} />, tone: 'var(--centaur-clay)', surface: 'var(--centaur-clay-tint)' },
-                { label: t('toolbox.categories.image'), count: imageCount, icon: <Picture size={20} />, tone: 'var(--centaur-gold-deep)', surface: 'var(--centaur-gold-tint)' },
-                { label: t('toolbox.categories.text'), count: textCount, icon: <BookOne size={20} />, tone: 'var(--centaur-green)', surface: 'var(--centaur-green-tint)' },
-              ].map((stat) => (
-                <div key={stat.label} className='centaur-card p-16px' style={{ borderRadius: 'var(--centaur-radius-sm)' }}>
+              {statCards.map((stat) => (
+                <div
+                  key={stat.label}
+                  className='centaur-card p-16px'
+                  style={{ borderRadius: 'var(--centaur-radius-sm)' }}
+                >
                   <div className='flex items-center justify-between gap-10px'>
                     <span className='centaur-eyebrow' style={{ color: 'var(--centaur-ink-mute)' }}>
                       {stat.label}
@@ -317,7 +658,11 @@ const ToolboxPage: React.FC = () => {
                     style={
                       active
                         ? { boxShadow: 'var(--centaur-shadow-clay)' }
-                        : { background: 'var(--centaur-card)', color: 'var(--centaur-ink-soft)', border: '1px solid var(--centaur-line)' }
+                        : {
+                            background: 'var(--centaur-card)',
+                            color: 'var(--centaur-ink-soft)',
+                            border: '1px solid var(--centaur-line)',
+                          }
                     }
                     onClick={() => setCategory(item.key)}
                   >
@@ -327,15 +672,30 @@ const ToolboxPage: React.FC = () => {
               })}
             </div>
 
-            {filteredTools.length > 0 ? (
+            {showImageWorkbenchCard || filteredTools.length > 0 ? (
               <div className='grid grid-cols-1 gap-16px md:grid-cols-2 xl:grid-cols-3'>
+                {showImageWorkbenchCard && (
+                  <WorkbenchCard
+                    title={t('toolbox.imageWorkbench.title')}
+                    desc={t('toolbox.imageWorkbench.cardDesc')}
+                    icon={<Picture size={24} />}
+                    meta={t('toolbox.categories.image')}
+                    chips={[
+                      t('toolbox.tools.textToImage.title'),
+                      t('toolbox.tools.imageEdit.title'),
+                      t('toolbox.tools.poster.title'),
+                      t('toolbox.tools.product.title'),
+                    ]}
+                    onOpen={openImageWorkbench}
+                  />
+                )}
                 {filteredTools.map((tool) => (
                   <ToolCard key={tool.id} tool={tool} onOpen={openTool} />
                 ))}
               </div>
             ) : (
               <div className='centaur-card py-44px'>
-                <Empty description={t('toolbox.empty')} />
+                <Empty description={emptyDescription} />
               </div>
             )}
           </>

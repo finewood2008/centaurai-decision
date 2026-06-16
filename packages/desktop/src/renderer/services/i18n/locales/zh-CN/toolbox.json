@@ -1,6 +1,18 @@
 {
-  "title": "AI工具箱",
-  "subtitle": "常用实用的 AI 工具——填写表单即可生成。",
+  "title": "图片工作台",
+  "subtitle": "常用图片 AI 工作流，填写表单即可生成图片、海报、证件照和商品图。",
+  "workbench": {
+    "title": "AI工作台",
+    "subtitle": "把常用 AI 能力按业务场景整理成工作台，当前包含图片工作台和香港报税工作台。",
+    "searchPlaceholder": "搜索工作台或工具",
+    "empty": "没有符合当前筛选条件的工作台或工具。"
+  },
+  "imageWorkbench": {
+    "title": "图片工作台",
+    "subtitle": "在一个工作台里完成图片生成、参考图改图、海报、头像、商品图、证件照、插画、美食摄影和老照片修复。",
+    "cardDesc": "集中处理所有图片任务：可以从文字生图，也可以上传参考图修改、重绘和修复。",
+    "empty": "暂无可用的图片处理能力。"
+  },
   "agent": "执行 Agent",
   "agentPlaceholder": "选择一个 Agent",
   "noAgent": "没有可用的 Agent",
@@ -60,6 +72,10 @@
     "photoRestore": {
       "title": "老照片修复",
       "desc": "修复增强老照片,可选上色。"
+    },
+    "hkTaxWorkbench": {
+      "title": "香港报税工作台",
+      "desc": "调用 LedgerLens 和本机 CLI，把香港银行月结单整理成报税底稿 Excel。"
     }
   },
   "fields": {
@@ -166,6 +182,50 @@
     },
     "restoreColorize": {
       "label": "上色"
+    },
+    "hkClientName": {
+      "label": "客户名称",
+      "placeholder": "如：某某贸易有限公司"
+    },
+    "hkFilingYear": {
+      "label": "报税年度",
+      "placeholder": "如：2025/26 或 2025"
+    },
+    "hkWorkspacePath": {
+      "label": "LedgerLens 本地目录",
+      "placeholder": "如：~/Documents/Aistation/ledgerlens"
+    },
+    "hkModule": {
+      "label": "处理模块"
+    },
+    "hkWorkflowMode": {
+      "label": "处理方式"
+    },
+    "hkBankCode": {
+      "label": "银行 / 平台"
+    },
+    "hkLlmBackend": {
+      "label": "抽取后端"
+    },
+    "hkStatementPdfs": {
+      "label": "银行月结单 PDF",
+      "placeholder": "选择同一银行的一份或多份 PDF"
+    },
+    "hkExtractJson": {
+      "label": "已抽取 JSON",
+      "placeholder": "选择 LedgerLens dump-json 文件"
+    },
+    "hkDocumentFiles": {
+      "label": "合同 / 发票 / 收据文件",
+      "placeholder": "选择 PDF、Word、Excel、图片或 txt 文件"
+    },
+    "hkOutputName": {
+      "label": "输出文件名",
+      "placeholder": "如：客户名_2025_香港报税明细账.xlsx"
+    },
+    "hkExtraNotes": {
+      "label": "补充要求",
+      "placeholder": "例如：只处理港币账户、保留原始币种、需要生成复核摘要…"
     }
   },
   "options": {
@@ -255,19 +315,50 @@
     "restoreColorize": {
       "keep": "保持原样",
       "colorize": "自动上色"
+    },
+    "hkModule": {
+      "bankLedger": "银行月结单 → 审计级明细账",
+      "documents": "合同 / 发票抽取 → 三表复核工作簿"
+    },
+    "hkWorkflowMode": {
+      "parse": "解析 PDF 并生成 Excel",
+      "fromJson": "用 JSON 直接生成 Excel",
+      "demo": "演示数据试跑"
+    },
+    "hkBankCode": {
+      "auto": "自动识别",
+      "hsbc": "汇丰银行 hsbc",
+      "ocbc": "华侨银行 ocbc",
+      "hangseng": "恒生银行 hangseng",
+      "boc": "中银香港 boc",
+      "scb": "渣打银行 scb",
+      "citi": "花旗银行 citi",
+      "dbs": "星展银行 dbs",
+      "payoneer": "Payoneer",
+      "worldfirst": "万里汇 worldfirst",
+      "other": "其它银行 other"
+    },
+    "hkLlmBackend": {
+      "auto": "自动探测",
+      "mock": "mock 离线占位",
+      "anthropic": "Anthropic / Claude",
+      "openai": "OpenAI 兼容",
+      "cli": "本机 Claude CLI"
     }
   },
-  "searchPlaceholder": "搜索工具",
-  "empty": "没有符合当前筛选条件的工具。",
+  "searchPlaceholder": "搜索图片工具",
+  "empty": "没有符合当前筛选条件的图片工具。",
   "categories": {
     "all": "全部",
-    "image": "图像",
-    "text": "文本"
+    "image": "图片工作台",
+    "text": "文本",
+    "workbench": "AI工作台"
   },
   "stats": {
     "total": "{{count}} 个工具",
     "image": "{{count}} 个图像工具",
-    "text": "{{count}} 个文本工具"
+    "text": "{{count}} 个文本工具",
+    "workbench": "{{count}} 个工作台"
   },
   "source": {
     "skill": "技能"

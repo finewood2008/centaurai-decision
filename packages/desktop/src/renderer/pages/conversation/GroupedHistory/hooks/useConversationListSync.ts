@@ -6,7 +6,9 @@
 
 import { ipcBridge } from '@/common';
 import type { TChatConversation } from '@/common/config/storage';
+import { filterConversationsForCurrentUser } from '@/common/utils/frontendUserScope';
 import { addEventListener } from '@/renderer/utils/emitter';
+import { buildConversationVisibilityScope } from '@/renderer/utils/user/conversationVisibility';
 import { useCallback, useEffect, useSyncExternalStore } from 'react';
 
 /**
@@ -137,10 +139,11 @@ const getConversationListSyncSnapshot = (): ConversationListSyncSnapshot => snap
 const refreshConversations = () => {
   void ipcBridge.database.getUserConversations
     .invoke({ limit: 10000 })
-    .then((result) => {
+    .then(async (result) => {
       const items = result?.items;
       if (items && Array.isArray(items)) {
-        const filteredData = items.filter((conv) => {
+        const visibilityScope = await buildConversationVisibilityScope();
+        const filteredData = filterConversationsForCurrentUser(items, visibilityScope).filter((conv) => {
           // Legacy rows from the pre-provider-probe health check flow are hidden
           // from normal history. New health checks must not create conversations.
           const extra = conv.extra as { is_health_check?: boolean; team_id?: string; teamId?: string } | undefined;

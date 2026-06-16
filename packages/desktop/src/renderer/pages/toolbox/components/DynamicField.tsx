@@ -22,10 +22,34 @@ type DynamicFieldProps = {
   onChange: (name: string, value: string | number | string[]) => void;
 };
 
+type FileFilter = { name: string; extensions: string[] };
+
+const ACCEPT_EXTENSION_MAP: Record<string, string[]> = {
+  'application/json': ['json'],
+  'application/pdf': ['pdf'],
+  'image/*': ['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp', 'avif', 'heic', 'heif'],
+};
+
 /** Render the file name from an absolute path. */
 function baseName(path: string): string {
   const parts = path.split(/[\\/]/);
   return parts[parts.length - 1] || path;
+}
+
+/** Convert an HTML accept hint into native dialog filters. */
+function buildFilters(accept: string | undefined, label: string): FileFilter[] | undefined {
+  if (!accept) return undefined;
+  const extensions = accept
+    .split(',')
+    .map((token) => token.trim().toLowerCase())
+    .flatMap((token) => {
+      if (!token) return [];
+      if (token.startsWith('.')) return [token.slice(1)];
+      return ACCEPT_EXTENSION_MAP[token] ?? [];
+    })
+    .filter(Boolean);
+
+  return extensions.length ? [{ name: label, extensions: Array.from(new Set(extensions)) }] : undefined;
 }
 
 /** Renders a single tool form field based on its declared type. */
@@ -38,12 +62,12 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({ field, value, onChan
     const properties: Array<'openFile' | 'multiSelections'> = field.multiple
       ? ['openFile', 'multiSelections']
       : ['openFile'];
-    const files = await ipcBridge.dialog.showOpen.invoke({ properties });
+    const files = await ipcBridge.dialog.showOpen.invoke({ properties, filters: buildFilters(field.accept, label) });
     if (files && files.length > 0) {
       const current = Array.isArray(value) ? value : [];
       onChange(field.name, field.multiple ? [...current, ...files] : [files[0]]);
     }
-  }, [field.multiple, field.name, onChange, value]);
+  }, [field.accept, field.multiple, field.name, label, onChange, value]);
 
   const removeFile = useCallback(
     (path: string) => {

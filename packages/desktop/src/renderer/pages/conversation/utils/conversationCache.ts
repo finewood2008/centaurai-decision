@@ -7,11 +7,16 @@
 import { ipcBridge } from '@/common';
 import { isBackendHttpError } from '@/common/adapter/httpBridge';
 import type { TChatConversation } from '@/common/config/storage';
+import { isConversationVisibleForCurrentUser } from '@/common/utils/frontendUserScope';
+import { buildConversationVisibilityScope } from '@/renderer/utils/user/conversationVisibility';
 import { mutate } from 'swr';
 
 export async function getConversationOrNull(conversation_id: string): Promise<TChatConversation | null> {
   try {
-    return await ipcBridge.conversation.get.invoke({ id: conversation_id });
+    const conversation = await ipcBridge.conversation.get.invoke({ id: conversation_id });
+    if (!conversation) return null;
+    const visibilityScope = await buildConversationVisibilityScope();
+    return isConversationVisibleForCurrentUser(conversation, visibilityScope) ? conversation : null;
   } catch (error) {
     if (isBackendHttpError(error) && error.status === 404 && error.code === 'NOT_FOUND') {
       return null;

@@ -6,6 +6,7 @@
 
 import { ipcBridge } from '@/common';
 import type { TChatConversation } from '@/common/config/storage';
+import { filterConversationsForCurrentUser } from '@/common/utils/frontendUserScope';
 import FlexFullContainer from '@/renderer/components/layout/FlexFullContainer';
 import { CronJobIndicator, useCronJobsMap } from '@/renderer/pages/cron';
 import { refreshConversationCache } from '@/renderer/pages/conversation/utils/conversationCache';
@@ -20,6 +21,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useLayoutContext } from '@/renderer/hooks/context/LayoutContext';
+import { buildConversationVisibilityScope } from '@/renderer/utils/user/conversationVisibility';
 
 const useTimeline = () => {
   const { t } = useTranslation();
@@ -107,10 +109,13 @@ const ChatHistory: React.FC<{ onSessionClick?: () => void; collapsed?: boolean }
       // Get conversations from database instead of file storage
       ipcBridge.database.getUserConversations
         .invoke({ limit: 10000 })
-        .then((result) => {
+        .then(async (result) => {
           const items = result?.items;
           if (items && Array.isArray(items) && items.length > 0) {
-            const sortedHistory = items.toSorted((a, b) => getActivityTime(b) - getActivityTime(a));
+            const visibilityScope = await buildConversationVisibilityScope();
+            const sortedHistory = filterConversationsForCurrentUser(items, visibilityScope).toSorted(
+              (a, b) => getActivityTime(b) - getActivityTime(a)
+            );
             setChatHistory(sortedHistory);
           } else {
             setChatHistory([]);
@@ -125,9 +130,9 @@ const ChatHistory: React.FC<{ onSessionClick?: () => void; collapsed?: boolean }
     return addEventListener('chat.history.refresh', refresh);
   }, [isConversation]);
 
-  const handleRemoveConversation = (id: string) => {
+  const handleRemoveConversation = (conversationId: string) => {
     void ipcBridge.conversation.remove
-      .invoke({ id })
+      .invoke({ id: conversationId })
       .then((success) => {
         if (success) {
           // Trigger refresh to reload from database

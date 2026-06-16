@@ -12,6 +12,8 @@ import { Message } from '@arco-design/web-react';
 import { Copy, FolderOpen } from '@icon-park/react';
 import { useTranslation } from 'react-i18next';
 import { ipcBridge } from '@/common';
+import type { TChatConversation } from '@/common/config/storage';
+import { filterConversationsWithChannelScope } from '@/renderer/utils/user/conversationVisibility';
 import styles from '../index.module.css';
 
 export interface FileEntry {
@@ -92,10 +94,44 @@ export function shortConversation(name: string): string {
   return m ? '#' + m[1].slice(0, 8) : name.slice(0, 16);
 }
 
-export async function fetchRecentFiles(): Promise<FileEntry[]> {
+type VisibleConversationFilter = {
+  conversationNames?: Set<string>;
+  workspacePaths?: Set<string>;
+};
+
+function normalizePath(path: string | undefined): string {
+  return path ? path.replace(/\\/g, '/') : '';
+}
+
+function isFileVisible(file: FileEntry, filter?: VisibleConversationFilter): boolean {
+  if (!filter) return true;
+  if (filter.conversationNames?.has(file.conversation)) return true;
+
+  const filePath = normalizePath(file.path);
+  if (!filePath || !filter.workspacePaths?.size) return false;
+  for (const workspace of filter.workspacePaths) {
+    const normalizedWorkspace = normalizePath(workspace);
+    if (normalizedWorkspace && filePath.startsWith(normalizedWorkspace)) return true;
+  }
+  return false;
+}
+
+export function buildVisibleFileFilter(conversations: TChatConversation[]): VisibleConversationFilter {
+  return {
+    conversationNames: new Set(conversations.map((conversation) => conversation.name).filter(Boolean)),
+    workspacePaths: new Set(
+      conversations
+        .map((conversation) => (conversation.extra as { workspace?: string } | undefined)?.workspace)
+        .filter((workspace): workspace is string => Boolean(workspace))
+    ),
+  };
+}
+
+export async function fetchRecentFiles(filter?: VisibleConversationFilter): Promise<FileEntry[]> {
   const resp = await fetch('http://127.0.0.1:8699/api/user-files');
   const data = await resp.json();
-  return data.files || [];
+  const files = (data.files || []) as FileEntry[];
+  return files.filter((file) => isFileVisible(file, filter));
 }
 
 interface RecentFilesProps {
@@ -115,26 +151,42 @@ const RecentFiles: React.FC<RecentFilesProps> = ({
   const { t } = useTranslation();
   const [files, setFiles] = useState<FileEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [visibleFilter, setVisibleFilter] = useState<VisibleConversationFilter | undefined>();
+
+  const loadVisibleFilter = useCallback(async () => {
+    try {
+      const result = await ipcBridge.database.getUserConversations.invoke({ limit: 10000 });
+      const visibleConversations = await filterConversationsWithChannelScope(result.items ?? []);
+      setVisibleFilter(buildVisibleFileFilter(visibleConversations));
+    } catch {
+      setVisibleFilter(buildVisibleFileFilter([]));
+    }
+  }, []);
 
   const loadFiles = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await fetchRecentFiles();
+      const data = await fetchRecentFiles(visibleFilter);
       setFiles(data);
     } catch {
       // silent
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [visibleFilter]);
 
   useEffect(() => {
+    void loadVisibleFilter();
+  }, [loadVisibleFilter]);
+
+  useEffect(() => {
+    if (!visibleFilter) return;
     loadFiles();
-  }, [loadFiles]);
+  }, [loadFiles, visibleFilter]);
 
   useEffect(() => {
-    const t = setInterval(loadFiles, 30000);
-    return () => clearInterval(t);
+    const timer = setInterval(loadFiles, 30000);
+    return () => clearInterval(timer);
   }, [loadFiles]);
 
   const handleOpen = async (path: string) => {

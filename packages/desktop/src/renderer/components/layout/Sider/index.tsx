@@ -13,7 +13,7 @@ import {
   SiderToolbar,
   SiderSearchEntry,
   SiderScheduledEntry,
-  SiderToolboxEntry,
+  SiderWorkbenchEntry,
   SiderFilesEntry,
   SiderAdvisorsEntry,
 } from './SiderNav';
@@ -105,12 +105,12 @@ const Sider: React.FC<SiderProps> = ({ onSessionClick, collapsed = false }) => {
     }
   };
 
-  const handleToolboxClick = () => {
+  const handleWorkbenchClick = () => {
     cleanupSiderTooltips();
     blurActiveElement();
     closePreview();
     setIsBatchMode(false);
-    Promise.resolve(navigate('/toolbox')).catch((error) => {
+    Promise.resolve(navigate('/workbench')).catch((error) => {
       console.error('Navigation failed:', error);
     });
     if (onSessionClick) {
@@ -224,13 +224,12 @@ const Sider: React.FC<SiderProps> = ({ onSessionClick, collapsed = false }) => {
               onConversationSelect={handleConversationSelect}
               onSessionClick={onSessionClick}
             />
-            {/* Common AI Toolbox nav entry - fixed above scroll */}
-            <SiderToolboxEntry
+            <SiderWorkbenchEntry
               isMobile={isMobile}
-              isActive={pathname === '/toolbox'}
+              isActive={pathname === '/workbench' || pathname === '/toolbox'}
               collapsed={collapsed}
               siderTooltipProps={siderTooltipProps}
-              onClick={handleToolboxClick}
+              onClick={handleWorkbenchClick}
             />
             {/* 专家 nav entry */}
             <SiderAdvisorsEntry

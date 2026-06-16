@@ -1,6 +1,18 @@
 {
-  "title": "AI Toolbox",
-  "subtitle": "Frequently used AI tools — fill in a form and generate.",
+  "title": "Image Workbench",
+  "subtitle": "Common image AI workflows for images, posters, ID photos, and product shots.",
+  "workbench": {
+    "title": "AI Workbench",
+    "subtitle": "Scenario-based AI workbenches, currently including Image Workbench and Hong Kong Tax Workbench.",
+    "searchPlaceholder": "Search workbenches or tools",
+    "empty": "No workbenches or tools match the current filters."
+  },
+  "imageWorkbench": {
+    "title": "Image Workbench",
+    "subtitle": "Generate images, edit reference images, create posters, avatars, product shots, ID photos, illustrations, food photos, and restore old photos in one workspace.",
+    "cardDesc": "One place for image work: generate from text, upload references, edit, redraw, and restore images.",
+    "empty": "No image processing capabilities are available."
+  },
   "agent": "Agent",
   "agentPlaceholder": "Select an agent",
   "noAgent": "No available agent",
@@ -60,6 +72,10 @@
     "photoRestore": {
       "title": "Photo Restoration",
       "desc": "Restore & enhance an old photo, optional colorize."
+    },
+    "hkTaxWorkbench": {
+      "title": "Hong Kong Tax Workbench",
+      "desc": "Use LedgerLens and local CLI tools to turn Hong Kong bank statements into tax workpaper Excel files."
     }
   },
   "fields": {
@@ -166,6 +182,50 @@
     },
     "restoreColorize": {
       "label": "Colorize"
+    },
+    "hkClientName": {
+      "label": "Client name",
+      "placeholder": "Example: Example Trading Limited"
+    },
+    "hkFilingYear": {
+      "label": "Filing year",
+      "placeholder": "Example: 2025/26 or 2025"
+    },
+    "hkWorkspacePath": {
+      "label": "LedgerLens local folder",
+      "placeholder": "Example: ~/Documents/Aistation/ledgerlens"
+    },
+    "hkModule": {
+      "label": "Processing module"
+    },
+    "hkWorkflowMode": {
+      "label": "Workflow mode"
+    },
+    "hkBankCode": {
+      "label": "Bank / platform"
+    },
+    "hkLlmBackend": {
+      "label": "Extraction backend"
+    },
+    "hkStatementPdfs": {
+      "label": "Bank statement PDFs",
+      "placeholder": "Choose one or more PDFs from the same bank"
+    },
+    "hkExtractJson": {
+      "label": "Extracted JSON",
+      "placeholder": "Choose LedgerLens dump-json files"
+    },
+    "hkDocumentFiles": {
+      "label": "Contract / invoice / receipt files",
+      "placeholder": "Choose PDF, Word, Excel, image, or txt files"
+    },
+    "hkOutputName": {
+      "label": "Output file name",
+      "placeholder": "Example: client_2025_hk_tax_ledger.xlsx"
+    },
+    "hkExtraNotes": {
+      "label": "Extra instructions",
+      "placeholder": "Example: only process HKD accounts, keep original currencies, include a review summary…"
     }
   },
   "options": {
@@ -255,19 +315,50 @@
     "restoreColorize": {
       "keep": "Keep original",
       "colorize": "Colorize"
+    },
+    "hkModule": {
+      "bankLedger": "Bank statements → audit ledger",
+      "documents": "Contract / invoice extraction → review workbook"
+    },
+    "hkWorkflowMode": {
+      "parse": "Parse PDFs and generate Excel",
+      "fromJson": "Generate Excel from JSON",
+      "demo": "Run demo data"
+    },
+    "hkBankCode": {
+      "auto": "Auto detect",
+      "hsbc": "HSBC hsbc",
+      "ocbc": "OCBC ocbc",
+      "hangseng": "Hang Seng hangseng",
+      "boc": "Bank of China HK boc",
+      "scb": "Standard Chartered scb",
+      "citi": "Citibank citi",
+      "dbs": "DBS dbs",
+      "payoneer": "Payoneer",
+      "worldfirst": "WorldFirst worldfirst",
+      "other": "Other bank other"
+    },
+    "hkLlmBackend": {
+      "auto": "Auto detect",
+      "mock": "mock offline placeholder",
+      "anthropic": "Anthropic / Claude",
+      "openai": "OpenAI compatible",
+      "cli": "Local Claude CLI"
     }
   },
-  "searchPlaceholder": "Search tools",
-  "empty": "No tools match the current filters.",
+  "searchPlaceholder": "Search image tools",
+  "empty": "No image tools match the current filters.",
   "categories": {
     "all": "All",
-    "image": "Image",
-    "text": "Text"
+    "image": "Image Workbench",
+    "text": "Text",
+    "workbench": "AI Workbench"
   },
   "stats": {
     "total": "{{count}} tools",
     "image": "{{count}} image tools",
-    "text": "{{count}} text tools"
+    "text": "{{count}} text tools",
+    "workbench": "{{count}} workbenches"
   },
   "source": {
     "skill": "Skill"

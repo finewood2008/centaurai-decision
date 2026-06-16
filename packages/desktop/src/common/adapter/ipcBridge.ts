@@ -92,6 +92,18 @@ import {
   fromBackendWorkspaceList,
   type RawWorkspaceFlatFile,
 } from './workspaceMapper';
+import {
+  CHANNEL_BINDINGS_STORAGE_KEY,
+  type ChannelBindings,
+  addChannelUserBindingForCurrentUser,
+  filterChannelUsersForCurrentUser,
+  mergeChannelBindings,
+  normalizeChannelBindings,
+  readLocalChannelBindings,
+  removeChannelUserBindingFromAllUsers,
+  withCurrentConversationOwner,
+  writeLocalChannelBindings,
+} from '../utils/frontendUserScope';
 
 // ---------------------------------------------------------------------------
 // Shell — routed to POST /api/shell/*
@@ -133,17 +145,18 @@ export const assistants = {
 export const conversation = {
   create: withResponseMap(
     httpPost<TChatConversation, ICreateConversationParams>('/api/conversations', (p) => {
+      const scopedParams = withCurrentConversationOwner(p);
       // Top-level `model` is aionrs-only on the backend (spec 2026-05-12).
       // Other agent types carry model info via `extra`.
-      const isAionrs = p.type === 'aionrs';
+      const isAionrs = scopedParams.type === 'aionrs';
       const body: Record<string, unknown> = {
-        type: p.type,
-        id: p.id,
-        name: p.name,
-        extra: p.extra,
+        type: scopedParams.type,
+        id: scopedParams.id,
+        name: scopedParams.name,
+        extra: scopedParams.extra,
       };
       if (isAionrs) {
-        const model = toApiModelOptional(p.model);
+        const model = toApiModelOptional(scopedParams.model);
         if (model) body.model = model;
       }
       return body;
@@ -152,8 +165,9 @@ export const conversation = {
   ),
   createWithConversation: withResponseMap(
     httpPost<TChatConversation, { conversation: TChatConversation }>('/api/conversations/clone', (p) => {
-      const isAionrs = p.conversation.type === 'aionrs';
-      const { model: _rawModel, ...rest } = p.conversation as TChatConversation & {
+      const scopedConversation = withCurrentConversationOwner(p.conversation);
+      const isAionrs = scopedConversation.type === 'aionrs';
+      const { model: _rawModel, ...rest } = scopedConversation as TChatConversation & {
         model?: TProviderWithModel;
       };
       const clonedConversation: Record<string, unknown> = { ...rest };
@@ -1777,6 +1791,38 @@ function toChannelSession(raw: RawSession): IChannelSession {
   };
 }
 
+async function readPersistedChannelBindings(): Promise<ChannelBindings> {
+  const localBindings = readLocalChannelBindings();
+  const serverSettings = await httpRequest<unknown>(
+    'GET',
+    `/api/settings/client?key=${encodeURIComponent(CHANNEL_BINDINGS_STORAGE_KEY)}`
+  ).catch(() => undefined);
+  if (serverSettings !== undefined && serverSettings !== null) {
+    const serverBindings = normalizeChannelBindings(serverSettings);
+    writeLocalChannelBindings(serverBindings);
+    return serverBindings;
+  }
+
+  const migratedBindings = mergeChannelBindings(localBindings);
+  writeLocalChannelBindings(migratedBindings);
+  return migratedBindings;
+}
+
+async function writePersistedChannelBindings(bindings: ChannelBindings): Promise<void> {
+  writeLocalChannelBindings(bindings);
+  await httpRequest<void>('PUT', '/api/settings/client', { [CHANNEL_BINDINGS_STORAGE_KEY]: bindings }).catch(() => {});
+}
+
+async function bindPersistedChannelUserToCurrentUser(channelUserId: string): Promise<void> {
+  const bindings = addChannelUserBindingForCurrentUser(await readPersistedChannelBindings(), channelUserId);
+  await writePersistedChannelBindings(bindings);
+}
+
+async function removePersistedChannelUserBinding(channelUserId: string): Promise<void> {
+  const bindings = removeChannelUserBindingFromAllUsers(await readPersistedChannelBindings(), channelUserId);
+  await writePersistedChannelBindings(bindings);
+}
+
 export const channel = {
   getPluginStatus: withResponseMap(httpGet<RawPluginStatus[], void>('/api/channel/plugins'), (raw) =>
     raw.map(toPluginStatus)
@@ -1790,10 +1836,53 @@ export const channel = {
   getPendingPairings: withResponseMap(httpGet<RawPairing[], void>('/api/channel/pairings'), (raw) =>
     raw.map(toPairing)
   ),
-  approvePairing: httpPost<void, { code: string }>('/api/channel/pairings/approve'),
+  approvePairing: {
+    provider: () => {},
+    invoke: async ({ code }: { code: string }): Promise<void> => {
+      const [before, pairings] = await Promise.all([
+        httpRequest<RawUser[]>('GET', '/api/channel/users').catch(() => []),
+        httpRequest<RawPairing[]>('GET', '/api/channel/pairings').catch(() => []),
+      ]);
+      const approvedPairing = pairings.find((pairing) => pairing.code === code);
+      await httpRequest<void>('POST', '/api/channel/pairings/approve', { code });
+      const after = await httpRequest<RawUser[]>('GET', '/api/channel/users').catch(() => []);
+      const beforeIds = new Set(before.map((user) => user.id).filter((id): id is string => typeof id === 'string'));
+      const newUserIds = after
+        .map((user) => user.id)
+        .filter((id): id is string => typeof id === 'string' && !beforeIds.has(id));
+      await Promise.all(newUserIds.map((userId) => bindPersistedChannelUserToCurrentUser(userId)));
+
+      if (newUserIds.length === 0 && approvedPairing) {
+        const matchedUser = after.find(
+          (user) =>
+            user.platform_type === approvedPairing.platform_type &&
+            user.platform_user_id === approvedPairing.platform_user_id &&
+            typeof user.id === 'string'
+        );
+        if (typeof matchedUser?.id === 'string') {
+          await bindPersistedChannelUserToCurrentUser(matchedUser.id);
+        }
+      }
+    },
+  },
   rejectPairing: httpPost<void, { code: string }>('/api/channel/pairings/reject'),
-  getAuthorizedUsers: withResponseMap(httpGet<RawUser[], void>('/api/channel/users'), (raw) => raw.map(toChannelUser)),
-  revokeUser: httpPost<void, { user_id: string }>('/api/channel/users/revoke'),
+  getAuthorizedUsers: {
+    provider: () => {},
+    invoke: async (): Promise<IChannelUser[]> => {
+      const [channelUsers, bindings] = await Promise.all([
+        httpRequest<RawUser[]>('GET', '/api/channel/users'),
+        readPersistedChannelBindings(),
+      ]);
+      return filterChannelUsersForCurrentUser(channelUsers.map(toChannelUser), bindings);
+    },
+  },
+  revokeUser: {
+    provider: () => {},
+    invoke: async ({ user_id }: { user_id: string }): Promise<void> => {
+      await httpRequest<void>('POST', '/api/channel/users/revoke', { user_id });
+      await removePersistedChannelUserBinding(user_id);
+    },
+  },
   getActiveSessions: withResponseMap(httpGet<RawSession[], void>('/api/channel/sessions'), (raw) =>
     raw.map(toChannelSession)
   ),
@@ -1811,7 +1900,19 @@ export const channel = {
       };
     }
   ),
-  userAuthorized: wsMappedEmitter<IChannelUser>('channel.user-authorized', (raw) => toChannelUser(raw as RawUser)),
+  userAuthorized: {
+    emit: (_user: IChannelUser) => {},
+    on: (callback: (user: IChannelUser) => void) => {
+      const inner = wsMappedEmitter<IChannelUser>('channel.user-authorized', (raw) => toChannelUser(raw as RawUser));
+      return inner.on((user) => {
+        void readPersistedChannelBindings().then((bindings) => {
+          if (filterChannelUsersForCurrentUser([user], bindings).length > 0) {
+            callback(user);
+          }
+        });
+      });
+    },
+  },
 };
 
 // ---------------------------------------------------------------------------

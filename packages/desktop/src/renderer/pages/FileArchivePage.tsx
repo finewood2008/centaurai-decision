@@ -7,7 +7,9 @@ import { Copy, FolderOpen, Search, ArrowLeft, Download } from '@icon-park/react'
 import { useNavigate } from 'react-router-dom';
 import { ipcBridge } from '@/common';
 import { downloadFileFromPath } from '@/renderer/utils/file/download';
+import { filterConversationsWithChannelScope } from '@/renderer/utils/user/conversationVisibility';
 import {
+  buildVisibleFileFilter,
   fetchRecentFiles,
   getFileIcon,
   formatSize,
@@ -25,9 +27,11 @@ const FileArchivePage: React.FC = () => {
   const loadFiles = useCallback(async () => {
     setLoading(true);
     try {
-      setFiles(await fetchRecentFiles());
+      const conversations = await ipcBridge.database.getUserConversations.invoke({ limit: 10000 });
+      const visibleConversations = await filterConversationsWithChannelScope(conversations.items ?? []);
+      setFiles(await fetchRecentFiles(buildVisibleFileFilter(visibleConversations)));
     } catch {
-      // silent
+      setFiles([]);
     } finally {
       setLoading(false);
     }

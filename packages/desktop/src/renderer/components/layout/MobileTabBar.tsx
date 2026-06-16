@@ -13,7 +13,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import styles from './MobileTabBar.module.css';
 
 // Icon components — inline SVGs to avoid extra dependencies
-const ChatIcon: React.FC<{ active: boolean }> = ({ active }) => (
+const ChatIcon: React.FC<{ active: boolean }> = ({ active: _active }) => (
   <svg
     width='24'
     height='24'
@@ -28,7 +28,7 @@ const ChatIcon: React.FC<{ active: boolean }> = ({ active }) => (
   </svg>
 );
 
-const ScheduledIcon: React.FC<{ active: boolean }> = ({ active }) => (
+const ScheduledIcon: React.FC<{ active: boolean }> = ({ active: _active }) => (
   <svg
     width='24'
     height='24'
@@ -44,7 +44,7 @@ const ScheduledIcon: React.FC<{ active: boolean }> = ({ active }) => (
   </svg>
 );
 
-const ToolboxIcon: React.FC<{ active: boolean }> = ({ active }) => (
+const WorkbenchIcon: React.FC<{ active: boolean }> = ({ active: _active }) => (
   <svg
     width='24'
     height='24'
@@ -55,11 +55,14 @@ const ToolboxIcon: React.FC<{ active: boolean }> = ({ active }) => (
     strokeLinecap='round'
     strokeLinejoin='round'
   >
-    <path d='M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z' />
+    <rect x='3' y='7' width='18' height='13' rx='2' />
+    <path d='M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2' />
+    <path d='M3 13h18' />
+    <path d='M12 12v2' />
   </svg>
 );
 
-const SettingsIcon: React.FC<{ active: boolean }> = ({ active }) => (
+const SettingsIcon: React.FC<{ active: boolean }> = ({ active: _active }) => (
   <svg
     width='24'
     height='24'
@@ -85,7 +88,7 @@ interface TabDef {
 const tabs: TabDef[] = [
   { key: 'chat', label: 'Chat', icon: ChatIcon, path: '/guid' },
   { key: 'scheduled', label: 'Tasks', icon: ScheduledIcon, path: '/scheduled' },
-  { key: 'toolbox', label: 'Tools', icon: ToolboxIcon, path: '/toolbox' },
+  { key: 'workbench', label: 'Workbench', icon: WorkbenchIcon, path: '/workbench' },
   { key: 'settings', label: 'Settings', icon: SettingsIcon, path: '/settings/model' },
 ];
 
@@ -101,7 +104,7 @@ const MobileTabBar: React.FC = () => {
 
   const getActiveKey = (): string => {
     if (location.pathname.startsWith('/scheduled')) return 'scheduled';
-    if (location.pathname.startsWith('/toolbox')) return 'toolbox';
+    if (location.pathname.startsWith('/workbench') || location.pathname.startsWith('/toolbox')) return 'workbench';
     if (location.pathname.startsWith('/settings')) return 'settings';
     // chat covers /guid, /conversation, /team
     return 'chat';

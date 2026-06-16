@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { ADMIN_FRONTEND_USER_ID, setCurrentFrontendUserId } from '@/common/utils/frontendUserScope';
 // M6: CSRF removed with legacy webserver — stub functions for compatibility, re-implement in M7
 const withCsrfToken = <T extends Record<string, unknown>>(data: T): T => data;
 const hasValidCsrfToken = (): boolean => true;
@@ -112,6 +113,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
     if (isDesktopRuntime) {
       setStatus('authenticated');
       setUser(null);
+      setCurrentFrontendUserId(ADMIN_FRONTEND_USER_ID);
       setReady(true);
       return;
     }
@@ -124,9 +126,11 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
     const currentUser = await fetchCurrentUser(controller.signal);
     if (currentUser) {
       setUser(currentUser);
+      setCurrentFrontendUserId(currentUser.id);
       setStatus('authenticated');
     } else {
       setUser(null);
+      setCurrentFrontendUserId(null);
       setStatus('unauthenticated');
     }
     setReady(true);
@@ -142,6 +146,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
   const login = useCallback(async ({ username, password, remember }: LoginParams): Promise<LoginResult> => {
     try {
       if (isDesktopRuntime) {
+        setCurrentFrontendUserId(ADMIN_FRONTEND_USER_ID);
         setReady(true);
         return { success: true };
       }
@@ -209,12 +214,17 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
       }
 
       setUser(data.user);
+      setCurrentFrontendUserId(data.user.id);
       setStatus('authenticated');
       setReady(true);
 
       // Re-enable WebSocket reconnection after successful login (WebUI mode only)
-      if (typeof window !== 'undefined' && (window as any).__websocketReconnect) {
-        (window as any).__websocketReconnect();
+      const websocketReconnect =
+        typeof window !== 'undefined'
+          ? (window as Window & { __websocketReconnect?: () => void }).__websocketReconnect
+          : undefined;
+      if (websocketReconnect) {
+        websocketReconnect();
       }
 
       return { success: true };
@@ -245,6 +255,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
   const logout = useCallback(async () => {
     if (isDesktopRuntime) {
       setUser(null);
+      setCurrentFrontendUserId(ADMIN_FRONTEND_USER_ID);
       setStatus('authenticated');
       setReady(true);
       return;
@@ -264,6 +275,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
       console.error('Logout request failed:', error);
     } finally {
       setUser(null);
+      setCurrentFrontendUserId(null);
       setStatus('unauthenticated');
       // Clear cache on logout for security
       clearAuthCache();

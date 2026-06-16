@@ -90,7 +90,7 @@ export type ToolDef = {
   /** icon-park icon name. */
   icon: string;
   /** Grouping bucket for the card grid. */
-  category: 'image' | 'text';
+  category: 'image' | 'text' | 'workbench';
   fields: ToolField[];
   execution: ToolExecution;
   output: ToolOutputKind;
