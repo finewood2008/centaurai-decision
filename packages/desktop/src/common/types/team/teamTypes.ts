@@ -91,6 +91,31 @@ export type ITeamTeammateMessageEvent = {
   from_name: string;
 };
 
+/** team_run lifecycle event (`team.runAccepted|runStarted|runUpdated|runCompleted|runFailed`, aioncore ≥ 0.1.29) */
+export type ITeamRunEvent = {
+  team_id: string;
+  team_run_id?: string;
+  /** accepted | running | completed | failed */
+  status: string;
+  target_role?: string;
+  target_slot_id?: string;
+  active_child_count?: number;
+  pending_wake_count?: number;
+  starting_child_count?: number;
+};
+
+/** A single agent's turn within a team_run (`team.childTurnStarted|childTurnCompleted`, aioncore ≥ 0.1.29) */
+export type ITeamChildTurnEvent = {
+  team_id: string;
+  team_run_id?: string;
+  conversation_id: string;
+  slot_id: string;
+  /** lead | teammate */
+  role: string;
+  /** running | completed | cancelled */
+  status: string;
+};
+
 /** IPC event for streaming agent messages to renderer */
 export type ITeamMessageEvent = {
   team_id: string;

@@ -47,8 +47,10 @@ import type {
   ITeamAgentRenamedEvent,
   ITeamAgentSpawnedEvent,
   ITeamAgentStatusEvent,
+  ITeamChildTurnEvent,
   ITeamCreatedEvent,
   ITeamListChangedEvent,
+  ITeamRunEvent,
   ITeamTeammateMessageEvent,
   TTeam,
   TeamAgent,
@@ -2030,6 +2032,22 @@ export const team = {
     (p) => `/api/teams/${p.team_id}/session-mode`,
     (p) => ({ session_mode: p.session_mode })
   ),
+  // Send a message to one team member. Team-owned conversations reject the
+  // ordinary `POST /api/conversations/:id/messages` ("Team-owned conversations
+  // must be sent through Team API") — this is the sanctioned team-scoped send.
+  sendAgentMessage: httpPost<ISendMessageResult, { team_id: string; slot_id: string; input: string; files?: string[] }>(
+    (p) => `/api/teams/${p.team_id}/agents/${p.slot_id}/messages`,
+    (p) => ({ content: p.input, files: p.files })
+  ),
+  // Send to the whole team — starts/continues a backend-orchestrated team_run
+  // where the leader coordinates teammates via mailboxes.
+  sendTeamMessage: httpPost<ISendMessageResult, { team_id: string; input: string; files?: string[] }>(
+    (p) => `/api/teams/${p.team_id}/messages`,
+    (p) => ({ content: p.input, files: p.files })
+  ),
+  cancelRun: httpDelete<void, { team_id: string; team_run_id: string }>(
+    (p) => `/api/teams/${p.team_id}/runs/${p.team_run_id}/cancel`
+  ),
   agentStatusChanged: wsEmitter<ITeamAgentStatusEvent>('team.agent.status'),
   agentSpawned: wsEmitter<ITeamAgentSpawnedEvent>('team.agent.spawned'),
   agentRemoved: wsEmitter<ITeamAgentRemovedEvent>('team.agent.removed'),
@@ -2037,4 +2055,14 @@ export const team = {
   listChanged: wsEmitter<ITeamListChangedEvent>('team.list-changed'),
   created: wsEmitter<ITeamCreatedEvent>('team.created'),
   teammateMessage: wsEmitter<ITeamTeammateMessageEvent>('team.teammate.message'),
+  // team_run orchestration events (aioncore ≥ 0.1.29 emits these camelCase frames).
+  runAccepted: wsEmitter<ITeamRunEvent>('team.runAccepted'),
+  runStarted: wsEmitter<ITeamRunEvent>('team.runStarted'),
+  runUpdated: wsEmitter<ITeamRunEvent>('team.runUpdated'),
+  runCompleted: wsEmitter<ITeamRunEvent>('team.runCompleted'),
+  runFailed: wsEmitter<ITeamRunEvent>('team.runFailed'),
+  childTurnStarted: wsEmitter<ITeamChildTurnEvent>('team.childTurnStarted'),
+  childTurnCompleted: wsEmitter<ITeamChildTurnEvent>('team.childTurnCompleted'),
+  /** Same payload as `teammateMessage` but the correct 0.1.29 frame name. */
+  teamMessageProjected: wsEmitter<ITeamTeammateMessageEvent>('team.teammateMessage'),
 };
