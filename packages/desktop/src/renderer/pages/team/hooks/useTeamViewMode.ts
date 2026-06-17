@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-export type TeamViewMode = 'split' | 'group';
+export type TeamViewMode = 'split' | 'group' | 'meeting';
 
 const STORAGE_KEY = 'team-view-mode';
 const DEFAULT_MODE: TeamViewMode = 'split';

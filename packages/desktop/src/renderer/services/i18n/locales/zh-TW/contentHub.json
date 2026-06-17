@@ -1,0 +1,56 @@
+{
+  "nav": {
+    "title": "內容中心"
+  },
+  "title": "內容中心",
+  "search": {
+    "placeholder": "搜尋檔案名稱..."
+  },
+  "tabs": {
+    "mine": "我的產物",
+    "byConversation": "依對話",
+    "byType": "依類型",
+    "shared": "共享庫"
+  },
+  "type": {
+    "all": "全部",
+    "image": "圖片",
+    "document": "文件",
+    "code": "程式碼",
+    "other": "其他"
+  },
+  "actions": {
+    "open": "開啟",
+    "copyPath": "複製路徑",
+    "download": "下載",
+    "showInFolder": "在資料夾中顯示",
+    "shareToTeam": "共享到團隊"
+  },
+  "share": {
+    "uploading": "正在共享...",
+    "success": "已共享到團隊",
+    "error": "共享失敗",
+    "alreadyShared": "已共享"
+  },
+  "empty": {
+    "noFiles": "暫無產生的檔案",
+    "noMatch": "無相符檔案",
+    "loading": "載入中..."
+  },
+  "shared": {
+    "allVisible": "區域網路內全員可見",
+    "categories": "分類",
+    "all": "全部",
+    "uncategorized": "未分類",
+    "upload": "上傳到共享庫",
+    "download": "下載",
+    "empty": "共享庫為空",
+    "comingSoon": "共享庫即將上線"
+  },
+  "toast": {
+    "copied": "已複製",
+    "copyFailed": "複製失敗",
+    "downloadFailed": "下載失敗",
+    "openFailed": "無法開啟"
+  }
+}

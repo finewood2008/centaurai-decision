@@ -234,6 +234,7 @@ async function main(): Promise<void> {
     port,
     allowRemote,
     dataDir: workDir,
+    sharedDriveDir: path.join(workDir, 'sharedDrive'),
     logDir,
     // Surface the same work dir on /api/system/info so the browser UI shows
     // where standalone webui is actually persisting data. Without this the

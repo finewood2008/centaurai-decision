@@ -1,0 +1,35 @@
+/* Animated glowing frame for the option the boss picks. */
+@keyframes meeting-option-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 2px var(--color-primary-6),
+      0 0 10px 2px color-mix(in srgb, var(--color-primary-6) 40%, transparent);
+  }
+  50% {
+    box-shadow:
+      0 0 0 2px var(--color-primary-6),
+      0 0 22px 6px color-mix(in srgb, var(--color-primary-6) 70%, transparent);
+  }
+}
+
+.selected {
+  border-color: var(--color-primary-6) !important;
+  animation: meeting-option-glow 1.6s ease-in-out infinite;
+}
+
+/* Subtle lift on hover for selectable cards. */
+.card {
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    border-color 0.15s ease;
+}
+.card:hover:not(.selected):not(.dimmed) {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--color-primary-6) 50%, var(--border-base));
+}
+.dimmed {
+  opacity: 0.4;
+  transform: scale(0.97);
+}

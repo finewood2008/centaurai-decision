@@ -92,6 +92,8 @@
   },
   "fileAttach.addFiles": "Add files",
   "fileAttach.myDevice": "Upload from device",
+  "fileAttach.fromSharedLibrary": "Add from shared library",
+  "fileAttach.attachSelected": "Attach selected ({{count}})",
   "fileAttach.failed": "Upload failed",
   "fileAttach.uploading": "Uploading...",
   "fileAttach.uploadSuccess": "Upload successful",

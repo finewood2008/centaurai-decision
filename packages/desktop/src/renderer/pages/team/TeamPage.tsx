@@ -21,10 +21,11 @@ import TeamAgentIdentity from './components/TeamAgentIdentity';
 import TeamViewModeSwitch from './components/TeamViewModeSwitch';
 import TeamSharedContextSwitch from './components/TeamSharedContextSwitch';
 import TeamGroupView from './components/TeamGroupView';
+import MeetingRoomView from './meeting/MeetingRoomView';
 import { TeamTabsProvider, useTeamTabs } from './hooks/TeamTabsContext';
 import { TeamPermissionProvider } from './hooks/TeamPermissionContext';
 import { useTeamSession } from './hooks/useTeamSession';
-import { useTeamViewMode } from './hooks/useTeamViewMode';
+import { useTeamViewMode, type TeamViewMode } from './hooks/useTeamViewMode';
 import { TeamSharedContextRoot } from './hooks/useTeamSharedContext';
 import { getConversationOrNull } from '@/renderer/pages/conversation/utils/conversationCache';
 
@@ -35,8 +36,8 @@ type Props = {
 type TeamPageContentProps = {
   team: TTeam;
   onRenameTeam: (new_name: string) => Promise<boolean>;
-  viewMode: 'split' | 'group';
-  onChangeViewMode: (mode: 'split' | 'group') => void;
+  viewMode: TeamViewMode;
+  onChangeViewMode: (mode: TeamViewMode) => void;
 };
 
 /** Compact aionrs model selector for the agent header */
@@ -343,7 +344,7 @@ const TeamPageContent: React.FC<TeamPageContentProps> = ({ team, onRenameTeam, v
 
   const tabsSlot = useMemo(
     () =>
-      viewMode === 'group' ? undefined : <TeamTabs onTabClick={handleTabClick} pendingCounts={slotPendingCounts} />,
+      viewMode === 'split' ? <TeamTabs onTabClick={handleTabClick} pendingCounts={slotPendingCounts} /> : undefined,
     [handleTabClick, slotPendingCounts, viewMode]
   );
 
@@ -379,7 +380,9 @@ const TeamPageContent: React.FC<TeamPageContentProps> = ({ team, onRenameTeam, v
           </div>
         }
       >
-        {viewMode === 'group' ? (
+        {viewMode === 'meeting' ? (
+          <MeetingRoomView team={team} />
+        ) : viewMode === 'group' ? (
           <TeamGroupView team={team} />
         ) : (
           <div className='relative flex flex-col h-full'>

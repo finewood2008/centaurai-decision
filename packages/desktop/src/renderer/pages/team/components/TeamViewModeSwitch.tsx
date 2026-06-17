@@ -1,5 +1,5 @@
 import { Tooltip } from '@arco-design/web-react';
-import { Comment, ViewGridList } from '@icon-park/react';
+import { Comment, VideoConference, ViewGridList } from '@icon-park/react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TeamViewMode } from '../hooks/useTeamViewMode';
@@ -62,6 +62,14 @@ const TeamViewModeSwitch: React.FC<Props> = ({ viewMode, onChange }) => {
         testid='team-view-mode-group'
       >
         <Comment theme='outline' size='14' fill='currentColor' />
+      </SwitchButton>
+      <SwitchButton
+        active={viewMode === 'meeting'}
+        onClick={() => onChange('meeting')}
+        title={t('team.viewMode.meeting', { defaultValue: 'Meeting' })}
+        testid='team-view-mode-meeting'
+      >
+        <VideoConference theme='outline' size='14' fill='currentColor' />
       </SwitchButton>
     </div>
   );

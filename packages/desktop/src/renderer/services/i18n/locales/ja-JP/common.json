@@ -90,6 +90,8 @@
   },
   "fileAttach.addFiles": "ファイルを追加",
   "fileAttach.myDevice": "マイデバイス",
+  "fileAttach.fromSharedLibrary": "共有ライブラリから追加",
+  "fileAttach.attachSelected": "選択を追加 ({{count}})",
   "fileAttach.failed": "アップロードに失敗しました",
   "fileAttach.uploading": "アップロード中...",
   "fileAttach.uploadSuccess": "アップロード成功",

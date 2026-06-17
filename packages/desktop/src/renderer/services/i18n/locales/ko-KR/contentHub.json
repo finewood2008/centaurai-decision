@@ -1,0 +1,56 @@
+{
+  "nav": {
+    "title": "콘텐츠 허브"
+  },
+  "title": "콘텐츠 허브",
+  "search": {
+    "placeholder": "파일 이름 검색..."
+  },
+  "tabs": {
+    "mine": "내 파일",
+    "byConversation": "대화별",
+    "byType": "유형별",
+    "shared": "공유 라이브러리"
+  },
+  "type": {
+    "all": "전체",
+    "image": "이미지",
+    "document": "문서",
+    "code": "코드",
+    "other": "기타"
+  },
+  "actions": {
+    "open": "열기",
+    "copyPath": "경로 복사",
+    "download": "다운로드",
+    "showInFolder": "폴더에서 표시",
+    "shareToTeam": "팀에 공유"
+  },
+  "share": {
+    "uploading": "공유 중...",
+    "success": "팀에 공유했습니다",
+    "error": "공유 실패",
+    "alreadyShared": "이미 공유됨"
+  },
+  "empty": {
+    "noFiles": "생성된 파일이 없습니다",
+    "noMatch": "일치하는 파일이 없습니다",
+    "loading": "로딩 중..."
+  },
+  "shared": {
+    "allVisible": "LAN의 모든 사용자에게 표시",
+    "categories": "카테고리",
+    "all": "전체",
+    "uncategorized": "미분류",
+    "upload": "공유 라이브러리에 업로드",
+    "download": "다운로드",
+    "empty": "공유 라이브러리가 비어 있습니다",
+    "comingSoon": "공유 라이브러리가 곧 제공됩니다"
+  },
+  "toast": {
+    "copied": "복사됨",
+    "copyFailed": "복사 실패",
+    "downloadFailed": "다운로드 실패",
+    "openFailed": "열 수 없습니다"
+  }
+}

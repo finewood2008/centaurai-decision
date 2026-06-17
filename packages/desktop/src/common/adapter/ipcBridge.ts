@@ -47,8 +47,10 @@ import type {
   ITeamAgentRenamedEvent,
   ITeamAgentSpawnedEvent,
   ITeamAgentStatusEvent,
+  ITeamChildTurnEvent,
   ITeamCreatedEvent,
   ITeamListChangedEvent,
+  ITeamRunEvent,
   ITeamTeammateMessageEvent,
   TTeam,
   TeamAgent,
@@ -626,6 +628,56 @@ export const fs = {
   ),
   enableSkillsMarket: httpPost<void, void>('/api/skills/market/enable'),
   disableSkillsMarket: httpPost<void, void>('/api/skills/market/disable'),
+};
+
+// ---------------------------------------------------------------------------
+// Shared drive — enterprise LAN shared library. Served by the web-host static
+// server (NOT proxied to aioncore). NOTE: the admin desktop renderer's
+// getBaseUrl() targets aioncore, NOT the static-server, so shared-drive calls
+// must resolve their own base URL (see SharedDriveService.resolveBase). These
+// types are the shared contract between that service and shared-drive.ts.
+// ---------------------------------------------------------------------------
+
+export type SharedFileEntry = {
+  id: string;
+  name: string;
+  relPath: string;
+  category: string;
+  size: number;
+  mime: string;
+  uploaderId?: string;
+  uploaderName?: string;
+  conversationId?: string;
+  createdAt: number;
+};
+
+export type SharedCategoryEntry = {
+  key: string;
+  label: string;
+  count: number;
+};
+
+export type ShareFromPathInput = {
+  sourcePath: string;
+  name: string;
+  category?: string;
+  uploaderId?: string;
+  uploaderName?: string;
+  conversationId?: string;
+};
+
+// Main-process IPC for the shared library, used by the ADMIN desktop renderer
+// (same machine as the host). This path does NOT require the WebUI server to be
+// running — it reads/writes the local shared-drive dir directly. Browser and
+// distributed clients use the HTTP routes (SharedDriveService) instead.
+export const sharedDriveLocal = {
+  list: bridge.buildProvider<SharedFileEntry[], { category?: string }>('shared-drive.list'),
+  listCategories: bridge.buildProvider<SharedCategoryEntry[], void>('shared-drive.categories'),
+  addFromPath: bridge.buildProvider<{ id: string }, ShareFromPathInput>('shared-drive.add-from-path'),
+  remove: bridge.buildProvider<boolean, { id: string }>('shared-drive.remove'),
+  blobInfo: bridge.buildProvider<{ path: string; name: string; mime: string } | null, { id: string }>(
+    'shared-drive.blob-info'
+  ),
 };
 
 // ---------------------------------------------------------------------------
@@ -1998,6 +2050,22 @@ export const team = {
     (p) => `/api/teams/${p.team_id}/session-mode`,
     (p) => ({ session_mode: p.session_mode })
   ),
+  // Send a message to one team member. Team-owned conversations reject the
+  // ordinary `POST /api/conversations/:id/messages` ("Team-owned conversations
+  // must be sent through Team API") — this is the sanctioned team-scoped send.
+  sendAgentMessage: httpPost<ISendMessageResult, { team_id: string; slot_id: string; input: string; files?: string[] }>(
+    (p) => `/api/teams/${p.team_id}/agents/${p.slot_id}/messages`,
+    (p) => ({ content: p.input, files: p.files })
+  ),
+  // Send to the whole team — starts/continues a backend-orchestrated team_run
+  // where the leader coordinates teammates via mailboxes.
+  sendTeamMessage: httpPost<ISendMessageResult, { team_id: string; input: string; files?: string[] }>(
+    (p) => `/api/teams/${p.team_id}/messages`,
+    (p) => ({ content: p.input, files: p.files })
+  ),
+  cancelRun: httpDelete<void, { team_id: string; team_run_id: string }>(
+    (p) => `/api/teams/${p.team_id}/runs/${p.team_run_id}/cancel`
+  ),
   agentStatusChanged: wsEmitter<ITeamAgentStatusEvent>('team.agent.status'),
   agentSpawned: wsEmitter<ITeamAgentSpawnedEvent>('team.agent.spawned'),
   agentRemoved: wsEmitter<ITeamAgentRemovedEvent>('team.agent.removed'),
@@ -2005,4 +2073,14 @@ export const team = {
   listChanged: wsEmitter<ITeamListChangedEvent>('team.list-changed'),
   created: wsEmitter<ITeamCreatedEvent>('team.created'),
   teammateMessage: wsEmitter<ITeamTeammateMessageEvent>('team.teammate.message'),
+  // team_run orchestration events (aioncore ≥ 0.1.29 emits these camelCase frames).
+  runAccepted: wsEmitter<ITeamRunEvent>('team.runAccepted'),
+  runStarted: wsEmitter<ITeamRunEvent>('team.runStarted'),
+  runUpdated: wsEmitter<ITeamRunEvent>('team.runUpdated'),
+  runCompleted: wsEmitter<ITeamRunEvent>('team.runCompleted'),
+  runFailed: wsEmitter<ITeamRunEvent>('team.runFailed'),
+  childTurnStarted: wsEmitter<ITeamChildTurnEvent>('team.childTurnStarted'),
+  childTurnCompleted: wsEmitter<ITeamChildTurnEvent>('team.childTurnCompleted'),
+  /** Same payload as `teammateMessage` but the correct 0.1.29 frame name. */
+  teamMessageProjected: wsEmitter<ITeamTeammateMessageEvent>('team.teammateMessage'),
 };

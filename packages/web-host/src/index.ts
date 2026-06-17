@@ -3,6 +3,8 @@ import type { WebHostOptions, WebHostHandle } from './types.js';
 export type { AppMetadata, BackendBinaryResolver, WebHostOptions, WebHostHandle } from './types.js';
 export { startStaticServer, stopStaticServer } from './static-server.js';
 export type { StaticServerOptions, StaticServerHandle } from './static-server.js';
+export type { SharedFile, SharedCategory, SharedAddInput } from './shared-drive.js';
+export { sharedList, sharedCategories, sharedRemove, sharedBlobInfo, sharedAddFromPath } from './shared-drive.js';
 
 // Backend launcher exports (M4)
 export {
@@ -57,6 +59,7 @@ export async function startWebHost(opts: WebHostOptions): Promise<WebHostHandle>
       port: opts.port,
       allowRemote: opts.allowRemote ?? false,
       installerDir: opts.installerDir,
+      sharedDriveDir: opts.sharedDriveDir,
     });
   } catch (err) {
     // If static-server fails, clean up backend

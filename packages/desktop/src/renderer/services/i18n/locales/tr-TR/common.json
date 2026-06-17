@@ -90,6 +90,8 @@
   },
   "fileAttach.addFiles": "Dosya ekle",
   "fileAttach.myDevice": "Cihazım",
+  "fileAttach.fromSharedLibrary": "Paylaşılan kitaplıktan ekle",
+  "fileAttach.attachSelected": "Seçileni ekle ({{count}})",
   "fileAttach.failed": "Yükleme başarısız",
   "fileAttach.uploading": "Yükleniyor...",
   "fileAttach.uploadSuccess": "Yükleme başarılı",

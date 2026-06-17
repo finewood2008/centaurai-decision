@@ -1,0 +1,56 @@
+{
+  "nav": {
+    "title": "İçerik Merkezi"
+  },
+  "title": "İçerik Merkezi",
+  "search": {
+    "placeholder": "Dosya adı ara..."
+  },
+  "tabs": {
+    "mine": "Dosyalarım",
+    "byConversation": "Sohbete Göre",
+    "byType": "Türe Göre",
+    "shared": "Paylaşılan Kitaplık"
+  },
+  "type": {
+    "all": "Tümü",
+    "image": "Görseller",
+    "document": "Belgeler",
+    "code": "Kod",
+    "other": "Diğer"
+  },
+  "actions": {
+    "open": "Aç",
+    "copyPath": "Yolu kopyala",
+    "download": "İndir",
+    "showInFolder": "Klasörde göster",
+    "shareToTeam": "Ekiple paylaş"
+  },
+  "share": {
+    "uploading": "Paylaşılıyor...",
+    "success": "Ekiple paylaşıldı",
+    "error": "Paylaşım başarısız",
+    "alreadyShared": "Zaten paylaşıldı"
+  },
+  "empty": {
+    "noFiles": "Henüz oluşturulmuş dosya yok",
+    "noMatch": "Eşleşen dosya yok",
+    "loading": "Yükleniyor..."
+  },
+  "shared": {
+    "allVisible": "LAN'daki herkese görünür",
+    "categories": "Kategoriler",
+    "all": "Tümü",
+    "uncategorized": "Kategorisiz",
+    "upload": "Paylaşılan kitaplığa yükle",
+    "download": "İndir",
+    "empty": "Paylaşılan kitaplık boş",
+    "comingSoon": "Paylaşılan kitaplık yakında geliyor"
+  },
+  "toast": {
+    "copied": "Kopyalandı",
+    "copyFailed": "Kopyalama başarısız",
+    "downloadFailed": "İndirme başarısız",
+    "openFailed": "Açılamıyor"
+  }
+}

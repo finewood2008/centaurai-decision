@@ -1,0 +1,56 @@
+{
+  "nav": {
+    "title": "内容中心"
+  },
+  "title": "内容中心",
+  "search": {
+    "placeholder": "搜索文件名..."
+  },
+  "tabs": {
+    "mine": "我的产物",
+    "byConversation": "按会话",
+    "byType": "按类型",
+    "shared": "共享库"
+  },
+  "type": {
+    "all": "全部",
+    "image": "图片",
+    "document": "文档",
+    "code": "代码",
+    "other": "其他"
+  },
+  "actions": {
+    "open": "打开",
+    "copyPath": "复制路径",
+    "download": "下载",
+    "showInFolder": "在文件夹中显示",
+    "shareToTeam": "共享到团队"
+  },
+  "share": {
+    "uploading": "正在共享...",
+    "success": "已共享到团队",
+    "error": "共享失败",
+    "alreadyShared": "已共享"
+  },
+  "empty": {
+    "noFiles": "暂无生成文件",
+    "noMatch": "无匹配文件",
+    "loading": "加载中..."
+  },
+  "shared": {
+    "allVisible": "局域网内全员可见",
+    "categories": "分类",
+    "all": "全部",
+    "uncategorized": "未分类",
+    "upload": "上传到共享库",
+    "download": "下载",
+    "empty": "共享库为空",
+    "comingSoon": "共享库即将上线"
+  },
+  "toast": {
+    "copied": "已复制",
+    "copyFailed": "复制失败",
+    "downloadFailed": "下载失败",
+    "openFailed": "无法打开"
+  }
+}

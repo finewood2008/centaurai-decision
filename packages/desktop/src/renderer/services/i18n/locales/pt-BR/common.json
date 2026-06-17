@@ -90,6 +90,8 @@
   },
   "fileAttach.addFiles": "Adicionar arquivos",
   "fileAttach.myDevice": "Upload do dispositivo",
+  "fileAttach.fromSharedLibrary": "Adicionar da biblioteca compartilhada",
+  "fileAttach.attachSelected": "Anexar selecionados ({{count}})",
   "fileAttach.failed": "Falha no upload",
   "fileAttach.uploading": "Enviando...",
   "fileAttach.uploadSuccess": "Upload bem-sucedido",

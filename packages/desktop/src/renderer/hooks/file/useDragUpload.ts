@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { Message } from '@arco-design/web-react';
 import type { FileMetadata } from '@renderer/services/FileService';
 import { isSupportedFile, FileService } from '@renderer/services/FileService';
+import { SHARED_DND_MIME, fetchSharedAsFile } from '@renderer/services/SharedDriveService';
 
 export interface UseDragUploadOptions {
   supportedExts?: string[];
@@ -69,10 +70,23 @@ export const useDragUpload = ({ supportedExts = [], onFilesAdded, conversation_i
       if (!onFilesAdded) return;
 
       try {
-        const droppedFiles = e.nativeEvent.dataTransfer!.files;
+        const dt = e.nativeEvent.dataTransfer!;
+        const droppedFiles = dt.files;
 
         // 第一步：先校验文件类型，筛选出支持的文件
         const validFiles: File[] = [];
+
+        // 共享库卡片拖入：从共享盘取回文件字节作为附件加入对话。
+        // Shared-library card dropped in: pull the blob back and attach it.
+        const sharedRaw = dt.getData(SHARED_DND_MIME);
+        if (sharedRaw) {
+          try {
+            const { id, name } = JSON.parse(sharedRaw) as { id: string; name: string };
+            validFiles.push(await fetchSharedAsFile(id, name));
+          } catch {
+            /* fall through to regular file handling */
+          }
+        }
 
         for (let i = 0; i < droppedFiles.length; i++) {
           const file = droppedFiles[i];
