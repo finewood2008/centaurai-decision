@@ -152,8 +152,30 @@ function enforceGate(req: IncomingMessage, res: ServerResponse, gate: AuthGate, 
     return true;
   }
   if (path === '/logout' || path === '/api/auth/logout') {
-    res.setHeader('Set-Cookie', gate.clearCookie());
-    forwardToBackend(req, res, backendPort);
+    const options: http.RequestOptions = {
+      hostname: '127.0.0.1',
+      port: backendPort,
+      path: req.url,
+      method: req.method,
+      headers: { ...req.headers, host: `127.0.0.1:${backendPort}` },
+    };
+    const proxy = http.request(options, (proxyRes) => {
+      const headers = { ...proxyRes.headers };
+      const existing = headers['set-cookie'];
+      const list = Array.isArray(existing) ? existing : existing ? [existing] : [];
+      headers['set-cookie'] = [...list, gate.clearCookie()];
+      res.writeHead(proxyRes.statusCode ?? 502, headers);
+      proxyRes.pipe(res);
+    });
+    proxy.on('error', () => {
+      if (!res.headersSent) {
+        res.writeHead(502, { 'content-type': 'application/json' });
+        res.end(JSON.stringify({ error: 'BACKEND_UNREACHABLE' }));
+      } else {
+        res.destroy();
+      }
+    });
+    req.pipe(proxy);
     return true;
   }
   // Bootstrap endpoints reachable before a session exists.
