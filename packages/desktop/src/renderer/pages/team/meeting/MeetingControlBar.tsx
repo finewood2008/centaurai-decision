@@ -1,9 +1,15 @@
-import { Button, Input } from '@arco-design/web-react';
-import { Redo, RightOne } from '@icon-park/react';
+import { Button, Checkbox, Input, Radio } from '@arco-design/web-react';
+import { CloseSmall, FolderClose, Redo, RightOne } from '@icon-park/react';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import SendBox from '@/renderer/components/chat/SendBox';
+import SharedLibraryPicker from '@/renderer/components/media/SharedLibraryPicker';
 import type { MeetingOrchestrator } from './useMeetingOrchestrator';
+import { MEETING_FORMS } from './meetingPrompts';
+import type { MeetingForm } from './meetingTypes';
+
+/** Last path segment, for a compact attachment chip label. */
+const baseName = (p: string): string => p.split(/[\\/]/).pop() || p;
 
 type Props = {
   orchestrator: MeetingOrchestrator;
@@ -22,8 +28,12 @@ type Props = {
  */
 const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange }) => {
   const { t } = useTranslation();
-  const { state, canStart, startMeeting, interject, cancel, reset } = orchestrator;
+  const { state, canStart, startMeeting, interject, continueMeeting, cancel, reset } = orchestrator;
   const [interjection, setInterjection] = useState('');
+  const [useKnowledgeBase, setUseKnowledgeBase] = useState(false);
+  const [attachments, setAttachments] = useState<string[]>([]);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [form, setForm] = useState<MeetingForm>(state.form || 'roundtable');
 
   const wrapperClass =
     'shrink-0 px-12px pt-10px pb-12px border-t border-solid border-[color:var(--border-base)] bg-[var(--color-bg-1)]';
@@ -31,6 +41,65 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
   if (state.phase === 'idle') {
     return (
       <div data-testid='meeting-control-idle' className={wrapperClass}>
+        <div className='flex items-center gap-12px mb-8px'>
+          <Checkbox
+            checked={useKnowledgeBase}
+            onChange={setUseKnowledgeBase}
+            disabled={!canStart}
+            className='text-12px text-[color:var(--color-text-2)] shrink-0'
+            data-testid='meeting-kb-toggle'
+          >
+            {t('team.meeting.searchKnowledgeBase', { defaultValue: '检索知识库' })}
+          </Checkbox>
+          <Button
+            size='mini'
+            icon={<FolderClose theme='outline' size='13' fill='currentColor' />}
+            disabled={!canStart}
+            onClick={() => setPickerOpen(true)}
+            data-testid='meeting-shared-attach'
+          >
+            {t('team.meeting.attachShared', { defaultValue: '引用共享库' })}
+          </Button>
+          {attachments.length > 0 && (
+            <div className='flex items-center gap-4px overflow-x-auto [scrollbar-width:none]'>
+              {attachments.map((p) => (
+                <span
+                  key={p}
+                  className='shrink-0 flex items-center gap-2px pl-8px pr-4px h-22px rd-11px text-11px bg-[var(--fill-2)] text-[color:var(--color-text-2)]'
+                  title={p}
+                >
+                  <span className='max-w-120px truncate'>{baseName(p)}</span>
+                  <CloseSmall
+                    theme='outline'
+                    size='13'
+                    fill='currentColor'
+                    className='cursor-pointer opacity-70 hover:opacity-100'
+                    onClick={() => setAttachments((prev) => prev.filter((x) => x !== p))}
+                  />
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className='flex items-center gap-8px mb-8px flex-wrap'>
+          <Radio.Group
+            type='button'
+            size='mini'
+            value={form}
+            onChange={(v) => setForm(v as MeetingForm)}
+            disabled={!canStart}
+            data-testid='meeting-form-picker'
+          >
+            {MEETING_FORMS.map((f) => (
+              <Radio key={f.id} value={f.id}>
+                {f.label}
+              </Radio>
+            ))}
+          </Radio.Group>
+          <span className='text-11px text-[color:var(--color-text-3)] truncate'>
+            {MEETING_FORMS.find((f) => f.id === form)?.hint}
+          </span>
+        </div>
         <div className='flex items-end gap-8px'>
           <Input.TextArea
             value={topic}
@@ -47,8 +116,9 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
             icon={<RightOne theme='filled' size='14' fill='currentColor' />}
             disabled={!canStart || !topic.trim()}
             onClick={() => {
-              startMeeting(topic);
+              startMeeting(topic, { useKnowledgeBase, attachments, form });
               onTopicChange('');
+              setAttachments([]);
             }}
             data-testid='meeting-start'
           >
@@ -60,6 +130,14 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
             {t('team.meeting.needAgents', { defaultValue: '需要 1 位主持人（队长）和至少 1 位专家才能开会。' })}
           </div>
         )}
+        <SharedLibraryPicker
+          visible={pickerOpen}
+          onCancel={() => setPickerOpen(false)}
+          onConfirm={(paths) => {
+            setAttachments((prev) => [...new Set([...prev, ...paths])]);
+            setPickerOpen(false);
+          }}
+        />
       </div>
     );
   }
@@ -80,6 +158,8 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
   }
 
   const isResolution = state.phase === 'resolution';
+  // Between-round pause: the moderator has recapped and is waiting for the boss.
+  const awaiting = state.awaitingContinue && state.phase === 'running';
 
   return (
     <div data-testid='meeting-control-active' className={wrapperClass}>
@@ -87,6 +167,12 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
         {isResolution ? (
           <span className='text-12px text-[color:var(--color-text-3)]'>
             {t('team.meeting.pickHint', { defaultValue: '请在上方选择一个方案拍板' })}
+          </span>
+        ) : awaiting ? (
+          <span className='text-12px text-[color:var(--color-primary-6)] font-medium'>
+            {t('team.meeting.pausedHint', {
+              defaultValue: '⏸ 主持人等你看完 — 可在下方补充想法，准备好后点「继续讨论」',
+            })}
           </span>
         ) : (
           <span className='text-12px text-[color:var(--color-text-3)]'>
@@ -107,6 +193,18 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
             : t('team.meeting.cancel', { defaultValue: '取消会议' })}
         </Button>
       </div>
+      {awaiting && (
+        <Button
+          type='primary'
+          long
+          className='mb-8px'
+          icon={<RightOne theme='filled' size='14' fill='currentColor' />}
+          onClick={continueMeeting}
+          data-testid='meeting-continue'
+        >
+          {t('team.meeting.continue', { defaultValue: '继续讨论 →' })}
+        </Button>
+      )}
       {!isResolution && (
         <SendBox
           value={interjection}
@@ -115,7 +213,11 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
             interject(msg);
             setInterjection('');
           }}
-          placeholder={t('team.meeting.interjectPlaceholder', { defaultValue: '✋ 举手插话：随时补充想法或纠偏…' })}
+          placeholder={
+            awaiting
+              ? t('team.meeting.interjectPausePlaceholder', { defaultValue: '💡 想补充什么？说给主持人和专家们…' })
+              : t('team.meeting.interjectPlaceholder', { defaultValue: '✋ 举手插话：随时补充想法或纠偏…' })
+          }
         />
       )}
     </div>

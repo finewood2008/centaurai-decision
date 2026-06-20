@@ -20,8 +20,16 @@ export type TeamAgentOption = {
   /** Icon / avatar token — an SVG filename, emoji, or key into
    *  `CUSTOM_AVATAR_IMAGE_MAP`. */
   icon?: string;
-  /** Whether this agent supports team mode. Sourced from backend `team_capable` field. */
+  /** Whether this agent supports team mode. Sourced from the backend's
+   *  authoritative `behavior_policy.supports_team` (the top-level `team_capable`
+   *  is uniformly true and non-discriminating, so it can't be used to gate). */
   team_capable?: boolean;
+  /** Set for a "直连模型专家" — a specific provider model (e.g. SiliconFlow 国产模型)
+   *  joined as an aionrs panelist. `backend` is `aionrs` and these two pin the model. */
+  provider_id?: string;
+  model_name?: string;
+  /** True when this option is a direct provider model rather than a CLI-agent backend. */
+  isModelExpert?: boolean;
 };
 
 export function cliAgentToOption(agent: AgentMetadata): TeamAgentOption {
@@ -30,7 +38,12 @@ export function cliAgentToOption(agent: AgentMetadata): TeamAgentOption {
     name: getAgentDisplayName(agent),
     backend: agent.backend || agent.agent_type,
     icon: agent.icon,
-    team_capable: agent.team_capable,
+    // `behavior_policy.supports_team` is the real capability — agents that can't
+    // be injected with the team-coordination MCP tools (e.g. OpenClaw, Hermes:
+    // no MCP http/sse in their ACP handshake) report false here, while the
+    // top-level `team_capable` stays true for everyone. Fall back to the
+    // top-level flag only when the policy is absent (older/custom backends).
+    team_capable: agent.behavior_policy?.supports_team ?? agent.team_capable,
   };
 }
 

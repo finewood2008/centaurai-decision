@@ -1,5 +1,8 @@
 import { ipcBridge } from '@/common';
+import type { ISendMessageResult } from '@/common/adapter/ipcBridge';
 import React, { createContext, useCallback, useContext, useMemo, useRef } from 'react';
+
+type AgentSlot = { slot_id: string; conversation_id: string };
 
 type TeamPermissionContextValue = {
   /** Whether we are in team mode */
@@ -14,6 +17,14 @@ type TeamPermissionContextValue = {
   propagateMode: (mode: string) => void;
   /** Trigger session warmup (idempotent, returns cached promise) */
   warmupSession: () => Promise<void>;
+  /**
+   * Send a message to a team-owned conversation. aioncore (≥0.1.29) rejects the
+   * ordinary `POST /conversations/:id/messages` for team-owned conversations
+   * ("must be sent through Team API"), so route through the team endpoint by
+   * resolving the conversation's slot. Falls back to the ordinary send if the
+   * conversation isn't a known team member.
+   */
+  sendToConversation: (conversation_id: string, input: string, files?: string[]) => Promise<ISendMessageResult>;
 };
 
 const TeamPermissionContext = createContext<TeamPermissionContextValue | null>(null);
@@ -24,7 +35,8 @@ export const TeamPermissionProvider: React.FC<{
   isLeaderAgent: boolean;
   leaderConversationId: string;
   allConversationIds: string[];
-}> = ({ children, team_id, isLeaderAgent, leaderConversationId, allConversationIds }) => {
+  agentSlots: AgentSlot[];
+}> = ({ children, team_id, isLeaderAgent, leaderConversationId, allConversationIds, agentSlots }) => {
   const warmupPromiseRef = useRef<Promise<void> | null>(null);
 
   const propagateMode = useCallback(
@@ -52,6 +64,21 @@ export const TeamPermissionProvider: React.FC<{
     return warmupPromiseRef.current;
   }, [team_id]);
 
+  const slotByConversation = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const a of agentSlots) if (a.conversation_id) m.set(a.conversation_id, a.slot_id);
+    return m;
+  }, [agentSlots]);
+
+  const sendToConversation = useCallback(
+    (conversation_id: string, input: string, files?: string[]): Promise<ISendMessageResult> => {
+      const slot_id = slotByConversation.get(conversation_id);
+      if (slot_id) return ipcBridge.team.sendAgentMessage.invoke({ team_id, slot_id, input, files });
+      return ipcBridge.acpConversation.sendMessage.invoke({ conversation_id, input, files });
+    },
+    [slotByConversation, team_id]
+  );
+
   const value = useMemo<TeamPermissionContextValue>(
     () => ({
       isTeamMode: true,
@@ -60,8 +87,9 @@ export const TeamPermissionProvider: React.FC<{
       allConversationIds,
       propagateMode,
       warmupSession,
+      sendToConversation,
     }),
-    [isLeaderAgent, leaderConversationId, allConversationIds, propagateMode, warmupSession]
+    [isLeaderAgent, leaderConversationId, allConversationIds, propagateMode, warmupSession, sendToConversation]
   );
 
   return <TeamPermissionContext.Provider value={value}>{children}</TeamPermissionContext.Provider>;

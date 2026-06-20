@@ -145,6 +145,20 @@ export function initApplicationBridge(): void {
     return Promise.resolve(false);
   });
 
+  ipcBridge.application.saveBinaryFile.provider(async ({ dir, fileName, base64 }) => {
+    try {
+      const fs = await import('node:fs');
+      const path = await import('node:path');
+      fs.mkdirSync(dir, { recursive: true });
+      const safeName = fileName.replace(/[\\/]+/g, '_');
+      const target = path.join(dir, safeName);
+      fs.writeFileSync(target, Buffer.from(base64, 'base64'));
+      return { success: true, data: { path: target } };
+    } catch (e) {
+      return { success: false, msg: (e as Error)?.message || String(e) };
+    }
+  });
+
   ipcBridge.application.getZoomFactor.provider(() => Promise.resolve(getZoomFactor()));
 
   ipcBridge.application.setZoomFactor.provider(async ({ factor }) => {

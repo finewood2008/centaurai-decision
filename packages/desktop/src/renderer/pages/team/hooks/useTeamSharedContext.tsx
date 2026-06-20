@@ -180,10 +180,12 @@ export const TeamSharedContextRoot: React.FC<ProviderProps> = ({ team, children 
 
       const formatted = `[${sourceAgent.agent_name}]: ${text}`;
       // Fire-and-forget; per-recipient failure does not block the others.
+      // Team-owned conversations must go through the Team API (aioncore ≥0.1.29).
       void Promise.allSettled(
         recipients.map((r) =>
-          ipcBridge.acpConversation.sendMessage.invoke({
-            conversation_id: r.conversation_id,
+          ipcBridge.team.sendAgentMessage.invoke({
+            team_id: team.id,
+            slot_id: r.slot_id,
             input: formatted,
           })
         )
