@@ -141,6 +141,7 @@ const AssistantListPanel: React.FC<AssistantListPanelProps> = ({
             type='text'
             size='small'
             icon={<SettingOne size={16} />}
+            data-testid={`btn-edit-${assistant.id}`}
             onClick={(e) => {
               e.stopPropagation();
               onEdit(assistant);

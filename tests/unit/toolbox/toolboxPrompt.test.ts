@@ -98,15 +98,17 @@ describe('buildToolPrompt + collectUploadPaths', () => {
 
 describe('registry', () => {
   it('ships the core + specialized image tools', () => {
-    const ids = getToolboxTools().map((t) => t.id);
-    expect(ids.slice(0, 3)).toEqual(['text-to-image', 'image-edit', 'poster']);
-    expect(ids).toEqual(
+    const imageIds = getToolboxTools()
+      .filter((t) => t.category === 'image')
+      .map((t) => t.id);
+    expect(imageIds.slice(0, 3)).toEqual(['text-to-image', 'image-edit', 'poster']);
+    expect(imageIds).toEqual(
       expect.arrayContaining(['avatar', 'sticker', 'product', 'id-photo', 'illustration', 'food', 'photo-restore'])
     );
   });
 
-  it('all builtin tools require an image model and use the image-gen MCP', () => {
-    for (const tool of getToolboxTools()) {
+  it('all builtin image tools require an image model and use the image-gen MCP', () => {
+    for (const tool of getToolboxTools().filter((t) => t.category === 'image')) {
       expect(tool.requires).toBe('image-model');
       expect(tool.execution.kind).toBe('mcp');
       expect(tool.execution.mcpTool).toBe('aionui_image_generation');

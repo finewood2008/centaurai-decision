@@ -18,6 +18,12 @@ vi.mock('@/common', () => ({
         invoke: vi.fn(),
       },
     },
+    // getConversationOrNull now scopes results by channel visibility, which
+    // reads these two channel IPCs; stub them so the success path resolves.
+    channel: {
+      getAuthorizedUsers: { invoke: vi.fn().mockResolvedValue([]) },
+      getActiveSessions: { invoke: vi.fn().mockResolvedValue([]) },
+    },
   },
 }));
 
