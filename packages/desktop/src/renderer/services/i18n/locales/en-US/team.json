@@ -1,13 +1,13 @@
 {
   "sider": {
-    "title": "Teams",
-    "createTeam": "New Team",
+    "title": "Think Tank",
+    "createTeam": "New Think Tank",
     "pin": "Pin",
     "unpin": "Unpin",
     "rename": "Rename",
     "delete": "Delete",
-    "renameTitle": "Rename Team",
-    "renamePlaceholder": "Team name",
+    "renameTitle": "Rename think tank",
+    "renamePlaceholder": "Think Tank name",
     "deleteConfirm": "Delete this team?",
     "deleteConfirmContent": "This action cannot be undone.",
     "deleteOk": "Delete",
@@ -49,12 +49,12 @@
     "workingType": "{{name}}: {{type}}"
   },
   "create": {
-    "title": "Create Team",
-    "namePlaceholder": "Team name",
+    "title": "New Think Tank",
+    "namePlaceholder": "Name your think tank…",
     "dispatchAgentPlaceholder": "Select team leader",
     "subAgentsPlaceholder": "Select sub agents",
     "workspacePlaceholder": "Project folder path (optional)",
-    "confirm": "Create Team",
+    "confirm": "Create",
     "noSupportedAgents": "No supported agents installed",
     "supportedAgentsHint": "Currently supports Claude and Codex. More agents coming soon.",
     "leaderDesc": "Understands your goals and coordinates agents to complete tasks",
@@ -86,6 +86,64 @@
       "debate": "Organize a debate with agents taking different sides",
       "interview": "Plan an in-depth interview between agents",
       "expert_review": "Have multiple experts analyze the same problem"
+    }
+  },
+  "meeting": {
+    "attachShared": "Reference shared library",
+    "boardTitle": "Think Tank",
+    "cancel": "Cancel meeting",
+    "continue": "Continue →",
+    "emptyTitle": "Think Tank · convene AI experts",
+    "extraExpertLabel": "Add expert",
+    "needAgents": "You need 1 host (leader) and at least 1 expert to start a meeting.",
+    "newMeeting": "Start a new meeting",
+    "newShort": "New meeting",
+    "pickHint": "Pick an option above to decide",
+    "planTitle": "Meeting plan",
+    "reset": "Restart",
+    "runningHint": "The host is leading the discussion… raise your hand to interject anytime",
+    "searchKnowledgeBase": "Search knowledge base",
+    "speaking": "Speaking",
+    "start": "Start",
+    "step1": "① Enter a topic below",
+    "step3": "② Start the discussion",
+    "topicLabel": "Topic: ",
+    "topicPlaceholder": "Pose a question for a panel of AI experts to debate…",
+    "interjectPausePlaceholder": "💡 Anything to add? Tell the host and experts…",
+    "interjectPlaceholder": "✋ Raise your hand: add thoughts or course-correct anytime…",
+    "export": {
+      "archive": "Export & archive",
+      "copied": "Plan copied",
+      "copy": "Copy",
+      "copyFailed": "Copy failed",
+      "openHub": "View in Content Hub"
+    },
+    "extraExpert": {
+      "title": "Add more experts (domestic models / OpenClaw / Hermes …)",
+      "titleShort": "Add more experts"
+    },
+    "history": {
+      "untitled": "Untitled topic"
+    },
+    "outputs": {
+      "section": "Meeting outputs"
+    },
+    "resolution": {
+      "pick": "Choose this",
+      "picked": "Decided",
+      "title": "Candidate options — your call"
+    },
+    "role": {
+      "moderator": "Host",
+      "panelist": "Expert"
+    },
+    "status": {
+      "decided": "Decided",
+      "resolution": "Discussion done — please decide",
+      "running": "Meeting in progress"
+    },
+    "turn": {
+      "failed": "No response"
     }
   }
 }

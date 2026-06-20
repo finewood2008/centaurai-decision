@@ -103,6 +103,7 @@ export type ConfigKeyMap = {
   'vectorDB.enabled': boolean | undefined;
   'vectorDB.endpoint': string | undefined;
   'vectorDB.searchCount': number | undefined;
+  'vectorDB.searchMode': 'text' | 'visual' | 'hybrid' | undefined;
 };
 
 export type ConfigKey = keyof ConfigKeyMap;

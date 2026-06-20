@@ -1,25 +1,29 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Form, Input, Message } from '@arco-design/web-react';
-import type { RefInputType } from '@arco-design/web-react/es/Input/interface';
+import type { RefInputType } from '@arco-design/web-react/es/Input';
 import { Check, Close, Crown, Search } from '@icon-park/react';
 import { useTranslation } from 'react-i18next';
 import { ipcBridge } from '@/common';
 import type { TTeam, TeamAgent } from '@/common/types/team/teamTypes';
 import { useAuth } from '@renderer/hooks/context/AuthContext';
 import { useConversationAgents } from '@renderer/pages/conversation/hooks/useConversationAgents';
+import { useModelProviderList } from '@renderer/hooks/agent/useModelProviderList';
 import AionModal from '@renderer/components/base/AionModal';
 import { WorkspaceFolderSelect } from '@renderer/components/workspace';
+import { addGuest as storeAddGuest, buildModelExpertOptions, optionToGuest } from '../meeting/meetingGuests';
 import { getConversationCreateErrorMessage } from '@renderer/pages/conversation/utils/conversationCreateError';
 import {
   agentKey,
   resolveConversationType,
   resolveTeamAgentType,
-  filterTeamSupportedAgents,
   AgentOptionLabel,
   cliAgentToOption,
 } from './agentSelectUtils';
 import type { TeamAgentOption } from './agentSelectUtils';
 import { resolveDefaultTeamAgentModel } from './teamCreateModelResolver';
+
+/** Remembered agent panel to pre-fill the next 智囊团. */
+const LAST_PANEL_KEY = 'roundtable-last-panel';
 
 // [E2E SYNC] 修改此组件的 DOM 结构（class、标题、关闭按钮等）时，
 // 必须同步更新 tests/e2e/cases/teams/team-create.e2e.ts 和 team-whitelist.e2e.ts 中的 selector，
@@ -36,11 +40,14 @@ const AgentMultiSelectRow: React.FC<{
   agent: TeamAgentOption;
   isSelected: boolean;
   isLeader: boolean;
+  /** Whether this agent can moderate (team-capable). Model experts / openclaw / hermes can't. */
+  canLead: boolean;
   onToggle: () => void;
   onPromoteLeader: () => void;
   makeLeaderTitle: string;
   leaderBadge: string;
-}> = ({ agent, isSelected, isLeader, onToggle, onPromoteLeader, makeLeaderTitle, leaderBadge }) => (
+  expertTag: string;
+}> = ({ agent, isSelected, isLeader, canLead, onToggle, onPromoteLeader, makeLeaderTitle, leaderBadge, expertTag }) => (
   <div
     className={`flex cursor-pointer items-center gap-12px rounded-8px px-12px py-9px transition-colors ${
       isSelected ? 'bg-aou-1' : 'hover:bg-fill-2'
@@ -62,7 +69,17 @@ const AgentMultiSelectRow: React.FC<{
     <div className='flex-1 overflow-hidden'>
       <AgentOptionLabel agent={agent} />
     </div>
+    {/* 直连模型专家 — a model, not a moderating backend; tag it so the mix is clear. */}
+    {agent.isModelExpert && (
+      <span
+        className='shrink-0 text-10px text-[color:var(--color-text-3)] px-5px py-1px rd-8px bg-[var(--fill-2)]'
+        title={expertTag}
+      >
+        {expertTag}
+      </span>
+    )}
     {isSelected &&
+      canLead &&
       (isLeader ? (
         <span
           className='shrink-0 flex items-center gap-3px text-11px font-500 text-[color:var(--aou-6)] px-6px py-2px rd-10px bg-[color:var(--aou-1)] border border-solid border-[color:var(--aou-6)]'
@@ -93,15 +110,20 @@ const TeamCreateModal: React.FC<Props> = ({ visible, onClose, onCreated }) => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { cliAgents } = useConversationAgents();
+  const { providers, getAvailableModels } = useModelProviderList();
+  // The 智囊团's name (a team, not a single discussion — the topic is set later in the room).
   const [name, setName] = useState('');
-  // Ordered selection — first entry is the team leader; the rest are teammates.
+  // Ordered selection — first entry is the team leader/moderator; the rest are panelists.
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
+  // Optional project folder (kept for users who want a fixed workspace per 智囊团).
   const [workspace, setWorkspace] = useState('');
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [searchExpanded, setSearchExpanded] = useState(false);
   const nameInputRef = useRef<RefInputType | null>(null);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
+  // Seed the panel from last-used once per open (after agents have loaded).
+  const seededRef = useRef(false);
 
   const handleToggleSearch = () => {
     if (searchExpanded) {
@@ -113,10 +135,16 @@ const TeamCreateModal: React.FC<Props> = ({ visible, onClose, onCreated }) => {
     }
   };
 
-  // Only show real CLI agents — preset assistants are LLM-config wrappers,
-  // not standalone team-capable agent processes. The user explicitly asked us
-  // not to mix them into team creation.
-  const allAgents = useMemo(() => filterTeamSupportedAgents(cliAgents.map(cliAgentToOption)), [cliAgents]);
+  // ALL experts are selectable here — no "guest" tier:
+  //  • CLI-agent backends (CentaurAI / Claude / Codex / OpenClaw / Hermes …)
+  //  • 直连模型专家: each configured provider model, incl. the user's SiliconFlow 国产模型
+  // On submit, team-capable backends form the aioncore team (first = moderator); the
+  // rest (openclaw/hermes + every 直连模型专家) join via the renderer-orchestrated extras.
+  const allAgents = useMemo(() => {
+    const backends = cliAgents.map(cliAgentToOption);
+    const modelExperts = buildModelExpertOptions(providers, getAvailableModels);
+    return [...backends, ...modelExperts];
+  }, [cliAgents, providers, getAvailableModels]);
 
   const filteredAgents = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -125,13 +153,37 @@ const TeamCreateModal: React.FC<Props> = ({ visible, onClose, onCreated }) => {
   }, [allAgents, search]);
 
   const selectedKeySet = useMemo(() => new Set(selectedKeys), [selectedKeys]);
-  const leaderKey = selectedKeys[0];
+  // Only a team-capable backend can moderate (a 直连模型专家 / openclaw / hermes can't
+  // run the aioncore team). The moderator is the first selected team-capable agent.
+  const leaderKey = useMemo(
+    () => selectedKeys.find((k) => allAgents.find((a) => agentKey(a) === k)?.team_capable),
+    [selectedKeys, allAgents]
+  );
 
   useEffect(() => {
     if (visible) {
       setTimeout(() => nameInputRef.current?.focus(), 50);
     }
   }, [visible]);
+
+  // Pre-fill the agent panel from the user's last 智囊团, once per open.
+  useEffect(() => {
+    if (!visible) {
+      seededRef.current = false;
+      return;
+    }
+    if (seededRef.current || allAgents.length === 0) return;
+    seededRef.current = true;
+    try {
+      const raw = localStorage.getItem(LAST_PANEL_KEY);
+      if (!raw) return;
+      const last = JSON.parse(raw) as { agentKeys?: string[] };
+      const validKeys = (last.agentKeys ?? []).filter((k) => allAgents.some((a) => agentKey(a) === k));
+      if (validKeys.length > 0) setSelectedKeys(validKeys);
+    } catch {
+      // ignore malformed storage
+    }
+  }, [visible, allAgents]);
 
   const handleClose = () => {
     setName('');
@@ -147,6 +199,8 @@ const TeamCreateModal: React.FC<Props> = ({ visible, onClose, onCreated }) => {
   };
 
   const handlePromoteLeader = (key: string) => {
+    // Only a team-capable backend can moderate.
+    if (!allAgents.find((a) => agentKey(a) === key)?.team_capable) return;
     setSelectedKeys((prev) => {
       if (!prev.includes(key) || prev[0] === key) return prev;
       return [key, ...prev.filter((k) => k !== key)];
@@ -164,15 +218,27 @@ const TeamCreateModal: React.FC<Props> = ({ visible, onClose, onCreated }) => {
       return;
     }
     const user_id = user?.id ?? 'system_default_user';
+    // Selected agents in order. Split: team-capable → the aioncore team (first = the
+    // moderator/host); non-team-capable (openclaw/hermes) → the renderer-orchestrated
+    // extras. Both are equal experts in the debate — the split is only because
+    // aioncore's team.create rejects non-MCP backends.
+    const orderedAgents = selectedKeys
+      .map((key) => allAgents.find((a) => agentKey(a) === key))
+      .filter((a): a is TeamAgentOption => Boolean(a));
+    const teamCapable = orderedAgents.filter((a) => a.team_capable);
+    const extraAgents = orderedAgents.filter((a) => !a.team_capable);
+    if (teamCapable.length === 0) {
+      Message.warning(
+        t('team.create.needTeamCapable', {
+          defaultValue: '请至少选择一个支持团队的模型作为主持人（如 CentaurAI / Claude）',
+        })
+      );
+      return;
+    }
     setLoading(true);
     try {
-      // Build agents in selection order — first is the leader, rest are teammates.
-      const orderedAgents = selectedKeys
-        .map((key) => allAgents.find((a) => agentKey(a) === key))
-        .filter((a): a is TeamAgentOption => Boolean(a));
-
       const agents: TeamAgent[] = await Promise.all(
-        orderedAgents.map(async (agentOption, index) => {
+        teamCapable.map(async (agentOption, index) => {
           const agentType = resolveTeamAgentType(agentOption, 'acp');
           const conversationType = resolveConversationType(agentType);
           const resolvedModel = await resolveDefaultTeamAgentModel({
@@ -210,6 +276,19 @@ const TeamCreateModal: React.FC<Props> = ({ visible, onClose, onCreated }) => {
         return;
       }
 
+      // The non-team-capable picks (openclaw / hermes + every 直连模型专家) join the
+      // debate via the renderer-orchestrated extras. optionToGuest preserves the
+      // provider+model pin for 直连模型专家.
+      extraAgents.map(optionToGuest).forEach((g) => storeAddGuest(team.id, g));
+
+      // Remember this panel for the next 智囊团. Creating only sets up the team — the
+      // room opens blank (idle) and the user sets the topic + starts the discussion there.
+      try {
+        localStorage.setItem(LAST_PANEL_KEY, JSON.stringify({ agentKeys: selectedKeys }));
+      } catch {
+        // ignore storage failures
+      }
+
       onCreated(team);
       handleClose();
     } catch (error) {
@@ -237,7 +316,7 @@ const TeamCreateModal: React.FC<Props> = ({ visible, onClose, onCreated }) => {
         render: () => (
           <div className='flex items-center justify-between border-b border-border-2 bg-dialog-fill-0 px-24px py-18px'>
             <h3 className='m-0 text-16px font-600 text-t-primary'>
-              {t('team.create.title', { defaultValue: 'Create Team' })}
+              {t('team.create.title', { defaultValue: '新建智囊团' })}
             </h3>
             <Button
               type='text'
@@ -261,25 +340,27 @@ const TeamCreateModal: React.FC<Props> = ({ visible, onClose, onCreated }) => {
             className='min-w-80px'
             style={{ borderRadius: 8 }}
           >
-            {t('team.create.confirm', { defaultValue: 'Create Team' })}
+            {t('team.create.confirm', { defaultValue: '创建' })}
           </Button>
         </div>
       }
     >
       <div className='px-24px py-20px' style={{ maxHeight: 'min(72vh, 640px)', overflowY: 'auto' }}>
         <Form layout='vertical'>
-          {/* Team name */}
+          {/* 智囊团 name (a team — the discussion topic is set later in the room). */}
           <FormItem
             label={
               <span className='text-12px font-500 text-t-secondary'>
-                {t('team.create.namePlaceholder', { defaultValue: 'Team name' })}
+                {t('team.create.nameLabel', { defaultValue: '团队名称' })}
                 <span className='ml-4px text-danger-6'>*</span>
               </span>
             }
           >
             <Input
               ref={nameInputRef}
-              placeholder={t('team.create.namePlaceholder', { defaultValue: 'Team name' })}
+              placeholder={t('team.create.namePlaceholder', {
+                defaultValue: '给你的智囊团起个名字，如「增长策略组」「产品方向智囊团」…',
+              })}
               value={name}
               onChange={setName}
               data-testid='team-create-name-input'
@@ -361,10 +442,12 @@ const TeamCreateModal: React.FC<Props> = ({ visible, onClose, onCreated }) => {
                           agent={agent}
                           isSelected={selectedKeySet.has(key)}
                           isLeader={leaderKey === key}
+                          canLead={Boolean(agent.team_capable)}
                           onToggle={() => handleToggleAgent(key)}
                           onPromoteLeader={() => handlePromoteLeader(key)}
                           makeLeaderTitle={t('team.create.makeLeader', { defaultValue: 'Set as leader' })}
                           leaderBadge={t('team.create.leaderBadge', { defaultValue: 'Leader' })}
+                          expertTag={t('team.create.modelExpertTag', { defaultValue: '直连模型' })}
                         />
                       );
                     })
@@ -374,7 +457,7 @@ const TeamCreateModal: React.FC<Props> = ({ visible, onClose, onCreated }) => {
             )}
           </FormItem>
 
-          {/* Project / Workspace */}
+          {/* Project / Workspace (optional) */}
           <FormItem
             label={
               <span className='text-12px font-500 text-t-secondary'>

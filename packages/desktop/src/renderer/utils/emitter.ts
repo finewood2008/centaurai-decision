@@ -42,6 +42,10 @@ interface EventTypes {
   'remote.selected.file.clear': void;
   'remote.workspace.refresh': void;
   'chat.history.refresh': void;
+  // 智囊团产出列表变化（新增一份方案书）/ Meeting outputs list changed
+  'meeting.outputs.changed': void;
+  // 从工作区侧栏的「会议产出」点开某场方案书 / Reopen a meeting record's 方案书
+  'meeting.open.record': [{ teamId: string; recordId: string }];
   // 会话删除事件 / Conversation deletion event
   'conversation.deleted': [string]; // conversation_id
   // 预览面板事件 / Preview panel events

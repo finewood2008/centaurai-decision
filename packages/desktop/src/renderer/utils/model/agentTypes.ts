@@ -41,6 +41,10 @@ export type AgentEnvEntry = {
  */
 export type BehaviorPolicy = {
   supports_side_question?: boolean;
+  /** Authoritative team-mode capability — true only when the backend can be
+   *  injected with the team-coordination MCP tools. Prefer this over the
+   *  top-level `team_capable`, which is uniformly true and non-discriminating. */
+  supports_team?: boolean;
 };
 
 /**

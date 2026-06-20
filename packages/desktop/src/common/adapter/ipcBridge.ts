@@ -447,6 +447,12 @@ export const application = {
     })
   ),
   getPath: bridge.buildProvider<string, { name: 'desktop' | 'home' | 'downloads' }>('app.get-path'),
+  // Write a base64-decoded binary file to disk (Electron main has Node fs; the
+  // aioncore /api/fs/write is text-only). Used to save generated .docx etc.
+  saveBinaryFile: bridge.buildProvider<
+    IBridgeResponse<{ path: string }>,
+    { dir: string; fileName: string; base64: string }
+  >('app.save-binary-file'),
   // Electron-local: copies cache dir + persists to ProcessEnv, paired with restart.
   // The backend reads AIONUI_*_DIR env vars on boot, so it does not own this config.
   updateSystemInfo: bridge.buildProvider<void, { cacheDir: string; workDir: string }>('update-system-info'),
