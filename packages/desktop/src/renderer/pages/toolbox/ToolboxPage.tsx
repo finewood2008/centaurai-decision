@@ -315,11 +315,7 @@ const ToolboxPage: React.FC<ToolboxPageProps> = ({ mode = 'toolbox' }) => {
   const keyword = query.trim().toLowerCase();
   const imageWorkbenchMatches =
     !keyword ||
-    [
-      t('toolbox.imageWorkbench.title'),
-      t('toolbox.imageWorkbench.cardDesc'),
-      t('toolbox.imageWorkbench.subtitle'),
-    ]
+    [t('toolbox.imageWorkbench.title'), t('toolbox.imageWorkbench.cardDesc'), t('toolbox.imageWorkbench.subtitle')]
       .join(' ')
       .toLowerCase()
       .includes(keyword);
@@ -337,12 +333,18 @@ const ToolboxPage: React.FC<ToolboxPageProps> = ({ mode = 'toolbox' }) => {
   const textCount = visibleTools.filter((tool) => tool.category === 'text').length;
   const workbenchCount = visibleTools.filter((tool) => tool.category === 'workbench').length;
 
-  const categoryOptions: Array<{ key: ToolboxCategory; label: string; count: number }> = [
-    { key: 'all', label: t('toolbox.categories.all'), count: isWorkbenchMode ? workbenchTools.length + 1 : visibleTools.length },
-    { key: 'image', label: t('toolbox.categories.image'), count: imageCount },
-    { key: 'text', label: t('toolbox.categories.text'), count: textCount },
-    { key: 'workbench', label: t('toolbox.categories.workbench'), count: workbenchCount },
-  ].filter((item) => item.key === 'all' || item.count > 0);
+  const categoryOptions: Array<{ key: ToolboxCategory; label: string; count: number }> = (
+    [
+      {
+        key: 'all',
+        label: t('toolbox.categories.all'),
+        count: isWorkbenchMode ? workbenchTools.length + 1 : visibleTools.length,
+      },
+      { key: 'image', label: t('toolbox.categories.image'), count: imageCount },
+      { key: 'text', label: t('toolbox.categories.text'), count: textCount },
+      { key: 'workbench', label: t('toolbox.categories.workbench'), count: workbenchCount },
+    ] as Array<{ key: ToolboxCategory; label: string; count: number }>
+  ).filter((item) => item.key === 'all' || item.count > 0);
 
   const statCards = isWorkbenchMode
     ? [
@@ -595,9 +597,7 @@ const ToolboxPage: React.FC<ToolboxPageProps> = ({ mode = 'toolbox' }) => {
           <>
             <div className='flex flex-col gap-16px lg:flex-row lg:items-end lg:justify-between'>
               <div className='flex min-w-0 items-start gap-14px'>
-                <div className='centaur-mark h-52px w-52px shrink-0'>
-                  {headerIcon}
-                </div>
+                <div className='centaur-mark h-52px w-52px shrink-0'>{headerIcon}</div>
                 <div className='min-w-0'>
                   <div className='centaur-eyebrow'>{headerEyebrow}</div>
                   <div className='mt-2px text-26px font-900 leading-32px' style={{ color: 'var(--centaur-ink)' }}>

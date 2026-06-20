@@ -6,16 +6,7 @@
 
 import { ipcBridge } from '@/common';
 import type { IProvider } from '@/common/config/storage';
-import {
-  Button,
-  Divider,
-  Message,
-  Popconfirm,
-  Collapse,
-  Tag,
-  Switch,
-  Tooltip,
-} from '@arco-design/web-react';
+import { Button, Divider, Message, Popconfirm, Collapse, Tag, Switch, Tooltip } from '@arco-design/web-react';
 import { DeleteFour, Info, Minus, Plus, Write, Heartbeat } from '@icon-park/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -100,8 +91,8 @@ const ModelModalContent: React.FC = () => {
     );
     ipcBridge.mode.deleteProvider
       .invoke({ id })
-      .then(() => void mutate())
-      .catch(() => void mutate());
+      .then((): void => void mutate())
+      .catch((): void => void mutate());
   };
   const toggleProviderEnabled = (p: IProvider) => {
     const { checked } = getProviderState(p);
@@ -156,7 +147,7 @@ const ModelModalContent: React.FC = () => {
         void mutate();
         Message.success({ content: t('settings.healthStatusCleared'), duration: 2000 });
       })
-      .catch(() => void mutate());
+      .catch((): void => void mutate());
   };
 
   const [addPlatformModalCtrl, apmc] = AddPlatformModal.useModal({
@@ -258,175 +249,173 @@ const ModelModalContent: React.FC = () => {
                 {t('settings.modelReadOnlyEmpty', { defaultValue: '管理员尚未配置任何模型，请联系管理员添加。' })}
               </p>
             ) : (
-            <p className='text-14px text-t-secondary text-center max-w-400px'>
-              {t('settings.needHelpConfigGuide')}
-              <a
-                href='https://github.com/iOfficeAI/CentaurAI/wiki/LLM-Configuration'
-                target='_blank'
-                rel='noopener noreferrer'
-                className='text-[rgb(var(--primary-6))] hover:text-[rgb(var(--primary-5))] underline ml-4px'
-              >
-                {t('settings.configGuide')}
-              </a>
-              {t('settings.configGuideSuffix')}
-            </p>
+              <p className='text-14px text-t-secondary text-center max-w-400px'>
+                {t('settings.needHelpConfigGuide')}
+                <a
+                  href='https://github.com/iOfficeAI/CentaurAI/wiki/LLM-Configuration'
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='text-[rgb(var(--primary-6))] hover:text-[rgb(var(--primary-5))] underline ml-4px'
+                >
+                  {t('settings.configGuide')}
+                </a>
+                {t('settings.configGuideSuffix')}
+              </p>
             )}
           </div>
         ) : (
           <div className='space-y-16px mt-12px'>
-                {(data || []).map((platform: IProvider) => {
-                  const key = platform.id;
-                  const isExpanded = collapseKey[platform.id] ?? false;
-                  return (
-                    <Collapse
-                      activeKey={isExpanded ? ['models'] : []}
-                      onChange={(_, ak) =>
-                        setCollapseKey((prev) => ({ ...prev, [platform.id]: ak.includes('models') }))
-                      }
-                      key={key}
-                      bordered
-                      expandIconPosition='left'
-                      className={`[&_.arco-collapse-item]:!border-0 [&_.arco-collapse-item]:!rounded-12px [&_.arco-collapse-item]:!overflow-hidden [&_.arco-collapse-item]:!bg-[var(--color-bg-2)] [&_.arco-collapse-item-header]:!bg-[var(--fill-0)] [&_.arco-collapse-item-header]:!pl-36px [&_.arco-collapse-item-header]:!pr-12px [&_.arco-collapse-item-header]:!py-8px [&_.arco-collapse-item-header]:hover:!bg-[var(--color-bg-2)] [&_.arco-collapse-item-header]:!gap-8px [&_.arco-collapse-item-content]:!bg-fill-1 [&_.arco-collapse-item-content-box]:!px-10px [&_.arco-collapse-item-content-box]:!py-8px [&_.arco-collapse-item-content]:!border-t [&_.arco-collapse-item-content]:!border-[var(--color-border-2)] ${isExpanded ? '[&_.arco-collapse-item-header]:!rounded-t-12px [&_.arco-collapse-item-header]:!rounded-b-0 [&_.arco-collapse-item-content]:!rounded-b-12px' : '[&_.arco-collapse-item-header]:!rounded-12px'}`}
-                    >
-                      <Collapse.Item
-                        name='models'
-                        className='[&_.arco-collapse-item-header-title]:flex-1 group'
-                        header={
-                          <div className='group flex items-center justify-between w-full min-h-32px gap-8px min-w-0'>
-                            <div className='min-w-0 flex-1'>
-                              <span
-                                className={`text-14px font-500 truncate min-w-0 transition-colors ${isExpanded ? 'text-t-primary' : 'text-2 group-hover:text-1'}`}
-                              >
-                                {platform.name}
-                              </span>
-                              <div className='text-11px text-t-tertiary truncate mt-2px'>
-                                {platform.base_url || platform.platform} · {getProviderState(platform).enabled}/
-                                {(platform.models ?? []).length} {t('settings.model', { defaultValue: '模型' })}
-                              </div>
-                            </div>
-                            <div
-                              className='flex items-center gap-8px shrink-0'
-                              onClick={(e) => e.stopPropagation()}
-                              onMouseDown={(e) => e.stopPropagation()}
-                            >
-                              {isReadOnly ? (
-                                <Tag size='small' color={getProviderState(platform).checked ? 'green' : undefined}>
-                                  {getProviderState(platform).checked
-                                    ? t('common.enabled', { defaultValue: '已启用' })
-                                    : t('common.disabled', { defaultValue: '已停用' })}
-                                </Tag>
-                              ) : (
-                                <>
-                                  <Switch
-                                    size='small'
-                                    checked={getProviderState(platform).checked}
-                                    onChange={() => toggleProviderEnabled(platform)}
+            {(data || []).map((platform: IProvider) => {
+              const key = platform.id;
+              const isExpanded = collapseKey[platform.id] ?? false;
+              return (
+                <Collapse
+                  activeKey={isExpanded ? ['models'] : []}
+                  onChange={(_, ak) => setCollapseKey((prev) => ({ ...prev, [platform.id]: ak.includes('models') }))}
+                  key={key}
+                  bordered
+                  expandIconPosition='left'
+                  className={`[&_.arco-collapse-item]:!border-0 [&_.arco-collapse-item]:!rounded-12px [&_.arco-collapse-item]:!overflow-hidden [&_.arco-collapse-item]:!bg-[var(--color-bg-2)] [&_.arco-collapse-item-header]:!bg-[var(--fill-0)] [&_.arco-collapse-item-header]:!pl-36px [&_.arco-collapse-item-header]:!pr-12px [&_.arco-collapse-item-header]:!py-8px [&_.arco-collapse-item-header]:hover:!bg-[var(--color-bg-2)] [&_.arco-collapse-item-header]:!gap-8px [&_.arco-collapse-item-content]:!bg-fill-1 [&_.arco-collapse-item-content-box]:!px-10px [&_.arco-collapse-item-content-box]:!py-8px [&_.arco-collapse-item-content]:!border-t [&_.arco-collapse-item-content]:!border-[var(--color-border-2)] ${isExpanded ? '[&_.arco-collapse-item-header]:!rounded-t-12px [&_.arco-collapse-item-header]:!rounded-b-0 [&_.arco-collapse-item-content]:!rounded-b-12px' : '[&_.arco-collapse-item-header]:!rounded-12px'}`}
+                >
+                  <Collapse.Item
+                    name='models'
+                    className='[&_.arco-collapse-item-header-title]:flex-1 group'
+                    header={
+                      <div className='group flex items-center justify-between w-full min-h-32px gap-8px min-w-0'>
+                        <div className='min-w-0 flex-1'>
+                          <span
+                            className={`text-14px font-500 truncate min-w-0 transition-colors ${isExpanded ? 'text-t-primary' : 'text-2 group-hover:text-1'}`}
+                          >
+                            {platform.name}
+                          </span>
+                          <div className='text-11px text-t-tertiary truncate mt-2px'>
+                            {platform.base_url || platform.platform} · {getProviderState(platform).enabled}/
+                            {(platform.models ?? []).length} {t('settings.model', { defaultValue: '模型' })}
+                          </div>
+                        </div>
+                        <div
+                          className='flex items-center gap-8px shrink-0'
+                          onClick={(e) => e.stopPropagation()}
+                          onMouseDown={(e) => e.stopPropagation()}
+                        >
+                          {isReadOnly ? (
+                            <Tag size='small' color={getProviderState(platform).checked ? 'green' : undefined}>
+                              {getProviderState(platform).checked
+                                ? t('common.enabled', { defaultValue: '已启用' })
+                                : t('common.disabled', { defaultValue: '已停用' })}
+                            </Tag>
+                          ) : (
+                            <>
+                              <Switch
+                                size='small'
+                                checked={getProviderState(platform).checked}
+                                onChange={() => toggleProviderEnabled(platform)}
+                              />
+                              <div className='flex items-center gap-4px'>
+                                <Button
+                                  size='mini'
+                                  className='model-provider-action-btn !w-28px !h-28px !min-w-28px'
+                                  icon={<Plus size='14' />}
+                                  onClick={() => addModelModalCtrl.open({ data: platform })}
+                                />
+                                <Popconfirm
+                                  title={t('settings.deleteAllModelConfirm')}
+                                  onOk={() => removePlatform(platform.id)}
+                                >
+                                  <Button
+                                    size='mini'
+                                    className='model-provider-action-btn !w-28px !h-28px !min-w-28px'
+                                    icon={<Minus size='14' />}
                                   />
-                                  <div className='flex items-center gap-4px'>
-                                    <Button
-                                      size='mini'
-                                      className='model-provider-action-btn !w-28px !h-28px !min-w-28px'
-                                      icon={<Plus size='14' />}
-                                      onClick={() => addModelModalCtrl.open({ data: platform })}
-                                    />
-                                    <Popconfirm
-                                      title={t('settings.deleteAllModelConfirm')}
-                                      onOk={() => removePlatform(platform.id)}
-                                    >
-                                      <Button
-                                        size='mini'
-                                        className='model-provider-action-btn !w-28px !h-28px !min-w-28px'
-                                        icon={<Minus size='14' />}
-                                      />
-                                    </Popconfirm>
-                                    <Button
-                                      size='mini'
-                                      className='model-provider-action-btn !w-28px !h-28px !min-w-28px'
-                                      icon={<Write size='14' />}
-                                      onClick={() => editModalCtrl.open({ data: platform })}
-                                    />
-                                  </div>
-                                </>
+                                </Popconfirm>
+                                <Button
+                                  size='mini'
+                                  className='model-provider-action-btn !w-28px !h-28px !min-w-28px'
+                                  icon={<Write size='14' />}
+                                  onClick={() => editModalCtrl.open({ data: platform })}
+                                />
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    }
+                  >
+                    {(platform.models ?? []).map((model: string, idx: number, arr: string[]) => {
+                      const nip = isNewApiPlatform(platform.platform);
+                      const mp = platform.model_protocols?.[model] || 'openai';
+                      const mh = platform.model_health?.[model];
+                      const hs = mh?.status || 'unknown';
+                      return (
+                        <div key={model}>
+                          <div className='flex items-center justify-between px-8px py-12px transition-colors hover:bg-[var(--fill-0)]'>
+                            <div className='flex items-center gap-8px'>
+                              {hs !== 'unknown' && (
+                                <Tooltip
+                                  content={hs === 'healthy' ? `OK (${mh?.latency ?? '?'}ms)` : mh?.error || 'Failed'}
+                                >
+                                  <div
+                                    className={`w-6px h-6px rd-999px ${hs === 'healthy' ? 'bg-[rgb(var(--success-6))]' : 'bg-[rgb(var(--danger-6))]'}`}
+                                  />
+                                </Tooltip>
+                              )}
+                              <span className='text-14px text-t-primary'>{model}</span>
+                              {nip && (
+                                <span
+                                  className={`rd-4px px-6px py-1px text-10px ${isReadOnly ? '' : 'cursor-pointer'}`}
+                                  style={{
+                                    backgroundColor:
+                                      getProtocolColor(mp) === 'blue'
+                                        ? 'rgba(var(--primary-6),0.1)'
+                                        : getProtocolColor(mp) === 'orange'
+                                          ? 'rgba(var(--warning-6),0.1)'
+                                          : 'rgba(var(--success-6),0.1)',
+                                    color:
+                                      getProtocolColor(mp) === 'blue'
+                                        ? 'rgb(var(--primary-6))'
+                                        : getProtocolColor(mp) === 'orange'
+                                          ? 'rgb(var(--warning-6))'
+                                          : 'rgb(var(--success-6))',
+                                  }}
+                                  onClick={
+                                    isReadOnly
+                                      ? undefined
+                                      : () => toggleModelProtocol(platform, model, getNextProtocol(mp))
+                                  }
+                                >
+                                  {getProtocolLabel(mp)}
+                                </span>
                               )}
                             </div>
-                          </div>
-                        }
-                      >
-                        {(platform.models ?? []).map((model: string, idx: number, arr: string[]) => {
-                          const nip = isNewApiPlatform(platform.platform);
-                          const mp = platform.model_protocols?.[model] || 'openai';
-                          const mh = platform.model_health?.[model];
-                          const hs = mh?.status || 'unknown';
-                          return (
-                            <div key={model}>
-                              <div className='flex items-center justify-between px-8px py-12px transition-colors hover:bg-[var(--fill-0)]'>
-                                <div className='flex items-center gap-8px'>
-                                  {hs !== 'unknown' && (
-                                    <Tooltip
-                                      content={
-                                        hs === 'healthy' ? `OK (${mh?.latency ?? '?'}ms)` : mh?.error || 'Failed'
-                                      }
-                                    >
-                                      <div
-                                        className={`w-6px h-6px rd-999px ${hs === 'healthy' ? 'bg-[rgb(var(--success-6))]' : 'bg-[rgb(var(--danger-6))]'}`}
-                                      />
-                                    </Tooltip>
-                                  )}
-                                  <span className='text-14px text-t-primary'>{model}</span>
-                                  {nip && (
-                                    <span
-                                      className={`rd-4px px-6px py-1px text-10px ${isReadOnly ? '' : 'cursor-pointer'}`}
-                                      style={{
-                                        backgroundColor:
-                                          getProtocolColor(mp) === 'blue'
-                                            ? 'rgba(var(--primary-6),0.1)'
-                                            : getProtocolColor(mp) === 'orange'
-                                              ? 'rgba(var(--warning-6),0.1)'
-                                              : 'rgba(var(--success-6),0.1)',
-                                        color:
-                                          getProtocolColor(mp) === 'blue'
-                                            ? 'rgb(var(--primary-6))'
-                                            : getProtocolColor(mp) === 'orange'
-                                              ? 'rgb(var(--warning-6))'
-                                              : 'rgb(var(--success-6))',
-                                      }}
-                                      onClick={
-                                        isReadOnly ? undefined : () => toggleModelProtocol(platform, model, getNextProtocol(mp))
-                                      }
-                                    >
-                                      {getProtocolLabel(mp)}
-                                    </span>
-                                  )}
-                                </div>
-                                {isReadOnly ? (
-                                  !isModelEnabled(platform, model) && (
-                                    <Tag size='small'>{t('common.disabled', { defaultValue: '已停用' })}</Tag>
-                                  )
-                                ) : (
-                                  <div className='flex items-center gap-6px'>
-                                    <Button
-                                      size='mini'
-                                      className='model-provider-action-btn !w-22px !h-22px !min-w-22px'
-                                      icon={<Heartbeat size='12' />}
-                                      loading={healthCheckLoading?.[`${platform.id}-${model}`]}
-                                      onClick={() => void performHealthCheck(platform, model)}
-                                    />
-                                    <Switch
-                                      size='small'
-                                      checked={isModelEnabled(platform, model)}
-                                      onChange={(v) => toggleModelEnabled(platform, model, v)}
-                                    />
-                                  </div>
-                                )}
+                            {isReadOnly ? (
+                              !isModelEnabled(platform, model) && (
+                                <Tag size='small'>{t('common.disabled', { defaultValue: '已停用' })}</Tag>
+                              )
+                            ) : (
+                              <div className='flex items-center gap-6px'>
+                                <Button
+                                  size='mini'
+                                  className='model-provider-action-btn !w-22px !h-22px !min-w-22px'
+                                  icon={<Heartbeat size='12' />}
+                                  loading={healthCheckLoading?.[`${platform.id}-${model}`]}
+                                  onClick={() => void performHealthCheck(platform, model)}
+                                />
+                                <Switch
+                                  size='small'
+                                  checked={isModelEnabled(platform, model)}
+                                  onChange={(v) => toggleModelEnabled(platform, model, v)}
+                                />
                               </div>
-                              {idx < arr.length - 1 && <Divider className='!my-0' />}
-                            </div>
-                          );
-                        })}
-                      </Collapse.Item>
-                    </Collapse>
-                  );
-                })}
+                            )}
+                          </div>
+                          {idx < arr.length - 1 && <Divider className='!my-0' />}
+                        </div>
+                      );
+                    })}
+                  </Collapse.Item>
+                </Collapse>
+              );
+            })}
           </div>
         )}
       </AionScrollArea>
