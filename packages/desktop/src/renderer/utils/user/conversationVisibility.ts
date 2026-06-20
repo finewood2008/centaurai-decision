@@ -1,11 +1,12 @@
 import { ipcBridge } from '@/common';
 import type { TChatConversation } from '@/common/config/storage';
+import type { IChannelSession, IChannelUser } from '@/common/types/channel/channel';
 import { filterConversationsForCurrentUser, type ConversationVisibilityScope } from '@/common/utils/frontendUserScope';
 
 export async function buildConversationVisibilityScope(): Promise<ConversationVisibilityScope> {
   const [channelUsers, channelSessions] = await Promise.all([
-    ipcBridge.channel.getAuthorizedUsers.invoke().catch(() => []),
-    ipcBridge.channel.getActiveSessions.invoke().catch(() => []),
+    ipcBridge.channel.getAuthorizedUsers.invoke().catch((): IChannelUser[] => []),
+    ipcBridge.channel.getActiveSessions.invoke().catch((): IChannelSession[] => []),
   ]);
   const visibleChannelUserIds = new Set(channelUsers.map((user) => user.id));
   const channelConversationUserIds = new Map<string, string>();

@@ -1848,7 +1848,7 @@ function toChannelSession(raw: RawSession): IChannelSession {
 async function readPersistedChannelBindings(): Promise<ChannelBindings> {
   const localBindings = readLocalChannelBindings();
   const serverSettings = await httpRequest<Record<string, unknown>>('GET', '/api/settings/client').catch(
-    () => undefined
+    (): undefined => undefined
   );
   if (serverSettings && typeof serverSettings === 'object' && CHANNEL_BINDINGS_STORAGE_KEY in serverSettings) {
     const serverBindings = normalizeChannelBindings(serverSettings[CHANNEL_BINDINGS_STORAGE_KEY]);
@@ -1904,12 +1904,12 @@ export const channel = {
     provider: () => {},
     invoke: async ({ code }: { code: string }): Promise<void> => {
       const [before, pairings] = await Promise.all([
-        httpRequest<RawUser[]>('GET', '/api/channel/users').catch(() => []),
-        httpRequest<RawPairing[]>('GET', '/api/channel/pairings').catch(() => []),
+        httpRequest<RawUser[]>('GET', '/api/channel/users').catch((): RawUser[] => []),
+        httpRequest<RawPairing[]>('GET', '/api/channel/pairings').catch((): RawPairing[] => []),
       ]);
       const approvedPairing = pairings.find((pairing) => pairing.code === code);
       await httpRequest<void>('POST', '/api/channel/pairings/approve', { code });
-      const after = await httpRequest<RawUser[]>('GET', '/api/channel/users').catch(() => []);
+      const after = await httpRequest<RawUser[]>('GET', '/api/channel/users').catch((): RawUser[] => []);
       const beforeIds = new Set(before.map((user) => user.id).filter((id): id is string => typeof id === 'string'));
       const newUserIds = after
         .map((user) => user.id)
@@ -1972,10 +1972,7 @@ export const channel = {
         void Promise.all([readPersistedChannelBindings(), resolveCurrentFrontendUserId()]).then(
           ([bindings, currentUserId]) => {
             const bindingOwnerIds = getChannelUserBindingOwnerIds(bindings, user.id);
-            if (
-              bindingOwnerIds.length > 0 &&
-              filterChannelUsersForUser([user], currentUserId, bindings).length > 0
-            ) {
+            if (bindingOwnerIds.length > 0 && filterChannelUsersForUser([user], currentUserId, bindings).length > 0) {
               callback(user);
             }
           }
