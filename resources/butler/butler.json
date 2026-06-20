@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "skills": ["aionui-config", "aionui-troubleshooting"],
+  "assistant": {
+    "id": "centaurai-butler",
+    "name": "CentaurAI 管家",
+    "name_i18n": {
+      "zh-CN": "CentaurAI 管家",
+      "en-US": "CentaurAI Butler"
+    },
+    "description": "用大白话管理 CentaurAI:建/改助手、装技能、配 MCP 与模型;诊断卡住的会话、失败的模型调用或定时任务。",
+    "description_i18n": {
+      "zh-CN": "用大白话管理 CentaurAI:建/改助手、装技能、配 MCP 与模型;诊断卡住的会话、失败的模型调用或定时任务。",
+      "en-US": "Manage CentaurAI in plain language: create/edit assistants, attach skills, configure MCP servers and LLM models; diagnose stuck conversations, failing model calls, or scheduled tasks that did not run."
+    },
+    "avatar": "🤵",
+    "preset_agent_type": "aionrs",
+    "enabled_skills": [],
+    "custom_skill_names": ["aionui-config", "aionui-troubleshooting"],
+    "disabled_builtin_skills": [],
+    "prompts": [
+      "添加一个新的 LLM 模型和 API Key,并设为默认模型",
+      "创建一个新助手,并给它绑定一个技能",
+      "有个会话卡住了,帮我诊断哪里出了问题",
+      "某个定时任务没执行,帮我看看为什么"
+    ],
+    "prompts_i18n": {
+      "zh-CN": [
+        "添加一个新的 LLM 模型和 API Key,并设为默认模型",
+        "创建一个新助手,并给它绑定一个技能",
+        "有个会话卡住了,帮我诊断哪里出了问题",
+        "某个定时任务没执行,帮我看看为什么"
+      ],
+      "en-US": [
+        "Add a new LLM provider and API key, then set it as the default model",
+        "Create a new assistant and attach a skill to it",
+        "A conversation is stuck — please diagnose what's wrong",
+        "A scheduled task didn't run — help me find out why"
+      ]
+    },
+    "models": []
+  }
+}
