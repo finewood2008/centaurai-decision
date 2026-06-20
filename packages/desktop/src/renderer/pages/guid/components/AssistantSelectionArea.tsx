@@ -53,6 +53,10 @@ const MAX_PRESET_SKILLS = 12;
 /** 办公助理 = general office-productivity assistants only (non-office builtin
  *  presets like 3D game / story roleplay / coach are intentionally excluded). */
 const OFFICE_ASSISTANT_IDS = new Set([
+  // CentaurAI 管家 — meta-management assistant (configure/diagnose CentaurAI
+  // itself). Desktop-only: the WebUI proxy strips it from the assistant list,
+  // so it only surfaces here on the admin desktop.
+  'centaurai-butler',
   'cowork',
   'ppt-creator',
   'morph-ppt',
@@ -244,10 +248,7 @@ const AssistantSelectionArea: React.FC<AssistantSelectionAreaProps> = ({
   // Separate agency assistants from others. Disabled experts (toggled off in
   // settings) are hidden everywhere they're surfaced.
   const isAgency = (a: Assistant) => a.id.startsWith('agency-');
-  const agencyAssistants = useMemo(
-    () => assistants.filter((a) => isAgency(a) && a.enabled !== false),
-    [assistants]
-  );
+  const agencyAssistants = useMemo(() => assistants.filter((a) => isAgency(a) && a.enabled !== false), [assistants]);
   const nonAgencyAssistants = useMemo(() => assistants.filter((a) => !isAgency(a)), [assistants]);
   const getAgencyDept = (id: string) => {
     const parts = id.replace('agency-', '').split('-');
