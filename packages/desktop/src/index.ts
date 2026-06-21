@@ -23,6 +23,7 @@ import { initializeProcess } from './process';
 import { startBackendOrExit } from './process/startup/backendStartup';
 import { assertStartupArchitectureCompatible } from './process/startup/architectureCompatibility';
 import { classifyBackendStartupFailure } from './process/startup/backendStartupFailure';
+import { resolvePreferredBackendPort } from './process/startup/backendPort';
 import { installQuitCleanup } from './process/startup/quitCleanup';
 import { ProcessConfig } from './process/utils/initStorage';
 import type { BackendStartupFailureInfo } from './common/types/platform/electron';
@@ -197,14 +198,6 @@ const clientMarkerExists = (): boolean => {
 const isClientMode = process.env.AIONUI_CLIENT === '1' || hasSwitch('client') || clientMarkerExists();
 let clientBackendHost = '';
 let clientBackendPort = 0;
-
-function resolvePreferredBackendPort(): number | undefined {
-  const raw = process.env.AIONUI_DEV_BACKEND_PORT ?? process.env.AIONUI_BACKEND_PORT;
-  if (!raw) return undefined;
-  const port = Number.parseInt(raw, 10);
-  if (!Number.isFinite(port) || port <= 0 || port > 65535) return undefined;
-  return port;
-}
 
 // Flag to distinguish intentional quit from unexpected exit in WebUI mode
 let isExplicitQuit = false;
