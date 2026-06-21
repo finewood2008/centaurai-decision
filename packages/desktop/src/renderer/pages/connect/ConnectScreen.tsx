@@ -84,7 +84,10 @@ const ConnectScreen: React.FC = () => {
         </div>
         <div className='mt-8px flex flex-col gap-8px'>
           {scanning && servers.length === 0 ? (
-            <div className='flex items-center justify-center gap-8px py-20px text-13px' style={{ color: 'var(--centaur-ink-mute)' }}>
+            <div
+              className='flex items-center justify-center gap-8px py-20px text-13px'
+              style={{ color: 'var(--centaur-ink-mute)' }}
+            >
               <Spin size={16} /> 正在搜索服务器…
             </div>
           ) : servers.length === 0 ? (
@@ -135,7 +138,13 @@ const ConnectScreen: React.FC = () => {
               onChange={setManualHost}
               className='flex-1'
             />
-            <InputNumber min={1} max={65535} value={manualPort} onChange={(v) => setManualPort(Number(v) || 25808)} style={{ width: 110 }} />
+            <InputNumber
+              min={1}
+              max={65535}
+              value={manualPort}
+              onChange={(v) => setManualPort(Number(v) || 25808)}
+              style={{ width: 110 }}
+            />
             <Button
               type='primary'
               loading={connecting === 'manual'}

@@ -1,4 +1,10 @@
 {
+  "routeError": {
+    "title": "Something went wrong",
+    "unknown": "An unknown error occurred",
+    "retry": "Retry",
+    "home": "Back to home"
+  },
   "send": "Send",
   "cancel": "Cancel",
   "save": "Save",

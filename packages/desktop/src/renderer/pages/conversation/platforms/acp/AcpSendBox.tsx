@@ -266,11 +266,10 @@ const AcpSendBox: React.FC<{
       try {
         if (teamPermission) await teamPermission.warmupSession();
         void checkAndUpdateTitle(conversation_id, input);
-        const result = await ipcBridge.acpConversation.sendMessage.invoke({
-          input: displayMessage,
-          conversation_id,
-          files,
-        });
+        // Team-owned conversations must go through the Team API (aioncore ≥0.1.29).
+        const result = teamPermission
+          ? await teamPermission.sendToConversation(conversation_id, displayMessage, files)
+          : await ipcBridge.acpConversation.sendMessage.invoke({ input: displayMessage, conversation_id, files });
         runtimeView.markSendAccepted(result.msg_id);
         emitter.emit('chat.history.refresh');
       } catch (error: unknown) {

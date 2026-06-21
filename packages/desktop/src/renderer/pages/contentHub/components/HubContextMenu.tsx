@@ -49,7 +49,14 @@ const HubContextMenu: React.FC<HubContextMenuProps> = ({
   return (
     <>
       {/* Invisible backdrop closes the menu on any outside interaction. */}
-      <div className='fixed inset-0 z-99' onClick={onClose} onContextMenu={(e) => { e.preventDefault(); onClose(); }} />
+      <div
+        className='fixed inset-0 z-99'
+        onClick={onClose}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          onClose();
+        }}
+      />
       <div
         className='fixed z-100 min-w-200px rd-12px bg-[var(--color-bg-2)] shadow-md p-6px'
         style={{ top, left }}

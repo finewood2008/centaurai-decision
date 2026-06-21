@@ -1,9 +1,9 @@
 /**
  * ContentHubPage — unified hub for generated content.
  *
- * Replaces the old standalone FileArchivePage. Organizes the user's
- * visibility-scoped artifacts across four dimensions: 我的产物 / 按会话 /
- * 按类型 / 共享库, with preview, search and (later) one-click share-to-team.
+ * Three top-level sections: 我的产物 (with 全部 / 按会话 / 按类型 sub-views),
+ * 共享库, and a read-only 知识库 (vector DB). Preview, search, per-section
+ * grid/waterfall + size controls and one-click share-to-team.
  */
 import React, { useState } from 'react';
 import { Message } from '@arco-design/web-react';
@@ -11,32 +11,45 @@ import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import HubHeader from './components/HubHeader';
 import HubTabBar from './components/HubTabBar';
+import MineSubTabs from './components/MineSubTabs';
 import TypeFilterBar from './components/TypeFilterBar';
-import FileGrid from './components/FileGrid';
+import FileGrid from './components/view/FileGrid';
+import ViewControls from './components/view/ViewControls';
 import ConversationGroup from './components/ConversationGroup';
 import EmptyState from './components/EmptyState';
 import ShareToTeamModal from './components/ShareToTeamModal';
 import HubContextMenu, { type HubMenuState } from './components/HubContextMenu';
 import SharedLibraryPanel from './shared/SharedLibraryPanel';
+import KnowledgeBasePanel from './knowledge/KnowledgeBasePanel';
 import { useHubFiles } from './useHubFiles';
 import { useHubPreview } from './useHubPreview';
 import { useHubFileActions } from './useHubFileActions';
+import { useHubViewPrefs } from './useHubViewPrefs';
 import { shareToTeam, SHARED_DRIVE_UNAVAILABLE } from '@/renderer/services/SharedDriveService';
 import { getCurrentFrontendUserId } from '@/common/utils/frontendUserScope';
-import type { FileEntry, HubTab } from './types';
+import type { FileEntry, HubMineView, HubSection } from './types';
 
-const isHubTab = (value: string | null): value is HubTab =>
-  value === 'mine' || value === 'byConversation' || value === 'byType' || value === 'shared';
+/** Map the legacy ?tab= deep-link onto the new section + mine-view model. */
+const parseInitialTab = (value: string | null): { section: HubSection; mineView: HubMineView } => {
+  if (value === 'shared') return { section: 'shared', mineView: 'all' };
+  if (value === 'knowledge') return { section: 'knowledge', mineView: 'all' };
+  if (value === 'byConversation') return { section: 'mine', mineView: 'byConversation' };
+  if (value === 'byType') return { section: 'mine', mineView: 'byType' };
+  return { section: 'mine', mineView: 'all' };
+};
 
 const ContentHubPage: React.FC = () => {
   const { t } = useTranslation();
   const location = useLocation();
-  const initialTab = new URLSearchParams(location.search).get('tab');
-  const [tab, setTab] = useState<HubTab>(isHubTab(initialTab) ? initialTab : 'mine');
+  const initial = parseInitialTab(new URLSearchParams(location.search).get('tab'));
+  const [section, setSection] = useState<HubSection>(initial.section);
+  const [mineView, setMineView] = useState<HubMineView>(initial.mineView);
+  const [search, setSearch] = useState('');
 
-  const hub = useHubFiles();
+  const hub = useHubFiles(search);
   const preview = useHubPreview();
   const actions = useHubFileActions();
+  const { view, size, setView, setSize } = useHubViewPrefs();
   const [shareTarget, setShareTarget] = useState<FileEntry | null>(null);
   const [sharing, setSharing] = useState(false);
   const [menu, setMenu] = useState<HubMenuState>(null);
@@ -70,50 +83,84 @@ const ContentHubPage: React.FC = () => {
     <EmptyState
       loading={hub.loading}
       loadingMessage={t('contentHub.empty.loading')}
-      message={hub.search ? t('contentHub.empty.noMatch') : t('contentHub.empty.noFiles')}
+      message={search ? t('contentHub.empty.noMatch') : t('contentHub.empty.noFiles')}
     />
   );
 
-  const renderBody = () => {
-    if (tab === 'shared') return <SharedLibraryPanel />;
+  // 我的产物 toolbar: sub-view tabs (left) + optional type filter + view controls (right).
+  const mineToolbar = (
+    <div className='flex items-center gap-8px px-16px py-8px shrink-0'>
+      <MineSubTabs active={mineView} onChange={setMineView} />
+      {mineView === 'byType' && (
+        <>
+          <span className='w-1px h-16px bg-[var(--color-border-2)]' />
+          <TypeFilterBar value={hub.kind} onChange={hub.setKind} />
+        </>
+      )}
+      <div className='flex-1' />
+      <ViewControls view={view} size={size} onViewChange={setView} onSizeChange={setSize} />
+    </div>
+  );
 
-    if (tab === 'byConversation') {
-      if (hub.loading || hub.byConversation.length === 0) return empty;
+  const renderMine = () => {
+    if (mineView === 'byConversation') {
       return (
-        <div className='flex-1 overflow-y-auto p-16px'>
-          {hub.byConversation.map((group) => (
-            <ConversationGroup
-              key={group.conversation}
-              conversation={group.conversation}
-              files={group.files}
-              onOpen={preview}
-              onShare={setShareTarget}
-              onContextMenu={openMenu}
-            />
-          ))}
-        </div>
+        <>
+          {mineToolbar}
+          {hub.loading || hub.byConversation.length === 0 ? (
+            empty
+          ) : (
+            <div className='flex-1 overflow-y-auto p-16px'>
+              {hub.byConversation.map((group) => (
+                <ConversationGroup
+                  key={group.conversation}
+                  conversation={group.conversation}
+                  files={group.files}
+                  view={view}
+                  size={size}
+                  onOpen={preview}
+                  onShare={setShareTarget}
+                  onContextMenu={openMenu}
+                />
+              ))}
+            </div>
+          )}
+        </>
       );
     }
 
-    const files = tab === 'byType' ? hub.byType : hub.searched;
+    const files = mineView === 'byType' ? hub.byType : hub.searched;
     return (
       <>
-        {tab === 'byType' && <TypeFilterBar value={hub.kind} onChange={hub.setKind} />}
+        {mineToolbar}
         {hub.loading || files.length === 0 ? (
           empty
         ) : (
           <div className='flex-1 overflow-y-auto p-16px'>
-            <FileGrid files={files} onOpen={preview} onShare={setShareTarget} onContextMenu={openMenu} />
+            <FileGrid
+              files={files}
+              view={view}
+              size={size}
+              onOpen={preview}
+              onShare={setShareTarget}
+              onContextMenu={openMenu}
+            />
           </div>
         )}
       </>
     );
   };
 
+  const renderBody = () => {
+    if (section === 'shared') return <SharedLibraryPanel search={search} />;
+    if (section === 'knowledge') return <KnowledgeBasePanel search={search} />;
+    return renderMine();
+  };
+
   return (
     <div className='h-full flex flex-col bg-[var(--color-bg-1)]'>
-      <HubHeader count={hub.total} search={hub.search} onSearchChange={hub.setSearch} />
-      <HubTabBar active={tab} onChange={setTab} />
+      <HubHeader count={hub.total} search={search} onSearchChange={setSearch} />
+      <HubTabBar active={section} onChange={setSection} />
       {renderBody()}
       <ShareToTeamModal
         file={shareTarget}

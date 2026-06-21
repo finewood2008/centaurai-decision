@@ -123,9 +123,13 @@ const SharedLibraryPicker: React.FC<SharedLibraryPickerProps> = ({ visible, onCa
         {/* File grid */}
         <div className='flex-1 overflow-y-auto pl-12px'>
           {loading ? (
-            <div className='h-full flex items-center justify-center text-t-secondary'>{t('contentHub.empty.loading')}</div>
+            <div className='h-full flex items-center justify-center text-t-secondary'>
+              {t('contentHub.empty.loading')}
+            </div>
           ) : files.length === 0 ? (
-            <div className='h-full flex items-center justify-center text-t-secondary'>{t('contentHub.shared.empty')}</div>
+            <div className='h-full flex items-center justify-center text-t-secondary'>
+              {t('contentHub.shared.empty')}
+            </div>
           ) : (
             <div className='flex flex-wrap gap-8px'>
               {files.map((file) => {
@@ -148,7 +152,9 @@ const SharedLibraryPicker: React.FC<SharedLibraryPickerProps> = ({ visible, onCa
                       </span>
                     )}
                     <span className='text-40px leading-none'>{getFileIcon(file.name)}</span>
-                    <span className='text-11px text-t-primary text-center w-full truncate leading-tight'>{file.name}</span>
+                    <span className='text-11px text-t-primary text-center w-full truncate leading-tight'>
+                      {file.name}
+                    </span>
                     <span className='text-10px text-t-secondary leading-tight'>{formatSize(file.size)}</span>
                   </div>
                 );

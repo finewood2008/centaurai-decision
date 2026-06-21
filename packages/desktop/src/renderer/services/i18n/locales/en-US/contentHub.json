@@ -10,7 +10,21 @@
     "mine": "My Files",
     "byConversation": "By Conversation",
     "byType": "By Type",
-    "shared": "Shared Library"
+    "shared": "Shared Library",
+    "knowledge": "Knowledge Base"
+  },
+  "mineView": {
+    "all": "All",
+    "byConversation": "By Conversation",
+    "byType": "By Type"
+  },
+  "knowledge": {
+    "chunks": "{{n}} chunks",
+    "readonly": "Knowledge Base · {{n}} files · read-only",
+    "refresh": "Refresh",
+    "empty": "Knowledge base is empty",
+    "unreachable": "Cannot reach the vector DB — make sure the service is running",
+    "openDesktopOnly": "Opening source files is desktop-only"
   },
   "type": {
     "all": "All",
@@ -18,6 +32,13 @@
     "document": "Documents",
     "code": "Code",
     "other": "Other"
+  },
+  "view": {
+    "grid": "Grid",
+    "waterfall": "Waterfall",
+    "sizeSmall": "S",
+    "sizeMedium": "M",
+    "sizeLarge": "L"
   },
   "actions": {
     "open": "Open",

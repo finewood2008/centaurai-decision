@@ -19,7 +19,7 @@ def find_source():
     if len(sys.argv) > 1 and os.path.exists(sys.argv[1]):
         return sys.argv[1]
     # default: the centaur artwork the user provided
-    cands = glob.glob("/home/user/桌面/centauros-assets/*MsgID=7589502657397164613*")
+    cands = glob.glob("/home/user/桌面/_仓库/centauros-assets/*MsgID=7589502657397164613*")
     if cands:
         return cands[0]
     raise SystemExit("source image not found; pass it as an argument")

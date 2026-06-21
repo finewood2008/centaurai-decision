@@ -223,11 +223,10 @@ const AionrsSendBox: React.FC<{
       const displayMessage = buildDisplayMessage(input, files, workspacePath);
       try {
         void checkAndUpdateTitle(conversation_id, input);
-        const res = await ipcBridge.conversation.sendMessage.invoke({
-          input: displayMessage,
-          conversation_id,
-          files,
-        });
+        // Team-owned conversations must go through the Team API (aioncore ≥0.1.29).
+        const res = teamPermission
+          ? await teamPermission.sendToConversation(conversation_id, displayMessage, files)
+          : await ipcBridge.conversation.sendMessage.invoke({ input: displayMessage, conversation_id, files });
         setActiveMsgId(res.msg_id);
         runtimeView.markSendAccepted(res.msg_id);
         emitter.emit('chat.history.refresh');

@@ -5,12 +5,13 @@
   "disabled": "Disabled",
   "empty": "No advisor data is available. Run the import script in the terminal.",
   "emptySearch": "No advisors match the current filters.",
+  "homeHint": "Консультація експерта — довірте завдання профільному фахівцю",
+  "viewAll": "Усі експерти",
   "departments": {
     "all": "All departments"
   },
   "stats": {
     "departments": "{{count}} departments",
-    "total": "{{count}} advisors",
     "enabled": "{{count}} enabled"
   }
 }

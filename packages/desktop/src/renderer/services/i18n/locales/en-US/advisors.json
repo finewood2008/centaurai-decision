@@ -1,16 +1,17 @@
 {
-  "title": "Experts",
-  "subtitle": "Find a specialist by department, search by expertise, and start a focused professional conversation.",
-  "searchPlaceholder": "Search advisors",
+  "title": "Consult an Expert",
+  "subtitle": "Like bringing in an outside advisor — hand your business problem to the right specialist: growth, sales, finance & tax, HR, operations. Find the right person by problem and get a diagnosis and plan you can act on.",
+  "searchPlaceholder": "Search experts / business problems",
   "disabled": "Disabled",
   "empty": "No advisor data is available. Run the import script in the terminal.",
   "emptySearch": "No advisors match the current filters.",
+  "homeHint": "Consult an expert — hand your business problem to the right specialist",
+  "viewAll": "View all experts",
   "departments": {
-    "all": "All departments"
+    "all": "All clinics"
   },
   "stats": {
-    "departments": "{{count}} departments",
-    "total": "{{count}} advisors",
-    "enabled": "{{count}} enabled"
+    "departments": "{{count}} clinics",
+    "enabled": "{{count}} experts"
   }
 }

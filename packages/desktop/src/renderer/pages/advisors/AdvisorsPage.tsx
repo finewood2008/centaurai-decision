@@ -8,6 +8,12 @@ import { useTranslation } from 'react-i18next';
 import AionScrollArea from '@/renderer/components/base/AionScrollArea';
 import { useAssistantList } from '@/renderer/hooks/assistant';
 import { groupAgencyByCategory } from '@/renderer/pages/settings/AssistantSettings/assistantUtils';
+import {
+  DEFAULT_SME_DEPARTMENT,
+  orderSmeDepartments,
+  resolveAgencyCategoryKey,
+  resolveExpertDepartment,
+} from '@/renderer/pages/settings/AssistantSettings/advisorTaxonomy';
 import AssistantAvatar from '@/renderer/pages/settings/AssistantSettings/AssistantAvatar';
 import type { AssistantListItem } from '@/renderer/pages/settings/AssistantSettings/types';
 import { Button, Empty, Input } from '@arco-design/web-react';
@@ -15,39 +21,6 @@ import { CheckOne, CloseSmall, Peoples, Search } from '@icon-park/react';
 import { useState } from 'react';
 
 const ALL_DEPARTMENTS = '__all__';
-
-/** Expert department order: market-related first, engineering/dev last.
- *  Default selection is 市场营销. Kept in sync with the home expert section. */
-const EXPERT_DEPT_ORDER = ['市场营销', '付费媒体', '销售', '产品', '战略', '设计', '学术', '财务', '项目管理', '技术支持', '专项专家', '集成', '工程开发', '测试', '安全', '游戏开发', '地理信息', '空间计算'];
-const DEFAULT_DEPARTMENT = '市场营销';
-const orderDepartments = (names: string[]): string[] => {
-  const rank = (n: string) => {
-    const i = EXPERT_DEPT_ORDER.indexOf(n);
-    return i === -1 ? EXPERT_DEPT_ORDER.length : i;
-  };
-  return [...names].sort((a, b) => rank(a) - rank(b) || a.localeCompare(b));
-};
-
-const AGENCY_CATEGORY_NAMES: Record<string, string> = {
-  academic: '学术',
-  design: '设计',
-  engineering: '工程开发',
-  finance: '财务',
-  'game-development': '游戏开发',
-  gis: '地理信息',
-  integrations: '集成',
-  marketing: '市场营销',
-  'paid-media': '付费媒体',
-  product: '产品',
-  'project-management': '项目管理',
-  sales: '销售',
-  security: '安全',
-  specialized: '专项专家',
-  'spatial-computing': '空间计算',
-  strategy: '战略',
-  support: '技术支持',
-  testing: '测试',
-};
 
 const ROLE_TOKEN_NAMES: Record<string, string> = {
   account: '客户',
@@ -94,17 +67,9 @@ const ROLE_TOKEN_NAMES: Record<string, string> = {
   writer: '写作',
 };
 
-function resolveAgencyCategoryKey(id: string): string | null {
-  const parts = id.replace(/^agency-/, '').split('-');
-  const twoWord = `${parts[0]}-${parts[1]}`;
-  if (AGENCY_CATEGORY_NAMES[twoWord]) return twoWord;
-  if (AGENCY_CATEGORY_NAMES[parts[0]]) return parts[0];
-  return null;
-}
-
 function buildChineseAdvisorDescription(advisor: AssistantListItem): string {
   const categoryKey = resolveAgencyCategoryKey(advisor.id);
-  const department = categoryKey ? AGENCY_CATEGORY_NAMES[categoryKey] : '行业';
+  const department = resolveExpertDepartment(advisor.id) ?? '行业';
   const roleTokens = advisor.id
     .replace(/^agency-/, '')
     .split('-')
@@ -141,7 +106,7 @@ const AdvisorsPage: React.FC = () => {
   const { assistants: fullAssistants } = useAssistantList();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchExpanded, setSearchExpanded] = useState(false);
-  const [activeDepartment, setActiveDepartment] = useState<string>(DEFAULT_DEPARTMENT);
+  const [activeDepartment, setActiveDepartment] = useState<string>(DEFAULT_SME_DEPARTMENT);
 
   const localeKey = useMemo(() => {
     const lang = i18n.language;
@@ -157,7 +122,7 @@ const AdvisorsPage: React.FC = () => {
   const enabledAdvisors = useMemo(() => advisors.filter((a) => a.enabled !== false), [advisors]);
 
   const allAgencyGroups = useMemo(() => groupAgencyByCategory(enabledAdvisors), [enabledAdvisors]);
-  const departmentNames = useMemo(() => orderDepartments(Object.keys(allAgencyGroups)), [allAgencyGroups]);
+  const departmentNames = useMemo(() => orderSmeDepartments(Object.keys(allAgencyGroups)), [allAgencyGroups]);
 
   // If the active department vanished (all its experts were disabled), fall
   // back to the "all" tab so the user isn't left on an empty, unhighlighted tab.
@@ -252,7 +217,6 @@ const AdvisorsPage: React.FC = () => {
 
   const statPills: Array<{ key: string; label: string; icon?: React.ReactNode }> = [
     { key: 'departments', label: t('advisors.stats.departments', { count: departmentNames.length }) },
-    { key: 'total', label: t('advisors.stats.total', { count: advisors.length }) },
     {
       key: 'enabled',
       label: t('advisors.stats.enabled', { count: enabledAdvisors.length }),
@@ -274,7 +238,10 @@ const AdvisorsPage: React.FC = () => {
                 <h1 className='m-0 mt-2px text-26px font-900 leading-32px' style={{ color: 'var(--centaur-ink)' }}>
                   {t('advisors.title')}
                 </h1>
-                <p className='m-0 mt-5px max-w-680px text-14px leading-21px' style={{ color: 'var(--centaur-ink-soft)' }}>
+                <p
+                  className='m-0 mt-5px max-w-680px text-14px leading-21px'
+                  style={{ color: 'var(--centaur-ink-soft)' }}
+                >
                   {t('advisors.subtitle')}
                 </p>
                 <div className='mt-12px flex flex-wrap items-center gap-8px'>
@@ -328,7 +295,10 @@ const AdvisorsPage: React.FC = () => {
           </div>
         </div>
         <div className='mt-14px flex gap-8px overflow-x-auto pb-2px'>
-          {[{ key: ALL_DEPARTMENTS, label: t('advisors.departments.all'), count: advisors.length }, ...departmentNames.map((name) => ({ key: name, label: name, count: allAgencyGroups[name]?.length ?? 0 }))].map((dept) => {
+          {[
+            { key: ALL_DEPARTMENTS, label: t('advisors.departments.all'), count: enabledAdvisors.length },
+            ...departmentNames.map((name) => ({ key: name, label: name, count: allAgencyGroups[name]?.length ?? 0 })),
+          ].map((dept) => {
             const active = activeDepartment === dept.key;
             return (
               <Button
@@ -339,7 +309,11 @@ const AdvisorsPage: React.FC = () => {
                 style={
                   active
                     ? { boxShadow: 'var(--centaur-shadow-clay)' }
-                    : { background: 'var(--centaur-card)', color: 'var(--centaur-ink-soft)', border: '1px solid var(--centaur-line)' }
+                    : {
+                        background: 'var(--centaur-card)',
+                        color: 'var(--centaur-ink-soft)',
+                        border: '1px solid var(--centaur-line)',
+                      }
                 }
                 onClick={() => setActiveDepartment(dept.key)}
               >

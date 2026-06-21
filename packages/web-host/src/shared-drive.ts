@@ -104,7 +104,10 @@ function sanitizeName(name: string): string {
 /** Category → filesystem-safe slug (keeps unicode letters, collapses the rest). */
 function slugifyCategory(category: string | null | undefined): string {
   if (!category) return UNCATEGORIZED;
-  return category.replace(UNSAFE_SLUG_CHARS, '_').replace(/^_+|_+$/g, '').trim();
+  return category
+    .replace(UNSAFE_SLUG_CHARS, '_')
+    .replace(/^_+|_+$/g, '')
+    .trim();
 }
 
 function sendJson(res: ServerResponse, status: number, body: unknown): void {
@@ -173,7 +176,7 @@ export type SharedAddInput = {
 export async function sharedList(dir: string, category?: string | null): Promise<SharedFile[]> {
   const entries = await readManifest(dir);
   const filtered = category != null ? entries.filter((e) => slugifyCategory(e.category) === category) : entries;
-  return [...filtered].sort((a, b) => b.createdAt - a.createdAt);
+  return [...filtered].toSorted((a, b) => b.createdAt - a.createdAt);
 }
 
 export async function sharedCategories(dir: string): Promise<SharedCategory[]> {
@@ -185,7 +188,7 @@ export async function sharedCategories(dir: string): Promise<SharedCategory[]> {
     if (existing) existing.count += 1;
     else map.set(key, { key, label: e.category || '', count: 1 });
   }
-  return [...map.values()].sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
+  return [...map.values()].toSorted((a, b) => b.count - a.count || a.label.localeCompare(b.label));
 }
 
 export async function sharedRemove(dir: string, id: string): Promise<boolean> {
@@ -422,7 +425,11 @@ async function streamEntry(
 }
 
 /** GET /api/shared-drive/download?id=<id> */
-export function handleSharedDownload(req: IncomingMessage, res: ServerResponse, dir: string | undefined): Promise<void> {
+export function handleSharedDownload(
+  req: IncomingMessage,
+  res: ServerResponse,
+  dir: string | undefined
+): Promise<void> {
   return streamEntry(req, res, dir, 'attachment');
 }
 

@@ -1,5 +1,7 @@
 import React, { Suspense } from 'react';
-import { HashRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { HashRouter, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { Button, Result } from '@arco-design/web-react';
+import { useTranslation } from 'react-i18next';
 import AppLoader from '@renderer/components/layout/AppLoader';
 import { useAuth } from '@renderer/hooks/context/AuthContext';
 import { TEAM_MODE_ENABLED } from '@/common/config/constants';
@@ -27,10 +29,84 @@ const WorkbenchPage = React.lazy(() => import('@renderer/pages/workbench'));
 const AdvisorsPage = React.lazy(() => import('@renderer/pages/advisors/AdvisorsPage'));
 const ContentHubPage = React.lazy(() => import('@renderer/pages/contentHub'));
 
+/** Shown in place of a crashed page (instead of blanking the whole app). */
+const RouteErrorFallback: React.FC<{ error: Error; onRetry: () => void }> = ({ error, onRetry }) => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  return (
+    <div className='flex h-full w-full items-center justify-center p-24px'>
+      <Result
+        status='error'
+        title={t('common.routeError.title', { defaultValue: '页面出错了' })}
+        subTitle={
+          <span className='block max-w-480px break-all text-12px text-[color:var(--color-text-3)]'>
+            {error.message || t('common.routeError.unknown', { defaultValue: '发生未知错误' })}
+          </span>
+        }
+        extra={[
+          <Button key='retry' type='primary' onClick={onRetry}>
+            {t('common.routeError.retry', { defaultValue: '重试' })}
+          </Button>,
+          <Button key='home' onClick={() => navigate('/guid')}>
+            {t('common.routeError.home', { defaultValue: '返回首页' })}
+          </Button>,
+        ]}
+      />
+    </div>
+  );
+};
+
+type RouteErrorBoundaryProps = { resetKey: string; children: React.ReactNode };
+type RouteErrorBoundaryState = { error: Error | null };
+
+/**
+ * Catches render-time throws in a routed page so ONE broken page shows a
+ * recoverable error panel instead of white-screening the entire app (the
+ * renderer has no other error boundary). Resets automatically when the route
+ * (`resetKey`) changes, so navigating away recovers.
+ */
+class RouteErrorBoundary extends React.Component<RouteErrorBoundaryProps, RouteErrorBoundaryState> {
+  state: RouteErrorBoundaryState = { error: null };
+
+  static getDerivedStateFromError(error: Error): RouteErrorBoundaryState {
+    return { error };
+  }
+
+  componentDidCatch(error: Error, info: React.ErrorInfo): void {
+    // Surface in DevTools so a crashed page can be diagnosed, not silently blanked.
+    console.error('[RouteErrorBoundary]', error, info.componentStack);
+  }
+
+  componentDidUpdate(prev: RouteErrorBoundaryProps): void {
+    if (prev.resetKey !== this.props.resetKey && this.state.error) {
+      this.setState({ error: null });
+    }
+  }
+
+  private reset = (): void => {
+    this.setState({ error: null });
+  };
+
+  render(): React.ReactNode {
+    if (this.state.error) {
+      return <RouteErrorFallback error={this.state.error} onRetry={this.reset} />;
+    }
+    return this.props.children;
+  }
+}
+
+/** Per-route boundary keyed by pathname so a different route (or param) resets it. */
+const RouteBoundary: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const location = useLocation();
+  return <RouteErrorBoundary resetKey={location.pathname}>{children}</RouteErrorBoundary>;
+};
+
 const withRouteFallback = (Component: React.LazyExoticComponent<React.ComponentType>) => (
-  <Suspense fallback={<AppLoader />}>
-    <Component />
-  </Suspense>
+  <RouteBoundary>
+    <Suspense fallback={<AppLoader />}>
+      <Component />
+    </Suspense>
+  </RouteBoundary>
 );
 
 const ProtectedLayout: React.FC<{ layout: React.ReactElement }> = ({ layout }) => {

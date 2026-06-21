@@ -142,17 +142,14 @@ class TokenManager {
       return this.token;
     }
 
-    const resp = await fetch(
-      'https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          app_id: process.env.FEISHU_APP_ID,
-          app_secret: process.env.FEISHU_APP_SECRET,
-        }),
-      }
-    );
+    const resp = await fetch('https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        app_id: process.env.FEISHU_APP_ID,
+        app_secret: process.env.FEISHU_APP_SECRET,
+      }),
+    });
 
     const data = await resp.json();
     if (data.code !== 0) {
@@ -307,21 +304,24 @@ eventDispatcher.register({
 });
 
 // Card action callback handler
-const cardActionHandler = new lark.CardActionHandler({
-  encryptKey: process.env.FEISHU_ENCRYPT_KEY || '',
-  verificationToken: process.env.FEISHU_VERIFICATION_TOKEN || '',
-}, async (data) => {
-  const action = data.action.value;
+const cardActionHandler = new lark.CardActionHandler(
+  {
+    encryptKey: process.env.FEISHU_ENCRYPT_KEY || '',
+    verificationToken: process.env.FEISHU_VERIFICATION_TOKEN || '',
+  },
+  async (data) => {
+    const action = data.action.value;
 
-  if (action.action === 'approve') {
-    await processApproval(action.instance_id, true);
-    // Return the updated card
-    return {
-      toast: { type: 'success', content: 'Approval granted' },
-    };
+    if (action.action === 'approve') {
+      await processApproval(action.instance_id, true);
+      // Return the updated card
+      return {
+        toast: { type: 'success', content: 'Approval granted' },
+      };
+    }
+    return {};
   }
-  return {};
-});
+);
 
 app.use('/webhook/event', lark.adaptExpress(eventDispatcher));
 app.use('/webhook/card', lark.adaptExpress(cardActionHandler));
@@ -364,11 +364,7 @@ class BitableClient {
   }
 
   // Batch create records
-  async batchCreateRecords(
-    appToken: string,
-    tableId: string,
-    records: Array<{ fields: Record<string, any> }>
-  ) {
+  async batchCreateRecords(appToken: string, tableId: string, records: Array<{ fields: Record<string, any> }>) {
     const resp = await this.client.bitable.appTableRecord.batchCreate({
       path: { app_token: appToken, table_id: tableId },
       data: { records },
@@ -381,12 +377,7 @@ class BitableClient {
   }
 
   // Update a single record
-  async updateRecord(
-    appToken: string,
-    tableId: string,
-    recordId: string,
-    fields: Record<string, any>
-  ) {
+  async updateRecord(appToken: string, tableId: string, recordId: string, fields: Record<string, any>) {
     const resp = await this.client.bitable.appTableRecord.update({
       path: {
         app_token: appToken,
@@ -414,7 +405,7 @@ async function syncOrdersToBitable(orders: any[]) {
       'Order ID': order.orderId,
       'Customer Name': order.customerName,
       'Order Amount': order.amount,
-      'Status': order.status,
+      Status: order.status,
       'Created At': order.createdAt,
     },
   }));
@@ -450,9 +441,7 @@ async function createApprovalInstance(params: {
           value: String(value),
         }))
       ),
-      node_approver_user_id_list: params.approvers
-        ? [{ key: 'node_1', value: params.approvers }]
-        : undefined,
+      node_approver_user_id_list: params.approvers ? [{ key: 'node_1', value: params.approvers }] : undefined,
     },
   });
 
@@ -485,17 +474,15 @@ const router = Router();
 
 // Step 1: Redirect to Feishu authorization page
 router.get('/login/feishu', (req, res) => {
-  const redirectUri = encodeURIComponent(
-    `${process.env.BASE_URL}/callback/feishu`
-  );
+  const redirectUri = encodeURIComponent(`${process.env.BASE_URL}/callback/feishu`);
   const state = generateRandomState();
   req.session!.oauthState = state;
 
   res.redirect(
     `https://open.feishu.cn/open-apis/authen/v1/authorize` +
-    `?app_id=${process.env.FEISHU_APP_ID}` +
-    `&redirect_uri=${redirectUri}` +
-    `&state=${state}`
+      `?app_id=${process.env.FEISHU_APP_ID}` +
+      `&redirect_uri=${redirectUri}` +
+      `&state=${state}`
   );
 });
 

@@ -10,7 +10,8 @@
     "mine": "Meus Arquivos",
     "byConversation": "Por Conversa",
     "byType": "Por Tipo",
-    "shared": "Biblioteca Compartilhada"
+    "shared": "Biblioteca Compartilhada",
+    "knowledge": "Base de Conhecimento"
   },
   "type": {
     "all": "Todos",
@@ -52,5 +53,25 @@
     "copyFailed": "Falha ao copiar",
     "downloadFailed": "Falha ao baixar",
     "openFailed": "Não é possível abrir"
+  },
+  "view": {
+    "grid": "Grade",
+    "waterfall": "Cascata",
+    "sizeSmall": "P",
+    "sizeMedium": "M",
+    "sizeLarge": "G"
+  },
+  "mineView": {
+    "all": "Todos",
+    "byConversation": "Por Conversa",
+    "byType": "Por Tipo"
+  },
+  "knowledge": {
+    "chunks": "{{n}} blocos",
+    "readonly": "Base de Conhecimento · {{n}} arquivos · somente leitura",
+    "refresh": "Atualizar",
+    "empty": "Base de conhecimento vazia",
+    "unreachable": "Não foi possível acessar o banco vetorial — verifique se o serviço está em execução",
+    "openDesktopOnly": "Abrir arquivos de origem é exclusivo do desktop"
   }
 }

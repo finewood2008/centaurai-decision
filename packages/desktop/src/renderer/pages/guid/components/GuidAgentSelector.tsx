@@ -42,7 +42,14 @@ const GuidAgentSelector: React.FC<GuidAgentSelectorProps> = ({
 }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const agents = availableAgents.filter((agent) => !agent.is_preset);
+  // CentaurAI (the aionrs agent) is pinned to the LAST position of the bar.
+  const isCentaurAI = (agent: AvailableAgent) => {
+    const key = (agent.backend || agent.agent_type || '').toLowerCase();
+    return key === 'aionrs' || key === 'aion-cli';
+  };
+  const agents = availableAgents
+    .filter((agent) => !agent.is_preset)
+    .toSorted((a, b) => Number(isCentaurAI(a)) - Number(isCentaurAI(b)));
 
   return (
     <div className={styles.agentSegmentBar}>

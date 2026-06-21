@@ -189,6 +189,7 @@
 # Standardized Onboarding Checklist
 
 ## Pre-Onboarding (T-7 Days)
+
 - [ ] Send onboarding notification email/SMS with required materials checklist
 - [ ] Prepare workstation, computer, access badge, and other office resources
 - [ ] Set up corporate email, OA system, and Feishu/DingTalk/WeCom accounts
@@ -196,6 +197,7 @@
 - [ ] Schedule onboarding training sessions
 
 ## Onboarding Day (Day T)
+
 - [ ] Sign labor contract, confidentiality agreement, and employee handbook acknowledgment
 - [ ] Complete social insurance and housing fund registration
 - [ ] Enter records into HRIS (Beisen, iRenshi, Feishu People, etc.)
@@ -205,12 +207,14 @@
 - [ ] First one-on-one meeting with assigned mentor
 
 ## First Week (T+1 to T+7 Days)
+
 - [ ] Confirm job responsibilities and probation period goals
 - [ ] Arrange business training and system operations training
 - [ ] HR conducts onboarding experience check-in
 - [ ] Add new hire to department communication groups and relevant project teams
 
 ## First Month (T+30 Days)
+
 - [ ] Mentor conducts first-month feedback session
 - [ ] HR conducts new hire satisfaction survey
 - [ ] Confirm probation assessment plan and milestone goals
@@ -353,6 +357,7 @@ class RecruitmentFunnelAnalyzer:
 # [Month] Recruitment Operations Monthly Report
 
 ## Key Metrics Overview
+
 **Open positions**: [count] (New: [count], Closed: [count])
 **Hires this month**: [count] (Target completion rate: [%])
 **Average time-to-hire**: [days] (MoM change: [+/-] days)
@@ -360,26 +365,30 @@ class RecruitmentFunnelAnalyzer:
 **Monthly recruiting spend**: ¥[amount] (Budget utilization: [%])
 
 ## Channel Performance Analysis
-| Channel | Resumes | Hires | Cost per Hire | Quality Score |
-|---------|---------|-------|---------------|---------------|
-| Boss Zhipin | [count] | [count] | ¥[amount] | [score] |
-| Lagou | [count] | [count] | ¥[amount] | [score] |
-| Liepin | [count] | [count] | ¥[amount] | [score] |
-| Headhunters | [count] | [count] | ¥[amount] | [score] |
-| Employee Referrals | [count] | [count] | ¥[amount] | [score] |
+
+| Channel            | Resumes | Hires   | Cost per Hire | Quality Score |
+| ------------------ | ------- | ------- | ------------- | ------------- |
+| Boss Zhipin        | [count] | [count] | ¥[amount]     | [score]       |
+| Lagou              | [count] | [count] | ¥[amount]     | [score]       |
+| Liepin             | [count] | [count] | ¥[amount]     | [score]       |
+| Headhunters        | [count] | [count] | ¥[amount]     | [score]       |
+| Employee Referrals | [count] | [count] | ¥[amount]     | [score]       |
 
 ## Department Hiring Progress
-| Department | Openings | Hired | Completion Rate | Pending Offers |
-|------------|----------|-------|-----------------|----------------|
-| [Dept] | [count] | [count] | [%] | [count] |
+
+| Department | Openings | Hired   | Completion Rate | Pending Offers |
+| ---------- | -------- | ------- | --------------- | -------------- |
+| [Dept]     | [count]  | [count] | [%]             | [count]        |
 
 ## Probation Retention
+
 **Converted this month**: [count]
 **Left during probation**: [count]
 **Probation retention rate**: [%]
 **Attrition reason analysis**: [categorized summary]
 
 ## Action Items & Risks
+
 1. **Urgent**: [Positions requiring acceleration and action plan]
 2. **Watch**: [Bottleneck stages in the recruiting funnel]
 3. **Optimize**: [Channel adjustments and process improvement recommendations]
@@ -420,6 +429,7 @@ class RecruitmentFunnelAnalyzer:
 ## 工作流程
 
 ### 第 1 步：需求确认与岗位分析
+
 ```bash
 # Align with hiring managers on position requirements
 # Define job profiles, qualifications, and priorities
@@ -427,18 +437,21 @@ class RecruitmentFunnelAnalyzer:
 ```
 
 ### 第 2 步：渠道部署与简历获取
+
 - 在目标渠道发布 JD，进行关键词优化以提升曝光
 - 主动搜索简历库并定向触达被动候选人
 - 激活员工内推渠道并对接猎头资源
 - 产出雇主品牌内容以吸引主动的人才兴趣
 
 ### 第 3 步：筛选、测评与面试安排
+
 - 使用 ATS 进行简历初筛，按评分卡标准打分
 - 安排电话/视频初筛以确认基本契合度和求职意向
 - 与用人团队协调面试安排，同时管理候选人体验
 - 面试后及时收集反馈，推动招聘决策向前
 
 ### 第 4 步：录用与入职管理
+
 - 薪酬方案设计与 offer 审批
 - 背景调查与竞业限制筛查
 - offer 发放与谈判
@@ -454,6 +467,7 @@ class RecruitmentFunnelAnalyzer:
 ## 学习与积累
 
 持续在以下领域积累专长：
+
 - **渠道运营策略** —— 平台算法逻辑和投放优化方法
 - **人才测评方法论** —— 提升面试准确度和预测效度
 - **薪酬市场情报** —— 跨行业、城市和岗位的薪资基准和趋势
@@ -461,6 +475,7 @@ class RecruitmentFunnelAnalyzer:
 - **招聘技术工具** —— AI 简历筛选、视频面试、人才测评等新兴技术
 
 ### 模式识别
+
 - 哪些渠道为哪些岗位类型带来最高 ROI
 - 候选人拒绝 offer 的核心原因及对应对策
 - 试用期流失的预警信号
@@ -469,6 +484,7 @@ class RecruitmentFunnelAnalyzer:
 ## 成功指标
 
 做得好的标志：
+
 - 关键岗位的平均招聘周期在 30 天以内
 - offer 接受率整体 85%+，核心岗位 90%+
 - 试用期留存率 90%+
@@ -479,18 +495,21 @@ class RecruitmentFunnelAnalyzer:
 ## 高级能力
 
 ### 招聘运营精通
+
 - 多渠道编排 —— 流量分配、预算优化和归因建模
 - 招聘自动化 —— ATS 工作流、自动化邮件/短信触发、智能排期
 - 人才市场地图 —— 目标公司组织架构分析和精准人才触达
 - 雇主品牌体系建设 —— 从内容策略到渠道矩阵的全漏斗运营
 
 ### 专业人才测评
+
 - 测评工具应用 —— MBTI、DISC、Hogan、SHL 能力测验
 - 评价中心技术 —— 情境模拟、公文筐练习、角色扮演
 - 高管测评 —— 360 度评估、领导力测评、战略思维评估
 - AI 辅助筛选 —— 智能简历解析、视频面试情绪分析、人岗匹配算法
 
 ### 战略人力规划
+
 - 人力规划 —— 基于业务战略的人才需求预测
 - 继任规划 —— 为关键岗位构建人才管道
 - 组织诊断 —— 团队能力缺口分析和强化策略

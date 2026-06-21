@@ -2,1879 +2,1106 @@
   {
     "key": "agency-academic-academic-anthropologist",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-academic-paper",
-      "pdf"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-academic-paper", "pdf"]
   },
   {
     "key": "agency-academic-academic-geographer",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-academic-paper",
-      "mermaid",
-      "pdf"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-academic-paper", "mermaid", "pdf"]
   },
   {
     "key": "agency-academic-academic-historian",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-academic-paper",
-      "pdf"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-academic-paper", "pdf"]
   },
   {
     "key": "agency-academic-academic-narratologist",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-academic-paper",
-      "pdf"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-academic-paper", "pdf"]
   },
   {
     "key": "agency-academic-academic-psychologist",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-academic-paper",
-      "pdf"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-academic-paper", "pdf"]
   },
   {
     "key": "agency-design-design-brand-guardian",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx"]
   },
   {
     "key": "agency-design-design-image-prompt-engineer",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx"]
   },
   {
     "key": "agency-design-design-inclusive-visuals-specialist",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx"]
   },
   {
     "key": "agency-design-design-persona-walkthrough",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-data-dashboard",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-data-dashboard", "officecli-pptx"]
   },
   {
     "key": "agency-design-design-ui-designer",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx", "mermaid"]
   },
   {
     "key": "agency-design-design-ux-architect",
     "agent_backend": "claude",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid"]
   },
   {
     "key": "agency-design-design-ux-researcher",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-data-dashboard",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-data-dashboard", "officecli-pptx"]
   },
   {
     "key": "agency-design-design-visual-storyteller",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-pptx",
-      "officecli-docx"
-    ]
+    "skill_ids": ["officecli-pptx", "officecli-docx"]
   },
   {
     "key": "agency-design-design-whimsy-injector",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-pptx",
-      "officecli-docx"
-    ]
+    "skill_ids": ["officecli-pptx", "officecli-docx"]
   },
   {
     "key": "agency-engineering-engineering-ai-data-remediation-engineer",
     "agent_backend": "claude",
-    "skill_ids": [
-      "mermaid",
-      "officecli-docx"
-    ]
+    "skill_ids": ["mermaid", "officecli-docx"]
   },
   {
     "key": "agency-engineering-engineering-ai-engineer",
     "agent_backend": "claude",
-    "skill_ids": [
-      "mermaid",
-      "officecli-docx"
-    ]
+    "skill_ids": ["mermaid", "officecli-docx"]
   },
   {
     "key": "agency-engineering-engineering-autonomous-optimization-architect",
     "agent_backend": "claude",
-    "skill_ids": [
-      "mermaid",
-      "officecli-docx"
-    ]
+    "skill_ids": ["mermaid", "officecli-docx"]
   },
   {
     "key": "agency-engineering-engineering-backend-architect",
     "agent_backend": "claude",
-    "skill_ids": [
-      "mermaid",
-      "officecli-docx"
-    ]
+    "skill_ids": ["mermaid", "officecli-docx"]
   },
   {
     "key": "agency-engineering-engineering-cms-developer",
     "agent_backend": "claude",
-    "skill_ids": [
-      "mermaid",
-      "officecli-docx"
-    ]
+    "skill_ids": ["mermaid", "officecli-docx"]
   },
   {
     "key": "agency-engineering-engineering-code-reviewer",
     "agent_backend": "claude",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid"]
   },
   {
     "key": "agency-engineering-engineering-codebase-onboarding-engineer",
     "agent_backend": "claude",
-    "skill_ids": [
-      "mermaid",
-      "officecli-docx"
-    ]
+    "skill_ids": ["mermaid", "officecli-docx"]
   },
   {
     "key": "agency-engineering-engineering-data-engineer",
     "agent_backend": "claude",
-    "skill_ids": [
-      "mermaid",
-      "officecli-docx"
-    ]
+    "skill_ids": ["mermaid", "officecli-docx"]
   },
   {
     "key": "agency-engineering-engineering-database-optimizer",
     "agent_backend": "claude",
-    "skill_ids": [
-      "mermaid",
-      "officecli-docx"
-    ]
+    "skill_ids": ["mermaid", "officecli-docx"]
   },
   {
     "key": "agency-engineering-engineering-devops-automator",
     "agent_backend": "claude",
-    "skill_ids": [
-      "mermaid",
-      "officecli-docx"
-    ]
+    "skill_ids": ["mermaid", "officecli-docx"]
   },
   {
     "key": "agency-engineering-engineering-drupal-shopping-cart",
     "agent_backend": "claude",
-    "skill_ids": [
-      "mermaid",
-      "officecli-docx"
-    ]
+    "skill_ids": ["mermaid", "officecli-docx"]
   },
   {
     "key": "agency-engineering-engineering-email-intelligence-engineer",
     "agent_backend": "claude",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid"]
   },
   {
     "key": "agency-engineering-engineering-embedded-firmware-engineer",
     "agent_backend": "claude",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid"]
   },
   {
     "key": "agency-engineering-engineering-feishu-integration-developer",
     "agent_backend": "claude",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid"]
   },
   {
     "key": "agency-engineering-engineering-filament-optimization-specialist",
     "agent_backend": "claude",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid"]
   },
   {
     "key": "agency-engineering-engineering-frontend-developer",
     "agent_backend": "claude",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid"]
   },
   {
     "key": "agency-engineering-engineering-git-workflow-master",
     "agent_backend": "claude",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid"]
   },
   {
     "key": "agency-engineering-engineering-incident-response-commander",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid",
-      "officecli-xlsx"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid", "officecli-xlsx"]
   },
   {
     "key": "agency-engineering-engineering-it-service-manager",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-xlsx", "mermaid"]
   },
   {
     "key": "agency-engineering-engineering-minimal-change-engineer",
     "agent_backend": "claude",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid"]
   },
   {
     "key": "agency-engineering-engineering-mobile-app-builder",
     "agent_backend": "claude",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid"]
   },
   {
     "key": "agency-engineering-engineering-multi-agent-systems-architect",
     "agent_backend": "claude",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid"]
   },
   {
     "key": "agency-engineering-engineering-orgscript-engineer",
     "agent_backend": "claude",
-    "skill_ids": [
-      "mermaid",
-      "officecli-docx"
-    ]
+    "skill_ids": ["mermaid", "officecli-docx"]
   },
   {
     "key": "agency-engineering-engineering-prompt-engineer",
     "agent_backend": "claude",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-xlsx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-xlsx"]
   },
   {
     "key": "agency-engineering-engineering-rapid-prototyper",
     "agent_backend": "claude",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid"]
   },
   {
     "key": "agency-engineering-engineering-senior-developer",
     "agent_backend": "claude",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid"]
   },
   {
     "key": "agency-engineering-engineering-software-architect",
     "agent_backend": "claude",
-    "skill_ids": [
-      "mermaid",
-      "officecli-docx"
-    ]
+    "skill_ids": ["mermaid", "officecli-docx"]
   },
   {
     "key": "agency-engineering-engineering-solidity-smart-contract-engineer",
     "agent_backend": "claude",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid"]
   },
   {
     "key": "agency-engineering-engineering-sre",
     "agent_backend": "claude",
-    "skill_ids": [
-      "mermaid",
-      "officecli-docx",
-      "officecli-xlsx"
-    ]
+    "skill_ids": ["mermaid", "officecli-docx", "officecli-xlsx"]
   },
   {
     "key": "agency-engineering-engineering-technical-writer",
     "agent_backend": "claude",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid"]
   },
   {
     "key": "agency-engineering-engineering-voice-ai-integration-engineer",
     "agent_backend": "claude",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid"]
   },
   {
     "key": "agency-engineering-engineering-wechat-mini-program-developer",
     "agent_backend": "claude",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid"]
   },
   {
     "key": "agency-engineering-engineering-wordpress-shopping-cart",
     "agent_backend": "claude",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid"]
   },
   {
     "key": "agency-finance-finance-bookkeeper-controller",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-xlsx",
-      "officecli-docx",
-      "officecli-financial-model"
-    ]
+    "skill_ids": ["officecli-xlsx", "officecli-docx", "officecli-financial-model"]
   },
   {
     "key": "agency-finance-finance-financial-analyst",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-xlsx",
-      "officecli-financial-model",
-      "officecli-docx"
-    ]
+    "skill_ids": ["officecli-xlsx", "officecli-financial-model", "officecli-docx"]
   },
   {
     "key": "agency-finance-finance-fpa-analyst",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-xlsx",
-      "officecli-financial-model",
-      "officecli-docx"
-    ]
+    "skill_ids": ["officecli-xlsx", "officecli-financial-model", "officecli-docx"]
   },
   {
     "key": "agency-finance-finance-investment-researcher",
     "agent_backend": "gemini",
-    "skill_ids": [
-      "officecli-xlsx",
-      "officecli-financial-model",
-      "pdf",
-      "officecli-docx"
-    ]
+    "skill_ids": ["officecli-xlsx", "officecli-financial-model", "pdf", "officecli-docx"]
   },
   {
     "key": "agency-finance-finance-tax-strategist",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "officecli-financial-model"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-xlsx", "officecli-financial-model"]
   },
   {
     "key": "agency-game-development-game-audio-engineer",
     "agent_backend": "claude",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid"]
   },
   {
     "key": "agency-game-development-game-designer",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-xlsx", "mermaid"]
   },
   {
     "key": "agency-game-development-level-designer",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid"]
   },
   {
     "key": "agency-game-development-narrative-designer",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid"]
   },
   {
     "key": "agency-game-development-technical-artist",
     "agent_backend": "claude",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid"]
   },
   {
     "key": "agency-gis-gis-3d-scene-developer",
     "agent_backend": "claude",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid"]
   },
   {
     "key": "agency-gis-gis-analyst",
     "agent_backend": "gemini",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-data-dashboard",
-      "officecli-xlsx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-data-dashboard", "officecli-xlsx"]
   },
   {
     "key": "agency-gis-gis-bim-specialist",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid"]
   },
   {
     "key": "agency-gis-gis-cartography-designer",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx"]
   },
   {
     "key": "agency-gis-gis-drone-reality-mapping",
     "agent_backend": "gemini",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-data-dashboard"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-data-dashboard"]
   },
   {
     "key": "agency-gis-gis-geoai-ml-engineer",
     "agent_backend": "claude",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-data-dashboard",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-data-dashboard", "mermaid"]
   },
   {
     "key": "agency-gis-gis-geoprocessing-specialist",
     "agent_backend": "claude",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid"]
   },
   {
     "key": "agency-gis-gis-qa-engineer",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-xlsx", "mermaid"]
   },
   {
     "key": "agency-gis-gis-solution-engineer",
     "agent_backend": "claude",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid"]
   },
   {
     "key": "agency-gis-gis-spatial-data-engineer",
     "agent_backend": "claude",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid"]
   },
   {
     "key": "agency-gis-gis-spatial-data-scientist",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "officecli-data-dashboard"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-xlsx", "officecli-data-dashboard"]
   },
   {
     "key": "agency-gis-gis-technical-consultant",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx",
-      "pdf"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx", "pdf"]
   },
   {
     "key": "agency-gis-gis-web-gis-developer",
     "agent_backend": "claude",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid"]
   },
   {
     "key": "agency-integrations-README",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx"
-    ]
+    "skill_ids": ["officecli-docx"]
   },
   {
     "key": "agency-marketing-marketing-aeo-foundations",
     "agent_backend": "claude",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid"]
   },
   {
     "key": "agency-marketing-marketing-agentic-search-optimizer",
     "agent_backend": "claude",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid"]
   },
   {
     "key": "agency-marketing-marketing-ai-citation-strategist",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx",
-      "officecli-data-dashboard"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx", "officecli-data-dashboard"]
   },
   {
     "key": "agency-marketing-marketing-app-store-optimizer",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx"]
   },
   {
     "key": "agency-marketing-marketing-baidu-seo-specialist",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-xlsx", "officecli-pptx"]
   },
   {
     "key": "agency-marketing-marketing-bilibili-content-strategist",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx",
-      "officecli-xlsx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx", "officecli-xlsx"]
   },
   {
     "key": "agency-marketing-marketing-book-co-author",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "pdf"
-    ]
+    "skill_ids": ["officecli-docx", "pdf"]
   },
   {
     "key": "agency-marketing-marketing-carousel-growth-engine",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-pptx",
-      "officecli-data-dashboard",
-      "officecli-docx"
-    ]
+    "skill_ids": ["officecli-pptx", "officecli-data-dashboard", "officecli-docx"]
   },
   {
     "key": "agency-marketing-marketing-china-ecommerce-operator",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-xlsx", "officecli-pptx"]
   },
   {
     "key": "agency-marketing-marketing-china-market-localization-strategist",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx",
-      "officecli-xlsx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx", "officecli-xlsx"]
   },
   {
     "key": "agency-marketing-marketing-content-creator",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-xlsx", "officecli-pptx"]
   },
   {
     "key": "agency-marketing-marketing-cross-border-ecommerce",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-xlsx", "officecli-pptx"]
   },
   {
     "key": "agency-marketing-marketing-douyin-strategist",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx",
-      "officecli-xlsx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx", "officecli-xlsx"]
   },
   {
     "key": "agency-marketing-marketing-email-strategist",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "officecli-data-dashboard"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-xlsx", "officecli-data-dashboard"]
   },
   {
     "key": "agency-marketing-marketing-global-podcast-strategist",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx",
-      "officecli-xlsx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx", "officecli-xlsx"]
   },
   {
     "key": "agency-marketing-marketing-growth-hacker",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "officecli-data-dashboard"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-xlsx", "officecli-data-dashboard"]
   },
   {
     "key": "agency-marketing-marketing-instagram-curator",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx"]
   },
   {
     "key": "agency-marketing-marketing-kuaishou-strategist",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx"]
   },
   {
     "key": "agency-marketing-marketing-linkedin-content-creator",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx"]
   },
   {
     "key": "agency-marketing-marketing-livestream-commerce-coach",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx"]
   },
   {
     "key": "agency-marketing-marketing-multi-platform-publisher",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx"
-    ]
+    "skill_ids": ["officecli-docx"]
   },
   {
     "key": "agency-marketing-marketing-podcast-strategist",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx"]
   },
   {
     "key": "agency-marketing-marketing-pr-communications-manager",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx"]
   },
   {
     "key": "agency-marketing-marketing-private-domain-operator",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx"]
   },
   {
     "key": "agency-marketing-marketing-reddit-community-builder",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx"]
   },
   {
     "key": "agency-marketing-marketing-seo-specialist",
     "agent_backend": "gemini",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-data-dashboard",
-      "officecli-xlsx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-data-dashboard", "officecli-xlsx"]
   },
   {
     "key": "agency-marketing-marketing-short-video-editing-coach",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx"]
   },
   {
     "key": "agency-marketing-marketing-social-media-strategist",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx"]
   },
   {
     "key": "agency-marketing-marketing-tiktok-strategist",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx"]
   },
   {
     "key": "agency-marketing-marketing-twitter-engager",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx"]
   },
   {
     "key": "agency-marketing-marketing-video-optimization-specialist",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-data-dashboard",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-data-dashboard", "officecli-pptx"]
   },
   {
     "key": "agency-marketing-marketing-wechat-official-account",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx"]
   },
   {
     "key": "agency-marketing-marketing-weibo-strategist",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx",
-      "officecli-data-dashboard"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx", "officecli-data-dashboard"]
   },
   {
     "key": "agency-marketing-marketing-x-twitter-intelligence-analyst",
     "agent_backend": "gemini",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-data-dashboard",
-      "officecli-xlsx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-data-dashboard", "officecli-xlsx"]
   },
   {
     "key": "agency-marketing-marketing-xiaohongshu-specialist",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx"]
   },
   {
     "key": "agency-marketing-marketing-zhihu-strategist",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx"]
   },
   {
     "key": "agency-paid-media-paid-media-auditor",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "officecli-data-dashboard"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-xlsx", "officecli-data-dashboard"]
   },
   {
     "key": "agency-paid-media-paid-media-creative-strategist",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx",
-      "officecli-xlsx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx", "officecli-xlsx"]
   },
   {
     "key": "agency-paid-media-paid-media-paid-social-strategist",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx",
-      "officecli-data-dashboard"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx", "officecli-data-dashboard"]
   },
   {
     "key": "agency-paid-media-paid-media-ppc-strategist",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-xlsx",
-      "officecli-docx",
-      "officecli-data-dashboard"
-    ]
+    "skill_ids": ["officecli-xlsx", "officecli-docx", "officecli-data-dashboard"]
   },
   {
     "key": "agency-paid-media-paid-media-programmatic-buyer",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-data-dashboard",
-      "officecli-xlsx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-data-dashboard", "officecli-xlsx"]
   },
   {
     "key": "agency-paid-media-paid-media-search-query-analyst",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-xlsx",
-      "officecli-data-dashboard",
-      "officecli-docx"
-    ]
+    "skill_ids": ["officecli-xlsx", "officecli-data-dashboard", "officecli-docx"]
   },
   {
     "key": "agency-paid-media-paid-media-tracking-specialist",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid",
-      "officecli-xlsx"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid", "officecli-xlsx"]
   },
   {
     "key": "agency-product-product-behavioral-nudge-engine",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx", "mermaid"]
   },
   {
     "key": "agency-product-product-feedback-synthesizer",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "officecli-data-dashboard"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-xlsx", "officecli-data-dashboard"]
   },
   {
     "key": "agency-product-product-manager",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx",
-      "officecli-xlsx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx", "officecli-xlsx"]
   },
   {
     "key": "agency-product-product-sprint-prioritizer",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-xlsx",
-      "officecli-docx",
-      "officecli-data-dashboard"
-    ]
+    "skill_ids": ["officecli-xlsx", "officecli-docx", "officecli-data-dashboard"]
   },
   {
     "key": "agency-product-product-trend-researcher",
     "agent_backend": "gemini",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx",
-      "officecli-data-dashboard"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx", "officecli-data-dashboard"]
   },
   {
     "key": "agency-project-management-project-management-experiment-tracker",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-xlsx",
-      "officecli-data-dashboard",
-      "officecli-docx"
-    ]
+    "skill_ids": ["officecli-xlsx", "officecli-data-dashboard", "officecli-docx"]
   },
   {
     "key": "agency-project-management-project-management-jira-workflow-stewa",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid",
-      "officecli-xlsx"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid", "officecli-xlsx"]
   },
   {
     "key": "agency-project-management-project-management-meeting-notes-speci",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx"
-    ]
+    "skill_ids": ["officecli-docx"]
   },
   {
     "key": "agency-project-management-project-management-project-shepherd",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-xlsx", "mermaid"]
   },
   {
     "key": "agency-project-management-project-management-studio-operations",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-xlsx", "mermaid"]
   },
   {
     "key": "agency-project-management-project-management-studio-producer",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-xlsx", "officecli-pptx"]
   },
   {
     "key": "agency-project-management-project-manager-senior",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-xlsx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-xlsx"]
   },
   {
     "key": "agency-sales-sales-account-strategist",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-pptx",
-      "officecli-xlsx",
-      "officecli-docx"
-    ]
+    "skill_ids": ["officecli-pptx", "officecli-xlsx", "officecli-docx"]
   },
   {
     "key": "agency-sales-sales-coach",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx",
-      "officecli-xlsx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx", "officecli-xlsx"]
   },
   {
     "key": "agency-sales-sales-deal-strategist",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-xlsx", "officecli-pptx"]
   },
   {
     "key": "agency-sales-sales-discovery-coach",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx"]
   },
   {
     "key": "agency-sales-sales-engineer",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-pptx",
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-pptx", "officecli-docx", "mermaid"]
   },
   {
     "key": "agency-sales-sales-offer-lead-gen-strategist",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-pptx",
-      "officecli-pitch-deck",
-      "officecli-docx"
-    ]
+    "skill_ids": ["officecli-pptx", "officecli-pitch-deck", "officecli-docx"]
   },
   {
     "key": "agency-sales-sales-outbound-strategist",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx"]
   },
   {
     "key": "agency-sales-sales-pipeline-analyst",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-xlsx",
-      "officecli-data-dashboard",
-      "officecli-docx"
-    ]
+    "skill_ids": ["officecli-xlsx", "officecli-data-dashboard", "officecli-docx"]
   },
   {
     "key": "agency-sales-sales-proposal-strategist",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-pptx",
-      "officecli-pitch-deck",
-      "officecli-docx"
-    ]
+    "skill_ids": ["officecli-pptx", "officecli-pitch-deck", "officecli-docx"]
   },
   {
     "key": "agency-security-security-appsec-engineer",
     "agent_backend": "claude",
-    "skill_ids": [
-      "mermaid",
-      "officecli-docx",
-      "pdf"
-    ]
+    "skill_ids": ["mermaid", "officecli-docx", "pdf"]
   },
   {
     "key": "agency-security-security-architect",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "mermaid",
-      "officecli-docx",
-      "pdf"
-    ]
+    "skill_ids": ["mermaid", "officecli-docx", "pdf"]
   },
   {
     "key": "agency-security-security-blockchain-security-auditor",
     "agent_backend": "claude",
-    "skill_ids": [
-      "mermaid",
-      "pdf",
-      "officecli-docx"
-    ]
+    "skill_ids": ["mermaid", "pdf", "officecli-docx"]
   },
   {
     "key": "agency-security-security-cloud-security-architect",
     "agent_backend": "claude",
-    "skill_ids": [
-      "mermaid",
-      "officecli-docx",
-      "pdf"
-    ]
+    "skill_ids": ["mermaid", "officecli-docx", "pdf"]
   },
   {
     "key": "agency-security-security-compliance-auditor",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-word-form",
-      "pdf",
-      "officecli-docx"
-    ]
+    "skill_ids": ["officecli-word-form", "pdf", "officecli-docx"]
   },
   {
     "key": "agency-security-security-incident-responder",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "pdf",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "pdf", "mermaid"]
   },
   {
     "key": "agency-security-security-penetration-tester",
     "agent_backend": "claude",
-    "skill_ids": [
-      "pdf",
-      "mermaid",
-      "officecli-docx"
-    ]
+    "skill_ids": ["pdf", "mermaid", "officecli-docx"]
   },
   {
     "key": "agency-security-security-senior-secops",
     "agent_backend": "claude",
-    "skill_ids": [
-      "mermaid",
-      "officecli-docx",
-      "pdf"
-    ]
+    "skill_ids": ["mermaid", "officecli-docx", "pdf"]
   },
   {
     "key": "agency-security-security-threat-detection-engineer",
     "agent_backend": "claude",
-    "skill_ids": [
-      "mermaid",
-      "officecli-docx",
-      "pdf"
-    ]
+    "skill_ids": ["mermaid", "officecli-docx", "pdf"]
   },
   {
     "key": "agency-security-security-threat-intelligence-analyst",
     "agent_backend": "gemini",
-    "skill_ids": [
-      "pdf",
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["pdf", "officecli-docx", "mermaid"]
   },
   {
     "key": "agency-spatial-computing-macos-spatial-metal-engineer",
     "agent_backend": "claude",
-    "skill_ids": [
-      "mermaid",
-      "officecli-docx"
-    ]
+    "skill_ids": ["mermaid", "officecli-docx"]
   },
   {
     "key": "agency-spatial-computing-terminal-integration-specialist",
     "agent_backend": "claude",
-    "skill_ids": [
-      "mermaid",
-      "officecli-docx"
-    ]
+    "skill_ids": ["mermaid", "officecli-docx"]
   },
   {
     "key": "agency-spatial-computing-visionos-spatial-engineer",
     "agent_backend": "claude",
-    "skill_ids": [
-      "mermaid",
-      "officecli-docx"
-    ]
+    "skill_ids": ["mermaid", "officecli-docx"]
   },
   {
     "key": "agency-spatial-computing-xr-cockpit-interaction-specialist",
     "agent_backend": "claude",
-    "skill_ids": [
-      "mermaid",
-      "officecli-docx"
-    ]
+    "skill_ids": ["mermaid", "officecli-docx"]
   },
   {
     "key": "agency-spatial-computing-xr-immersive-developer",
     "agent_backend": "claude",
-    "skill_ids": [
-      "mermaid",
-      "officecli-docx"
-    ]
+    "skill_ids": ["mermaid", "officecli-docx"]
   },
   {
     "key": "agency-spatial-computing-xr-interface-architect",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-pptx",
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-pptx", "officecli-docx", "mermaid"]
   },
   {
     "key": "agency-specialized-accounts-payable-agent",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-xlsx",
-      "officecli-docx"
-    ]
+    "skill_ids": ["officecli-xlsx", "officecli-docx"]
   },
   {
     "key": "agency-specialized-agentic-identity-trust",
     "agent_backend": "claude",
-    "skill_ids": [
-      "mermaid",
-      "officecli-docx",
-      "pdf"
-    ]
+    "skill_ids": ["mermaid", "officecli-docx", "pdf"]
   },
   {
     "key": "agency-specialized-agents-orchestrator",
     "agent_backend": "claude",
-    "skill_ids": [
-      "mermaid",
-      "officecli-docx"
-    ]
+    "skill_ids": ["mermaid", "officecli-docx"]
   },
   {
     "key": "agency-specialized-automation-governance-architect",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "mermaid",
-      "officecli-docx",
-      "officecli-xlsx"
-    ]
+    "skill_ids": ["mermaid", "officecli-docx", "officecli-xlsx"]
   },
   {
     "key": "agency-specialized-business-strategist",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-pptx",
-      "officecli-docx",
-      "officecli-pitch-deck"
-    ]
+    "skill_ids": ["officecli-pptx", "officecli-docx", "officecli-pitch-deck"]
   },
   {
     "key": "agency-specialized-change-management-consultant",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx"]
   },
   {
     "key": "agency-specialized-chief-financial-officer",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-financial-model",
-      "officecli-xlsx",
-      "officecli-pptx",
-      "officecli-docx"
-    ]
+    "skill_ids": ["officecli-financial-model", "officecli-xlsx", "officecli-pptx", "officecli-docx"]
   },
   {
     "key": "agency-specialized-corporate-training-designer",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx",
-      "officecli-xlsx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx", "officecli-xlsx"]
   },
   {
     "key": "agency-specialized-customer-service",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx"
-    ]
+    "skill_ids": ["officecli-docx"]
   },
   {
     "key": "agency-specialized-customer-success-manager",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-pptx",
-      "officecli-xlsx",
-      "officecli-docx"
-    ]
+    "skill_ids": ["officecli-pptx", "officecli-xlsx", "officecli-docx"]
   },
   {
     "key": "agency-specialized-data-consolidation-agent",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-xlsx",
-      "officecli-data-dashboard",
-      "officecli-docx"
-    ]
+    "skill_ids": ["officecli-xlsx", "officecli-data-dashboard", "officecli-docx"]
   },
   {
     "key": "agency-specialized-data-privacy-officer",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-word-form",
-      "pdf",
-      "officecli-xlsx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-word-form", "pdf", "officecli-xlsx"]
   },
   {
     "key": "agency-specialized-esg-sustainability-officer",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "officecli-pptx",
-      "pdf"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-xlsx", "officecli-pptx", "pdf"]
   },
   {
     "key": "agency-specialized-government-digital-presales-consultant",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-pptx",
-      "officecli-docx",
-      "officecli-word-form",
-      "pdf"
-    ]
+    "skill_ids": ["officecli-pptx", "officecli-docx", "officecli-word-form", "pdf"]
   },
   {
     "key": "agency-specialized-grant-writer",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-word-form",
-      "officecli-xlsx",
-      "pdf"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-word-form", "officecli-xlsx", "pdf"]
   },
   {
     "key": "agency-specialized-healthcare-customer-service",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx"
-    ]
+    "skill_ids": ["officecli-docx"]
   },
   {
     "key": "agency-specialized-healthcare-marketing-compliance",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-word-form",
-      "pdf"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-word-form", "pdf"]
   },
   {
     "key": "agency-specialized-hospitality-guest-services",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-xlsx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-xlsx"]
   },
   {
     "key": "agency-specialized-hr-onboarding",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-word-form",
-      "officecli-xlsx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-word-form", "officecli-xlsx"]
   },
   {
     "key": "agency-specialized-identity-graph-operator",
     "agent_backend": "claude",
-    "skill_ids": [
-      "mermaid",
-      "officecli-docx"
-    ]
+    "skill_ids": ["mermaid", "officecli-docx"]
   },
   {
     "key": "agency-specialized-language-translator",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx"
-    ]
+    "skill_ids": ["officecli-docx"]
   },
   {
     "key": "agency-specialized-legal-billing-time-tracking",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-xlsx",
-      "officecli-docx",
-      "officecli-word-form"
-    ]
+    "skill_ids": ["officecli-xlsx", "officecli-docx", "officecli-word-form"]
   },
   {
     "key": "agency-specialized-legal-client-intake",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-word-form",
-      "officecli-docx",
-      "pdf"
-    ]
+    "skill_ids": ["officecli-word-form", "officecli-docx", "pdf"]
   },
   {
     "key": "agency-specialized-legal-document-review",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "pdf",
-      "officecli-docx",
-      "officecli-word-form"
-    ]
+    "skill_ids": ["pdf", "officecli-docx", "officecli-word-form"]
   },
   {
     "key": "agency-specialized-loan-officer-assistant",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-xlsx",
-      "officecli-financial-model",
-      "officecli-docx",
-      "officecli-word-form"
-    ]
+    "skill_ids": ["officecli-xlsx", "officecli-financial-model", "officecli-docx", "officecli-word-form"]
   },
   {
     "key": "agency-specialized-lsp-index-engineer",
     "agent_backend": "claude",
-    "skill_ids": [
-      "mermaid",
-      "officecli-docx"
-    ]
+    "skill_ids": ["mermaid", "officecli-docx"]
   },
   {
     "key": "agency-specialized-ma-integration-manager",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-pptx",
-      "officecli-xlsx",
-      "officecli-docx",
-      "officecli-financial-model"
-    ]
+    "skill_ids": ["officecli-pptx", "officecli-xlsx", "officecli-docx", "officecli-financial-model"]
   },
   {
     "key": "agency-specialized-medical-billing-coding-specialist",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-xlsx",
-      "officecli-docx"
-    ]
+    "skill_ids": ["officecli-xlsx", "officecli-docx"]
   },
   {
     "key": "agency-specialized-operations-manager",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-xlsx",
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-xlsx", "officecli-docx", "mermaid"]
   },
   {
     "key": "agency-specialized-organizational-psychologist",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx"]
   },
   {
     "key": "agency-specialized-personal-growth-mentor",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx"
-    ]
+    "skill_ids": ["officecli-docx"]
   },
   {
     "key": "agency-specialized-real-estate-buyer-seller",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-word-form",
-      "officecli-xlsx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-word-form", "officecli-xlsx"]
   },
   {
     "key": "agency-specialized-recruitment-specialist",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-word-form",
-      "officecli-docx",
-      "officecli-xlsx"
-    ]
+    "skill_ids": ["officecli-word-form", "officecli-docx", "officecli-xlsx"]
   },
   {
     "key": "agency-specialized-report-distribution-agent",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-xlsx",
-      "officecli-docx"
-    ]
+    "skill_ids": ["officecli-xlsx", "officecli-docx"]
   },
   {
     "key": "agency-specialized-retail-customer-returns",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-xlsx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-xlsx"]
   },
   {
     "key": "agency-specialized-sales-data-extraction-agent",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-xlsx",
-      "officecli-data-dashboard"
-    ]
+    "skill_ids": ["officecli-xlsx", "officecli-data-dashboard"]
   },
   {
     "key": "agency-specialized-sales-outreach",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx",
-      "officecli-xlsx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx", "officecli-xlsx"]
   },
   {
     "key": "agency-specialized-specialized-chief-of-staff",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx",
-      "officecli-xlsx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx", "officecli-xlsx"]
   },
   {
     "key": "agency-specialized-specialized-civil-engineer",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-xlsx", "mermaid"]
   },
   {
     "key": "agency-specialized-specialized-cultural-intelligence-strategist",
     "agent_backend": "gemini",
-    "skill_ids": [
-      "officecli-docx",
-      "pdf"
-    ]
+    "skill_ids": ["officecli-docx", "pdf"]
   },
   {
     "key": "agency-specialized-specialized-developer-advocate",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx", "mermaid"]
   },
   {
     "key": "agency-specialized-specialized-document-generator",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx",
-      "officecli-xlsx",
-      "pdf"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx", "officecli-xlsx", "pdf"]
   },
   {
     "key": "agency-specialized-specialized-french-consulting-market",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-xlsx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-xlsx"]
   },
   {
     "key": "agency-specialized-specialized-korean-business-navigator",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx"]
   },
   {
     "key": "agency-specialized-specialized-mcp-builder",
     "agent_backend": "claude",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid"]
   },
   {
     "key": "agency-specialized-specialized-model-qa",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "pdf"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-xlsx", "pdf"]
   },
   {
     "key": "agency-specialized-specialized-pricing-analyst",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-xlsx",
-      "officecli-financial-model",
-      "officecli-docx"
-    ]
+    "skill_ids": ["officecli-xlsx", "officecli-financial-model", "officecli-docx"]
   },
   {
     "key": "agency-specialized-specialized-salesforce-architect",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid"]
   },
   {
     "key": "agency-specialized-specialized-strategy-duel-agent",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx"]
   },
   {
     "key": "agency-specialized-specialized-workflow-architect",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "mermaid",
-      "officecli-docx"
-    ]
+    "skill_ids": ["mermaid", "officecli-docx"]
   },
   {
     "key": "agency-specialized-study-abroad-advisor",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx"]
   },
   {
     "key": "agency-specialized-supply-chain-strategist",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-xlsx", "officecli-pptx"]
   },
   {
     "key": "agency-specialized-zk-steward",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid"]
   },
   {
     "key": "agency-strategy-EXECUTIVE-BRIEF",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx"]
   },
   {
     "key": "agency-strategy-nexus-strategy",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx"]
   },
   {
     "key": "agency-strategy-QUICKSTART",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx"]
   },
   {
     "key": "agency-support-support-analytics-reporter",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-data-dashboard",
-      "officecli-xlsx",
-      "officecli-docx"
-    ]
+    "skill_ids": ["officecli-data-dashboard", "officecli-xlsx", "officecli-docx"]
   },
   {
     "key": "agency-support-support-executive-summary-generator",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-pptx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-pptx"]
   },
   {
     "key": "agency-support-support-finance-tracker",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-xlsx",
-      "officecli-financial-model",
-      "officecli-docx"
-    ]
+    "skill_ids": ["officecli-xlsx", "officecli-financial-model", "officecli-docx"]
   },
   {
     "key": "agency-support-support-infrastructure-maintainer",
     "agent_backend": "claude",
-    "skill_ids": [
-      "mermaid",
-      "officecli-docx"
-    ]
+    "skill_ids": ["mermaid", "officecli-docx"]
   },
   {
     "key": "agency-support-support-legal-compliance-checker",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-word-form",
-      "pdf",
-      "officecli-docx"
-    ]
+    "skill_ids": ["officecli-word-form", "pdf", "officecli-docx"]
   },
   {
     "key": "agency-support-support-support-responder",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx"
-    ]
+    "skill_ids": ["officecli-docx"]
   },
   {
     "key": "agency-testing-testing-accessibility-auditor",
     "agent_backend": "claude",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid"]
   },
   {
     "key": "agency-testing-testing-api-tester",
     "agent_backend": "claude",
-    "skill_ids": [
-      "mermaid",
-      "officecli-docx"
-    ]
+    "skill_ids": ["mermaid", "officecli-docx"]
   },
   {
     "key": "agency-testing-testing-evidence-collector",
     "agent_backend": "claude",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid"]
   },
   {
     "key": "agency-testing-testing-performance-benchmarker",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "officecli-data-dashboard"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-xlsx", "officecli-data-dashboard"]
   },
   {
     "key": "agency-testing-testing-reality-checker",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-xlsx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-xlsx"]
   },
   {
     "key": "agency-testing-testing-test-results-analyzer",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "officecli-data-dashboard"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-xlsx", "officecli-data-dashboard"]
   },
   {
     "key": "agency-testing-testing-tool-evaluator",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "officecli-xlsx"
-    ]
+    "skill_ids": ["officecli-docx", "officecli-xlsx"]
   },
   {
     "key": "agency-testing-testing-workflow-optimizer",
     "agent_backend": "aionrs",
-    "skill_ids": [
-      "officecli-docx",
-      "mermaid",
-      "officecli-xlsx"
-    ]
+    "skill_ids": ["officecli-docx", "mermaid", "officecli-xlsx"]
   }
 ]

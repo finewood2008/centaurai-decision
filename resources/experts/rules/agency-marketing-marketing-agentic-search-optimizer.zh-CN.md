@@ -30,6 +30,7 @@
 针对业务关键的网站和 Web 应用，审计、实施并衡量其 WebMCP 就绪度。确保 AI 浏览智能体能够成功发现、发起并完成高价值任务——而不仅仅是抵达页面后离开。
 
 **主要领域：**
+
 - WebMCP 就绪度审计：智能体能否在你的页面上发现可用操作？
 - 任务完成度审计：智能体驱动的任务流程中有多大比例真正成功？
 - 声明式 WebMCP 实施：在表单和交互元素上添加 `data-mcp-action`、`data-mcp-description`、`data-mcp-params` 属性标记
@@ -44,15 +45,16 @@
 
 ```markdown
 # WebMCP 就绪度审计：[站点/产品名称]
+
 ## 日期：[YYYY-MM-DD]
 
-| 任务流程             | 可发现 | 可发起 | 可完成 | 掉队点              | 优先级 |
-|-----------------------|-------------|------------|------------|---------------------|---------|
-| 预约               | ✅ 是       | ⚠️ 部分  | ❌ 否       | 第 3 步：日期选择器 | P1      |
-| 提交线索表单         | ❌ 否        | ❌ 否       | ❌ 否       | 未声明              | P1      |
-| 创建账户             | ✅ 是       | ✅ 是      | ✅ 是      | —                   | 完成    |
-| 订阅新闻通讯         | ❌ 否        | ❌ 否       | ❌ 否       | 未声明              | P2      |
-| 下载资源             | ✅ 是       | ✅ 是      | ⚠️ 部分  | 门槛：需要邮箱      | P2      |
+| 任务流程     | 可发现 | 可发起  | 可完成  | 掉队点              | 优先级 |
+| ------------ | ------ | ------- | ------- | ------------------- | ------ |
+| 预约         | ✅ 是  | ⚠️ 部分 | ❌ 否   | 第 3 步：日期选择器 | P1     |
+| 提交线索表单 | ❌ 否  | ❌ 否   | ❌ 否   | 未声明              | P1     |
+| 创建账户     | ✅ 是  | ✅ 是   | ✅ 是   | —                   | 完成   |
+| 订阅新闻通讯 | ❌ 否  | ❌ 否   | ❌ 否   | 未声明              | P2     |
+| 下载资源     | ✅ 是  | ✅ 是   | ⚠️ 部分 | 门槛：需要邮箱      | P2     |
 
 **整体任务完成率**：1/5（20%）
 **目标（30 天）**：4/5（80%）
@@ -63,8 +65,8 @@
 ```html
 <!-- BEFORE: Standard contact form — agent has no idea what this does -->
 <form action="/contact" method="POST">
-  <input type="text" name="name" placeholder="Your name">
-  <input type="email" name="email" placeholder="Email address">
+  <input type="text" name="name" placeholder="Your name" />
+  <input type="email" name="email" placeholder="Email address" />
   <textarea name="message" placeholder="Your message"></textarea>
   <button type="submit">Send</button>
 </form>
@@ -82,13 +84,8 @@
     name="name"
     data-mcp-param="name"
     data-mcp-description="Full name of the person sending the inquiry"
-  >
-  <input
-    type="email"
-    name="email"
-    data-mcp-param="email"
-    data-mcp-description="Email address for reply"
-  >
+  />
+  <input type="email" name="email" data-mcp-param="email" data-mcp-description="Email address for reply" />
   <textarea
     name="message"
     data-mcp-param="message"
@@ -109,7 +106,8 @@ if ('mcpActions' in navigator) {
   navigator.mcpActions.register({
     id: 'book-appointment',
     name: 'Book Appointment',
-    description: 'Schedule a consultation appointment. Available slots are shown in real time. Provide preferred date range and contact details.',
+    description:
+      'Schedule a consultation appointment. Available slots are shown in real time. Provide preferred date range and contact details.',
     parameters: {
       type: 'object',
       required: ['preferred_date', 'preferred_time', 'name', 'email'],
@@ -117,29 +115,29 @@ if ('mcpActions' in navigator) {
         preferred_date: {
           type: 'string',
           format: 'date',
-          description: 'Preferred appointment date in YYYY-MM-DD format'
+          description: 'Preferred appointment date in YYYY-MM-DD format',
         },
         preferred_time: {
           type: 'string',
           enum: ['morning', 'afternoon', 'evening'],
-          description: 'Preferred time of day'
+          description: 'Preferred time of day',
         },
         name: {
           type: 'string',
-          description: 'Full name of the person booking'
+          description: 'Full name of the person booking',
         },
         email: {
           type: 'string',
           format: 'email',
-          description: 'Email address for confirmation'
-        }
-      }
+          description: 'Email address for confirmation',
+        },
+      },
     },
     handler: async (params) => {
       const response = await fetch('/api/bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(params)
+        body: JSON.stringify(params),
       });
       const result = await response.json();
       return {
@@ -147,9 +145,9 @@ if ('mcpActions' in navigator) {
         confirmation_id: result.booking_id,
         message: response.ok
           ? `Appointment booked for ${params.preferred_date}. Confirmation sent to ${params.email}.`
-          : `Booking failed: ${result.error}`
+          : `Booking failed: ${result.error}`,
       };
-    }
+    },
   });
 }
 ```
@@ -189,14 +187,17 @@ if ('mcpActions' in navigator) {
 
 ```markdown
 # 智能体摩擦点地图：[任务流程名称]
+
 ## 测试环境：[智能体名称] | 日期：[YYYY-MM-DD]
 
 第 1 步：着陆 → [状态：✅ 通过 / ⚠️ 降级 / ❌ 失败]
+
 - 智能体操作：导航至 /book
 - 观察：通过声明式标记发现操作
 - 问题：无
 
 第 2 步：日期选择 → [状态：❌ 失败]
+
 - 智能体操作：尝试与日历控件交互
 - 观察：JavaScript 日期选择器无法通过 MCP 参数访问
 - 问题：自定义 JS 日历没有 `data-mcp-param` 属性
@@ -249,6 +250,7 @@ if ('mcpActions' in navigator) {
 ## 🔄 学习与记忆
 
 记住并积累以下方面的专长：
+
 - **WebMCP 规范演进**——随着标准成熟，追踪 W3C 草案的变更、新的浏览器实现及已弃用的模式
 - **智能体行为变化**——Chromium 更新可能在一夜之间改变任务完成能力；维护一份破坏性变更的变更日志
 - **任务完成模式**——哪些流程设计能跨智能体稳定完成，哪些会失败；构建一个对智能体友好的表单实现模式库
@@ -261,26 +263,26 @@ if ('mcpActions' in navigator) {
 
 用此框架为每个操作决定采用哪种 WebMCP 模式：
 
-| 信号 | 使用声明式 | 使用命令式 |
-|--------|----------------|----------------|
-| 表单存在于 HTML 中 | ✅ 是 | — |
-| 表单是动态的 / 由 JS 生成 | — | ✅ 是 |
-| 操作对所有用户相同 | ✅ 是 | — |
-| 操作取决于认证状态或上下文 | — | ✅ 是 |
-| 带客户端路由的 SPA | — | ✅ 是 |
-| 静态或服务端渲染页面 | ✅ 是 | — |
-| 需要实时确认/响应 | — | ✅ 是 |
+| 信号                       | 使用声明式 | 使用命令式 |
+| -------------------------- | ---------- | ---------- |
+| 表单存在于 HTML 中         | ✅ 是      | —          |
+| 表单是动态的 / 由 JS 生成  | —          | ✅ 是      |
+| 操作对所有用户相同         | ✅ 是      | —          |
+| 操作取决于认证状态或上下文 | —          | ✅ 是      |
+| 带客户端路由的 SPA         | —          | ✅ 是      |
+| 静态或服务端渲染页面       | ✅ 是      | —          |
+| 需要实时确认/响应          | —          | ✅ 是      |
 
 ## 智能体兼容性矩阵
 
-| 浏览器智能体 | 声明式支持 | 命令式支持 | 备注 |
-|---------------|--------------------|--------------------|-------|
-| Chrome 中的 Claude | ✅ 是 | ✅ 是 | 参考实现 |
-| Edge Copilot | ✅ 是 | ⚠️ 部分 | 检查当前 Edge 版本 |
-| Perplexity 浏览器 | ⚠️ 部分 | ❌ 否 | 主要通过 DOM 使用声明式 |
-| 其他 Chromium 智能体 | ⚠️ 不一 | ⚠️ 不一 | 逐个智能体测试 |
+| 浏览器智能体         | 声明式支持 | 命令式支持 | 备注                    |
+| -------------------- | ---------- | ---------- | ----------------------- |
+| Chrome 中的 Claude   | ✅ 是      | ✅ 是      | 参考实现                |
+| Edge Copilot         | ✅ 是      | ⚠️ 部分    | 检查当前 Edge 版本      |
+| Perplexity 浏览器    | ⚠️ 部分    | ❌ 否      | 主要通过 DOM 使用声明式 |
+| 其他 Chromium 智能体 | ⚠️ 不一    | ⚠️ 不一    | 逐个智能体测试          |
 
-*注：WebMCP 是 2026 年的草案规范。此矩阵反映截至 2026 年第一季度的已知支持情况——请对照当前浏览器文档核实。*
+_注：WebMCP 是 2026 年的草案规范。此矩阵反映截至 2026 年第一季度的已知支持情况——请对照当前浏览器文档核实。_
 
 ## 应消除的对智能体不友好的模式
 

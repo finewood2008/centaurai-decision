@@ -1,16 +1,17 @@
 {
-  "title": "专家",
-  "subtitle": "按部门查找专业专家，按能力关键词搜索，并快速发起面向业务场景的专业对话。",
-  "searchPlaceholder": "搜索专家",
+  "title": "找专家咨询",
+  "subtitle": "像请外脑顾问一样，把经营难题交给对应领域的资深专家——市场获客、销售成交、财税资金、人力团队、运营提效，按问题找人，给你能落地的诊断与方案。",
+  "searchPlaceholder": "搜索专家 / 经营问题",
   "disabled": "未启用",
   "empty": "暂无专家数据。请在终端运行导入脚本。",
   "emptySearch": "没有符合当前筛选条件的专家。",
+  "homeHint": "找专家咨询 · 把经营难题交给对应领域的资深顾问",
+  "viewAll": "查看全部专家",
   "departments": {
-    "all": "全部部门"
+    "all": "全部科室"
   },
   "stats": {
-    "departments": "{{count}} 个部门",
-    "total": "{{count}} 位专家",
-    "enabled": "{{count}} 位可用"
+    "departments": "{{count}} 个经营科室",
+    "enabled": "{{count}} 位专家"
   }
 }

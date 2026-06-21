@@ -276,11 +276,9 @@ const RemoteSendBox: React.FC<{ conversation_id: string }> = ({ conversation_id 
         aiProcessingRef.current = true;
 
         void checkAndUpdateTitle(conversation_id, input);
-        await ipcBridge.conversation.sendMessage.invoke({
-          input: initialDisplayMessage,
-          conversation_id,
-          files,
-        });
+        // Team-owned conversations must go through the Team API (aioncore ≥0.1.29).
+        if (teamPermission) await teamPermission.sendToConversation(conversation_id, initialDisplayMessage, files);
+        else await ipcBridge.conversation.sendMessage.invoke({ input: initialDisplayMessage, conversation_id, files });
         emitter.emit('chat.history.refresh');
         sessionStorage.removeItem(storageKey);
       } catch (error) {
@@ -329,11 +327,9 @@ const RemoteSendBox: React.FC<{ conversation_id: string }> = ({ conversation_id 
 
       try {
         void checkAndUpdateTitle(conversation_id, input);
-        await ipcBridge.conversation.sendMessage.invoke({
-          input: displayMessage,
-          conversation_id,
-          files,
-        });
+        // Team-owned conversations must go through the Team API (aioncore ≥0.1.29).
+        if (teamPermission) await teamPermission.sendToConversation(conversation_id, displayMessage, files);
+        else await ipcBridge.conversation.sendMessage.invoke({ input: displayMessage, conversation_id, files });
         emitter.emit('chat.history.refresh');
       } catch (error) {
         setAiProcessing(false);

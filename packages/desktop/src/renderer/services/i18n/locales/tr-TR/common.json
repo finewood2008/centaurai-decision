@@ -1,4 +1,10 @@
 {
+  "routeError": {
+    "title": "Bir hata oluştu",
+    "unknown": "Bilinmeyen bir hata oluştu",
+    "retry": "Yeniden dene",
+    "home": "Ana sayfaya dön"
+  },
   "send": "Gönder",
   "cancel": "İptal",
   "save": "Kaydet",

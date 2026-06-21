@@ -21,6 +21,7 @@ import {
   InputNumber,
   Message,
   Modal,
+  Radio,
   Switch,
   Tooltip,
 } from '@arco-design/web-react';
@@ -66,7 +67,19 @@ const SystemModalContent: React.FC = () => {
   const [vectorDBEnabled, setVectorDBEnabled] = useState(false);
   const [vectorDBEndpoint, setVectorDBEndpoint] = useState('http://127.0.0.1:8618');
   const [vectorDBSearchCount, setVectorDBSearchCount] = useState(5);
-  const [vectorDBTestResult, setVectorDBTestResult] = useState<string | null>(null);
+  const [vectorDBSearchMode, setVectorDBSearchMode] = useState<'text' | 'visual' | 'hybrid'>('text');
+  const [vectorDBTesting, setVectorDBTesting] = useState(false);
+  const [vectorDBStatus, setVectorDBStatus] = useState<{
+    ok: boolean;
+    error?: string;
+    caps?: { text_model?: string; reranker?: boolean; visual?: boolean; ocr?: boolean; hybrid_bm25?: boolean };
+    stats?: {
+      total_documents?: number;
+      total_chunks?: number;
+      visual_indexed_images?: number;
+      image_documents?: number;
+    };
+  } | null>(null);
 
   useEffect(() => {
     if (!isDesktop) {
@@ -110,6 +123,7 @@ const SystemModalContent: React.FC = () => {
     setVectorDBEnabled(configService.get('vectorDB.enabled') ?? false);
     setVectorDBEndpoint(configService.get('vectorDB.endpoint') ?? 'http://127.0.0.1:8618');
     setVectorDBSearchCount(configService.get('vectorDB.searchCount') ?? 5);
+    setVectorDBSearchMode(configService.get('vectorDB.searchMode') ?? 'text');
     const pt = configService.get('acp.promptTimeout');
     if (pt && pt > 0) setPromptTimeout(pt);
     const ait = configService.get('acp.agentIdleTimeout');
@@ -279,22 +293,28 @@ const SystemModalContent: React.FC = () => {
     configService.set('vectorDB.searchCount', clamped).catch(() => {});
   }, [vectorDBSearchCount]);
 
+  const handleVectorDBSearchModeChange = useCallback((mode: 'text' | 'visual' | 'hybrid') => {
+    setVectorDBSearchMode(mode);
+    configService.set('vectorDB.searchMode', mode).catch(() => {});
+  }, []);
+
   const handleVectorDBTest = useCallback(async () => {
-    setVectorDBTestResult(null);
+    setVectorDBTesting(true);
+    setVectorDBStatus(null);
     try {
       const resp = await fetch(`${vectorDBEndpoint}/api/health`);
       const data = await resp.json();
       if (data.status === 'ok') {
         const statsResp = await fetch(`${vectorDBEndpoint}/api/stats`);
         const stats = await statsResp.json();
-        setVectorDBTestResult(
-          `✅ 连接正常 | 文档数: ${stats.total_documents} (文本: ${stats.text_documents}, 图片: ${stats.image_documents})`
-        );
+        setVectorDBStatus({ ok: true, caps: data.capabilities ?? {}, stats });
       } else {
-        setVectorDBTestResult('⚠️ 服务异常');
+        setVectorDBStatus({ ok: false, error: '服务异常' });
       }
     } catch {
-      setVectorDBTestResult('❌ 连接失败，请检查服务是否启动');
+      setVectorDBStatus({ ok: false, error: '连接失败，请检查服务是否启动' });
+    } finally {
+      setVectorDBTesting(false);
     }
   }, [vectorDBEndpoint]);
 
@@ -433,20 +453,66 @@ const SystemModalContent: React.FC = () => {
             ),
           },
           {
-            key: 'vectorDBTest',
-            label: '连接测试',
+            key: 'vectorDBSearchMode',
+            label: '检索模式',
+            description: '文本=语义检索 · 视觉=以文搜图 · 混合=两者合并',
             component: (
-              <div className='flex items-center gap-8px'>
-                <Button size='small' onClick={handleVectorDBTest}>
+              <Radio.Group
+                type='button'
+                size='small'
+                value={vectorDBSearchMode}
+                onChange={handleVectorDBSearchModeChange}
+              >
+                <Radio value='text'>文本</Radio>
+                <Radio value='visual'>视觉</Radio>
+                <Radio value='hybrid'>混合</Radio>
+              </Radio.Group>
+            ),
+          },
+          {
+            key: 'vectorDBTest',
+            label: '服务状态',
+            component: (
+              <div className='flex flex-col items-end gap-8px' style={{ maxWidth: 320 }}>
+                <Button size='small' loading={vectorDBTesting} onClick={handleVectorDBTest}>
                   测试连接
                 </Button>
-                {vectorDBTestResult && (
-                  <span
-                    className={`text-12px ${vectorDBTestResult.startsWith('✅') ? 'text-[#4ecca3]' : 'text-[#e94560]'}`}
-                  >
-                    {vectorDBTestResult}
-                  </span>
-                )}
+                {vectorDBStatus &&
+                  (vectorDBStatus.ok ? (
+                    <div className='flex flex-col items-end gap-6px'>
+                      <div className='flex flex-wrap justify-end gap-4px'>
+                        {[
+                          { on: true, label: vectorDBStatus.caps?.text_model || 'bge' },
+                          { on: !!vectorDBStatus.caps?.reranker, label: '重排' },
+                          { on: !!vectorDBStatus.caps?.hybrid_bm25, label: 'BM25' },
+                          { on: !!vectorDBStatus.caps?.ocr, label: 'OCR' },
+                          { on: !!vectorDBStatus.caps?.visual, label: '视觉' },
+                        ].map((c) => (
+                          <span
+                            key={c.label}
+                            className='text-10px px-6px py-1px rd-6px'
+                            style={{
+                              color: c.on ? '#4e9a6b' : '#b3a896',
+                              background: c.on ? 'rgba(78,154,107,0.12)' : 'transparent',
+                              border: `1px solid ${c.on ? 'rgba(78,154,107,0.3)' : 'var(--color-border-2)'}`,
+                            }}
+                          >
+                            {c.on ? '● ' : '○ '}
+                            {c.label}
+                          </span>
+                        ))}
+                      </div>
+                      <span className='text-12px text-t-tertiary'>
+                        文档 {vectorDBStatus.stats?.total_documents ?? '--'} · 块{' '}
+                        {vectorDBStatus.stats?.total_chunks ?? '--'} · 图片{' '}
+                        {vectorDBStatus.stats?.visual_indexed_images ?? vectorDBStatus.stats?.image_documents ?? '--'}
+                      </span>
+                    </div>
+                  ) : (
+                    <span className='text-12px' style={{ color: '#e94560' }}>
+                      ❌ {vectorDBStatus.error}
+                    </span>
+                  ))}
               </div>
             ),
           },

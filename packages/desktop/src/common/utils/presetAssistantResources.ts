@@ -5,6 +5,7 @@
  */
 
 import { ipcBridge } from '@/common';
+import { getConsultationProtocol, isAgencyExpert } from './consultationProtocol';
 
 /**
  * Thin pass-through over `ipcBridge.fs.readAssistant{Rule,Skill}`. The backend
@@ -94,8 +95,16 @@ export async function loadPresetAssistantResources(
     deps.warn(`[presetAssistantResources] Failed to load skills for ${custom_agent_id}`, error);
   }
 
+  // Prepend the consultation protocol for agency experts so they gather context
+  // (via multiple-choice clarifying questions) before answering. Prefix — not
+  // suffix — so it outranks the "produce a full deliverable now" instructions in
+  // the rule body. Gated by id prefix; office assistants are unaffected.
+  const baseRules = rules || fallbackRules;
+  const finalRules =
+    isAgencyExpert(custom_agent_id) && baseRules ? getConsultationProtocol(localeKey) + baseRules : baseRules;
+
   return {
-    rules: rules || fallbackRules,
+    rules: finalRules,
     skills,
     enabled_skills: await deps.getEnabledSkills(custom_agent_id),
     exclude_auto_inject_skills: await deps.getExcludeAutoInjectSkills(custom_agent_id),

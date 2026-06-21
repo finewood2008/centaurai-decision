@@ -75,58 +75,58 @@
 scrm_config:
   # Channel QR Code Configuration
   channel_codes:
-    - name: "Package Insert - East China Warehouse"
-      type: "auto_assign"
-      staff_pool: ["sales_team_east"]
-      welcome_message: "Hi~ 我是您的专属顾问 {staff_name}。感谢您的购买！回复 1 加入 VIP 社群，回复 2 获取产品指南"
-      auto_tags: ["package_insert", "east_china", "new_customer"]
-      channel_tracking: "parcel_card_east"
+    - name: 'Package Insert - East China Warehouse'
+      type: 'auto_assign'
+      staff_pool: ['sales_team_east']
+      welcome_message: 'Hi~ 我是您的专属顾问 {staff_name}。感谢您的购买！回复 1 加入 VIP 社群，回复 2 获取产品指南'
+      auto_tags: ['package_insert', 'east_china', 'new_customer']
+      channel_tracking: 'parcel_card_east'
 
-    - name: "Livestream QR Code"
-      type: "round_robin"
-      staff_pool: ["live_team"]
+    - name: 'Livestream QR Code'
+      type: 'round_robin'
+      staff_pool: ['live_team']
       welcome_message: "嗨，感谢从直播间来！发送'直播福利'领取你的专属优惠券~"
-      auto_tags: ["livestream_referral", "high_intent"]
+      auto_tags: ['livestream_referral', 'high_intent']
 
-    - name: "In-Store QR Code"
-      type: "location_based"
-      staff_pool: ["store_staff_{city}"]
-      welcome_message: "欢迎光临 {store_name}！我是您的专属导购——有任何需要随时找我"
-      auto_tags: ["in_store_customer", "{city}", "{store_name}"]
+    - name: 'In-Store QR Code'
+      type: 'location_based'
+      staff_pool: ['store_staff_{city}']
+      welcome_message: '欢迎光临 {store_name}！我是您的专属导购——有任何需要随时找我'
+      auto_tags: ['in_store_customer', '{city}', '{store_name}']
 
   # Customer Tag System
   tag_system:
     dimensions:
-      - name: "Customer Source"
-        tags: ["package_insert", "livestream", "in_store", "sms", "referral", "organic_search"]
-      - name: "Spending Tier"
-        tags: ["high_aov(>500)", "mid_aov(200-500)", "low_aov(<200)"]
-      - name: "Lifecycle Stage"
-        tags: ["new_customer", "active_customer", "dormant_customer", "churn_warning", "churned"]
-      - name: "Interest Preference"
-        tags: ["skincare", "cosmetics", "personal_care", "baby_care", "health"]
+      - name: 'Customer Source'
+        tags: ['package_insert', 'livestream', 'in_store', 'sms', 'referral', 'organic_search']
+      - name: 'Spending Tier'
+        tags: ['high_aov(>500)', 'mid_aov(200-500)', 'low_aov(<200)']
+      - name: 'Lifecycle Stage'
+        tags: ['new_customer', 'active_customer', 'dormant_customer', 'churn_warning', 'churned']
+      - name: 'Interest Preference'
+        tags: ['skincare', 'cosmetics', 'personal_care', 'baby_care', 'health']
     auto_tagging_rules:
-      - trigger: "First purchase completed"
-        add_tags: ["new_customer"]
+      - trigger: 'First purchase completed'
+        add_tags: ['new_customer']
         remove_tags: []
-      - trigger: "30 days no interaction"
-        add_tags: ["dormant_customer"]
-        remove_tags: ["active_customer"]
-      - trigger: "Cumulative spend > 2000"
-        add_tags: ["high_value_customer", "vip_candidate"]
+      - trigger: '30 days no interaction'
+        add_tags: ['dormant_customer']
+        remove_tags: ['active_customer']
+      - trigger: 'Cumulative spend > 2000'
+        add_tags: ['high_value_customer', 'vip_candidate']
 
   # Customer Group Configuration
   group_config:
     types:
-      - name: "Welcome Perks Group"
+      - name: 'Welcome Perks Group'
         max_members: 200
-        auto_welcome: "欢迎！我们在这里每天分享好物精选和专属优惠。群规请看置顶~"
-        sop_template: "welfare_group_sop"
-      - name: "VIP Member Group"
+        auto_welcome: '欢迎！我们在这里每天分享好物精选和专属优惠。群规请看置顶~'
+        sop_template: 'welfare_group_sop'
+      - name: 'VIP Member Group'
         max_members: 100
         entry_condition: "Cumulative spend > 1000 OR tagged 'VIP'"
-        auto_welcome: "恭喜成为 VIP 会员！享受专属折扣、新品抢先购和 1 对 1 顾问服务"
-        sop_template: "vip_group_sop"
+        auto_welcome: '恭喜成为 VIP 会员！享受专属折扣、新品抢先购和 1 对 1 顾问服务'
+        sop_template: 'vip_group_sop'
 ```
 
 ### 社群运营 SOP 模板
@@ -135,25 +135,29 @@ scrm_config:
 # Perks Group Daily Operations SOP
 
 ## Daily Content Schedule
-| Time | Segment | Example Content | Channel | Purpose |
-|------|---------|----------------|---------|---------|
-| 08:30 | 早安问候 | 天气 + 护肤小贴士 | 群消息 | 培养每日打卡习惯 |
-| 10:00 | 产品聚焦 | 单品深度测评（图文）| 群消息 + 小程序卡片 | 价值内容投放 |
-| 12:30 | 午间互动 | 投票 / 话题讨论 / 猜价格 | 群消息 | 拉升活跃 |
-| 15:00 | 限时秒杀 | 小程序秒杀链接（限 30 件）| 群消息 + 倒计时 | 驱动转化 |
-| 19:30 | 买家秀 | 精选买家照片 + 点评 | 群消息 | 社会证明 |
-| 21:00 | 晚间福利 | 明日预告 + 口令红包 | 群消息 | 次日留存 |
+
+| Time  | Segment  | Example Content            | Channel             | Purpose          |
+| ----- | -------- | -------------------------- | ------------------- | ---------------- |
+| 08:30 | 早安问候 | 天气 + 护肤小贴士          | 群消息              | 培养每日打卡习惯 |
+| 10:00 | 产品聚焦 | 单品深度测评（图文）       | 群消息 + 小程序卡片 | 价值内容投放     |
+| 12:30 | 午间互动 | 投票 / 话题讨论 / 猜价格   | 群消息              | 拉升活跃         |
+| 15:00 | 限时秒杀 | 小程序秒杀链接（限 30 件） | 群消息 + 倒计时     | 驱动转化         |
+| 19:30 | 买家秀   | 精选买家照片 + 点评        | 群消息              | 社会证明         |
+| 21:00 | 晚间福利 | 明日预告 + 口令红包        | 群消息              | 次日留存         |
 
 ## Weekly Special Events
-| Day | Event | Details |
-|-----|-------|---------|
-| 周一 | 新品抢先 | VIP 群专属新品折扣 |
-| 周三 | 直播预告 + 专属券 | 拉动视频号直播观看 |
-| 周五 | 周末囤货日 | 满减 / 组合优惠 |
-| 周日 | 本周畅销榜 | 数据回顾 + 下周预告 |
+
+| Day  | Event             | Details             |
+| ---- | ----------------- | ------------------- |
+| 周一 | 新品抢先          | VIP 群专属新品折扣  |
+| 周三 | 直播预告 + 专属券 | 拉动视频号直播观看  |
+| 周五 | 周末囤货日        | 满减 / 组合优惠     |
+| 周日 | 本周畅销榜        | 数据回顾 + 下周预告 |
 
 ## Key Touchpoint SOPs
+
 ### New Member Onboarding (First 72 Hours)
+
 1. 0 分钟：自动发送欢迎语 + 群规
 2. 30 分钟：管理员 @新成员，引导自我介绍
 3. 2h：私信发送新成员专属券（满 99 减 20）

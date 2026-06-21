@@ -246,4 +246,53 @@ describe('static-server', () => {
     expect(typeof h2.networkUrl === 'string' || h2.networkUrl === undefined).toBe(true);
     await h2.stop();
   });
+
+  it('POST /api/vector-search forwards to the configured vector DB endpoint', async () => {
+    const backend = await startMockBackend((_req, res) => res.end('nope'));
+    stopBackend = backend.close;
+
+    let seenSearchBody: unknown = null;
+    const vectorDb = await startMockBackend((req, res) => {
+      if (req.method === 'POST' && req.url === '/api/search') {
+        const chunks: Buffer[] = [];
+        req.on('data', (d) => chunks.push(d as Buffer));
+        req.on('end', () => {
+          seenSearchBody = JSON.parse(Buffer.concat(chunks).toString('utf-8'));
+          res.writeHead(200, { 'content-type': 'application/json' });
+          res.end(JSON.stringify({ results: [{ text: 'hit', metadata: { file_name: 'a.md' } }], total: 1 }));
+        });
+        return;
+      }
+      res.writeHead(404).end();
+    });
+
+    handle = await startStaticServer({ staticDir, backendPort: backend.port, port: 0 });
+    const r = await fetch(`${handle.localUrl}/api/vector-search`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        endpoint: `http://127.0.0.1:${vectorDb.port}`,
+        query: 'hello',
+        n_results: 3,
+        mode: 'text',
+      }),
+    });
+    expect(r.status).toBe(200);
+    const data = await r.json();
+    expect(data.results).toHaveLength(1);
+    expect(seenSearchBody).toEqual({ query: 'hello', n_results: 3, mode: 'text' });
+    await vectorDb.close();
+  });
+
+  it('POST /api/vector-search rejects a non-http endpoint with 400', async () => {
+    const backend = await startMockBackend((_req, res) => res.end('nope'));
+    stopBackend = backend.close;
+    handle = await startStaticServer({ staticDir, backendPort: backend.port, port: 0 });
+    const r = await fetch(`${handle.localUrl}/api/vector-search`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ endpoint: 'file:///etc/passwd', query: 'x' }),
+    });
+    expect(r.status).toBe(400);
+  });
 });

@@ -5,12 +5,13 @@
   "disabled": "Disabled",
   "empty": "No advisor data is available. Run the import script in the terminal.",
   "emptySearch": "No advisors match the current filters.",
+  "homeHint": "専門家に相談 — 課題を各分野のプロに任せる",
+  "viewAll": "すべての専門家を見る",
   "departments": {
     "all": "All departments"
   },
   "stats": {
     "departments": "{{count}} departments",
-    "total": "{{count}} advisors",
     "enabled": "{{count}} enabled"
   }
 }

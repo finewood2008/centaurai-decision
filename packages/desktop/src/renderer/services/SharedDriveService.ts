@@ -142,14 +142,15 @@ export async function shareToTeam(input: ShareToTeamInput): Promise<{ id: string
 }
 
 /** Upload an in-browser/OS File into the shared library. */
-export async function shareFileToTeam(
-  file: File,
-  category?: string,
-  uploaderId?: string
-): Promise<{ id: string }> {
+export async function shareFileToTeam(file: File, category?: string, uploaderId?: string): Promise<{ id: string }> {
   const localPath = (file as File & { path?: string }).path;
   if (isAdminElectron() && localPath) {
-    return ipcBridge.sharedDriveLocal.addFromPath.invoke({ sourcePath: localPath, name: file.name, category, uploaderId });
+    return ipcBridge.sharedDriveLocal.addFromPath.invoke({
+      sourcePath: localPath,
+      name: file.name,
+      category,
+      uploaderId,
+    });
   }
   return uploadBytes(file, file.name, { category, uploaderId });
 }

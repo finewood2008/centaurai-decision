@@ -88,13 +88,14 @@ test.describe('Team Create - Full UI Flow', () => {
     const teamNameInSider = page.locator(`text=${TEAM_NAME}`);
     await expect(teamNameInSider.first()).toBeVisible({ timeout: 10_000 });
 
-    // Step 10: Verify Tab bar with Leader agent is visible
-    const tabBar = page.locator('[data-testid="team-tab-bar"]');
-    await expect(tabBar).toBeVisible({ timeout: 10_000 });
+    // Step 10: Verify the roundtable meeting room rendered (topic-centric board —
+    // the only view is the meeting room; the legacy per-agent tab bar was removed).
+    const roster = page.locator('[data-testid="meeting-roster"]');
+    await expect(roster).toBeVisible({ timeout: 10_000 });
 
-    // At least one tab (the Leader) must exist
-    const tabs = tabBar.locator('> div');
-    await expect(tabs.first()).toBeVisible({ timeout: 5_000 });
+    // The idle control bar (topic input + start) must be present for a fresh room.
+    const controlIdle = page.locator('[data-testid="meeting-control-idle"], [data-testid="meeting-start"]');
+    await expect(controlIdle.first()).toBeVisible({ timeout: 5_000 });
 
     await page.screenshot({ path: 'tests/e2e/results/team-ui-06-team-page.png' });
 

@@ -37,7 +37,12 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ categories, total, se
   return (
     <div className='w-160px shrink-0 border-r border-[var(--color-border-2)] p-8px overflow-y-auto'>
       <div className='text-11px text-t-secondary px-10px py-4px'>{t('contentHub.shared.categories')}</div>
-      <Row active={selected == null} label={t('contentHub.shared.all')} count={total} onClick={() => onSelect(undefined)} />
+      <Row
+        active={selected == null}
+        label={t('contentHub.shared.all')}
+        count={total}
+        onClick={() => onSelect(undefined)}
+      />
       {categories.map((c) => (
         <Row
           key={c.key}

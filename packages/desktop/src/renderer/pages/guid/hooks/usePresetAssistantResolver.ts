@@ -6,6 +6,7 @@
 
 import { ipcBridge } from '@/common';
 import type { Assistant } from '@/common/types/agent/assistantTypes';
+import { getConsultationProtocol, isAgencyExpert } from '@/common/utils/consultationProtocol';
 import { useCallback } from 'react';
 
 type UsePresetAssistantResolverOptions = {
@@ -82,7 +83,14 @@ export const usePresetAssistantResolver = ({
         // skills may not exist, this is normal
       }
 
-      return { rules: rules || agentInfo.context, skills };
+      // Agency experts get the consultation protocol prepended (gather context
+      // before answering). Prefix so it outranks the rule body's deliverable
+      // instructions. Mirrors loadPresetAssistantResources for this send path.
+      const baseRules = rules || agentInfo.context;
+      const finalRules =
+        isAgencyExpert(custom_agent_id) && baseRules ? getConsultationProtocol(localeKey) + baseRules : baseRules;
+
+      return { rules: finalRules, skills };
     },
     [localeKey]
   );

@@ -32,13 +32,28 @@ export type BuildAgentConversationInput = {
   extra?: Partial<ICreateConversationParams['extra']>;
 };
 
+/**
+ * Normalize a backend string into its canonical ACP backend identifier.
+ *
+ * OpenClaw now runs as an ACP builtin backend (like gemini/codex). The legacy
+ * `'openclaw-gateway'` slug is collapsed to `'openclaw'` so it never leaks into
+ * `extra.backend` for a freshly created conversation.
+ */
+export function normalizeAcpBackend(backend: string): string {
+  return backend === 'openclaw-gateway' ? 'openclaw' : backend;
+}
+
 export function getConversationTypeForBackend(backend: string): ICreateConversationParams['type'] {
   switch (backend) {
     case 'aionrs':
       return 'aionrs';
+    // OpenClaw is migrated to an ACP builtin backend, same precedent as
+    // gemini/codex. New conversations are `type='acp'` with
+    // `extra.backend='openclaw'`. `type='openclaw-gateway'` is kept only for
+    // rendering historical conversations (see ChatConversation case).
     case 'openclaw-gateway':
     case 'openclaw':
-      return 'openclaw-gateway';
+      return 'acp';
     case 'nanobot':
       return 'nanobot';
     case 'remote':
@@ -89,20 +104,12 @@ export function buildAgentConversationParams(input: BuildAgentConversationInput)
     extra.preset_assistant_id = effectivePresetAssistantId;
     extra.preset_context = preset_resources?.rules;
     if (type === 'acp') {
-      extra.backend = effectivePresetType as string;
+      extra.backend = normalizeAcpBackend(effectivePresetType as string);
     }
   } else if (type === 'remote') {
     extra.remote_agent_id = custom_agent_id;
-  } else if (type === 'openclaw-gateway') {
-    extra.agent_name = agent_name || name;
-    extra.gateway = {
-      cli_path,
-    };
-    if (custom_agent_id) {
-      extra.custom_agent_id = custom_agent_id;
-    }
   } else if (type === 'acp') {
-    extra.backend = backend as string;
+    extra.backend = normalizeAcpBackend(backend as string);
     extra.agent_name = agent_name || name;
     if (agent_id) extra.agent_id = agent_id;
     if (cli_path) extra.cli_path = cli_path;

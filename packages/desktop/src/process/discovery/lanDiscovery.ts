@@ -55,7 +55,11 @@ const toRecord = (txt: unknown): Record<string, string> => {
  * Advertise this machine as a CentaurAI server on the LAN. Call from the
  * server/WebUI startup. Safe to call once; returns a stop() handle.
  */
-export function advertiseServer(options: { name: string; port: number; info?: Record<string, string> }): AdvertiseHandle {
+export function advertiseServer(options: {
+  name: string;
+  port: number;
+  info?: Record<string, string>;
+}): AdvertiseHandle {
   const instance = new Bonjour();
   const service = instance.publish({
     name: options.name,

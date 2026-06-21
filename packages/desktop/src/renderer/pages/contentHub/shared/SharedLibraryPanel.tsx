@@ -11,15 +11,26 @@ import { useTranslation } from 'react-i18next';
 import CategorySidebar from './CategorySidebar';
 import SharedFileCard from './SharedFileCard';
 import EmptyState from '../components/EmptyState';
+import ViewControls from '../components/view/ViewControls';
+import { WATERFALL_COL_WIDTH } from '../components/view/viewConfig';
 import { useSharedDrive } from '../useSharedDrive';
+import { useHubViewPrefs } from '../useHubViewPrefs';
 
-const SharedLibraryPanel: React.FC = () => {
+type SharedLibraryPanelProps = {
+  /** Filters the visible files by name; comes from the hub-wide search box. */
+  search?: string;
+};
+
+const SharedLibraryPanel: React.FC<SharedLibraryPanelProps> = ({ search = '' }) => {
   const { t } = useTranslation();
   const { files, categories, category, setCategory, loading, unavailable, remove, addFiles } = useSharedDrive();
+  const { view, size, setView, setSize } = useHubViewPrefs();
   const [dragging, setDragging] = useState(false);
   const dragDepth = useRef(0);
 
   const total = categories.reduce((sum, c) => sum + c.count, 0);
+  const q = search.trim().toLowerCase();
+  const visibleFiles = q ? files.filter((f) => f.name.toLowerCase().includes(q)) : files;
 
   const onDragEnter = (e: React.DragEvent) => {
     if (!e.dataTransfer.types.includes('Files')) return;
@@ -77,20 +88,32 @@ const SharedLibraryPanel: React.FC = () => {
       )}
       <CategorySidebar categories={categories} total={total} selected={category} onSelect={setCategory} />
       <div className='flex-1 flex flex-col min-w-0'>
-        <div className='px-16px py-8px text-11px text-t-secondary shrink-0'>{t('contentHub.shared.allVisible')}</div>
-        {loading || files.length === 0 ? (
+        <div className='flex items-center gap-8px px-16px py-8px shrink-0'>
+          <span className='text-11px text-t-secondary'>{t('contentHub.shared.allVisible')}</span>
+          <div className='flex-1' />
+          <ViewControls view={view} size={size} onViewChange={setView} onSizeChange={setSize} />
+        </div>
+        {loading || visibleFiles.length === 0 ? (
           <EmptyState
             loading={loading}
             loadingMessage={t('contentHub.empty.loading')}
-            message={t('contentHub.shared.empty')}
+            message={q ? t('contentHub.empty.noMatch') : t('contentHub.shared.empty')}
           />
         ) : (
           <div className='flex-1 overflow-y-auto p-16px'>
-            <div className='flex flex-wrap gap-8px'>
-              {files.map((file) => (
-                <SharedFileCard key={file.id} file={file} onRemove={remove} />
-              ))}
-            </div>
+            {view === 'waterfall' ? (
+              <div style={{ columnWidth: WATERFALL_COL_WIDTH[size], columnGap: 12 }}>
+                {visibleFiles.map((file) => (
+                  <SharedFileCard key={file.id} file={file} view={view} size={size} onRemove={remove} />
+                ))}
+              </div>
+            ) : (
+              <div className='flex flex-wrap gap-8px'>
+                {visibleFiles.map((file) => (
+                  <SharedFileCard key={file.id} file={file} view={view} size={size} onRemove={remove} />
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

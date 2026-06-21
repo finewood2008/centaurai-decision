@@ -115,7 +115,8 @@ describe('shared-drive endpoints', () => {
     expect(await list(srv.port, 'sales')).toHaveLength(2);
     expect(await list(srv.port, 'ops')).toHaveLength(1);
 
-    const cats = (await (await fetch(`http://127.0.0.1:${srv.port}/api/shared-drive/categories`)).json()).data as Array<{
+    const cats = (await (await fetch(`http://127.0.0.1:${srv.port}/api/shared-drive/categories`)).json())
+      .data as Array<{
       key: string;
       count: number;
     }>;

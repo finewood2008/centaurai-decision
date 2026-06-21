@@ -10,11 +10,11 @@
 
 ## 选择你的模式
 
-| I want to... | Use | Agents | Time |
-|-------------|-----|--------|------|
-| 从零构建一个完整产品 | **NEXUS-Full** | All | 12-24 周 |
-| 构建一个功能或 MVP | **NEXUS-Sprint** | 15-25 | 2-6 周 |
-| 完成一项具体任务（修 bug、做活动、审计） | **NEXUS-Micro** | 5-10 | 1-5 天 |
+| I want to...                             | Use              | Agents | Time     |
+| ---------------------------------------- | ---------------- | ------ | -------- |
+| 从零构建一个完整产品                     | **NEXUS-Full**   | All    | 12-24 周 |
+| 构建一个功能或 MVP                       | **NEXUS-Sprint** | 15-25  | 2-6 周   |
+| 完成一项具体任务（修 bug、做活动、审计） | **NEXUS-Micro**  | 5-10   | 1-5 天   |
 
 ---
 
@@ -73,6 +73,7 @@ Reality Checker approval required before launch.
 **选择你的场景并复制提示词：**
 
 ### 修复一个 Bug
+
 ```
 Activate Backend Architect to investigate and fix [BUG DESCRIPTION].
 After fix, activate API Tester to verify the fix.
@@ -80,6 +81,7 @@ Then activate Evidence Collector to confirm no visual regressions.
 ```
 
 ### 开展一场营销活动
+
 ```
 Activate Social Media Strategist as campaign lead for [CAMPAIGN DESCRIPTION].
 Team: Content Creator, Twitter Engager, Instagram Curator, Reddit Community Builder.
@@ -89,6 +91,7 @@ Growth Hacker optimizes channels weekly.
 ```
 
 ### 进行一次合规审计
+
 ```
 Activate Legal Compliance Checker for comprehensive compliance audit.
 Scope: [GDPR / CCPA / HIPAA / ALL]
@@ -96,6 +99,7 @@ After audit, activate Executive Summary Generator to create stakeholder report.
 ```
 
 ### 排查性能问题
+
 ```
 Activate Performance Benchmarker to diagnose performance issues.
 Scope: [API response times / Page load / Database queries / All]
@@ -104,6 +108,7 @@ DevOps Automator deploys any infrastructure changes.
 ```
 
 ### 市场调研
+
 ```
 Activate Trend Researcher for market intelligence on [DOMAIN].
 Deliverables: Competitive landscape, market sizing, trend forecast.
@@ -111,6 +116,7 @@ After research, activate Executive Summary Generator for executive brief.
 ```
 
 ### UX 改进
+
 ```
 Activate UX Researcher to identify usability issues in [FEATURE/PRODUCT].
 After research, activate UX Architect to design improvements.
@@ -122,22 +128,22 @@ Evidence Collector verifies improvements.
 
 ## 📁 战略文档
 
-| Document | Purpose | Location |
-|----------|---------|----------|
-| **Master Strategy** | 完整的 NEXUS 准则 | `strategy/nexus-strategy.md` |
-| **Phase 0 Playbook** | 发现与情报 | `strategy/playbooks/phase-0-discovery.md` |
-| **Phase 1 Playbook** | 战略与架构 | `strategy/playbooks/phase-1-strategy.md` |
-| **Phase 2 Playbook** | 基础与脚手架 | `strategy/playbooks/phase-2-foundation.md` |
-| **Phase 3 Playbook** | 构建与迭代 | `strategy/playbooks/phase-3-build.md` |
-| **Phase 4 Playbook** | 质量与加固 | `strategy/playbooks/phase-4-hardening.md` |
-| **Phase 5 Playbook** | 上线与增长 | `strategy/playbooks/phase-5-launch.md` |
-| **Phase 6 Playbook** | 运营与演进 | `strategy/playbooks/phase-6-operate.md` |
-| **Activation Prompts** | 即用型 agent 提示词 | `strategy/coordination/agent-activation-prompts.md` |
-| **Handoff Templates** | 标准化交接格式 | `strategy/coordination/handoff-templates.md` |
-| **Startup MVP Runbook** | 4-6 周 MVP 构建 | `strategy/runbooks/scenario-startup-mvp.md` |
-| **Enterprise Feature Runbook** | 企业级功能开发 | `strategy/runbooks/scenario-enterprise-feature.md` |
-| **Marketing Campaign Runbook** | 多渠道营销活动 | `strategy/runbooks/scenario-marketing-campaign.md` |
-| **Incident Response Runbook** | 生产事件处理 | `strategy/runbooks/scenario-incident-response.md` |
+| Document                       | Purpose             | Location                                            |
+| ------------------------------ | ------------------- | --------------------------------------------------- |
+| **Master Strategy**            | 完整的 NEXUS 准则   | `strategy/nexus-strategy.md`                        |
+| **Phase 0 Playbook**           | 发现与情报          | `strategy/playbooks/phase-0-discovery.md`           |
+| **Phase 1 Playbook**           | 战略与架构          | `strategy/playbooks/phase-1-strategy.md`            |
+| **Phase 2 Playbook**           | 基础与脚手架        | `strategy/playbooks/phase-2-foundation.md`          |
+| **Phase 3 Playbook**           | 构建与迭代          | `strategy/playbooks/phase-3-build.md`               |
+| **Phase 4 Playbook**           | 质量与加固          | `strategy/playbooks/phase-4-hardening.md`           |
+| **Phase 5 Playbook**           | 上线与增长          | `strategy/playbooks/phase-5-launch.md`              |
+| **Phase 6 Playbook**           | 运营与演进          | `strategy/playbooks/phase-6-operate.md`             |
+| **Activation Prompts**         | 即用型 agent 提示词 | `strategy/coordination/agent-activation-prompts.md` |
+| **Handoff Templates**          | 标准化交接格式      | `strategy/coordination/handoff-templates.md`        |
+| **Startup MVP Runbook**        | 4-6 周 MVP 构建     | `strategy/runbooks/scenario-startup-mvp.md`         |
+| **Enterprise Feature Runbook** | 企业级功能开发      | `strategy/runbooks/scenario-enterprise-feature.md`  |
+| **Marketing Campaign Runbook** | 多渠道营销活动      | `strategy/runbooks/scenario-marketing-campaign.md`  |
+| **Incident Response Runbook**  | 生产事件处理        | `strategy/runbooks/scenario-incident-response.md`   |
 
 ---
 

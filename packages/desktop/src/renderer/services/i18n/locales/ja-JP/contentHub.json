@@ -10,7 +10,8 @@
     "mine": "マイファイル",
     "byConversation": "会話別",
     "byType": "種類別",
-    "shared": "共有ライブラリ"
+    "shared": "共有ライブラリ",
+    "knowledge": "ナレッジベース"
   },
   "type": {
     "all": "すべて",
@@ -52,5 +53,25 @@
     "copyFailed": "コピーに失敗しました",
     "downloadFailed": "ダウンロードに失敗しました",
     "openFailed": "開けません"
+  },
+  "view": {
+    "grid": "グリッド",
+    "waterfall": "ウォーターフォール",
+    "sizeSmall": "小",
+    "sizeMedium": "中",
+    "sizeLarge": "大"
+  },
+  "mineView": {
+    "all": "すべて",
+    "byConversation": "会話別",
+    "byType": "種類別"
+  },
+  "knowledge": {
+    "chunks": "{{n}} チャンク",
+    "readonly": "ナレッジベース · {{n}} ファイル · 読み取り専用",
+    "refresh": "更新",
+    "empty": "ナレッジベースは空です",
+    "unreachable": "ベクトルDBに接続できません。サービスが起動しているか確認してください",
+    "openDesktopOnly": "ソースファイルを開けるのはデスクトップのみです"
   }
 }

@@ -10,7 +10,8 @@
     "mine": "Dosyalarım",
     "byConversation": "Sohbete Göre",
     "byType": "Türe Göre",
-    "shared": "Paylaşılan Kitaplık"
+    "shared": "Paylaşılan Kitaplık",
+    "knowledge": "Bilgi Tabanı"
   },
   "type": {
     "all": "Tümü",
@@ -52,5 +53,25 @@
     "copyFailed": "Kopyalama başarısız",
     "downloadFailed": "İndirme başarısız",
     "openFailed": "Açılamıyor"
+  },
+  "view": {
+    "grid": "Izgara",
+    "waterfall": "Şelale",
+    "sizeSmall": "S",
+    "sizeMedium": "M",
+    "sizeLarge": "L"
+  },
+  "mineView": {
+    "all": "Tümü",
+    "byConversation": "Sohbete Göre",
+    "byType": "Türe Göre"
+  },
+  "knowledge": {
+    "chunks": "{{n}} parça",
+    "readonly": "Bilgi Tabanı · {{n}} dosya · salt okunur",
+    "refresh": "Yenile",
+    "empty": "Bilgi tabanı boş",
+    "unreachable": "Vektör veritabanına ulaşılamıyor — servisin çalıştığından emin olun",
+    "openDesktopOnly": "Kaynak dosyaları açmak yalnızca masaüstünde geçerlidir"
   }
 }

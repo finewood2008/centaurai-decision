@@ -14,7 +14,11 @@
  */
 
 import os from 'os';
-import { advertiseServer, discoverServers, type DiscoveredServer } from '../packages/desktop/src/process/discovery/lanDiscovery';
+import {
+  advertiseServer,
+  discoverServers,
+  type DiscoveredServer,
+} from '../packages/desktop/src/process/discovery/lanDiscovery';
 
 function arg(name: string, fallback?: string): string | undefined {
   const i = process.argv.indexOf(`--${name}`);

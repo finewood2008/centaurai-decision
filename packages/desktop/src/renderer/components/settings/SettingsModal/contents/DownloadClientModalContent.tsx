@@ -134,10 +134,10 @@ const DownloadClientModalContent: React.FC = () => {
       else byVersion.set(item.version, [item]);
     }
     return Array.from(byVersion.entries())
-      .sort(([a], [b]) => compareVersionDesc(a, b))
+      .toSorted(([a], [b]) => compareVersionDesc(a, b))
       .map(([version, items]) => ({
         version,
-        items: items.slice().sort((x, y) => OS_ORDER[x.os] - OS_ORDER[y.os] || x.file.localeCompare(y.file)),
+        items: items.slice().toSorted((x, y) => OS_ORDER[x.os] - OS_ORDER[y.os] || x.file.localeCompare(y.file)),
       }));
   }, [installers]);
 

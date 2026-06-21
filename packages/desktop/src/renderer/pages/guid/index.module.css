@@ -1208,6 +1208,10 @@
 .agentSegmentName {
   white-space: nowrap;
 }
+/* Domestic model quick-select row — sits snug beneath the agent icon bar. */
+.domesticModelRow {
+  margin-top: -12px;
+}
 .agentSegmentAdd {
   display: inline-flex;
   align-items: center;
