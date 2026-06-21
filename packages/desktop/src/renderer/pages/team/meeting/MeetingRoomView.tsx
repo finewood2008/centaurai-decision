@@ -118,7 +118,13 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
           {t('team.meeting.newShort', { defaultValue: '新会议' })}
         </Button>
       </div>
-      <MeetingRoster moderator={moderator} panelists={panelists} activeSlotId={state.activeSlotId} guests={guests} />
+      <MeetingRoster
+        moderator={moderator}
+        panelists={panelists}
+        activeSlotId={state.activeSlotId}
+        guests={guests}
+        compact={!isIdle}
+      />
       {!isIdle && <MeetingPhaseBar phase={state.phase} turnsCompleted={state.turnsCompleted} />}
 
       {!isIdle && state.topic && (
