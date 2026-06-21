@@ -4,12 +4,14 @@
 import React, { useState } from 'react';
 import { Down, Right } from '@icon-park/react';
 import { shortConversation } from '@/renderer/pages/guid/components/RecentFiles';
-import FileGrid from './FileGrid';
-import type { FileEntry } from '../types';
+import FileGrid from './view/FileGrid';
+import type { FileEntry, HubCardSize, HubViewMode } from '../types';
 
 type ConversationGroupProps = {
   conversation: string;
   files: FileEntry[];
+  view: HubViewMode;
+  size: HubCardSize;
   onOpen: (file: FileEntry) => void;
   onShare?: (file: FileEntry) => void;
   onContextMenu?: (file: FileEntry, e: React.MouseEvent) => void;
@@ -18,6 +20,8 @@ type ConversationGroupProps = {
 const ConversationGroup: React.FC<ConversationGroupProps> = ({
   conversation,
   files,
+  view,
+  size,
   onOpen,
   onShare,
   onContextMenu,
@@ -36,7 +40,14 @@ const ConversationGroup: React.FC<ConversationGroupProps> = ({
       </div>
       {open && (
         <div className='pl-20px'>
-          <FileGrid files={files} onOpen={onOpen} onShare={onShare} onContextMenu={onContextMenu} />
+          <FileGrid
+            files={files}
+            view={view}
+            size={size}
+            onOpen={onOpen}
+            onShare={onShare}
+            onContextMenu={onContextMenu}
+          />
         </div>
       )}
     </div>

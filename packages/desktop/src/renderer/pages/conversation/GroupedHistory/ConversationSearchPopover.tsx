@@ -203,12 +203,12 @@ const ConversationSearchPopover: React.FC<ConversationSearchPopoverProps> = ({
           page_size: PAGE_SIZE,
         });
 
+        const searchedConversations = result.items.map((item) => item.conversation);
         const visibilityScope = await buildConversationVisibilityScope();
         const visibleConversationIds = new Set(
-          filterConversationsForCurrentUser(
-            result.items.map((item) => item.conversation),
-            visibilityScope
-          ).map((conversation) => conversation.id)
+          filterConversationsForCurrentUser(searchedConversations, visibilityScope).map(
+            (conversation) => conversation.id
+          )
         );
         const visibleItems = result.items.filter((item) => visibleConversationIds.has(item.conversation.id));
 

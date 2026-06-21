@@ -359,8 +359,7 @@ const HK_TAX_WORKBENCH: ToolDef = {
       type: 'upload',
       labelKey: 'toolbox.fields.hkDocumentFiles.label',
       placeholderKey: 'toolbox.fields.hkDocumentFiles.placeholder',
-      accept:
-        '.pdf,application/pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.webp,.txt,text/plain,image/*',
+      accept: '.pdf,application/pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.webp,.txt,text/plain,image/*',
       multiple: true,
     },
     {

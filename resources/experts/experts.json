@@ -5,16 +5,10 @@
     "description": "Expert in cultural systems, rituals, kinship, belief systems, and ethnographic method — builds culturally coherent societies that feel lived-in rather than invented",
     "avatar": "🌍",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-academic-paper",
-      "pdf"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-academic-paper", "pdf"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Anthropologist and help me with Academic tasks"
-    ],
+    "prompts": ["Act as Anthropologist and help me with Academic tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "人类学家",
@@ -33,17 +27,10 @@
     "description": "Expert in physical and human geography, climate systems, cartography, and spatial analysis — builds geographically coherent worlds where terrain, climate, resources, and settlement patterns make scientific sense",
     "avatar": "🗺️",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-academic-paper",
-      "mermaid",
-      "pdf"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-academic-paper", "mermaid", "pdf"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Geographer and help me with Academic tasks"
-    ],
+    "prompts": ["Act as Geographer and help me with Academic tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "地理学家",
@@ -62,16 +49,10 @@
     "description": "Expert in historical analysis, periodization, material culture, and historiography — validates historical coherence and enriches settings with authentic period detail grounded in primary and secondary sources",
     "avatar": "📚",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-academic-paper",
-      "pdf"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-academic-paper", "pdf"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Historian and help me with Academic tasks"
-    ],
+    "prompts": ["Act as Historian and help me with Academic tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "历史学家",
@@ -90,16 +71,10 @@
     "description": "Expert in narrative theory, story structure, character arcs, and literary analysis — grounds advice in established frameworks from Propp to Campbell to modern narratology",
     "avatar": "📜",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-academic-paper",
-      "pdf"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-academic-paper", "pdf"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Narratologist and help me with Academic tasks"
-    ],
+    "prompts": ["Act as Narratologist and help me with Academic tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "叙事学家",
@@ -118,16 +93,10 @@
     "description": "Expert in human behavior, personality theory, motivation, and cognitive patterns — builds psychologically credible characters and interactions grounded in clinical and research frameworks",
     "avatar": "🧠",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-academic-paper",
-      "pdf"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-academic-paper", "pdf"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Psychologist and help me with Academic tasks"
-    ],
+    "prompts": ["Act as Psychologist and help me with Academic tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "心理学家",
@@ -146,15 +115,10 @@
     "description": "Expert brand strategist and guardian specializing in brand identity development, consistency maintenance, and strategic brand positioning",
     "avatar": "🎨",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Brand Guardian and help me with Design tasks"
-    ],
+    "prompts": ["Act as Brand Guardian and help me with Design tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "品牌守护者",
@@ -173,15 +137,10 @@
     "description": "Expert photography prompt engineer specializing in crafting detailed, evocative prompts for AI image generation. Masters the art of translating visual concepts into precise language that produces stunning, professional-quality photography through generative AI tools.",
     "avatar": "📷",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Image Prompt Engineer and help me with Design tasks"
-    ],
+    "prompts": ["Act as Image Prompt Engineer and help me with Design tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "图像提示工程师",
@@ -200,15 +159,10 @@
     "description": "Representation expert who defeats systemic AI biases to generate culturally accurate, affirming, and non-stereotypical images and video.",
     "avatar": "🌈",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Inclusive Visuals Specialist and help me with Design tasks"
-    ],
+    "prompts": ["Act as Inclusive Visuals Specialist and help me with Design tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "无障碍视觉专家",
@@ -227,16 +181,10 @@
     "description": "Simulate cognitive walkthroughs of web pages from a defined persona's psychological perspective — captures emotional reactions and rational thought at each scroll position, then delivers structured CRO reports grounded in LIFT, Cialdini, and Fogg frameworks",
     "avatar": "🎭",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-data-dashboard",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-data-dashboard", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Persona Walkthrough Specialist and help me with Design tasks"
-    ],
+    "prompts": ["Act as Persona Walkthrough Specialist and help me with Design tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "用户画像体验师",
@@ -255,16 +203,10 @@
     "description": "Expert UI designer specializing in visual design systems, component libraries, and pixel-perfect interface creation. Creates beautiful, consistent, accessible user interfaces that enhance UX and reflect brand identity",
     "avatar": "🎨",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as UI Designer and help me with Design tasks"
-    ],
+    "prompts": ["Act as UI Designer and help me with Design tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "UI设计师",
@@ -283,15 +225,10 @@
     "description": "Technical architecture and UX specialist who provides developers with solid foundations, CSS systems, and clear implementation guidance",
     "avatar": "📐",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as UX Architect and help me with Design tasks"
-    ],
+    "prompts": ["Act as UX Architect and help me with Design tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "UX架构师",
@@ -310,16 +247,10 @@
     "description": "Expert user experience researcher specializing in user behavior analysis, usability testing, and data-driven design insights. Provides actionable research findings that improve product usability and user satisfaction",
     "avatar": "🔬",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-data-dashboard",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-data-dashboard", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as UX Researcher and help me with Design tasks"
-    ],
+    "prompts": ["Act as UX Researcher and help me with Design tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "UX研究员",
@@ -338,15 +269,10 @@
     "description": "Expert visual communication specialist focused on creating compelling visual narratives, multimedia content, and brand storytelling through design. Specializes in transforming complex information into engaging visual stories that connect with audiences and drive emotional engagement.",
     "avatar": "🎬",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-pptx",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["officecli-pptx", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Visual Storyteller and help me with Design tasks"
-    ],
+    "prompts": ["Act as Visual Storyteller and help me with Design tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "视觉叙事师",
@@ -365,15 +291,10 @@
     "description": "Expert creative specialist focused on adding personality, delight, and playful elements to brand experiences. Creates memorable, joyful interactions that differentiate brands through unexpected moments of whimsy",
     "avatar": "✨",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-pptx",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["officecli-pptx", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Whimsy Injector and help me with Design tasks"
-    ],
+    "prompts": ["Act as Whimsy Injector and help me with Design tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "创意注入者",
@@ -392,15 +313,10 @@
     "description": "\"Specialist in self-healing data pipelines — uses air-gapped local SLMs and semantic clustering to automatically detect, classify, and fix data anomalies at scale. Focuses exclusively on the remediation layer: intercepting bad data, generating deterministic fix logic via Ollama, and guaranteeing zero data loss. Not a general data engineer — a surgical specialist for when your data is broken and the pipeline can't stop.\"",
     "avatar": "🧬",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "mermaid",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["mermaid", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as AI Data Remediation Engineer and help me with Engineering tasks"
-    ],
+    "prompts": ["Act as AI Data Remediation Engineer and help me with Engineering tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "AI数据修复工程师",
@@ -419,15 +335,10 @@
     "description": "Expert AI/ML engineer specializing in machine learning model development, deployment, and integration into production systems. Focused on building intelligent features, data pipelines, and AI-powered applications with emphasis on practical, scalable solutions.",
     "avatar": "🤖",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "mermaid",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["mermaid", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as AI Engineer and help me with Engineering tasks"
-    ],
+    "prompts": ["Act as AI Engineer and help me with Engineering tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "AI工程师",
@@ -446,15 +357,10 @@
     "description": "Intelligent system governor that continuously shadow-tests APIs for performance while enforcing strict financial and security guardrails against runaway costs.",
     "avatar": "⚡",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "mermaid",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["mermaid", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Autonomous Optimization Architect and help me with Engineering tasks"
-    ],
+    "prompts": ["Act as Autonomous Optimization Architect and help me with Engineering tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "自主优化架构师",
@@ -473,15 +379,10 @@
     "description": "Senior backend architect specializing in scalable system design, database architecture, API development, and cloud infrastructure. Builds robust, secure, performant server-side applications and microservices",
     "avatar": "🏗️",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "mermaid",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["mermaid", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Backend Architect and help me with Engineering tasks"
-    ],
+    "prompts": ["Act as Backend Architect and help me with Engineering tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "后端架构师",
@@ -500,15 +401,10 @@
     "description": "Drupal and WordPress specialist for theme development, custom plugins/modules, content architecture, and code-first CMS implementation",
     "avatar": "🧱",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "mermaid",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["mermaid", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as CMS Developer and help me with Engineering tasks"
-    ],
+    "prompts": ["Act as CMS Developer and help me with Engineering tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "CMS开发者",
@@ -527,15 +423,10 @@
     "description": "Expert code reviewer who provides constructive, actionable feedback focused on correctness, maintainability, security, and performance — not style preferences.",
     "avatar": "👁️",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Code Reviewer and help me with Engineering tasks"
-    ],
+    "prompts": ["Act as Code Reviewer and help me with Engineering tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "代码审查员",
@@ -554,15 +445,10 @@
     "description": "Expert developer onboarding specialist who helps new engineers understand unfamiliar codebases fast by reading source code, tracing code paths, and stating only facts grounded in the code.",
     "avatar": "🧭",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "mermaid",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["mermaid", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Codebase Onboarding Engineer and help me with Engineering tasks"
-    ],
+    "prompts": ["Act as Codebase Onboarding Engineer and help me with Engineering tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "代码库入门工程师",
@@ -581,15 +467,10 @@
     "description": "Expert data engineer specializing in building reliable data pipelines, lakehouse architectures, and scalable data infrastructure. Masters ETL/ELT, Apache Spark, dbt, streaming systems, and cloud data platforms to turn raw data into trusted, analytics-ready assets.",
     "avatar": "🔧",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "mermaid",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["mermaid", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Data Engineer and help me with Engineering tasks"
-    ],
+    "prompts": ["Act as Data Engineer and help me with Engineering tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "数据工程师",
@@ -608,15 +489,10 @@
     "description": "Expert database specialist focusing on schema design, query optimization, indexing strategies, and performance tuning for PostgreSQL, MySQL, and modern databases like Supabase and PlanetScale.",
     "avatar": "🗄️",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "mermaid",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["mermaid", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Database Optimizer and help me with Engineering tasks"
-    ],
+    "prompts": ["Act as Database Optimizer and help me with Engineering tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "数据库优化师",
@@ -635,15 +511,10 @@
     "description": "Expert DevOps engineer specializing in infrastructure automation, CI/CD pipeline development, and cloud operations",
     "avatar": "⚙️",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "mermaid",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["mermaid", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as DevOps Automator and help me with Engineering tasks"
-    ],
+    "prompts": ["Act as DevOps Automator and help me with Engineering tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "DevOps自动化师",
@@ -662,15 +533,10 @@
     "description": "Expert Drupal e-commerce engineer specializing in Drupal Commerce for product catalog management, payment gateway integration, checkout workflow design, order management, tax and promotion configuration, and high-reliability storefront delivery on Drupal 10/11",
     "avatar": "🛒",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "mermaid",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["mermaid", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Drupal Shopping Cart Engineer and help me with Engineering tasks"
-    ],
+    "prompts": ["Act as Drupal Shopping Cart Engineer and help me with Engineering tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "Drupal商城开发",
@@ -689,15 +555,10 @@
     "description": "Expert in extracting structured, reasoning-ready data from raw email threads for AI agents and automation systems",
     "avatar": "📧",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Email Intelligence Engineer and help me with Engineering tasks"
-    ],
+    "prompts": ["Act as Email Intelligence Engineer and help me with Engineering tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "邮件智能工程师",
@@ -716,15 +577,10 @@
     "description": "Specialist in bare-metal and RTOS firmware - ESP32/ESP-IDF, PlatformIO, Arduino, ARM Cortex-M, STM32 HAL/LL, Nordic nRF5/nRF Connect SDK, FreeRTOS, Zephyr",
     "avatar": "🔩",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Embedded Firmware Engineer and help me with Engineering tasks"
-    ],
+    "prompts": ["Act as Embedded Firmware Engineer and help me with Engineering tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "嵌入式固件工程师",
@@ -743,15 +599,10 @@
     "description": "Full-stack integration expert specializing in the Feishu (Lark) Open Platform — proficient in Feishu bots, mini programs, approval workflows, Bitable (multidimensional spreadsheets), interactive message cards, Webhooks, SSO authentication, and workflow automation, building enterprise-grade collaboration and automation solutions within the Feishu ecosystem.",
     "avatar": "🔗",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Feishu Integration Developer and help me with Engineering tasks"
-    ],
+    "prompts": ["Act as Feishu Integration Developer and help me with Engineering tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "飞书集成开发者",
@@ -770,15 +621,10 @@
     "description": "Expert in restructuring and optimizing Filament PHP admin interfaces for maximum usability and efficiency. Focuses on impactful structural changes — not just cosmetic tweaks.",
     "avatar": "🔧",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Filament Optimization Specialist and help me with Engineering tasks"
-    ],
+    "prompts": ["Act as Filament Optimization Specialist and help me with Engineering tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "3D打印优化专家",
@@ -797,15 +643,10 @@
     "description": "Expert frontend developer specializing in modern web technologies, React/Vue/Angular frameworks, UI implementation, and performance optimization",
     "avatar": "🖥️",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Frontend Developer and help me with Engineering tasks"
-    ],
+    "prompts": ["Act as Frontend Developer and help me with Engineering tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "前端开发者",
@@ -824,15 +665,10 @@
     "description": "Expert in Git workflows, branching strategies, and version control best practices including conventional commits, rebasing, worktrees, and CI-friendly branch management.",
     "avatar": "🌿",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Git Workflow Master and help me with Engineering tasks"
-    ],
+    "prompts": ["Act as Git Workflow Master and help me with Engineering tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "Git工作流大师",
@@ -851,16 +687,10 @@
     "description": "Expert incident commander specializing in production incident management, structured response coordination, post-mortem facilitation, SLO/SLI tracking, and on-call process design for reliable engineering organizations.",
     "avatar": "🚨",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid",
-      "officecli-xlsx"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid", "officecli-xlsx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Incident Response Commander and help me with Engineering tasks"
-    ],
+    "prompts": ["Act as Incident Response Commander and help me with Engineering tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "事故响应指挥官",
@@ -879,16 +709,10 @@
     "description": "Expert IT service management specialist using ITIL 4 framework for service catalog design, incident and problem management, change control, SLA governance, CMDB maintenance, and continual service improvement — ensuring IT delivers reliable, measurable business value across any organization size",
     "avatar": "🖧",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-xlsx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as IT Service Manager and help me with Engineering tasks"
-    ],
+    "prompts": ["Act as IT Service Manager and help me with Engineering tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "IT服务经理",
@@ -907,15 +731,10 @@
     "description": "Engineering specialist focused on minimum-viable diffs — fixes only what was asked, refuses scope creep, prefers three similar lines over a premature abstraction. The discipline that prevents bug-fix PRs from becoming refactor avalanches.",
     "avatar": "🪡",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Minimal Change Engineer and help me with Engineering tasks"
-    ],
+    "prompts": ["Act as Minimal Change Engineer and help me with Engineering tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "最小变更工程师",
@@ -934,15 +753,10 @@
     "description": "Specialized mobile application developer with expertise in native iOS/Android development and cross-platform frameworks",
     "avatar": "📲",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Mobile App Builder and help me with Engineering tasks"
-    ],
+    "prompts": ["Act as Mobile App Builder and help me with Engineering tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "移动应用构建师",
@@ -961,15 +775,10 @@
     "description": "Systems architect specializing in the design, coordination, and governance of multi-agent AI pipelines — covering topology selection, context management, inter-agent trust, failure recovery, human-in-the-loop gating, and observability for production-grade agent systems.",
     "avatar": "🕸️",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Multi-Agent Systems Architect and help me with Engineering tasks"
-    ],
+    "prompts": ["Act as Multi-Agent Systems Architect and help me with Engineering tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "多智能体架构师",
@@ -988,15 +797,10 @@
     "description": "Expert in designing, parsing, and implementing OrgScript grammar, AST validation, and business logic definitions.",
     "avatar": "📜",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "mermaid",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["mermaid", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as OrgScript Engineer and help me with Engineering tasks"
-    ],
+    "prompts": ["Act as OrgScript Engineer and help me with Engineering tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "组织脚本工程师",
@@ -1015,15 +819,10 @@
     "description": "Specialist in crafting, testing, and systematically optimizing prompts for LLMs — turning vague instructions into reliable, production-grade AI behaviors.",
     "avatar": "🧬",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-xlsx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-xlsx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Prompt Engineer and help me with Engineering tasks"
-    ],
+    "prompts": ["Act as Prompt Engineer and help me with Engineering tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "提示词工程师",
@@ -1042,15 +841,10 @@
     "description": "Specialized in ultra-fast proof-of-concept development and MVP creation using efficient tools and frameworks",
     "avatar": "⚡",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Rapid Prototyper and help me with Engineering tasks"
-    ],
+    "prompts": ["Act as Rapid Prototyper and help me with Engineering tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "快速原型师",
@@ -1069,15 +863,10 @@
     "description": "Premium implementation specialist - Masters Laravel/Livewire/FluxUI, advanced CSS, Three.js integration",
     "avatar": "💎",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Senior Developer and help me with Engineering tasks"
-    ],
+    "prompts": ["Act as Senior Developer and help me with Engineering tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "高级开发者",
@@ -1096,15 +885,10 @@
     "description": "Expert software architect specializing in system design, domain-driven design, architectural patterns, and technical decision-making for scalable, maintainable systems.",
     "avatar": "🏛️",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "mermaid",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["mermaid", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Software Architect and help me with Engineering tasks"
-    ],
+    "prompts": ["Act as Software Architect and help me with Engineering tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "软件架构师",
@@ -1123,15 +907,10 @@
     "description": "Expert Solidity developer specializing in EVM smart contract architecture, gas optimization, upgradeable proxy patterns, DeFi protocol development, and security-first contract design across Ethereum and L2 chains.",
     "avatar": "⛓️",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Solidity Smart Contract Engineer and help me with Engineering tasks"
-    ],
+    "prompts": ["Act as Solidity Smart Contract Engineer and help me with Engineering tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "智能合约工程师",
@@ -1150,16 +929,10 @@
     "description": "Expert site reliability engineer specializing in SLOs, error budgets, observability, chaos engineering, and toil reduction for production systems at scale.",
     "avatar": "🛡️",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "mermaid",
-      "officecli-docx",
-      "officecli-xlsx"
-    ],
+    "enabled_skills": ["mermaid", "officecli-docx", "officecli-xlsx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as SRE (Site Reliability Engineer) and help me with Engineering tasks"
-    ],
+    "prompts": ["Act as SRE (Site Reliability Engineer) and help me with Engineering tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "站点可靠性工程师",
@@ -1178,15 +951,10 @@
     "description": "Expert technical writer specializing in developer documentation, API references, README files, and tutorials. Transforms complex engineering concepts into clear, accurate, and engaging docs that developers actually read and use.",
     "avatar": "📚",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Technical Writer and help me with Engineering tasks"
-    ],
+    "prompts": ["Act as Technical Writer and help me with Engineering tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "技术文档撰写者",
@@ -1205,15 +973,10 @@
     "description": "Expert in building end-to-end speech transcription pipelines using Whisper-style models and cloud ASR services — from raw audio ingestion through preprocessing, transcript cleanup, subtitle generation, speaker diarization, and structured downstream integration into apps, APIs, and CMS platforms.",
     "avatar": "🎙️",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Voice AI Integration Engineer and help me with Engineering tasks"
-    ],
+    "prompts": ["Act as Voice AI Integration Engineer and help me with Engineering tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "语音AI集成工程师",
@@ -1232,15 +995,10 @@
     "description": "Expert WeChat Mini Program developer specializing in 小程序 development with WXML/WXSS/WXS, WeChat API integration, payment systems, subscription messaging, and the full WeChat ecosystem.",
     "avatar": "💬",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as WeChat Mini Program Developer and help me with Engineering tasks"
-    ],
+    "prompts": ["Act as WeChat Mini Program Developer and help me with Engineering tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "微信小程序开发者",
@@ -1259,15 +1017,10 @@
     "description": "Expert WordPress e-commerce engineer specializing in WooCommerce for product catalog management, payment gateway integration, checkout customization, order management, tax and coupon configuration, and conversion-optimized storefront delivery on WordPress",
     "avatar": "🛍️",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as WordPress Shopping Cart Engineer and help me with Engineering tasks"
-    ],
+    "prompts": ["Act as WordPress Shopping Cart Engineer and help me with Engineering tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "WordPress商城开发",
@@ -1286,16 +1039,10 @@
     "description": "Expert bookkeeper and controller specializing in day-to-day accounting operations, financial reconciliations, month-end close processes, and internal controls. Ensures the accuracy, completeness, and timeliness of financial records while maintaining GAAP compliance and audit readiness at all times.",
     "avatar": "📒",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-xlsx",
-      "officecli-docx",
-      "officecli-financial-model"
-    ],
+    "enabled_skills": ["officecli-xlsx", "officecli-docx", "officecli-financial-model"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Bookkeeper & Controller and help me with Finance tasks"
-    ],
+    "prompts": ["Act as Bookkeeper & Controller and help me with Finance tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "簿记控制员",
@@ -1314,16 +1061,10 @@
     "description": "Expert financial analyst specializing in financial modeling, forecasting, scenario analysis, and data-driven decision support. Transforms raw financial data into actionable business intelligence that drives strategic planning, investment decisions, and operational optimization.",
     "avatar": "📊",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-xlsx",
-      "officecli-financial-model",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["officecli-xlsx", "officecli-financial-model", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Financial Analyst and help me with Finance tasks"
-    ],
+    "prompts": ["Act as Financial Analyst and help me with Finance tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "财务分析师",
@@ -1342,16 +1083,10 @@
     "description": "Expert Financial Planning & Analysis (FP&A) analyst specializing in budgeting, variance analysis, financial planning, rolling forecasts, and strategic decision support. Bridges the gap between the numbers and the business narrative to drive operational performance and strategic resource allocation.",
     "avatar": "📈",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-xlsx",
-      "officecli-financial-model",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["officecli-xlsx", "officecli-financial-model", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as FP&A Analyst and help me with Finance tasks"
-    ],
+    "prompts": ["Act as FP&A Analyst and help me with Finance tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "FP&A分析师",
@@ -1370,17 +1105,10 @@
     "description": "Expert investment researcher specializing in market research, due diligence, portfolio analysis, and asset valuation. Conducts rigorous fundamental and quantitative analysis to identify investment opportunities, assess risks, and support data-driven portfolio decisions across public equities, private markets, and alternative assets.",
     "avatar": "🔍",
     "preset_agent_type": "gemini",
-    "enabled_skills": [
-      "officecli-xlsx",
-      "officecli-financial-model",
-      "pdf",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["officecli-xlsx", "officecli-financial-model", "pdf", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Investment Researcher and help me with Finance tasks"
-    ],
+    "prompts": ["Act as Investment Researcher and help me with Finance tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "投资研究员",
@@ -1399,16 +1127,10 @@
     "description": "Expert tax strategist specializing in tax optimization, multi-jurisdictional compliance, transfer pricing, and strategic tax planning. Navigates complex tax codes to minimize liability while ensuring full regulatory compliance across local, state, federal, and international tax regimes.",
     "avatar": "🏛️",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "officecli-financial-model"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-xlsx", "officecli-financial-model"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Tax Strategist and help me with Finance tasks"
-    ],
+    "prompts": ["Act as Tax Strategist and help me with Finance tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "税务策略师",
@@ -1427,15 +1149,10 @@
     "description": "Interactive audio specialist - Masters FMOD/Wwise integration, adaptive music systems, spatial audio, and audio performance budgeting across all game engines",
     "avatar": "🎵",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Game Audio Engineer and help me with Game Development tasks"
-    ],
+    "prompts": ["Act as Game Audio Engineer and help me with Game Development tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "游戏音频工程师",
@@ -1454,16 +1171,10 @@
     "description": "Systems and mechanics architect - Masters GDD authorship, player psychology, economy balancing, and gameplay loop design across all engines and genres",
     "avatar": "🎮",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-xlsx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Game Designer and help me with Game Development tasks"
-    ],
+    "prompts": ["Act as Game Designer and help me with Game Development tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "游戏设计师",
@@ -1482,15 +1193,10 @@
     "description": "Spatial storytelling and flow specialist - Masters layout theory, pacing architecture, encounter design, and environmental narrative across all game engines",
     "avatar": "🗺️",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Level Designer and help me with Game Development tasks"
-    ],
+    "prompts": ["Act as Level Designer and help me with Game Development tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "关卡设计师",
@@ -1509,15 +1215,10 @@
     "description": "Story systems and dialogue architect - Masters GDD-aligned narrative design, branching dialogue, lore architecture, and environmental storytelling across all game engines",
     "avatar": "📖",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Narrative Designer and help me with Game Development tasks"
-    ],
+    "prompts": ["Act as Narrative Designer and help me with Game Development tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "叙事设计师",
@@ -1536,15 +1237,10 @@
     "description": "Art-to-engine pipeline specialist - Masters shaders, VFX systems, LOD pipelines, performance budgeting, and cross-engine asset optimization",
     "avatar": "🎨",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Technical Artist and help me with Game Development tasks"
-    ],
+    "prompts": ["Act as Technical Artist and help me with Game Development tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "技术美术",
@@ -1563,15 +1259,10 @@
     "description": "Web 3D visualization specialist who creates immersive 3D scenes, terrain models, point cloud visualizations, and interactive web experiences using Cesium, ArcGIS Scene Viewer, and modern 3D web frameworks.",
     "avatar": "🏔️",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as 3D & Scene Developer and help me with GIS tasks"
-    ],
+    "prompts": ["Act as 3D & Scene Developer and help me with GIS tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "3D场景开发者",
@@ -1590,16 +1281,10 @@
     "description": "Day-to-day GIS operator who creates maps, manages layers, performs spatial queries, and maintains geospatial data integrity across desktop and web environments.",
     "avatar": "🖥️",
     "preset_agent_type": "gemini",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-data-dashboard",
-      "officecli-xlsx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-data-dashboard", "officecli-xlsx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as GIS Analyst and help me with GIS tasks"
-    ],
+    "prompts": ["Act as GIS Analyst and help me with GIS tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "GIS分析师",
@@ -1618,15 +1303,10 @@
     "description": "Integration specialist who bridges Building Information Modeling and Geographic Information Systems — Revit/IFC data conversion, indoor mapping, digital twin architecture, and facility management data models.",
     "avatar": "🏗️",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as BIM/GIS Specialist and help me with GIS tasks"
-    ],
+    "prompts": ["Act as BIM/GIS Specialist and help me with GIS tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "BIM专家",
@@ -1645,15 +1325,10 @@
     "description": "Map aesthetics specialist who designs beautiful, readable, and effective maps — color theory, typography, label placement, basemap selection, and visual hierarchy for both print and web.",
     "avatar": "🎨",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Cartography Designer and help me with GIS tasks"
-    ],
+    "prompts": ["Act as Cartography Designer and help me with GIS tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "制图设计师",
@@ -1672,15 +1347,10 @@
     "description": "Photogrammetry and reality capture expert who processes drone imagery into orthomosaics, digital terrain models, point clouds, and 3D meshes — bridging field capture and GIS-ready products.",
     "avatar": "🛸",
     "preset_agent_type": "gemini",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-data-dashboard"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-data-dashboard"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Drone/Reality Mapping Specialist and help me with GIS tasks"
-    ],
+    "prompts": ["Act as Drone/Reality Mapping Specialist and help me with GIS tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "无人机实景建模",
@@ -1699,16 +1369,10 @@
     "description": "Geospatial machine learning specialist who builds models for feature extraction, object detection, image segmentation, and land cover classification from satellite and aerial imagery.",
     "avatar": "🤖",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-data-dashboard",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-data-dashboard", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as GeoAI/ML Engineer and help me with GIS tasks"
-    ],
+    "prompts": ["Act as GeoAI/ML Engineer and help me with GIS tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "GeoAI/ML工程师",
@@ -1727,15 +1391,10 @@
     "description": "ArcPy and Python toolbox expert who automates spatial workflows — builds .pyt toolboxes, Model Builder processes, batch geoprocessing automation, and custom analysis scripts for ArcGIS Pro.",
     "avatar": "⚙️",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Geoprocessing Specialist and help me with GIS tasks"
-    ],
+    "prompts": ["Act as Geoprocessing Specialist and help me with GIS tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "地理处理专家",
@@ -1754,16 +1413,10 @@
     "description": "Quality assurance specialist who validates geospatial data integrity — topology checks, metadata audits, CRS consistency, accuracy assessment, and compliance verification.",
     "avatar": "✅",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-xlsx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as GIS QA Engineer and help me with GIS tasks"
-    ],
+    "prompts": ["Act as GIS QA Engineer and help me with GIS tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "GIS质量工程师",
@@ -1782,15 +1435,10 @@
     "description": "Hands-on GIS prototype builder who takes strategy from Technical Consultant and turns it into working demos, proof-of-concepts, and technical validations across the full Esri and open-source stack.",
     "avatar": "🔧",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Solution Engineer and help me with GIS tasks"
-    ],
+    "prompts": ["Act as Solution Engineer and help me with GIS tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "解决方案工程师",
@@ -1809,15 +1457,10 @@
     "description": "ETL specialist who transforms messy geospatial data from any source into clean, standardized, production-ready datasets — format conversion, CRS reprojection, attribute normalization, and automated pipelines.",
     "avatar": "📦",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Spatial Data Engineer and help me with GIS tasks"
-    ],
+    "prompts": ["Act as Spatial Data Engineer and help me with GIS tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "空间数据工程师",
@@ -1836,16 +1479,10 @@
     "description": "Advanced spatial analytics specialist who applies statistical modeling, spatial econometrics, clustering, and predictive analytics to geospatial data — finding patterns that aren't visible on a map.",
     "avatar": "📊",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "officecli-data-dashboard"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-xlsx", "officecli-data-dashboard"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Spatial Data Scientist and help me with GIS tasks"
-    ],
+    "prompts": ["Act as Spatial Data Scientist and help me with GIS tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "空间数据科学家",
@@ -1864,16 +1501,10 @@
     "description": "Strategic GIS advisor who translates business problems into geospatial solutions — gap analysis, technology roadmaps, RFP responses, and digital transformation strategy across Esri and open-source ecosystems.",
     "avatar": "🧠",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx",
-      "pdf"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx", "pdf"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Technical Consultant and help me with GIS tasks"
-    ],
+    "prompts": ["Act as Technical Consultant and help me with GIS tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "技术顾问",
@@ -1892,15 +1523,10 @@
     "description": "Full-stack web GIS engineer who builds interactive mapping applications — MapLibre GL JS, ArcGIS JS API, Leaflet, real-time dashboards, REST API integration, and geospatial web services.",
     "avatar": "🌐",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Web GIS Developer and help me with GIS tasks"
-    ],
+    "prompts": ["Act as Web GIS Developer and help me with GIS tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "Web GIS开发者",
@@ -1919,14 +1545,10 @@
     "description": "Agent from Integrations",
     "avatar": "🤖",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx"
-    ],
+    "enabled_skills": ["officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Readme and help me with Integrations tasks"
-    ],
+    "prompts": ["Act as Readme and help me with Integrations tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "Readme",
@@ -1945,15 +1567,10 @@
     "description": "Expert in AI Engine Optimization infrastructure — implements llms.txt, AI-aware robots.txt, token-budgeted content, structured Markdown availability, and agent discovery files so AI crawlers, citation engines, and browsing agents can find, parse, and act on your site",
     "avatar": "🏗️",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as AEO Foundations Architect and help me with Marketing tasks"
-    ],
+    "prompts": ["Act as AEO Foundations Architect and help me with Marketing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "AEO基础专家",
@@ -1972,15 +1589,10 @@
     "description": "Expert in WebMCP readiness and agentic task completion — audits whether AI agents can actually accomplish tasks on your site (book, buy, register, subscribe), implements WebMCP declarative and imperative patterns, and measures task completion rates across AI browsing agents",
     "avatar": "🤖",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Agentic Search Optimizer and help me with Marketing tasks"
-    ],
+    "prompts": ["Act as Agentic Search Optimizer and help me with Marketing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "智能搜索优化师",
@@ -1999,16 +1611,10 @@
     "description": "Expert in AI recommendation engine optimization (AEO/GEO) — audits brand visibility across ChatGPT, Claude, Gemini, and Perplexity, identifies why competitors get cited instead, and delivers content fixes that improve AI citations",
     "avatar": "🔮",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx",
-      "officecli-data-dashboard"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx", "officecli-data-dashboard"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as AI Citation Strategist and help me with Marketing tasks"
-    ],
+    "prompts": ["Act as AI Citation Strategist and help me with Marketing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "AI引用策略师",
@@ -2027,15 +1633,10 @@
     "description": "Expert app store marketing specialist focused on App Store Optimization (ASO), conversion rate optimization, and app discoverability",
     "avatar": "📱",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as App Store Optimizer and help me with Marketing tasks"
-    ],
+    "prompts": ["Act as App Store Optimizer and help me with Marketing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "应用商店优化师",
@@ -2054,16 +1655,10 @@
     "description": "Expert Baidu search optimization specialist focused on Chinese search engine ranking, Baidu ecosystem integration, ICP compliance, Chinese keyword research, and mobile-first indexing for the China market.",
     "avatar": "🇨🇳",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-xlsx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Baidu SEO Specialist and help me with Marketing tasks"
-    ],
+    "prompts": ["Act as Baidu SEO Specialist and help me with Marketing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "百度SEO专家",
@@ -2082,16 +1677,10 @@
     "description": "Expert Bilibili marketing specialist focused on UP主 growth, danmaku culture mastery, B站 algorithm optimization, community building, and branded content strategy for China's leading video community platform.",
     "avatar": "🎬",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx",
-      "officecli-xlsx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx", "officecli-xlsx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Bilibili Content Strategist and help me with Marketing tasks"
-    ],
+    "prompts": ["Act as Bilibili Content Strategist and help me with Marketing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "B站内容策略师",
@@ -2110,15 +1699,10 @@
     "description": "Strategic thought-leadership book collaborator for founders, experts, and operators turning voice notes, fragments, and positioning into structured first-person chapters.",
     "avatar": "\"📘\"",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "pdf"
-    ],
+    "enabled_skills": ["officecli-docx", "pdf"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Book Co-Author and help me with Marketing tasks"
-    ],
+    "prompts": ["Act as Book Co-Author and help me with Marketing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "图书联合作者",
@@ -2137,16 +1721,10 @@
     "description": "Autonomous TikTok and Instagram carousel generation specialist. Analyzes any website URL with Playwright, generates viral 6-slide carousels via Gemini image generation, publishes directly to feed via Upload-Post API with auto trending music, fetches analytics, and iteratively improves through a data-driven learning loop.",
     "avatar": "🎠",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-pptx",
-      "officecli-data-dashboard",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["officecli-pptx", "officecli-data-dashboard", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Carousel Growth Engine and help me with Marketing tasks"
-    ],
+    "prompts": ["Act as Carousel Growth Engine and help me with Marketing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "轮播增长引擎",
@@ -2165,16 +1743,10 @@
     "description": "Expert China e-commerce operations specialist covering Taobao, Tmall, Pinduoduo, and JD ecosystems with deep expertise in product listing optimization, live commerce, store operations, 618/Double 11 campaigns, and cross-platform strategy.",
     "avatar": "🛒",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-xlsx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as China E-Commerce Operator and help me with Marketing tasks"
-    ],
+    "prompts": ["Act as China E-Commerce Operator and help me with Marketing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "中国电商运营师",
@@ -2193,16 +1765,10 @@
     "description": "Full-stack China market localization expert who transforms real-time trend signals into executable go-to-market strategies across Douyin, Xiaohongshu, WeChat, Bilibili, and beyond",
     "avatar": "🇨🇳",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx",
-      "officecli-xlsx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx", "officecli-xlsx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as China Market Localization Strategist and help me with Marketing tasks"
-    ],
+    "prompts": ["Act as China Market Localization Strategist and help me with Marketing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "中国市场本地化策略师",
@@ -2221,16 +1787,10 @@
     "description": "Expert content strategist and creator for multi-platform campaigns. Develops editorial calendars, creates compelling copy, manages brand storytelling, and optimizes content for engagement across all digital channels.",
     "avatar": "✍️",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-xlsx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Content Creator and help me with Marketing tasks"
-    ],
+    "prompts": ["Act as Content Creator and help me with Marketing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "内容创作者",
@@ -2249,16 +1809,10 @@
     "description": "Full-funnel cross-border e-commerce strategist covering Amazon, Shopee, Lazada, AliExpress, Temu, and TikTok Shop operations, international logistics and overseas warehousing, compliance and taxation, multilingual listing optimization, brand globalization, and DTC independent site development.",
     "avatar": "🌏",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-xlsx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Cross-Border E-Commerce Specialist and help me with Marketing tasks"
-    ],
+    "prompts": ["Act as Cross-Border E-Commerce Specialist and help me with Marketing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "跨境电商专家",
@@ -2277,16 +1831,10 @@
     "description": "Short-video marketing expert specializing in the Douyin platform, with deep expertise in recommendation algorithm mechanics, viral video planning, livestream commerce workflows, and full-funnel brand growth through content matrix strategies.",
     "avatar": "🎵",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx",
-      "officecli-xlsx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx", "officecli-xlsx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Douyin Strategist and help me with Marketing tasks"
-    ],
+    "prompts": ["Act as Douyin Strategist and help me with Marketing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "抖音策略师",
@@ -2305,16 +1853,10 @@
     "description": "Expert email marketing strategist for CRM-driven campaigns, lifecycle automation, segmentation architecture, and deliverability. Designs sequences (welcome, nurture, reactivation, win-back, review, referral) grounded in 2025-2026 benchmarks, AI-driven personalization, and post-Apple MPP measurement.",
     "avatar": "📧",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "officecli-data-dashboard"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-xlsx", "officecli-data-dashboard"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Email Marketing Strategist and help me with Marketing tasks"
-    ],
+    "prompts": ["Act as Email Marketing Strategist and help me with Marketing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "邮件策略师",
@@ -2333,16 +1875,10 @@
     "description": "Expert podcast growth specialist focused on show positioning, audience development, content strategy, and monetisation. Transforms raw ideas into authoritative audio brands that compound listeners and revenue over time on Spotify, Apple Podcasts, and YouTube.",
     "avatar": "🎙️",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx",
-      "officecli-xlsx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx", "officecli-xlsx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Global Podcast Strategist and help me with Marketing tasks"
-    ],
+    "prompts": ["Act as Global Podcast Strategist and help me with Marketing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "全球播客策略师",
@@ -2361,16 +1897,10 @@
     "description": "Expert growth strategist specializing in rapid user acquisition through data-driven experimentation. Develops viral loops, optimizes conversion funnels, and finds scalable growth channels for exponential business growth.",
     "avatar": "🚀",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "officecli-data-dashboard"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-xlsx", "officecli-data-dashboard"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Growth Hacker and help me with Marketing tasks"
-    ],
+    "prompts": ["Act as Growth Hacker and help me with Marketing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "增长黑客",
@@ -2389,15 +1919,10 @@
     "description": "Expert Instagram marketing specialist focused on visual storytelling, community building, and multi-format content optimization. Masters aesthetic development and drives meaningful engagement.",
     "avatar": "📸",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Instagram Curator and help me with Marketing tasks"
-    ],
+    "prompts": ["Act as Instagram Curator and help me with Marketing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "Instagram策划师",
@@ -2416,15 +1941,10 @@
     "description": "Expert Kuaishou marketing strategist specializing in short-video content for China's lower-tier city markets, live commerce operations, community trust building, and grassroots audience growth on 快手.",
     "avatar": "🎥",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Kuaishou Strategist and help me with Marketing tasks"
-    ],
+    "prompts": ["Act as Kuaishou Strategist and help me with Marketing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "快手策略师",
@@ -2443,15 +1963,10 @@
     "description": "Expert LinkedIn content strategist focused on thought leadership, personal brand building, and high-engagement professional content. Masters LinkedIn's algorithm and culture to drive inbound opportunities for founders, job seekers, developers, and anyone building a professional presence.",
     "avatar": "💼",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as LinkedIn Content Creator and help me with Marketing tasks"
-    ],
+    "prompts": ["Act as LinkedIn Content Creator and help me with Marketing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "LinkedIn创作者",
@@ -2470,15 +1985,10 @@
     "description": "Veteran livestream e-commerce coach specializing in host training and live room operations across Douyin, Kuaishou, Taobao Live, and Channels, covering script design, product sequencing, paid-vs-organic traffic balancing, conversion closing techniques, and real-time data-driven optimization.",
     "avatar": "🎙️",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Livestream Commerce Coach and help me with Marketing tasks"
-    ],
+    "prompts": ["Act as Livestream Commerce Coach and help me with Marketing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "直播电商教练",
@@ -2497,14 +2007,10 @@
     "description": "Expert orchestrator for one-click Chinese blog publishing. Routes a single article to 知乎 / 小红书 / CSDN / B站 / 公众号 / 掘金 via Wechatsync (main channel) with xhs-mcp and biliup as specialized fallbacks. Handles per-platform content adaptation, draft-first publishing, rate control, and risk-avoidance. Does NOT auto-publish — always stops at draft for human review.",
     "avatar": "📡",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx"
-    ],
+    "enabled_skills": ["officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Multi-Platform Publisher and help me with Marketing tasks"
-    ],
+    "prompts": ["Act as Multi-Platform Publisher and help me with Marketing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "多平台发布者",
@@ -2523,15 +2029,10 @@
     "description": "Content strategy and operations expert for the Chinese podcast market, with deep expertise in Xiaoyuzhou, Ximalaya, and other major audio platforms, covering show positioning, audio production, audience growth, multi-platform distribution, and monetization to help podcast creators build sticky audio content brands.",
     "avatar": "🎧",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Podcast Strategist and help me with Marketing tasks"
-    ],
+    "prompts": ["Act as Podcast Strategist and help me with Marketing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "播客策略师",
@@ -2550,15 +2051,10 @@
     "description": "Strategic public relations and communications specialist for media relations, press releases, crisis communications, executive thought leadership, brand reputation management, and integrated communications planning — building and protecting reputations through earned media, storytelling, and proactive narrative control",
     "avatar": "📣",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as PR & Communications Manager and help me with Marketing tasks"
-    ],
+    "prompts": ["Act as PR & Communications Manager and help me with Marketing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "公关传播经理",
@@ -2577,15 +2073,10 @@
     "description": "Expert in building enterprise WeChat (WeCom) private domain ecosystems, with deep expertise in SCRM systems, segmented community operations, Mini Program commerce integration, user lifecycle management, and full-funnel conversion optimization.",
     "avatar": "🔒",
     "preset_agent_type": "hermes",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Private Domain Operator and help me with Marketing tasks"
-    ],
+    "prompts": ["Act as Private Domain Operator and help me with Marketing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "私域运营师",
@@ -2604,15 +2095,10 @@
     "description": "Expert Reddit marketing specialist focused on authentic community engagement, value-driven content creation, and long-term relationship building. Masters Reddit culture navigation.",
     "avatar": "💬",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Reddit Community Builder and help me with Marketing tasks"
-    ],
+    "prompts": ["Act as Reddit Community Builder and help me with Marketing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "Reddit社区建设者",
@@ -2631,16 +2117,10 @@
     "description": "Expert search engine optimization strategist specializing in technical SEO, content optimization, link authority building, and organic search growth. Drives sustainable traffic through data-driven search strategies.",
     "avatar": "🔍",
     "preset_agent_type": "gemini",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-data-dashboard",
-      "officecli-xlsx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-data-dashboard", "officecli-xlsx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as SEO Specialist and help me with Marketing tasks"
-    ],
+    "prompts": ["Act as SEO Specialist and help me with Marketing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "SEO专家",
@@ -2659,15 +2139,10 @@
     "description": "Hands-on short-video editing coach covering the full post-production pipeline, with mastery of CapCut Pro, Premiere Pro, DaVinci Resolve, and Final Cut Pro across composition and camera language, color grading, audio engineering, motion graphics and VFX, subtitle design, multi-platform export optimization, editing workflow efficiency, and AI-assisted editing.",
     "avatar": "🎬",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Short-Video Editing Coach and help me with Marketing tasks"
-    ],
+    "prompts": ["Act as Short-Video Editing Coach and help me with Marketing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "短视频编辑教练",
@@ -2686,15 +2161,10 @@
     "description": "Expert social media strategist for LinkedIn, Twitter, and professional platforms. Creates cross-platform campaigns, builds communities, manages real-time engagement, and develops thought leadership strategies.",
     "avatar": "📣",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Social Media Strategist and help me with Marketing tasks"
-    ],
+    "prompts": ["Act as Social Media Strategist and help me with Marketing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "社交媒体策略师",
@@ -2713,15 +2183,10 @@
     "description": "Expert TikTok marketing specialist focused on viral content creation, algorithm optimization, and community building. Masters TikTok's unique culture and features for brand growth.",
     "avatar": "🎵",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as TikTok Strategist and help me with Marketing tasks"
-    ],
+    "prompts": ["Act as TikTok Strategist and help me with Marketing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "TikTok策略师",
@@ -2740,15 +2205,10 @@
     "description": "Expert Twitter marketing specialist focused on real-time engagement, thought leadership building, and community-driven growth. Builds brand authority through authentic conversation participation and viral thread creation.",
     "avatar": "🐦",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Twitter Engager and help me with Marketing tasks"
-    ],
+    "prompts": ["Act as Twitter Engager and help me with Marketing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "Twitter互动师",
@@ -2767,16 +2227,10 @@
     "description": "Video marketing strategist specializing in YouTube algorithm optimization, audience retention, chaptering, thumbnail concepts, and cross-platform video syndication.",
     "avatar": "🎬",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-data-dashboard",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-data-dashboard", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Video Optimization Specialist and help me with Marketing tasks"
-    ],
+    "prompts": ["Act as Video Optimization Specialist and help me with Marketing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "视频优化专家",
@@ -2795,15 +2249,10 @@
     "description": "Expert WeChat Official Account (OA) strategist specializing in content marketing, subscriber engagement, and conversion optimization. Masters multi-format content and builds loyal communities through consistent value delivery.",
     "avatar": "📱",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as WeChat Official Account Manager and help me with Marketing tasks"
-    ],
+    "prompts": ["Act as WeChat Official Account Manager and help me with Marketing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "微信公众号运营",
@@ -2822,16 +2271,10 @@
     "description": "Full-spectrum operations expert for Sina Weibo, with deep expertise in trending topic mechanics, Super Topic community management, public sentiment monitoring, fan economy strategies, and Weibo advertising, helping brands achieve viral reach and sustained growth on China's leading public discourse platform.",
     "avatar": "🔥",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx",
-      "officecli-data-dashboard"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx", "officecli-data-dashboard"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Weibo Strategist and help me with Marketing tasks"
-    ],
+    "prompts": ["Act as Weibo Strategist and help me with Marketing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "微博策略师",
@@ -2850,16 +2293,10 @@
     "description": "Social intelligence specialist for X/Twitter research, trend detection, account monitoring, and evidence-backed audience insights using public signals and structured data workflows.",
     "avatar": "🛰️",
     "preset_agent_type": "gemini",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-data-dashboard",
-      "officecli-xlsx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-data-dashboard", "officecli-xlsx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as X/Twitter Intelligence Analyst and help me with Marketing tasks"
-    ],
+    "prompts": ["Act as X/Twitter Intelligence Analyst and help me with Marketing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "X情报分析师",
@@ -2878,15 +2315,10 @@
     "description": "Expert Xiaohongshu marketing specialist focused on lifestyle content, trend-driven strategies, and authentic community engagement. Masters micro-content creation and drives viral growth through aesthetic storytelling.",
     "avatar": "🌸",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Xiaohongshu Specialist and help me with Marketing tasks"
-    ],
+    "prompts": ["Act as Xiaohongshu Specialist and help me with Marketing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "小红书专家",
@@ -2905,15 +2337,10 @@
     "description": "Expert Zhihu marketing specialist focused on thought leadership, community credibility, and knowledge-driven engagement. Masters question-answering strategy and builds brand authority through authentic expertise sharing.",
     "avatar": "🧠",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Zhihu Strategist and help me with Marketing tasks"
-    ],
+    "prompts": ["Act as Zhihu Strategist and help me with Marketing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "知乎策略师",
@@ -2932,16 +2359,10 @@
     "description": "Comprehensive paid media auditor who systematically evaluates Google Ads, Microsoft Ads, and Meta accounts across 200+ checkpoints spanning account structure, tracking, bidding, creative, audiences, and competitive positioning. Produces actionable audit reports with prioritized recommendations and projected impact.",
     "avatar": "📋",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "officecli-data-dashboard"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-xlsx", "officecli-data-dashboard"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Paid Media Auditor and help me with Paid Media tasks"
-    ],
+    "prompts": ["Act as Paid Media Auditor and help me with Paid Media tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "广告审计师",
@@ -2960,16 +2381,10 @@
     "description": "Paid media creative specialist focused on ad copywriting, RSA optimization, asset group design, and creative testing frameworks across Google, Meta, Microsoft, and programmatic platforms. Bridges the gap between performance data and persuasive messaging.",
     "avatar": "✍️",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx",
-      "officecli-xlsx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx", "officecli-xlsx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Ad Creative Strategist and help me with Paid Media tasks"
-    ],
+    "prompts": ["Act as Ad Creative Strategist and help me with Paid Media tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "广告创意策略师",
@@ -2988,16 +2403,10 @@
     "description": "Cross-platform paid social advertising specialist covering Meta (Facebook/Instagram), LinkedIn, TikTok, Pinterest, X, and Snapchat. Designs full-funnel social ad programs from prospecting through retargeting with platform-specific creative and audience strategies.",
     "avatar": "📱",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx",
-      "officecli-data-dashboard"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx", "officecli-data-dashboard"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Paid Social Strategist and help me with Paid Media tasks"
-    ],
+    "prompts": ["Act as Paid Social Strategist and help me with Paid Media tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "付费社交策略师",
@@ -3016,16 +2425,10 @@
     "description": "Senior paid media strategist specializing in large-scale search, shopping, and performance max campaign architecture across Google, Microsoft, and Amazon ad platforms. Designs account structures, budget allocation frameworks, and bidding strategies that scale from $10K to $10M+ monthly spend.",
     "avatar": "💰",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-xlsx",
-      "officecli-docx",
-      "officecli-data-dashboard"
-    ],
+    "enabled_skills": ["officecli-xlsx", "officecli-docx", "officecli-data-dashboard"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as PPC Campaign Strategist and help me with Paid Media tasks"
-    ],
+    "prompts": ["Act as PPC Campaign Strategist and help me with Paid Media tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "PPC策略师",
@@ -3044,16 +2447,10 @@
     "description": "Display advertising and programmatic media buying specialist covering managed placements, Google Display Network, DV360, trade desk platforms, partner media (newsletters, sponsored content), and ABM display strategies via platforms like Demandbase and 6Sense.",
     "avatar": "📺",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-data-dashboard",
-      "officecli-xlsx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-data-dashboard", "officecli-xlsx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Programmatic & Display Buyer and help me with Paid Media tasks"
-    ],
+    "prompts": ["Act as Programmatic & Display Buyer and help me with Paid Media tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "程序化购买师",
@@ -3072,16 +2469,10 @@
     "description": "Specialist in search term analysis, negative keyword architecture, and query-to-intent mapping. Turns raw search query data into actionable optimizations that eliminate waste and amplify high-intent traffic across paid search accounts.",
     "avatar": "🔍",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-xlsx",
-      "officecli-data-dashboard",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["officecli-xlsx", "officecli-data-dashboard", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Search Query Analyst and help me with Paid Media tasks"
-    ],
+    "prompts": ["Act as Search Query Analyst and help me with Paid Media tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "搜索查询分析师",
@@ -3100,16 +2491,10 @@
     "description": "Expert in conversion tracking architecture, tag management, and attribution modeling across Google Tag Manager, GA4, Google Ads, Meta CAPI, LinkedIn Insight Tag, and server-side implementations. Ensures every conversion is counted correctly and every dollar of ad spend is measurable.",
     "avatar": "📡",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid",
-      "officecli-xlsx"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid", "officecli-xlsx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Tracking & Measurement Specialist and help me with Paid Media tasks"
-    ],
+    "prompts": ["Act as Tracking & Measurement Specialist and help me with Paid Media tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "追踪测量专家",
@@ -3128,16 +2513,10 @@
     "description": "Behavioral psychology specialist that adapts software interaction cadences and styles to maximize user motivation and success.",
     "avatar": "🧠",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Behavioral Nudge Engine and help me with Product tasks"
-    ],
+    "prompts": ["Act as Behavioral Nudge Engine and help me with Product tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "行为助推工程师",
@@ -3156,16 +2535,10 @@
     "description": "Expert in collecting, analyzing, and synthesizing user feedback from multiple channels to extract actionable product insights. Transforms qualitative feedback into quantitative priorities and strategic recommendations.",
     "avatar": "🔍",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "officecli-data-dashboard"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-xlsx", "officecli-data-dashboard"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Feedback Synthesizer and help me with Product tasks"
-    ],
+    "prompts": ["Act as Feedback Synthesizer and help me with Product tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "反馈综合师",
@@ -3184,16 +2557,10 @@
     "description": "Holistic product leader who owns the full product lifecycle — from discovery and strategy through roadmap, stakeholder alignment, go-to-market, and outcome measurement. Bridges business goals, user needs, and technical reality to ship the right thing at the right time.",
     "avatar": "🧭",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx",
-      "officecli-xlsx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx", "officecli-xlsx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Product Manager and help me with Product tasks"
-    ],
+    "prompts": ["Act as Product Manager and help me with Product tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "产品经理",
@@ -3212,16 +2579,10 @@
     "description": "Expert product manager specializing in agile sprint planning, feature prioritization, and resource allocation. Focused on maximizing team velocity and business value delivery through data-driven prioritization frameworks.",
     "avatar": "🎯",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-xlsx",
-      "officecli-docx",
-      "officecli-data-dashboard"
-    ],
+    "enabled_skills": ["officecli-xlsx", "officecli-docx", "officecli-data-dashboard"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Sprint Prioritizer and help me with Product tasks"
-    ],
+    "prompts": ["Act as Sprint Prioritizer and help me with Product tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "Sprint优先级师",
@@ -3240,16 +2601,10 @@
     "description": "Expert market intelligence analyst specializing in identifying emerging trends, competitive analysis, and opportunity assessment. Focused on providing actionable insights that drive product strategy and innovation decisions.",
     "avatar": "🔭",
     "preset_agent_type": "gemini",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx",
-      "officecli-data-dashboard"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx", "officecli-data-dashboard"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Trend Researcher and help me with Product tasks"
-    ],
+    "prompts": ["Act as Trend Researcher and help me with Product tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "趋势研究员",
@@ -3268,16 +2623,10 @@
     "description": "Expert project manager specializing in experiment design, execution tracking, and data-driven decision making. Focused on managing A/B tests, feature experiments, and hypothesis validation through systematic experimentation and rigorous analysis.",
     "avatar": "🧪",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-xlsx",
-      "officecli-data-dashboard",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["officecli-xlsx", "officecli-data-dashboard", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Experiment Tracker and help me with Project Management tasks"
-    ],
+    "prompts": ["Act as Experiment Tracker and help me with Project Management tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "实验追踪师",
@@ -3296,16 +2645,10 @@
     "description": "Expert delivery operations specialist who enforces Jira-linked Git workflows, traceable commits, structured pull requests, and release-safe branch strategy across software teams.",
     "avatar": "📋",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid",
-      "officecli-xlsx"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid", "officecli-xlsx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Jira Workflow Steward and help me with Project Management tasks"
-    ],
+    "prompts": ["Act as Jira Workflow Steward and help me with Project Management tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "Jira工作流管家",
@@ -3324,14 +2667,10 @@
     "description": "Extract structured decisions, action items, and open questions from meeting transcripts or rough notes into a clean 4-section summary.",
     "avatar": "📋",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx"
-    ],
+    "enabled_skills": ["officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Meeting Notes Specialist and help me with Project Management tasks"
-    ],
+    "prompts": ["Act as Meeting Notes Specialist and help me with Project Management tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "会议纪要专家",
@@ -3350,16 +2689,10 @@
     "description": "Expert project manager specializing in cross-functional project coordination, timeline management, and stakeholder alignment. Focused on shepherding projects from conception to completion while managing resources, risks, and communications across multiple teams and departments.",
     "avatar": "🐑",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-xlsx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Project Shepherd and help me with Project Management tasks"
-    ],
+    "prompts": ["Act as Project Shepherd and help me with Project Management tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "项目守护者",
@@ -3378,16 +2711,10 @@
     "description": "Expert operations manager specializing in day-to-day studio efficiency, process optimization, and resource coordination. Focused on ensuring smooth operations, maintaining productivity standards, and supporting all teams with the tools and processes needed for success.",
     "avatar": "🏭",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-xlsx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Studio Operations and help me with Project Management tasks"
-    ],
+    "prompts": ["Act as Studio Operations and help me with Project Management tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "工作室运营",
@@ -3406,16 +2733,10 @@
     "description": "Senior strategic leader specializing in high-level creative and technical project orchestration, resource allocation, and multi-project portfolio management. Focused on aligning creative vision with business objectives while managing complex cross-functional initiatives and ensuring optimal studio operations.",
     "avatar": "🎬",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-xlsx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Studio Producer and help me with Project Management tasks"
-    ],
+    "prompts": ["Act as Studio Producer and help me with Project Management tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "工作室制作人",
@@ -3434,15 +2755,10 @@
     "description": "Converts specs to tasks and remembers previous projects. Focused on realistic scope, no background processes, exact spec requirements",
     "avatar": "📝",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-xlsx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-xlsx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Senior Project Manager and help me with Project Management tasks"
-    ],
+    "prompts": ["Act as Senior Project Manager and help me with Project Management tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "高级项目经理",
@@ -3461,16 +2777,10 @@
     "description": "Expert post-sale account strategist specializing in land-and-expand execution, stakeholder mapping, QBR facilitation, and net revenue retention. Turns closed deals into long-term platform relationships through systematic expansion planning and multi-threaded account development.",
     "avatar": "🗺️",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-pptx",
-      "officecli-xlsx",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["officecli-pptx", "officecli-xlsx", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Account Strategist and help me with Sales tasks"
-    ],
+    "prompts": ["Act as Account Strategist and help me with Sales tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "客户策略师",
@@ -3489,16 +2799,10 @@
     "description": "Expert sales coaching specialist focused on rep development, pipeline review facilitation, call coaching, deal strategy, and forecast accuracy. Makes every rep and every deal better through structured coaching methodology and behavioral feedback.",
     "avatar": "🏋️",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx",
-      "officecli-xlsx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx", "officecli-xlsx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Sales Coach and help me with Sales tasks"
-    ],
+    "prompts": ["Act as Sales Coach and help me with Sales tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "销售教练",
@@ -3517,16 +2821,10 @@
     "description": "Senior deal strategist specializing in MEDDPICC qualification, competitive positioning, and win planning for complex B2B sales cycles. Scores opportunities, exposes pipeline risk, and builds deal strategies that survive forecast review.",
     "avatar": "♟️",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-xlsx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Deal Strategist and help me with Sales tasks"
-    ],
+    "prompts": ["Act as Deal Strategist and help me with Sales tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "交易策略师",
@@ -3545,15 +2843,10 @@
     "description": "Coaches sales teams on elite discovery methodology — question design, current-state mapping, gap quantification, and call structure that surfaces real buying motivation.",
     "avatar": "🔍",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Discovery Coach and help me with Sales tasks"
-    ],
+    "prompts": ["Act as Discovery Coach and help me with Sales tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "销售发现教练",
@@ -3572,16 +2865,10 @@
     "description": "Senior pre-sales engineer specializing in technical discovery, demo engineering, POC scoping, competitive battlecards, and bridging product capabilities to business outcomes. Wins the technical decision so the deal can close.",
     "avatar": "🛠️",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-pptx",
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-pptx", "officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Sales Engineer and help me with Sales tasks"
-    ],
+    "prompts": ["Act as Sales Engineer and help me with Sales tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "销售工程师",
@@ -3600,16 +2887,10 @@
     "description": "Top-of-funnel architect who designs irresistible offers and lead magnets that attract qualified buyers at scale. Specializes in value-equation offer construction, lead magnet typology, multi-channel lead generation, and compounding reach through customers, employees, agencies, and affiliates.",
     "avatar": "🧲",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-pptx",
-      "officecli-pitch-deck",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["officecli-pptx", "officecli-pitch-deck", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Offer & Lead Gen Strategist and help me with Sales tasks"
-    ],
+    "prompts": ["Act as Offer & Lead Gen Strategist and help me with Sales tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "线索生成策略师",
@@ -3628,15 +2909,10 @@
     "description": "Signal-based outbound specialist who designs multi-channel prospecting sequences, defines ICPs, and builds pipeline through research-driven personalization — not volume.",
     "avatar": "🎯",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Outbound Strategist and help me with Sales tasks"
-    ],
+    "prompts": ["Act as Outbound Strategist and help me with Sales tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "外呼策略师",
@@ -3655,16 +2931,10 @@
     "description": "Revenue operations analyst specializing in pipeline health diagnostics, deal velocity analysis, forecast accuracy, and data-driven sales coaching. Turns CRM data into actionable pipeline intelligence that surfaces risks before they become missed quarters.",
     "avatar": "📊",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-xlsx",
-      "officecli-data-dashboard",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["officecli-xlsx", "officecli-data-dashboard", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Pipeline Analyst and help me with Sales tasks"
-    ],
+    "prompts": ["Act as Pipeline Analyst and help me with Sales tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "销售管道分析师",
@@ -3683,16 +2953,10 @@
     "description": "Strategic proposal architect who transforms RFPs and sales opportunities into compelling win narratives. Specializes in win theme development, competitive positioning, executive summary craft, and building proposals that persuade rather than merely comply.",
     "avatar": "🏹",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-pptx",
-      "officecli-pitch-deck",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["officecli-pptx", "officecli-pitch-deck", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Proposal Strategist and help me with Sales tasks"
-    ],
+    "prompts": ["Act as Proposal Strategist and help me with Sales tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "提案策略师",
@@ -3711,16 +2975,10 @@
     "description": "AppSec specialist who secures the software development lifecycle through threat modeling, secure code review, SAST/DAST integration, and developer security education that makes secure code the default.",
     "avatar": "🔐",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "mermaid",
-      "officecli-docx",
-      "pdf"
-    ],
+    "enabled_skills": ["mermaid", "officecli-docx", "pdf"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Application Security Engineer and help me with Security tasks"
-    ],
+    "prompts": ["Act as Application Security Engineer and help me with Security tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "应用安全工程师",
@@ -3739,16 +2997,10 @@
     "description": "Expert security architect specializing in threat modeling, secure-by-design architecture, trust-boundary analysis, defense-in-depth, and risk-based security reviews across web, API, cloud-native, and distributed systems. Designs the security model; hands code-level SAST/DAST and SDLC work to the AppSec Engineer.",
     "avatar": "🛡️",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "mermaid",
-      "officecli-docx",
-      "pdf"
-    ],
+    "enabled_skills": ["mermaid", "officecli-docx", "pdf"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Security Architect and help me with Security tasks"
-    ],
+    "prompts": ["Act as Security Architect and help me with Security tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "安全架构师",
@@ -3767,16 +3019,10 @@
     "description": "Expert smart contract security auditor specializing in vulnerability detection, formal verification, exploit analysis, and comprehensive audit report writing for DeFi protocols and blockchain applications.",
     "avatar": "🛡️",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "mermaid",
-      "pdf",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["mermaid", "pdf", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Blockchain Security Auditor and help me with Security tasks"
-    ],
+    "prompts": ["Act as Blockchain Security Auditor and help me with Security tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "区块链安全审计师",
@@ -3795,16 +3041,10 @@
     "description": "Cloud-native security specialist designing zero trust architectures, implementing defense-in-depth across AWS, Azure, and GCP, and securing infrastructure-as-code pipelines from day one.",
     "avatar": "☁️",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "mermaid",
-      "officecli-docx",
-      "pdf"
-    ],
+    "enabled_skills": ["mermaid", "officecli-docx", "pdf"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Cloud Security Architect and help me with Security tasks"
-    ],
+    "prompts": ["Act as Cloud Security Architect and help me with Security tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "云安全架构师",
@@ -3823,16 +3063,10 @@
     "description": "Expert technical compliance auditor specializing in SOC 2, ISO 27001, HIPAA, and PCI-DSS audits — from readiness assessment through evidence collection to certification.",
     "avatar": "📋",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-word-form",
-      "pdf",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["officecli-word-form", "pdf", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Compliance Auditor and help me with Security tasks"
-    ],
+    "prompts": ["Act as Compliance Auditor and help me with Security tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "合规审计师",
@@ -3851,16 +3085,10 @@
     "description": "Digital forensics and incident response specialist who leads breach investigations, contains active threats, coordinates crisis response, and writes post-mortems that prevent recurrence.",
     "avatar": "🚨",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "pdf",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "pdf", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Incident Responder and help me with Security tasks"
-    ],
+    "prompts": ["Act as Incident Responder and help me with Security tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "事件响应员",
@@ -3879,16 +3107,10 @@
     "description": "Offensive security specialist conducting authorized penetration tests, red team operations, and vulnerability assessments across networks, web applications, and cloud infrastructure.",
     "avatar": "🗡️",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "pdf",
-      "mermaid",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["pdf", "mermaid", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Penetration Tester and help me with Security tasks"
-    ],
+    "prompts": ["Act as Penetration Tester and help me with Security tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "渗透测试员",
@@ -3907,16 +3129,10 @@
     "description": "Defensive application security specialist who scans every code submission for secrets and sensitive data exposure before anything else, then implements or audits security controls following the organization's security standard — covering authentication, authorization, tokens, cookies, HTTP headers, CORS, rate limiting, CSP, secrets management, input validation, and secure logging.",
     "avatar": "🛡️",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "mermaid",
-      "officecli-docx",
-      "pdf"
-    ],
+    "enabled_skills": ["mermaid", "officecli-docx", "pdf"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Senior SecOps Engineer and help me with Security tasks"
-    ],
+    "prompts": ["Act as Senior SecOps Engineer and help me with Security tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "高级安全运营",
@@ -3935,16 +3151,10 @@
     "description": "Expert detection engineer specializing in SIEM rule development, MITRE ATT&CK coverage mapping, threat hunting, alert tuning, and detection-as-code pipelines for security operations teams.",
     "avatar": "🎯",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "mermaid",
-      "officecli-docx",
-      "pdf"
-    ],
+    "enabled_skills": ["mermaid", "officecli-docx", "pdf"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Threat Detection Engineer and help me with Security tasks"
-    ],
+    "prompts": ["Act as Threat Detection Engineer and help me with Security tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "威胁检测工程师",
@@ -3963,16 +3173,10 @@
     "description": "Cyber threat intelligence specialist who tracks adversary groups, maps attack campaigns to MITRE ATT&CK, produces actionable intelligence reports, and builds detection rules that catch real threats.",
     "avatar": "🔍",
     "preset_agent_type": "gemini",
-    "enabled_skills": [
-      "pdf",
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["pdf", "officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Threat Intelligence Analyst and help me with Security tasks"
-    ],
+    "prompts": ["Act as Threat Intelligence Analyst and help me with Security tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "威胁情报分析师",
@@ -3991,15 +3195,10 @@
     "description": "Native Swift and Metal specialist building high-performance 3D rendering systems and spatial computing experiences for macOS and Vision Pro",
     "avatar": "🍎",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "mermaid",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["mermaid", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as macOS Spatial/Metal Engineer and help me with Spatial Computing tasks"
-    ],
+    "prompts": ["Act as macOS Spatial/Metal Engineer and help me with Spatial Computing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "macOS空间Metal工程师",
@@ -4018,15 +3217,10 @@
     "description": "Terminal emulation, text rendering optimization, and SwiftTerm integration for modern Swift applications",
     "avatar": "🖥️",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "mermaid",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["mermaid", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Terminal Integration Specialist and help me with Spatial Computing tasks"
-    ],
+    "prompts": ["Act as Terminal Integration Specialist and help me with Spatial Computing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "终端集成专家",
@@ -4045,15 +3239,10 @@
     "description": "Native visionOS spatial computing, SwiftUI volumetric interfaces, and Liquid Glass design implementation",
     "avatar": "🥽",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "mermaid",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["mermaid", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as visionOS Spatial Engineer and help me with Spatial Computing tasks"
-    ],
+    "prompts": ["Act as visionOS Spatial Engineer and help me with Spatial Computing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "visionOS空间工程师",
@@ -4072,15 +3261,10 @@
     "description": "Specialist in designing and developing immersive cockpit-based control systems for XR environments",
     "avatar": "🕹️",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "mermaid",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["mermaid", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as XR Cockpit Interaction Specialist and help me with Spatial Computing tasks"
-    ],
+    "prompts": ["Act as XR Cockpit Interaction Specialist and help me with Spatial Computing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "XR座舱交互专家",
@@ -4099,15 +3283,10 @@
     "description": "Expert WebXR and immersive technology developer with specialization in browser-based AR/VR/XR applications",
     "avatar": "🌐",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "mermaid",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["mermaid", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as XR Immersive Developer and help me with Spatial Computing tasks"
-    ],
+    "prompts": ["Act as XR Immersive Developer and help me with Spatial Computing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "XR沉浸式开发者",
@@ -4126,16 +3305,10 @@
     "description": "Spatial interaction designer and interface strategist for immersive AR/VR/XR environments",
     "avatar": "🫧",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-pptx",
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-pptx", "officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as XR Interface Architect and help me with Spatial Computing tasks"
-    ],
+    "prompts": ["Act as XR Interface Architect and help me with Spatial Computing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "XR界面架构师",
@@ -4154,15 +3327,10 @@
     "description": "Autonomous payment processing specialist that executes vendor payments, contractor invoices, and recurring bills across any payment rail — crypto, fiat, stablecoins. Integrates with AI agent workflows via tool calls.",
     "avatar": "💸",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-xlsx",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["officecli-xlsx", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Accounts Payable Agent and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Accounts Payable Agent and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "应付账款专员",
@@ -4181,16 +3349,10 @@
     "description": "Designs identity, authentication, and trust verification systems for autonomous AI agents operating in multi-agent environments. Ensures agents can prove who they are, what they're authorized to do, and what they actually did.",
     "avatar": "🔐",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "mermaid",
-      "officecli-docx",
-      "pdf"
-    ],
+    "enabled_skills": ["mermaid", "officecli-docx", "pdf"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Agentic Identity & Trust Architect and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Agentic Identity & Trust Architect and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "智能身份信任架构师",
@@ -4209,15 +3371,10 @@
     "description": "Autonomous pipeline manager that orchestrates the entire development workflow. You are the leader of this process.",
     "avatar": "🎛️",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "mermaid",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["mermaid", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Agents Orchestrator and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Agents Orchestrator and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "智能体编排器",
@@ -4236,16 +3393,10 @@
     "description": "Governance-first architect for business automations (n8n-first) who audits value, risk, and maintainability before implementation.",
     "avatar": "⚙️",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "mermaid",
-      "officecli-docx",
-      "officecli-xlsx"
-    ],
+    "enabled_skills": ["mermaid", "officecli-docx", "officecli-xlsx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Automation Governance Architect and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Automation Governance Architect and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "自动化治理架构师",
@@ -4264,16 +3415,10 @@
     "description": "Senior management consulting specialist for competitive analysis, market entry strategy, business model design, growth planning, organizational strategy, and strategic decision-making — translating complex market dynamics into clear, actionable strategies that create sustainable competitive advantage",
     "avatar": "♟️",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-pptx",
-      "officecli-docx",
-      "officecli-pitch-deck"
-    ],
+    "enabled_skills": ["officecli-pptx", "officecli-docx", "officecli-pitch-deck"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Business Strategist and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Business Strategist and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "商业策略师",
@@ -4292,15 +3437,10 @@
     "description": "Expert change management specialist using ADKAR, Kotter, and Prosci frameworks to guide organizations through technology implementations, restructuring, culture transformation, and M&A integration — managing resistance, building adoption, and ensuring changes stick long after go-live",
     "avatar": "🔄",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Change Management Consultant and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Change Management Consultant and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "变革管理顾问",
@@ -4319,17 +3459,10 @@
     "description": "Strategic finance executive who governs capital allocation, treasury operations, financial planning, M&A finance, investor relations, and board reporting — translating financial complexity into clear decisions that drive business performance and stakeholder confidence.",
     "avatar": "💼",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-financial-model",
-      "officecli-xlsx",
-      "officecli-pptx",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["officecli-financial-model", "officecli-xlsx", "officecli-pptx", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Chief Financial Officer and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Chief Financial Officer and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "首席财务官",
@@ -4348,16 +3481,10 @@
     "description": "Expert in enterprise training system design and curriculum development — proficient in training needs analysis, instructional design methodology, blended learning program design, internal trainer development, leadership programs, and training effectiveness evaluation and continuous optimization.",
     "avatar": "📚",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx",
-      "officecli-xlsx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx", "officecli-xlsx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Corporate Training Designer and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Corporate Training Designer and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "企业培训设计师",
@@ -4376,14 +3503,10 @@
     "description": "Friendly, professional customer service specialist for any industry — handling inquiries, complaints, account support, FAQs, and seamless escalation with warmth, efficiency, and a genuine commitment to customer satisfaction",
     "avatar": "🎧",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx"
-    ],
+    "enabled_skills": ["officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Customer Service and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Customer Service and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "客服专员",
@@ -4402,16 +3525,10 @@
     "description": "Strategic customer success specialist for onboarding, health scoring, QBR facilitation, churn prevention, expansion identification, and renewal management — driving net revenue retention by turning customers into long-term partners who achieve measurable outcomes",
     "avatar": "🌟",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-pptx",
-      "officecli-xlsx",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["officecli-pptx", "officecli-xlsx", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Customer Success Manager and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Customer Success Manager and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "客户成功经理",
@@ -4430,16 +3547,10 @@
     "description": "AI agent that consolidates extracted sales data into live reporting dashboards with territory, rep, and pipeline summaries",
     "avatar": "🗄️",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-xlsx",
-      "officecli-data-dashboard",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["officecli-xlsx", "officecli-data-dashboard", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Data Consolidation Agent and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Data Consolidation Agent and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "数据整合专员",
@@ -4458,17 +3569,10 @@
     "description": "Corporate data privacy specialist and DPO who builds GDPR, CCPA, and global privacy compliance programs — covering data mapping, privacy impact assessments, consent management, breach response, vendor due diligence, and regulatory engagement.",
     "avatar": "🔐",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-word-form",
-      "pdf",
-      "officecli-xlsx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-word-form", "pdf", "officecli-xlsx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Data Privacy Officer and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Data Privacy Officer and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "数据隐私官",
@@ -4487,17 +3591,10 @@
     "description": "Corporate sustainability strategist and ESG reporting specialist who builds environmental, social, and governance programs, manages disclosures, drives decarbonization initiatives, and aligns business strategy with stakeholder and regulatory expectations.",
     "avatar": "🌱",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "officecli-pptx",
-      "pdf"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-xlsx", "officecli-pptx", "pdf"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as ESG & Sustainability Officer and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as ESG & Sustainability Officer and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "ESG可持续发展官",
@@ -4516,17 +3613,10 @@
     "description": "Presales expert for China's government digital transformation market (ToG), proficient in policy interpretation, solution design, bid document preparation, POC validation, compliance requirements (classified protection/cryptographic assessment/Xinchuang domestic IT), and stakeholder management — helping technical teams efficiently win government IT projects.",
     "avatar": "🏛️",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-pptx",
-      "officecli-docx",
-      "officecli-word-form",
-      "pdf"
-    ],
+    "enabled_skills": ["officecli-pptx", "officecli-docx", "officecli-word-form", "pdf"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Government Digital Presales Consultant and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Government Digital Presales Consultant and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "政府数字化售前顾问",
@@ -4545,17 +3635,10 @@
     "description": "Expert grant writing specialist for nonprofits, research institutions, and social enterprises — covering prospect research, letter of inquiry writing, full proposal development, budget narratives, federal and foundation grants, and post-award reporting to maximize funding success",
     "avatar": "📝",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-word-form",
-      "officecli-xlsx",
-      "pdf"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-word-form", "officecli-xlsx", "pdf"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Grant Writer and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Grant Writer and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "资助申请撰写者",
@@ -4574,14 +3657,10 @@
     "description": "Empathetic healthcare customer service specialist for patient support, billing inquiries, appointment management, insurance questions, complaint resolution, and seamless escalation to clinical or administrative staff",
     "avatar": "🏥",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx"
-    ],
+    "enabled_skills": ["officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Healthcare Customer Service and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Healthcare Customer Service and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "医疗客服专员",
@@ -4600,16 +3679,10 @@
     "description": "Expert in healthcare marketing compliance in China, proficient in the Advertising Law, Medical Advertisement Management Measures, Drug Administration Law, and related regulations — covering pharmaceuticals, medical devices, medical aesthetics, health supplements, and internet healthcare across content review, risk control, platform rule interpretation, and patient privacy protection, helping enterprises conduct effective health marketing within legal boundaries.",
     "avatar": "⚕️",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-word-form",
-      "pdf"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-word-form", "pdf"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Healthcare Marketing Compliance Specialist and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Healthcare Marketing Compliance Specialist and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "医疗营销合规专员",
@@ -4628,15 +3701,10 @@
     "description": "Comprehensive hospitality guest services specialist for hotels, resorts, restaurants, and event venues — covering reservations, check-in/check-out, concierge services, guest complaint resolution, loyalty program management, and post-stay follow-up to deliver exceptional guest experiences that drive loyalty and revenue",
     "avatar": "🏨",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-xlsx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-xlsx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Hospitality Guest Services and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Hospitality Guest Services and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "酒店客户服务",
@@ -4655,16 +3723,10 @@
     "description": "Comprehensive HR onboarding specialist for employee orientation, documentation management, compliance tracking, benefits enrollment, culture integration, and new hire support — delivering a seamless first-day-to-first-year experience that drives retention and productivity",
     "avatar": "🤝",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-word-form",
-      "officecli-xlsx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-word-form", "officecli-xlsx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as HR Onboarding and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as HR Onboarding and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "HR入职专员",
@@ -4683,15 +3745,10 @@
     "description": "Operates a shared identity graph that multiple AI agents resolve against. Ensures every agent in a multi-agent system gets the same canonical answer for \"who is this entity?\" - deterministically, even under concurrent writes.",
     "avatar": "🕸️",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "mermaid",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["mermaid", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Identity Graph Operator and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Identity Graph Operator and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "身份图谱运营师",
@@ -4710,14 +3767,10 @@
     "description": "Real-time Spanish ↔ English translation specialist with cultural context, regional dialect awareness, travel phrase guidance, and tone-appropriate communication for everyday, business, and emergency situations",
     "avatar": "🌐",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx"
-    ],
+    "enabled_skills": ["officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Language Translator and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Language Translator and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "语言翻译员",
@@ -4736,16 +3789,10 @@
     "description": "Comprehensive legal billing and time tracking specialist for accurate time capture, invoice generation, billing narrative writing, collections management, trust account compliance, and billing analysis — maximizing revenue recovery while maintaining client relationships and ethical compliance across any firm size or billing model",
     "avatar": "⏱️",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-xlsx",
-      "officecli-docx",
-      "officecli-word-form"
-    ],
+    "enabled_skills": ["officecli-xlsx", "officecli-docx", "officecli-word-form"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Legal Billing & Time Tracking and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Legal Billing & Time Tracking and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "法律计费工时追踪",
@@ -4764,16 +3811,10 @@
     "description": "Comprehensive legal client intake specialist for qualifying prospects, collecting case information, scheduling consultations, managing conflict checks, and delivering attorney-ready intake summaries across any practice area and firm size",
     "avatar": "📋",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-word-form",
-      "officecli-docx",
-      "pdf"
-    ],
+    "enabled_skills": ["officecli-word-form", "officecli-docx", "pdf"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Legal Client Intake and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Legal Client Intake and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "法律客户受理",
@@ -4792,16 +3833,10 @@
     "description": "Comprehensive legal document review specialist for contracts, litigation documents, and real estate agreements — summarizing documents, flagging risk clauses, comparing contract versions, and checking compliance across any law firm size or practice area",
     "avatar": "⚖️",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "pdf",
-      "officecli-docx",
-      "officecli-word-form"
-    ],
+    "enabled_skills": ["pdf", "officecli-docx", "officecli-word-form"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Legal Document Review and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Legal Document Review and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "法律文件审查",
@@ -4820,17 +3855,10 @@
     "description": "Comprehensive loan officer assistant for mortgage and lending professionals — covering borrower intake, pre-qualification, document collection, pipeline management, compliance tracking, rate quoting, and closing coordination across residential, commercial, and consumer lending",
     "avatar": "🏦",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-xlsx",
-      "officecli-financial-model",
-      "officecli-docx",
-      "officecli-word-form"
-    ],
+    "enabled_skills": ["officecli-xlsx", "officecli-financial-model", "officecli-docx", "officecli-word-form"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Loan Officer Assistant and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Loan Officer Assistant and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "贷款专员助理",
@@ -4849,15 +3877,10 @@
     "description": "Language Server Protocol specialist building unified code intelligence systems through LSP client orchestration and semantic indexing",
     "avatar": "🔎",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "mermaid",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["mermaid", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as LSP/Index Engineer and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as LSP/Index Engineer and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "LSP索引工程师",
@@ -4876,17 +3899,10 @@
     "description": "Mergers and acquisitions integration specialist who designs and executes post-merger integration programs — covering Day 1 readiness, 100-day planning, synergy tracking, cultural integration, functional workstream coordination, and transition service agreement management.",
     "avatar": "🤝",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-pptx",
-      "officecli-xlsx",
-      "officecli-docx",
-      "officecli-financial-model"
-    ],
+    "enabled_skills": ["officecli-pptx", "officecli-xlsx", "officecli-docx", "officecli-financial-model"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as M&A Integration Manager and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as M&A Integration Manager and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "并购整合经理",
@@ -4905,15 +3921,10 @@
     "description": "Expert medical billing and coding specialist for ICD-10-CM/PCS, CPT, and HCPCS coding, claim submission, denial management, revenue cycle optimization, compliance auditing, and payer contract analysis — maximizing clean claim rates and revenue recovery for healthcare providers of all sizes",
     "avatar": "🏥",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-xlsx",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["officecli-xlsx", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Medical Billing & Coding Specialist and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Medical Billing & Coding Specialist and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "医疗账单编码专家",
@@ -4932,16 +3943,10 @@
     "description": "Business operations specialist who applies Lean, Six Sigma, and systems thinking to process mapping, capacity planning, KPI governance, vendor management, and organizational efficiency — turning operational complexity into repeatable, measurable performance.",
     "avatar": "⚙️",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-xlsx",
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-xlsx", "officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Operations Manager and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Operations Manager and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "运营经理",
@@ -4960,15 +3965,10 @@
     "description": "Applied organizational psychologist who diagnoses team dynamics, psychological safety, burnout risk, and culture health — using evidence-based frameworks to help leaders build high-performing, resilient, and psychologically safe organizations.",
     "avatar": "🧠",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Organizational Psychologist and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Organizational Psychologist and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "组织心理学家",
@@ -4987,14 +3987,10 @@
     "description": "Cross-domain personal development mentor for goal clarity, habit design, strategic decisions, and accountability without motivational fluff.",
     "avatar": "🌱",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx"
-    ],
+    "enabled_skills": ["officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Personal Growth Mentor and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Personal Growth Mentor and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "个人成长导师",
@@ -5013,16 +4009,10 @@
     "description": "Comprehensive real estate agent assistant for buyer representation, seller representation, listing management, offer negotiation, transaction coordination, and closing support — delivering a world-class client experience from first showing to final closing across residential and investment real estate",
     "avatar": "🏠",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-word-form",
-      "officecli-xlsx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-word-form", "officecli-xlsx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Real Estate Buyer & Seller and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Real Estate Buyer & Seller and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "房地产买卖顾问",
@@ -5041,16 +4031,10 @@
     "description": "Expert recruitment operations and talent acquisition specialist — skilled in China's major hiring platforms, talent assessment frameworks, and labor law compliance. Helps companies efficiently attract, screen, and retain top talent while building a competitive employer brand.",
     "avatar": "🎯",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-word-form",
-      "officecli-docx",
-      "officecli-xlsx"
-    ],
+    "enabled_skills": ["officecli-word-form", "officecli-docx", "officecli-xlsx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Recruitment Specialist and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Recruitment Specialist and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "招聘专员",
@@ -5069,15 +4053,10 @@
     "description": "AI agent that automates distribution of consolidated sales reports to representatives based on territorial parameters",
     "avatar": "📤",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-xlsx",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["officecli-xlsx", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Report Distribution Agent and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Report Distribution Agent and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "报告分发专员",
@@ -5096,15 +4075,10 @@
     "description": "Comprehensive retail customer returns specialist for processing returns, exchanges, and refunds across in-store, online, and omnichannel retail — handling policy enforcement, fraud prevention, customer retention, vendor returns, and returns analytics to maximize recovery while preserving customer loyalty",
     "avatar": "🛒",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-xlsx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-xlsx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Retail Customer Returns and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Retail Customer Returns and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "零售退货专员",
@@ -5123,15 +4097,10 @@
     "description": "AI agent specialized in monitoring Excel files and extracting key sales metrics (MTD, YTD, Year End) for internal live reporting",
     "avatar": "📊",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-xlsx",
-      "officecli-data-dashboard"
-    ],
+    "enabled_skills": ["officecli-xlsx", "officecli-data-dashboard"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Sales Data Extraction Agent and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Sales Data Extraction Agent and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "销售数据提取专员",
@@ -5150,16 +4119,10 @@
     "description": "Consultative B2B sales outreach specialist for cold prospecting, lead follow-up, objection handling, proposal writing, and pipeline management — combining data-driven targeting with genuine relationship-building to open doors and close deals",
     "avatar": "🎯",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx",
-      "officecli-xlsx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx", "officecli-xlsx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Sales Outreach and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Sales Outreach and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "销售外联",
@@ -5178,16 +4141,10 @@
     "description": "Master coordinator for founders and executives — filters noise, owns processes, enforces consistency, routes decisions, and positions outputs for impact so the boss can think clearly.",
     "avatar": "🧭",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx",
-      "officecli-xlsx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx", "officecli-xlsx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Chief of Staff and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Chief of Staff and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "幕僚长",
@@ -5206,16 +4163,10 @@
     "description": "Expert civil and structural engineer with global standards coverage — Eurocode, DIN, ACI, AISC, ASCE, AS/NZS, CSA, GB, IS, AIJ, and more. Specializes in structural analysis, geotechnical design, construction documentation, building code compliance, and multi-standard international projects.",
     "avatar": "🏗️",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-xlsx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Civil Engineer and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Civil Engineer and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "土木工程师",
@@ -5234,15 +4185,10 @@
     "description": "CQ specialist that detects invisible exclusion, researches global context, and ensures software resonates authentically across intersectional identities.",
     "avatar": "🌍",
     "preset_agent_type": "gemini",
-    "enabled_skills": [
-      "officecli-docx",
-      "pdf"
-    ],
+    "enabled_skills": ["officecli-docx", "pdf"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Cultural Intelligence Strategist and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Cultural Intelligence Strategist and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "文化情报策略师",
@@ -5261,16 +4207,10 @@
     "description": "Expert developer advocate specializing in building developer communities, creating compelling technical content, optimizing developer experience (DX), and driving platform adoption through authentic engineering engagement. Bridges product and engineering teams with external developers.",
     "avatar": "🗣️",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Developer Advocate and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Developer Advocate and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "开发者布道师",
@@ -5289,17 +4229,10 @@
     "description": "Expert document creation specialist who generates professional PDF, PPTX, DOCX, and XLSX files using code-based approaches with proper formatting, charts, and data visualization.",
     "avatar": "📄",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx",
-      "officecli-xlsx",
-      "pdf"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx", "officecli-xlsx", "pdf"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Document Generator and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Document Generator and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "文档生成器",
@@ -5318,15 +4251,10 @@
     "description": "Navigate the French ESN/SI freelance ecosystem — margin models, platform mechanics (Malt, collective.work), portage salarial, rate positioning, and payment cycle realities",
     "avatar": "🇫🇷",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-xlsx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-xlsx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as French Consulting Market Navigator and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as French Consulting Market Navigator and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "法国咨询市场专家",
@@ -5345,15 +4273,10 @@
     "description": "Korean business culture for foreign professionals — 품의 decision process, nunchi reading, KakaoTalk business etiquette, hierarchy navigation, and relationship-first deal mechanics",
     "avatar": "🇰🇷",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Korean Business Navigator and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Korean Business Navigator and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "韩国商务导航员",
@@ -5372,15 +4295,10 @@
     "description": "Expert Model Context Protocol developer who designs, builds, and tests MCP servers that extend AI agent capabilities with custom tools, resources, and prompts.",
     "avatar": "🔌",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as MCP Builder and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as MCP Builder and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "MCP构建师",
@@ -5399,16 +4317,10 @@
     "description": "Independent model QA expert who audits ML and statistical models end-to-end - from documentation review and data reconstruction to replication, calibration testing, interpretability analysis, performance monitoring, and audit-grade reporting.",
     "avatar": "🔬",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "pdf"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-xlsx", "pdf"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Model QA Specialist and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Model QA Specialist and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "模型QA专家",
@@ -5427,16 +4339,10 @@
     "description": "Specialized pricing analyst who develops optimal pricing models through market research, competitor analysis, cost structure evaluation, and margin optimization — turning pricing from guesswork into a data-driven competitive advantage.",
     "avatar": "💰",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-xlsx",
-      "officecli-financial-model",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["officecli-xlsx", "officecli-financial-model", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Pricing Analyst and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Pricing Analyst and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "定价分析师",
@@ -5455,15 +4361,10 @@
     "description": "Solution architecture for Salesforce platform — multi-cloud design, integration patterns, governor limits, deployment strategy, and data model governance for enterprise-scale orgs",
     "avatar": "☁️",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Salesforce Architect and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Salesforce Architect and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "Salesforce架构师",
@@ -5482,15 +4383,10 @@
     "description": "Conducts live strategy duels using game theory and the 36 Chinese stratagems",
     "avatar": "⚔️",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Strategy Duel Agent and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Strategy Duel Agent and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "策略对决代理",
@@ -5509,15 +4405,10 @@
     "description": "Workflow design specialist who maps complete workflow trees for every system, user journey, and agent interaction — covering happy paths, all branch conditions, failure modes, recovery paths, handoff contracts, and observable states to produce build-ready specs that agents can implement against and QA can test against.",
     "avatar": "\"🗺️\"",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "mermaid",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["mermaid", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Workflow Architect and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Workflow Architect and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "工作流架构师",
@@ -5536,15 +4427,10 @@
     "description": "Full-spectrum study abroad planning expert covering the US, UK, Canada, Australia, Europe, Hong Kong, and Singapore — proficient in undergraduate, master's, and PhD application strategy, school selection, essay coaching, profile enhancement, standardized test planning, visa preparation, and overseas life adaptation, helping Chinese students craft personalized end-to-end study abroad plans.",
     "avatar": "🎓",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Study Abroad Advisor and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Study Abroad Advisor and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "留学顾问",
@@ -5563,16 +4449,10 @@
     "description": "Expert supply chain management and procurement strategy specialist — skilled in supplier development, strategic sourcing, quality control, and supply chain digitalization. Grounded in China's manufacturing ecosystem, helps companies build efficient, resilient, and sustainable supply chains.",
     "avatar": "🔗",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-xlsx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Supply Chain Strategist and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as Supply Chain Strategist and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "供应链策略师",
@@ -5591,15 +4471,10 @@
     "description": "\"Knowledge-base steward in the spirit of Niklas Luhmann's Zettelkasten. Default perspective: Luhmann; switches to domain experts (Feynman, Munger, Ogilvy, etc.) by task. Enforces atomic notes, connectivity, and validation loops. Use for knowledge-base building, note linking, complex task breakdown, and cross-domain decision support.\"",
     "avatar": "🗃️",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as ZK Steward and help me with Specialized tasks"
-    ],
+    "prompts": ["Act as ZK Steward and help me with Specialized tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "ZK管家",
@@ -5618,15 +4493,10 @@
     "description": "Agent from Strategy",
     "avatar": "🤖",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Executive Brief and help me with Strategy tasks"
-    ],
+    "prompts": ["Act as Executive Brief and help me with Strategy tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "高管简报",
@@ -5645,15 +4515,10 @@
     "description": "Agent from Strategy",
     "avatar": "🤖",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Quickstart and help me with Strategy tasks"
-    ],
+    "prompts": ["Act as Quickstart and help me with Strategy tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "快速入门",
@@ -5672,15 +4537,10 @@
     "description": "Agent from Strategy",
     "avatar": "🤖",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Nexus Strategy and help me with Strategy tasks"
-    ],
+    "prompts": ["Act as Nexus Strategy and help me with Strategy tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "Nexus策略师",
@@ -5699,16 +4559,10 @@
     "description": "Expert data analyst transforming raw data into actionable business insights. Creates dashboards, performs statistical analysis, tracks KPIs, and provides strategic decision support through data visualization and reporting.",
     "avatar": "📊",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-data-dashboard",
-      "officecli-xlsx",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["officecli-data-dashboard", "officecli-xlsx", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Analytics Reporter and help me with Support tasks"
-    ],
+    "prompts": ["Act as Analytics Reporter and help me with Support tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "分析报告员",
@@ -5727,15 +4581,10 @@
     "description": "Consultant-grade AI specialist trained to think and communicate like a senior strategy consultant. Transforms complex business inputs into concise, actionable executive summaries using McKinsey SCQA, BCG Pyramid Principle, and Bain frameworks for C-suite decision-makers.",
     "avatar": "📝",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-pptx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-pptx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Executive Summary Generator and help me with Support tasks"
-    ],
+    "prompts": ["Act as Executive Summary Generator and help me with Support tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "高管摘要生成器",
@@ -5754,16 +4603,10 @@
     "description": "Expert financial analyst and controller specializing in financial planning, budget management, and business performance analysis. Maintains financial health, optimizes cash flow, and provides strategic financial insights for business growth.",
     "avatar": "💰",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-xlsx",
-      "officecli-financial-model",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["officecli-xlsx", "officecli-financial-model", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Finance Tracker and help me with Support tasks"
-    ],
+    "prompts": ["Act as Finance Tracker and help me with Support tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "财务追踪员",
@@ -5782,15 +4625,10 @@
     "description": "Expert infrastructure specialist focused on system reliability, performance optimization, and technical operations management. Maintains robust, scalable infrastructure supporting business operations with security, performance, and cost efficiency.",
     "avatar": "🏢",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "mermaid",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["mermaid", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Infrastructure Maintainer and help me with Support tasks"
-    ],
+    "prompts": ["Act as Infrastructure Maintainer and help me with Support tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "基础设施维护员",
@@ -5809,16 +4647,10 @@
     "description": "Expert legal and compliance specialist ensuring business operations, data handling, and content creation comply with relevant laws, regulations, and industry standards across multiple jurisdictions.",
     "avatar": "⚖️",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-word-form",
-      "pdf",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["officecli-word-form", "pdf", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Legal Compliance Checker and help me with Support tasks"
-    ],
+    "prompts": ["Act as Legal Compliance Checker and help me with Support tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "法律合规检查员",
@@ -5837,14 +4669,10 @@
     "description": "Expert customer support specialist delivering exceptional customer service, issue resolution, and user experience optimization. Specializes in multi-channel support, proactive customer care, and turning support interactions into positive brand experiences.",
     "avatar": "💬",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx"
-    ],
+    "enabled_skills": ["officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Support Responder and help me with Support tasks"
-    ],
+    "prompts": ["Act as Support Responder and help me with Support tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "支持响应员",
@@ -5863,15 +4691,10 @@
     "description": "Expert accessibility specialist who audits interfaces against WCAG standards, tests with assistive technologies, and ensures inclusive design. Defaults to finding barriers — if it's not tested with a screen reader, it's not accessible.",
     "avatar": "♿",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Accessibility Auditor and help me with Testing tasks"
-    ],
+    "prompts": ["Act as Accessibility Auditor and help me with Testing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "无障碍审计员",
@@ -5890,15 +4713,10 @@
     "description": "Expert API testing specialist focused on comprehensive API validation, performance testing, and quality assurance across all systems and third-party integrations",
     "avatar": "🔌",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "mermaid",
-      "officecli-docx"
-    ],
+    "enabled_skills": ["mermaid", "officecli-docx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as API Tester and help me with Testing tasks"
-    ],
+    "prompts": ["Act as API Tester and help me with Testing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "API测试员",
@@ -5917,15 +4735,10 @@
     "description": "Screenshot-obsessed, fantasy-allergic QA specialist - Default to finding 3-5 issues, requires visual proof for everything",
     "avatar": "📸",
     "preset_agent_type": "claude",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Evidence Collector and help me with Testing tasks"
-    ],
+    "prompts": ["Act as Evidence Collector and help me with Testing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "证据收集员",
@@ -5944,16 +4757,10 @@
     "description": "Expert performance testing and optimization specialist focused on measuring, analyzing, and improving system performance across all applications and infrastructure",
     "avatar": "⏱️",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "officecli-data-dashboard"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-xlsx", "officecli-data-dashboard"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Performance Benchmarker and help me with Testing tasks"
-    ],
+    "prompts": ["Act as Performance Benchmarker and help me with Testing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "性能基准测试员",
@@ -5972,15 +4779,10 @@
     "description": "Stops fantasy approvals, evidence-based certification - Default to \"NEEDS WORK\", requires overwhelming proof for production readiness",
     "avatar": "🧐",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-xlsx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-xlsx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Reality Checker and help me with Testing tasks"
-    ],
+    "prompts": ["Act as Reality Checker and help me with Testing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "现实校验员",
@@ -5999,16 +4801,10 @@
     "description": "Expert test analysis specialist focused on comprehensive test result evaluation, quality metrics analysis, and actionable insight generation from testing activities",
     "avatar": "📋",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-xlsx",
-      "officecli-data-dashboard"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-xlsx", "officecli-data-dashboard"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Test Results Analyzer and help me with Testing tasks"
-    ],
+    "prompts": ["Act as Test Results Analyzer and help me with Testing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "测试结果分析师",
@@ -6027,15 +4823,10 @@
     "description": "Expert technology assessment specialist focused on evaluating, testing, and recommending tools, software, and platforms for business use and productivity optimization",
     "avatar": "🔧",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "officecli-xlsx"
-    ],
+    "enabled_skills": ["officecli-docx", "officecli-xlsx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Tool Evaluator and help me with Testing tasks"
-    ],
+    "prompts": ["Act as Tool Evaluator and help me with Testing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "工具评估员",
@@ -6054,16 +4845,10 @@
     "description": "Expert process improvement specialist focused on analyzing, optimizing, and automating workflows across all business functions for maximum productivity and efficiency",
     "avatar": "⚡",
     "preset_agent_type": "aionrs",
-    "enabled_skills": [
-      "officecli-docx",
-      "mermaid",
-      "officecli-xlsx"
-    ],
+    "enabled_skills": ["officecli-docx", "mermaid", "officecli-xlsx"],
     "custom_skill_names": [],
     "disabled_builtin_skills": [],
-    "prompts": [
-      "Act as Workflow Optimizer and help me with Testing tasks"
-    ],
+    "prompts": ["Act as Workflow Optimizer and help me with Testing tasks"],
     "models": [],
     "name_i18n": {
       "zh-CN": "工作流优化师",

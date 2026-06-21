@@ -10,6 +10,11 @@ import AssistantEditDrawer from '@/renderer/pages/settings/AssistantSettings/Ass
 import DeleteAssistantModal from '@/renderer/pages/settings/AssistantSettings/DeleteAssistantModal';
 import SkillConfirmModals from '@/renderer/pages/settings/AssistantSettings/SkillConfirmModals';
 import { resolveAvatarImageSrc } from '@/renderer/pages/settings/AssistantSettings/assistantUtils';
+import {
+  DEFAULT_SME_DEPARTMENT,
+  SME_DEPARTMENT_ORDER,
+  resolveExpertDepartment,
+} from '@/renderer/pages/settings/AssistantSettings/advisorTaxonomy';
 import { normalizeBrandText } from '@/renderer/utils/brandText';
 import { assistantSkills, prettifySkill, skillIcon } from './assistantPresentation';
 import { CUSTOM_AVATAR_IMAGE_MAP } from '../constants';
@@ -73,29 +78,6 @@ const OFFICE_ASSISTANT_IDS = new Set([
   'star-office-helper',
 ]);
 const isOfficeAssistant = (id: string) => OFFICE_ASSISTANT_IDS.has(id.replace(/^builtin-/, ''));
-
-/** Expert department order: market-related first, engineering/dev last. Default
- *  selection is the first entry (市场营销). Shared with the experts page. */
-const EXPERT_DEPT_ORDER = [
-  '市场营销',
-  '付费媒体',
-  '销售',
-  '产品',
-  '战略',
-  '设计',
-  '学术',
-  '财务',
-  '项目管理',
-  '技术支持',
-  '专项专家',
-  '集成',
-  '工程开发',
-  '测试',
-  '安全',
-  '游戏开发',
-  '地理信息',
-  '空间计算',
-];
 
 const resolveAssistantCandidateIds = (assistantId: string): string[] => {
   const stripped = assistantId.replace(/^builtin-/, '');
@@ -250,37 +232,16 @@ const AssistantSelectionArea: React.FC<AssistantSelectionAreaProps> = ({
   const isAgency = (a: Assistant) => a.id.startsWith('agency-');
   const agencyAssistants = useMemo(() => assistants.filter((a) => isAgency(a) && a.enabled !== false), [assistants]);
   const nonAgencyAssistants = useMemo(() => assistants.filter((a) => !isAgency(a)), [assistants]);
-  const getAgencyDept = (id: string) => {
-    const parts = id.replace('agency-', '').split('-');
-    const nameMap: Record<string, string> = {
-      academic: '学术',
-      design: '设计',
-      engineering: '工程开发',
-      finance: '财务',
-      'game-development': '游戏开发',
-      gis: '地理信息',
-      integrations: '集成',
-      marketing: '市场营销',
-      'paid-media': '付费媒体',
-      product: '产品',
-      'project-management': '项目管理',
-      sales: '销售',
-      security: '安全',
-      specialized: '专项专家',
-      'spatial-computing': '空间计算',
-      strategy: '战略',
-      support: '技术支持',
-      testing: '测试',
-    };
-    return nameMap[parts[0]] || nameMap[`${parts[0]}-${parts[1]}`] || parts[0];
-  };
-  // Department tabs, market-first ordered, limited to categories that still
-  // have at least one enabled expert. A fully-disabled category has no tab.
+  // Department tabs, frequency-ordered, limited to 科室 that still have at least
+  // one enabled expert. A fully-disabled 科室 has no tab.
   const agencyDeptNames = useMemo(
-    () => EXPERT_DEPT_ORDER.filter((dept) => agencyAssistants.some((a) => getAgencyDept(a.id) === dept)),
+    () =>
+      (SME_DEPARTMENT_ORDER as readonly string[]).filter((dept) =>
+        agencyAssistants.some((a) => resolveExpertDepartment(a.id) === dept)
+      ),
     [agencyAssistants]
   );
-  const [agencyDeptFilter, setAgencyDeptFilter] = useState<string | null>('市场营销');
+  const [agencyDeptFilter, setAgencyDeptFilter] = useState<string | null>(DEFAULT_SME_DEPARTMENT);
   // Keep a non-null selection valid: if the chosen department was disabled
   // away, jump to the first remaining one. A null filter (user collapsed the
   // grid) is left alone.
@@ -291,7 +252,7 @@ const AssistantSelectionArea: React.FC<AssistantSelectionAreaProps> = ({
   }, [agencyDeptNames, agencyDeptFilter]);
   const filteredAgency = useMemo(() => {
     if (!agencyDeptFilter) return [];
-    return agencyAssistants.filter((a) => getAgencyDept(a.id) === agencyDeptFilter);
+    return agencyAssistants.filter((a) => resolveExpertDepartment(a.id) === agencyDeptFilter);
   }, [agencyAssistants, agencyDeptFilter]);
 
   // Render only if the backend catalog has at least one assistant.
@@ -460,7 +421,16 @@ const AssistantSelectionArea: React.FC<AssistantSelectionAreaProps> = ({
       {/* ── Section 2: 专家 (independent parallel block) ── */}
       {showExperts && agencyAssistants.length > 0 && (
         <div className={showAssistants ? 'mt-32px' : ''}>
-          <div className={`${styles.assistantPromptHint} text-center mb-12px`}>专家 — 各领域专业专家</div>
+          <div className='mb-12px flex items-center justify-center gap-10px flex-wrap'>
+            <span className={styles.assistantPromptHint}>{t('advisors.homeHint')}</span>
+            <span
+              className='text-12px cursor-pointer whitespace-nowrap transition-colors'
+              style={{ color: 'var(--color-primary-6)' }}
+              onClick={() => navigate('/advisors')}
+            >
+              {t('advisors.viewAll')} →
+            </span>
+          </div>
           <div className='flex flex-wrap justify-center gap-6px mb-14px'>
             {agencyDeptNames.map((dept) => (
               <span
@@ -474,7 +444,7 @@ const AssistantSelectionArea: React.FC<AssistantSelectionAreaProps> = ({
                     agencyDeptFilter === dept ? '1px solid var(--color-primary-light-3)' : '1px solid transparent',
                 }}
               >
-                {dept} ({agencyAssistants.filter((a) => getAgencyDept(a.id) === dept).length})
+                {dept} ({agencyAssistants.filter((a) => resolveExpertDepartment(a.id) === dept).length})
               </span>
             ))}
           </div>

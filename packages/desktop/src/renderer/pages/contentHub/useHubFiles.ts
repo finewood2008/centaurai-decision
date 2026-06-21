@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ipcBridge } from '@/common';
 import { filterConversationsWithChannelScope } from '@/renderer/utils/user/conversationVisibility';
-import { buildVisibleFileFilter, fetchRecentFiles } from '@/renderer/pages/guid/components/RecentFiles';
+import { fetchRecentFiles } from '@/renderer/pages/guid/components/RecentFiles';
 import { getContentTypeByExtension } from '@/renderer/pages/conversation/Preview/fileUtils';
 import type { FileEntry, HubConversationGroup, HubFileKind } from './types';
 
@@ -21,10 +21,9 @@ export function classifyHubFile(name: string): Exclude<HubFileKind, 'all'> {
   return 'other';
 }
 
-export function useHubFiles() {
+export function useHubFiles(search: string) {
   const [files, setFiles] = useState<FileEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
   const [kind, setKind] = useState<HubFileKind>('all');
 
   const loadFiles = useCallback(async () => {
@@ -32,7 +31,7 @@ export function useHubFiles() {
     try {
       const conversations = await ipcBridge.database.getUserConversations.invoke({ limit: 10000 });
       const visibleConversations = await filterConversationsWithChannelScope(conversations.items ?? []);
-      setFiles(await fetchRecentFiles(buildVisibleFileFilter(visibleConversations)));
+      setFiles(await fetchRecentFiles(visibleConversations));
     } catch {
       setFiles([]);
     } finally {
@@ -48,7 +47,7 @@ export function useHubFiles() {
   const searched = useMemo(() => {
     const q = search.trim().toLowerCase();
     const list = q ? files.filter((f) => f.name.toLowerCase().includes(q)) : files;
-    return [...list].sort((a, b) => b.mtime - a.mtime);
+    return [...list].toSorted((a, b) => b.mtime - a.mtime);
   }, [files, search]);
 
   // Files for the 按类型 view: search + kind filter applied.
@@ -67,14 +66,12 @@ export function useHubFiles() {
     }
     return [...map.entries()]
       .map(([conversation, list]) => ({ conversation, files: list }))
-      .sort((a, b) => (b.files[0]?.mtime ?? 0) - (a.files[0]?.mtime ?? 0));
+      .toSorted((a, b) => (b.files[0]?.mtime ?? 0) - (a.files[0]?.mtime ?? 0));
   }, [searched]);
 
   return {
     loading,
     total: files.length,
-    search,
-    setSearch,
     kind,
     setKind,
     searched,

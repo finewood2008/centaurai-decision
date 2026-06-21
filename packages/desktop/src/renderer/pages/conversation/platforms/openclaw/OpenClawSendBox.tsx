@@ -353,11 +353,9 @@ const OpenClawSendBox: React.FC<{ conversation_id: string }> = ({ conversation_i
       let msg_id: string | null = null;
       try {
         void checkAndUpdateTitle(conversation_id, input);
-        await ipcBridge.openclawConversation.sendMessage.invoke({
-          input: displayMessage,
-          conversation_id,
-          files,
-        });
+        // Team-owned conversations must go through the Team API (aioncore ≥0.1.29).
+        if (teamPermission) await teamPermission.sendToConversation(conversation_id, displayMessage, files);
+        else await ipcBridge.openclawConversation.sendMessage.invoke({ input: displayMessage, conversation_id, files });
         emitter.emit('chat.history.refresh');
       } catch (error) {
         setAiProcessing(false);
@@ -462,12 +460,15 @@ const OpenClawSendBox: React.FC<{ conversation_id: string }> = ({ conversation_i
         const initialDisplayMessage = buildDisplayMessage(input, files, workspacePath);
 
         void checkAndUpdateTitle(conversation_id, input);
-        await ipcBridge.openclawConversation.sendMessage.invoke({
-          input: initialDisplayMessage,
-          conversation_id,
-          files,
-          loading_id,
-        });
+        // Team-owned conversations must go through the Team API (aioncore ≥0.1.29).
+        if (teamPermission) await teamPermission.sendToConversation(conversation_id, initialDisplayMessage, files);
+        else
+          await ipcBridge.openclawConversation.sendMessage.invoke({
+            input: initialDisplayMessage,
+            conversation_id,
+            files,
+            loading_id,
+          });
         emitter.emit('chat.history.refresh');
         sessionStorage.removeItem(storageKey);
       } catch (error) {

@@ -48,11 +48,11 @@ A cross-platform AI cowork workstation developed by CentaurAI — built-in agent
 
 > 为什么还要装客户端:浏览器在局域网 HTTP(非安全上下文)下会禁用麦克风等能力;原生客户端是安全上下文,**语音输入可直接录音**。
 
-| 平台 | 产物 |
-| --- | --- |
+| 平台    | 产物                                             |
+| ------- | ------------------------------------------------ |
 | Windows | `*-win-x64.exe`(安装版)/ `*-win-x64.zip`(免安装) |
-| macOS | `*-mac-arm64.dmg` / `*-mac-x64.dmg` |
-| Linux | `*-linux-x64.AppImage` / `.deb` |
+| macOS   | `*-mac-arm64.dmg` / `*-mac-x64.dmg`              |
+| Linux   | `*-linux-x64.AppImage` / `.deb`                  |
 
 ### 局域网客户端模式 / LAN client mode
 

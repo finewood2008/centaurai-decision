@@ -1,4 +1,10 @@
 {
+  "routeError": {
+    "title": "页面出错了",
+    "unknown": "发生未知错误",
+    "retry": "重试",
+    "home": "返回首页"
+  },
   "send": "发送",
   "cancel": "取消",
   "save": "保存",

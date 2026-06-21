@@ -5,12 +5,13 @@
   "disabled": "Disabled",
   "empty": "No advisor data is available. Run the import script in the terminal.",
   "emptySearch": "No advisors match the current filters.",
+  "homeHint": "전문가 상담 — 비즈니스 과제를 분야별 전문가에게",
+  "viewAll": "모든 전문가 보기",
   "departments": {
     "all": "All departments"
   },
   "stats": {
     "departments": "{{count}} departments",
-    "total": "{{count}} advisors",
     "enabled": "{{count}} enabled"
   }
 }

@@ -1,4 +1,5 @@
 import { resolveExtensionAssetUrl } from '@/renderer/utils/platform';
+import { resolveExpertDepartment } from './advisorTaxonomy';
 import type { AssistantListItem } from './types';
 
 export type AssistantListFilter = 'all' | 'enabled' | 'disabled' | 'builtin' | 'user' | 'extension';
@@ -87,63 +88,22 @@ export const groupAssistantsByEnabled = (assistants: AssistantListItem[]) => ({
 });
 
 /**
- * Category display names for agency agents.
- */
-const AGENCY_CATEGORY_NAMES: Record<string, string> = {
-  academic: '学术',
-  design: '设计',
-  engineering: '工程开发',
-  finance: '财务',
-  'game-development': '游戏开发',
-  gis: '地理信息',
-  integrations: '集成',
-  marketing: '市场营销',
-  'paid-media': '付费媒体',
-  product: '产品',
-  'project-management': '项目管理',
-  sales: '销售',
-  security: '安全',
-  specialized: '专项专家',
-  'spatial-computing': '空间计算',
-  strategy: '战略',
-  support: '技术支持',
-  testing: '测试',
-};
-
-/**
- * Extract category from an agency assistant key.
- * Keys are like "agency-engineering-frontend-developer".
- */
-export const getAgencyCategory = (assistant: AssistantListItem): string | null => {
-  if (!assistant.id.startsWith('agency-')) return null;
-  const parts = assistant.id.split('-');
-  // parts: ['agency', 'engineering', 'frontend', 'developer']
-  if (parts.length < 3) return null;
-  // Try single category name
-  const cat1 = parts[1];
-  if (AGENCY_CATEGORY_NAMES[cat1]) return cat1;
-  // Try two-word category like "game-development"
-  const cat2 = `${parts[1]}-${parts[2]}`;
-  if (AGENCY_CATEGORY_NAMES[cat2]) return cat2;
-  return 'specialized';
-};
-
-/**
- * Group agency assistants by their category.
- * Returns an object of category name → sorted assistants.
+ * Group agency experts by their SME department (经营科室). The department for
+ * each id is resolved by the shared {@link resolveExpertDepartment} taxonomy, so
+ * the home showcase and the full catalog group identically. Returns an object of
+ * department name → assistants sorted by `sort_order`.
  */
 export const groupAgencyByCategory = (assistants: AssistantListItem[]): Record<string, AssistantListItem[]> => {
   const groups: Record<string, AssistantListItem[]> = {};
   for (const a of assistants) {
-    const cat = getAgencyCategory(a);
-    if (!cat) continue;
-    const name = AGENCY_CATEGORY_NAMES[cat] || cat;
-    if (!groups[name]) groups[name] = [];
-    groups[name].push(a);
+    const dept = resolveExpertDepartment(a.id);
+    if (!dept) continue;
+    if (!groups[dept]) groups[dept] = [];
+    groups[dept].push(a);
   }
   // Sort each group by sort_order
   for (const name of Object.keys(groups)) {
-    groups[name] = [...groups[name]].sort((a, b) => a.sort_order - b.sort_order);
+    groups[name] = [...groups[name]].toSorted((a, b) => a.sort_order - b.sort_order);
   }
   return groups;
 };

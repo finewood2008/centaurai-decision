@@ -50,7 +50,7 @@ type ExpertManifestEntry = CreateAssistantRequest & { rule_file?: string };
  * relative to the main bundle (`out/main`). Returns the first candidate that
  * actually holds `experts.json`, or null when the dataset is absent.
  */
-function resolveExpertsDir(): string | null {
+export function resolveExpertsDir(): string | null {
   const candidates: string[] = [];
   const resourcesPath = (process as NodeJS.Process & { resourcesPath?: string }).resourcesPath;
   if (resourcesPath) candidates.push(path.join(resourcesPath, 'experts'));

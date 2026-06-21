@@ -23,7 +23,7 @@ const TypeFilterBar: React.FC<TypeFilterBarProps> = ({ value, onChange }) => {
   const { t } = useTranslation();
 
   return (
-    <div className='flex items-center gap-6px px-16px py-10px shrink-0'>
+    <div className='flex items-center gap-6px'>
       {KINDS.map((item) => (
         <button
           key={item.key}

@@ -9,6 +9,16 @@ import type { IDirOrFile, IWorkspaceFlatFile } from './ipcBridge';
 type RawFsEntry = { name: string; type: string };
 export type RawWorkspaceFlatFile = { name: string; full_path: string; relative_path: string };
 
+/** Raw `/api/fs/dir` tree node — snake_case, as serialized by the backend. */
+export type RawDirOrFile = {
+  name: string;
+  full_path: string;
+  relative_path: string;
+  is_dir: boolean;
+  is_file: boolean;
+  children?: RawDirOrFile[];
+};
+
 // ── Path helpers ───────────────────────────────────────────────────────
 
 function normalizeSlashes(p: string): string {
@@ -78,6 +88,28 @@ export function fromBackendWorkspaceList(raw: RawFsEntry[], workspace: string, r
       children,
     },
   ];
+}
+
+/**
+ * Map a `/api/fs/dir` response tree from the backend's snake_case
+ * (`is_file`/`is_dir`/`full_path`/`relative_path`) into the camelCase
+ * {@link IDirOrFile} shape every consumer reads. Without this, `node.isFile`
+ * etc. are `undefined`, so the tree walk in the Content Hub (and the skill-rule
+ * generator) collects zero files — i.e. the hub renders empty.
+ */
+export function fromBackendDirOrFile(item: RawDirOrFile): IDirOrFile {
+  return {
+    name: item.name,
+    fullPath: item.full_path,
+    relativePath: item.relative_path,
+    isDir: item.is_dir,
+    isFile: item.is_file,
+    ...(item.children ? { children: item.children.map(fromBackendDirOrFile) } : {}),
+  };
+}
+
+export function fromBackendDirOrFileList(raw: RawDirOrFile[]): IDirOrFile[] {
+  return Array.isArray(raw) ? raw.map(fromBackendDirOrFile) : [];
 }
 
 export function fromBackendWorkspaceFlatFiles(raw: RawWorkspaceFlatFile[]): IWorkspaceFlatFile[] {

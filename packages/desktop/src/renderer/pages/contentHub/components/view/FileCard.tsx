@@ -1,15 +1,19 @@
 /**
- * FileCard — one generated artifact. Ported from FileArchivePage's inline card,
- * with copy / download / reveal hover actions plus an optional "share to team".
+ * FileCard — one generated artifact in the uniform grid. Copy / download /
+ * reveal hover actions plus an optional "share to team". Size-aware.
  */
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Copy, Download, FolderOpen, Share } from '@icon-park/react';
-import { getFileIcon, formatSize, formatTime, shortConversation } from '@/renderer/pages/guid/components/RecentFiles';
-import { useHubFileActions } from '../useHubFileActions';
-import type { FileEntry } from '../types';
+import { formatSize, formatTime, shortConversation } from '@/renderer/pages/guid/components/RecentFiles';
+import { ipcBridge } from '@/common';
+import FileThumb from './FileThumb';
+import { GRID_SIZE } from './viewConfig';
+import { useHubFileActions } from '../../useHubFileActions';
+import type { FileEntry, HubCardSize } from '../../types';
 
 type FileCardProps = {
   file: FileEntry;
+  size: HubCardSize;
   onOpen: (file: FileEntry) => void;
   /** When provided, renders a "share to team" hover action. */
   onShare?: (file: FileEntry) => void;
@@ -29,8 +33,9 @@ const ActionChip: React.FC<{ onClick: (e: React.MouseEvent) => void; children: R
   </span>
 );
 
-const FileCard: React.FC<FileCardProps> = ({ file, onOpen, onShare, onContextMenu }) => {
+const FileCard: React.FC<FileCardProps> = ({ file, size, onOpen, onShare, onContextMenu }) => {
   const actions = useHubFileActions();
+  const dim = GRID_SIZE[size];
 
   const stop = (fn: () => void) => (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -40,11 +45,12 @@ const FileCard: React.FC<FileCardProps> = ({ file, onOpen, onShare, onContextMen
   const handleDownload = stop(() => void actions.download(file));
   const handleShowFolder = stop(() => void actions.reveal(file));
   const handleShare = stop(() => onShare?.(file));
+  const loadImage = useCallback(() => ipcBridge.fs.getImageBase64.invoke({ path: file.path }), [file.path]);
 
   return (
     <div
-      className='flex flex-col items-center gap-4px w-108px px-6px py-14px rd-10px cursor-pointer
-        bg-[var(--color-fill-1)] hover:bg-[var(--color-fill-2)] transition-colors group relative'
+      className={`flex flex-col items-center gap-4px ${dim.card} rd-10px cursor-pointer
+        bg-[var(--color-fill-1)] hover:bg-[var(--color-fill-2)] transition-colors group relative`}
       onClick={() => onOpen(file)}
       onContextMenu={onContextMenu ? (e) => onContextMenu(file, e) : undefined}
       title={`${file.name}\n${file.conversation}\n${formatSize(file.size)} · ${formatTime(file.mtime)}`}
@@ -65,9 +71,17 @@ const FileCard: React.FC<FileCardProps> = ({ file, onOpen, onShare, onContextMen
           <FolderOpen size='10' />
         </ActionChip>
       </div>
-      <span className='text-48px leading-none'>{getFileIcon(file.name)}</span>
-      <span className='text-11px text-t-primary text-center w-full truncate leading-tight'>{file.name}</span>
-      <span className='text-10px text-t-secondary text-center leading-tight'>{shortConversation(file.conversation)}</span>
+      <FileThumb
+        name={file.name}
+        loadImage={loadImage}
+        variant='cover'
+        heightClass={dim.thumb}
+        emojiClass={dim.emoji}
+      />
+      <span className={`${dim.name} text-t-primary text-center w-full truncate leading-tight`}>{file.name}</span>
+      <span className='text-10px text-t-secondary text-center leading-tight'>
+        {shortConversation(file.conversation)}
+      </span>
       <span className='text-10px text-t-secondary text-center leading-tight'>{formatSize(file.size)}</span>
       <span className='text-10px text-t-secondary text-center leading-tight'>{formatTime(file.mtime)}</span>
     </div>

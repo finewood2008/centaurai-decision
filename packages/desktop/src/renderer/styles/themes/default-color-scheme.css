@@ -16,7 +16,8 @@
 :root {
   /* Brand fonts — verbatim from centaurloop.com (--sans / --serif), with the
      "Noto …CJK SC" family names added so they also resolve on Linux. */
-  --app-font-sans: 'Noto Sans SC', 'Noto Sans CJK SC', 'PingFang SC', -apple-system, BlinkMacSystemFont, 'Microsoft YaHei', sans-serif;
+  --app-font-sans:
+    'Noto Sans SC', 'Noto Sans CJK SC', 'PingFang SC', -apple-system, BlinkMacSystemFont, 'Microsoft YaHei', sans-serif;
   --app-font-serif: 'Noto Serif SC', 'Noto Serif CJK SC', 'Songti SC', serif;
 
   /* AOU brand ramp — soft warm neutral → clay */

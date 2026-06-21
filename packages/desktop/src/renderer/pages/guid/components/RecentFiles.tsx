@@ -12,7 +12,9 @@ import { Message } from '@arco-design/web-react';
 import { Copy, FolderOpen } from '@icon-park/react';
 import { useTranslation } from 'react-i18next';
 import { ipcBridge } from '@/common';
+import type { IDirOrFile } from '@/common/adapter/ipcBridge';
 import type { TChatConversation } from '@/common/config/storage';
+import { getCurrentFrontendUserId } from '@/common/utils/frontendUserScope';
 import { filterConversationsWithChannelScope } from '@/renderer/utils/user/conversationVisibility';
 import styles from '../index.module.css';
 
@@ -74,6 +76,9 @@ export function getFileIcon(name: string): string {
 }
 
 export function formatSize(bytes: number): string {
+  // The workspace fs API exposes no per-file size; treat 0/unknown as "no size"
+  // and render nothing rather than a misleading "0B".
+  if (bytes <= 0) return '';
   if (bytes < 1024) return bytes + 'B';
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + 'K';
   return (bytes / (1024 * 1024)).toFixed(1) + 'M';
@@ -94,44 +99,134 @@ export function shortConversation(name: string): string {
   return m ? '#' + m[1].slice(0, 8) : name.slice(0, 16);
 }
 
-type VisibleConversationFilter = {
-  conversationNames?: Set<string>;
-  workspacePaths?: Set<string>;
-};
+/**
+ * Directory names that are build/dependency noise, never user deliverables.
+ * Pruned while walking a conversation workspace so the Content Hub and the
+ * recent-files rail show generated artifacts, not `node_modules` internals.
+ */
+const EXCLUDED_DIRS = new Set([
+  'node_modules',
+  'venv',
+  '.venv',
+  '__pycache__',
+  'dist',
+  'build',
+  'out',
+  '.next',
+  'target',
+  '.cache',
+  'coverage',
+  '.turbo',
+  '.pytest_cache',
+  '.git',
+  '.idea',
+  '.vscode',
+]);
 
-function normalizePath(path: string | undefined): string {
-  return path ? path.replace(/\\/g, '/') : '';
+/** Bound per-conversation enumeration so a single file-heavy workspace can't
+ *  dominate the listing or the request budget. */
+const MAX_FILES_PER_CONVERSATION = 300;
+
+/** Epoch ms is ≥ 1e12 since 2001; smaller values are already epoch seconds. */
+function toEpochSeconds(ts: number): number {
+  if (!ts) return 0;
+  return ts >= 1e12 ? Math.floor(ts / 1000) : Math.floor(ts);
 }
 
-function isFileVisible(file: FileEntry, filter?: VisibleConversationFilter): boolean {
-  if (!filter) return true;
-  if (filter.conversationNames?.has(file.conversation)) return true;
+/**
+ * Collect deliverable files from one workspace directory.
+ *
+ * Uses the real backend (`/api/fs/dir` via {@link ipcBridge.fs.getFilesByDir}),
+ * which returns a shallow (~2-level) tree with each entry's immediate children
+ * pre-populated. We walk that tree, prune {@link EXCLUDED_DIRS} and dotfiles,
+ * and only issue an extra `getFilesByDir` call to expand a directory the
+ * backend left unexpanded — so a typical workspace costs a single request.
+ *
+ * The backend fs API exposes no per-file mtime/size, so every file inherits the
+ * owning entity's timestamp (`mtimeSec`, newest first) and size 0.
+ */
+async function collectWorkspaceFiles(workspace: string, label: string, mtimeSec: number): Promise<FileEntry[]> {
+  if (!workspace) return [];
 
-  const filePath = normalizePath(file.path);
-  if (!filePath || !filter.workspacePaths?.size) return false;
-  for (const workspace of filter.workspacePaths) {
-    const normalizedWorkspace = normalizePath(workspace);
-    if (normalizedWorkspace && filePath.startsWith(normalizedWorkspace)) return true;
-  }
-  return false;
-}
-
-export function buildVisibleFileFilter(conversations: TChatConversation[]): VisibleConversationFilter {
-  return {
-    conversationNames: new Set(conversations.map((conversation) => conversation.name).filter(Boolean)),
-    workspacePaths: new Set(
-      conversations
-        .map((conversation) => (conversation.extra as { workspace?: string } | undefined)?.workspace)
-        .filter((workspace): workspace is string => Boolean(workspace))
-    ),
+  const out: FileEntry[] = [];
+  const fetchDir = async (dir: string): Promise<IDirOrFile[]> => {
+    try {
+      return await ipcBridge.fs.getFilesByDir.invoke({ dir, root: workspace });
+    } catch {
+      return [];
+    }
   };
+
+  const MAX_DEPTH = 3;
+  const walk = async (entries: IDirOrFile[], depth: number): Promise<void> => {
+    for (const node of entries) {
+      if (out.length >= MAX_FILES_PER_CONVERSATION) return;
+      if (node.name.startsWith('.')) continue; // hidden files/dirs
+      if (node.isDir) {
+        if (EXCLUDED_DIRS.has(node.name) || depth >= MAX_DEPTH) continue;
+        const children = node.children && node.children.length > 0 ? node.children : await fetchDir(node.fullPath);
+        await walk(children, depth + 1);
+      } else if (node.isFile) {
+        out.push({ name: node.name, path: node.fullPath, size: 0, mtime: mtimeSec, conversation: label });
+      }
+    }
+  };
+
+  await walk(await fetchDir(workspace), 0);
+  return out;
 }
 
-export async function fetchRecentFiles(filter?: VisibleConversationFilter): Promise<FileEntry[]> {
-  const resp = await fetch('http://127.0.0.1:8699/api/user-files');
-  const data = await resp.json();
-  const files = (data.files || []) as FileEntry[];
-  return files.filter((file) => isFileVisible(file, filter));
+/**
+ * Files generated inside a single conversation's workspace.
+ *
+ * 智囊团/圆桌会议 meeting deliverables (the synthesized 方案书 and the 拍板 decision
+ * .docx) are written into the team's *leader* conversation workspace, which is
+ * named "Leader" and carries `extra.teamId`. We relabel those with the team name
+ * (via `teamNames`) so they're recognizable as meeting outputs in the Content Hub
+ * instead of an opaque "Leader" group.
+ */
+function collectConversationFiles(
+  conversation: TChatConversation,
+  teamNames: Map<string, string>
+): Promise<FileEntry[]> {
+  const workspace = (conversation.extra as { workspace?: string } | undefined)?.workspace;
+  if (!workspace) return Promise.resolve([]);
+  // modified_at is epoch ms; FileEntry.mtime is epoch seconds (see formatTime).
+  const mtimeSec = toEpochSeconds(conversation.modified_at || conversation.created_at || 0);
+  const teamId =
+    (conversation.extra as { teamId?: string; team_id?: string } | undefined)?.teamId ??
+    (conversation.extra as { team_id?: string } | undefined)?.team_id;
+  const teamName = teamId ? teamNames.get(teamId) : undefined;
+  const label = teamName ? `${teamName} · 圆桌会议` : conversation.name || workspace.split('/').pop() || '';
+  return collectWorkspaceFiles(workspace, label, mtimeSec);
+}
+
+/** Fetch the current frontend user's teams (id → name), swallowing any error. */
+async function fetchTeamNames(): Promise<Map<string, string>> {
+  try {
+    const teams = (await ipcBridge.team.list.invoke({ user_id: getCurrentFrontendUserId() })) ?? [];
+    return new Map(teams.filter((team) => team.id).map((team) => [team.id, team.name || '圆桌会议']));
+  } catch {
+    return new Map();
+  }
+}
+
+/**
+ * Aggregate generated files across the given (already user-scoped) conversations
+ * by enumerating each conversation's workspace via the real backend. Replaces the
+ * previous reliance on a hardcoded, 100-capped `127.0.0.1:8699/api/user-files`
+ * endpoint — so the Hub/rail are complete, exclude dependency noise, are scoped
+ * per sub-user, and work on desktop, WebUI and LAN alike. Meeting deliverables
+ * surface here too because they live in the team leader conversation's workspace
+ * (relabeled with the team name). Files come back newest-first.
+ */
+export async function fetchRecentFiles(conversations: TChatConversation[]): Promise<FileEntry[]> {
+  if (!conversations.length) return [];
+  const teamNames = await fetchTeamNames();
+  const perConversation = await Promise.all(
+    conversations.map((conversation) => collectConversationFiles(conversation, teamNames))
+  );
+  return perConversation.flat().toSorted((a, b) => b.mtime - a.mtime);
 }
 
 interface RecentFilesProps {
@@ -151,38 +246,38 @@ const RecentFiles: React.FC<RecentFilesProps> = ({
   const { t } = useTranslation();
   const [files, setFiles] = useState<FileEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [visibleFilter, setVisibleFilter] = useState<VisibleConversationFilter | undefined>();
+  const [visibleConversations, setVisibleConversations] = useState<TChatConversation[] | null>(null);
 
-  const loadVisibleFilter = useCallback(async () => {
+  const loadVisibleConversations = useCallback(async () => {
     try {
       const result = await ipcBridge.database.getUserConversations.invoke({ limit: 10000 });
-      const visibleConversations = await filterConversationsWithChannelScope(result.items ?? []);
-      setVisibleFilter(buildVisibleFileFilter(visibleConversations));
+      setVisibleConversations(await filterConversationsWithChannelScope(result.items ?? []));
     } catch {
-      setVisibleFilter(buildVisibleFileFilter([]));
+      setVisibleConversations([]);
     }
   }, []);
 
   const loadFiles = useCallback(async () => {
+    if (!visibleConversations) return;
     setLoading(true);
     try {
-      const data = await fetchRecentFiles(visibleFilter);
+      const data = await fetchRecentFiles(visibleConversations);
       setFiles(data);
     } catch {
       // silent
     } finally {
       setLoading(false);
     }
-  }, [visibleFilter]);
+  }, [visibleConversations]);
 
   useEffect(() => {
-    void loadVisibleFilter();
-  }, [loadVisibleFilter]);
+    void loadVisibleConversations();
+  }, [loadVisibleConversations]);
 
   useEffect(() => {
-    if (!visibleFilter) return;
+    if (!visibleConversations) return;
     loadFiles();
-  }, [loadFiles, visibleFilter]);
+  }, [loadFiles, visibleConversations]);
 
   useEffect(() => {
     const timer = setInterval(loadFiles, 30000);

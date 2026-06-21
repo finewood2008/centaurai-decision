@@ -6,7 +6,7 @@
 
 import { ipcBridge } from '@/common';
 import type { IMcpServer, TProviderWithModel } from '@/common/config/storage';
-import { configService } from '@/common/config/configService';
+import { retrieveKnowledgeContext } from '@/renderer/services/knowledgeBaseSearch';
 import { buildAgentConversationParams } from '@/common/utils/buildAgentConversationParams';
 import { toSessionMcpServer } from '@/renderer/hooks/mcp/catalog';
 import { emitter } from '@/renderer/utils/emitter';
@@ -125,29 +125,21 @@ export const useGuidSend = (deps: GuidSendDeps): GuidSendResult => {
     const isCustomWorkspace = !!dir;
     const finalWorkspace = dir || '';
 
-    // 向量知识库：勾选后才检索
+    // 向量知识库：勾选后才检索（与智囊团共用 retrieveKnowledgeContext）
     let enrichedInput = input;
     if (searchKnowledgeBase && input.trim()) {
-      const vectorDBEndpoint = configService.get('vectorDB.endpoint') ?? 'http://127.0.0.1:8618';
-      const vectorDBSearchCount = configService.get('vectorDB.searchCount') ?? 5;
       try {
-        const resp = await fetch(`${vectorDBEndpoint}/api/search`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ query: input, n_results: vectorDBSearchCount }),
-        });
-        const data = await resp.json();
-        if (data.results?.length > 0) {
-          const context = data.results
-            .map(
-              (r: { text: string; metadata: { file_name: string } }, i: number) =>
-                `[知识库 ${i + 1}] ${r.metadata?.file_name || '未知'}:\n${r.text || '(无文字)'}`
-            )
-            .join('\n\n');
+        const { context, count } = await retrieveKnowledgeContext(input);
+        if (count > 0 && context) {
           enrichedInput = `【知识库检索结果】\n${context}\n\n---\n用户问题：${input}`;
+        } else {
+          Message.info('知识库中未找到相关内容，已按原始问题发送');
         }
-      } catch {
-        // 向量库不可用时静默跳过
+      } catch (error) {
+        // Surface the failure instead of silently sending without context, so the
+        // user knows retrieval did not happen (was previously swallowed).
+        console.error('[KnowledgeBase] retrieval failed:', error);
+        Message.warning('知识库检索失败，请确认向量库服务已启动');
       }
     }
 
@@ -184,61 +176,13 @@ export const useGuidSend = (deps: GuidSendDeps): GuidSendResult => {
 
     const finalEffectiveAgentType = effectiveAgentType;
 
-    // OpenClaw Gateway path
-    if (selectedAgent === 'openclaw-gateway') {
-      const openclawAgentInfo = agentInfo || findAgentByKey(selectedAgentKey);
-      const openclawConversationParams = buildAgentConversationParams({
-        backend: openclawAgentInfo?.backend || 'openclaw-gateway',
-        name: enrichedInput,
-        agent_name: openclawAgentInfo?.name,
-        preset_assistant_id,
-        workspace: finalWorkspace,
-        model: current_model!,
-        cli_path: openclawAgentInfo?.cli_path,
-        custom_agent_id: openclawAgentInfo?.custom_agent_id,
-        custom_workspace: isCustomWorkspace,
-        extra: {
-          default_files: files,
-          runtime_validation: {
-            expected_workspace: finalWorkspace,
-            expected_backend: openclawAgentInfo?.backend,
-            expected_agent_name: openclawAgentInfo?.name,
-            expected_cli_path: openclawAgentInfo?.cli_path,
-            expected_model: current_model?.use_model,
-            switched_at: Date.now(),
-          },
-          preset_enabled_skills: enabled_skills_to_send,
-          exclude_auto_inject_skills: excludeBuiltinSkills,
-        },
-      });
-
-      try {
-        const conversation = await ipcBridge.conversation.create.invoke(openclawConversationParams);
-
-        if (!conversation || !conversation.id) {
-          Message.error(t('conversation.createFailed'));
-          return;
-        }
-
-        if (isCustomWorkspace) {
-          updateWorkspaceTime(finalWorkspace);
-        }
-
-        emitter.emit('chat.history.refresh');
-
-        const initialMessage = {
-          input: enrichedInput,
-          files: files.length > 0 ? files : undefined,
-        };
-        sessionStorage.setItem(`openclaw_initial_message_${conversation.id}`, JSON.stringify(initialMessage));
-
-        await navigate(`/conversation/${conversation.id}`);
-      } catch (error: unknown) {
-        console.error('Failed to create OpenClaw conversation:', error);
-        throw error;
-      }
-      return;
-    }
+    // OpenClaw is now an ACP builtin backend (same migration as gemini/codex):
+    // it intentionally has NO dedicated branch here. Whether the user picks the
+    // new ACP OpenClaw row (selectedAgent='openclaw') or the legacy gateway row
+    // (selectedAgent='openclaw-gateway'), it flows through the generic ACP path
+    // below. `buildAgentConversationParams` resolves it to `type='acp'` with
+    // `extra.backend='openclaw'`, and the first message is delivered via the
+    // shared `acp_initial_message_${id}` sessionStorage key that AcpChat reads.
 
     // Nanobot path
     if (selectedAgent === 'nanobot') {

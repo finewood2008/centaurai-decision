@@ -1,4 +1,10 @@
 {
+  "routeError": {
+    "title": "頁面出錯了",
+    "unknown": "發生未知錯誤",
+    "retry": "重試",
+    "home": "返回首頁"
+  },
   "send": "發送",
   "cancel": "取消",
   "save": "儲存",

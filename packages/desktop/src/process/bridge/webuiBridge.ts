@@ -118,7 +118,12 @@ export function initWebuiBridge(): void {
         name: `CentaurAI · ${os.hostname()}`,
         port: handle.port,
         // share='1' tells distributed clients this server hosts the LAN shared library.
-        info: { ver: process.env.npm_package_version || '', os: process.platform, lanIP: handle.lanIP || '', share: '1' },
+        info: {
+          ver: process.env.npm_package_version || '',
+          os: process.platform,
+          lanIP: handle.lanIP || '',
+          share: '1',
+        },
       });
     } catch {
       // Non-fatal: discovery is a convenience; manual connect still works.

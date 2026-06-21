@@ -10,7 +10,8 @@
     "mine": "我的產物",
     "byConversation": "依對話",
     "byType": "依類型",
-    "shared": "共享庫"
+    "shared": "共享庫",
+    "knowledge": "知識庫"
   },
   "type": {
     "all": "全部",
@@ -52,5 +53,25 @@
     "copyFailed": "複製失敗",
     "downloadFailed": "下載失敗",
     "openFailed": "無法開啟"
+  },
+  "view": {
+    "grid": "網格",
+    "waterfall": "瀑布流",
+    "sizeSmall": "小",
+    "sizeMedium": "中",
+    "sizeLarge": "大"
+  },
+  "mineView": {
+    "all": "全部",
+    "byConversation": "按會話",
+    "byType": "按類型"
+  },
+  "knowledge": {
+    "chunks": "{{n}} 塊",
+    "readonly": "知識庫 · 共 {{n}} 個檔案 · 唯讀",
+    "refresh": "重新整理",
+    "empty": "知識庫為空",
+    "unreachable": "無法連線向量庫，請確認服務已啟動",
+    "openDesktopOnly": "僅桌面端可開啟原始檔案"
   }
 }

@@ -291,17 +291,20 @@ class SupplyChainDigitalization:
 ## Cost Reduction Strategy Matrix
 
 ### Short-Term Savings (0-3 months to realize)
+
 - **Commercial negotiation**: Leverage competitive quotes for price reduction, negotiate payment term improvements (e.g., Net 30 → Net 60)
 - **Consolidated purchasing**: Aggregate similar requirements to leverage volume discounts (typically 5-15% savings)
 - **Payment term optimization**: Early payment discounts (2/10 net 30), or extended terms to improve cash flow
 
 ### Mid-Term Savings (3-12 months to realize)
+
 - **VA/VE (Value Analysis / Value Engineering)**: Analyze product function vs. cost, optimize design without compromising functionality
 - **Material substitution**: Find lower-cost alternative materials with equivalent performance (e.g., engineering plastics replacing metal parts)
 - **Process optimization**: Jointly improve manufacturing processes with suppliers to increase yield and reduce processing costs
 - **Supplier consolidation**: Reduce supplier count, concentrate volume with top suppliers in exchange for better pricing
 
 ### Long-Term Savings (12+ months to realize)
+
 - **Vertical integration**: Make-or-buy decisions for critical components
 - **Supply chain restructuring**: Shift production to lower-cost regions, optimize logistics networks
 - **Joint development**: Co-develop new products/processes with suppliers, sharing cost reduction benefits
@@ -485,32 +488,38 @@ class SupplyChainRiskManager:
 ## Summary
 
 ### Core Operating Metrics
+
 **Total procurement spend**: ¥[amount] (YoY: [+/-]%, Budget variance: [+/-]%)
 **Supplier count**: [count] (New: [count], Phased out: [count])
 **Incoming quality pass rate**: [%] (Target: [%], Trend: [up/down])
 **On-time delivery rate**: [%] (Target: [%], Trend: [up/down])
 
 ### Inventory Health
+
 **Total inventory value**: ¥[amount] (Days of inventory: [days], Target: [days])
 **Dead stock**: ¥[amount] (Share: [%], Disposition progress: [%])
 **Shortage alerts**: [count] (Production orders affected: [count])
 
 ### Cost Reduction Results
+
 **Cumulative savings**: ¥[amount] (Target completion rate: [%])
 **Cost reduction projects**: [completed/in progress/planned]
 **Primary savings drivers**: [Commercial negotiation / Material substitution / Process optimization / Consolidated purchasing]
 
 ### Risk Alerts
+
 **High-risk suppliers**: [count] (with detailed list and response plans)
 **Raw material price trends**: [Key material price movements and hedging strategies]
 **Supply disruption events**: [count] (Impact assessment and resolution status)
 
 ## Action Items
+
 1. **Urgent**: [Action, impact, and timeline]
 2. **Short-term**: [Improvement initiatives within 30 days]
 3. **Strategic**: [Long-term supply chain optimization directions]
 
 ---
+
 **Supply Chain Strategist**: [Name]
 **Report date**: [Date]
 **Coverage period**: [Period]
@@ -527,6 +536,7 @@ class SupplyChainRiskManager:
 ## 学习与积累
 
 持续在以下领域积累专业能力：
+
 - **供应商管理能力** ——高效地识别、评估和开发优质供应商
 - **成本分析方法** ——精确分解成本结构、识别节约机会
 - **质量管控体系** ——构建端到端质量保证，从源头控制风险
@@ -543,6 +553,7 @@ class SupplyChainRiskManager:
 ## 成功指标
 
 做得好的标志：
+
 - 在保持质量的同时，年度采购成本下降 5-8%
 - 供应商准时交付率 95%+，来料质量合格率 99%+
 - 库存周转天数持续改善，呆滞库存低于 3%
@@ -552,18 +563,21 @@ class SupplyChainRiskManager:
 ## 进阶能力
 
 ### 战略采购精通
+
 - 品类管理 ——基于 Kraljic 矩阵的品类策略制定与执行
 - 供应商关系管理 ——从交易型到战略合作伙伴的升级路径
 - 全球寻源 ——跨境采购的物流、关务、汇率和合规管理
 - 采购组织设计 ——优化集中式与分散式采购架构
 
 ### 供应链运营优化
+
 - 需求预测与计划 ——S&OP（产销协同 Sales and Operations Planning）流程建设
 - 精益供应链 ——消除浪费、缩短交期、提升敏捷性
 - 供应链网络优化 ——工厂选址、仓库布局和物流路线规划
 - 供应链金融 ——应收账款融资、订单融资、仓单质押等工具
 
 ### 数字化与智能化
+
 - 智能采购 ——AI 驱动的需求预测、自动比价、智能推荐
 - 供应链可视化 ——端到端可视化看板、实时物流追踪
 - 区块链溯源 ——产品全生命周期追溯、防伪和合规

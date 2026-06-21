@@ -57,7 +57,8 @@ function parseArgs(argv: string[]): Map<string, string | boolean> {
 }
 
 function resolveDefaultDataDir(): string {
-  const suffix = process.env.NODE_ENV === 'production' ? '' : process.env.AIONUI_MULTI_INSTANCE === '1' ? '-Dev-2' : '-Dev';
+  const suffix =
+    process.env.NODE_ENV === 'production' ? '' : process.env.AIONUI_MULTI_INSTANCE === '1' ? '-Dev-2' : '-Dev';
   return path.join(os.homedir(), '.config', `CentaurAI${suffix}`, 'aionui');
 }
 
@@ -74,7 +75,9 @@ function main() {
   const dryRun = args.has('--dry-run');
 
   const mapPath =
-    typeof args.get('--map') === 'string' ? path.resolve(args.get('--map') as string) : path.join(__dirname, 'advisor-skill-map.json');
+    typeof args.get('--map') === 'string'
+      ? path.resolve(args.get('--map') as string)
+      : path.join(__dirname, 'advisor-skill-map.json');
   if (!fs.existsSync(mapPath)) throw new Error(`Mapping file not found: ${mapPath}`);
   const mapping: Mapping[] = JSON.parse(fs.readFileSync(mapPath, 'utf8'));
 
@@ -86,7 +89,9 @@ function main() {
   // Write to the canonical `assistants` table (the definitions table is derived
   // from it on startup). enabled_skills = the builtin skill ids; preset_agent_type = main agent.
   const select = db.prepare(`select enabled_skills, preset_agent_type from assistants where id = ?`);
-  const update = db.prepare(`update assistants set preset_agent_type = ?, enabled_skills = ?, updated_at = ? where id = ?`);
+  const update = db.prepare(
+    `update assistants set preset_agent_type = ?, enabled_skills = ?, updated_at = ? where id = ?`
+  );
 
   let updated = 0;
   let missing = 0;
@@ -124,7 +129,10 @@ function main() {
   console.log(`${dryRun ? 'Would update' : 'Updated'}    : ${updated}`);
   console.log(`Unchanged       : ${unchanged}`);
   console.log(`Missing in DB   : ${missing}`);
-  if (invalid.length) console.log(`Invalid (no valid skills): ${invalid.length} -> ${invalid.slice(0, 5).join(', ')}${invalid.length > 5 ? '…' : ''}`);
+  if (invalid.length)
+    console.log(
+      `Invalid (no valid skills): ${invalid.length} -> ${invalid.slice(0, 5).join(', ')}${invalid.length > 5 ? '…' : ''}`
+    );
 }
 
 main();

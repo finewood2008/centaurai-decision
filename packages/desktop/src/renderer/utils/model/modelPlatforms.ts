@@ -340,6 +340,80 @@ export const getProviderLogo = ({
 };
 
 /**
+ * 国内（中国）模型供应商的 value 集合
+ * Set of provider `value`s that are domestic (Chinese) model vendors / clouds.
+ */
+const DOMESTIC_PLATFORM_VALUES = new Set<string>([
+  'DeepSeek',
+  'MiniMax',
+  'Dashscope',
+  'Dashscope-Coding',
+  'SiliconFlow-CN',
+  'Zhipu',
+  'Moonshot',
+  'Moonshot-Global',
+  'Ark',
+  'Qianfan',
+  'Hunyuan',
+  'Lingyi',
+  'StepFun',
+  'ModelScope',
+  'PPIO',
+  'InfiniAI',
+  'Ctyun',
+]);
+
+/** Hostname hints for domestic providers whose base_url is not under `.cn`. */
+const DOMESTIC_HOSTNAME_HINTS = [
+  'deepseek.com',
+  'minimaxi.com',
+  'minimax.chat',
+  'aliyuncs.com',
+  'siliconflow.cn',
+  'bigmodel.cn',
+  'moonshot.cn',
+  'moonshot.ai',
+  'volces.com',
+  'baidubce.com',
+  'tencent.com',
+  'lingyiwanwu.com',
+  'stepfun.com',
+  'modelscope.cn',
+  'ppinfra.com',
+  'infini-ai.com',
+  'ctyun.cn',
+];
+
+/**
+ * 判断一个供应商是否为国内（中国）模型供应商
+ * Decide whether a provider is a domestic (Chinese) model vendor.
+ * Matches by preset name/value, the `ai-china` logo group, or a domestic hostname.
+ */
+export const isDomesticProvider = ({ name, base_url }: { name?: string; base_url?: string }): boolean => {
+  if (name) {
+    const matched = MODEL_PLATFORMS.find((p) => p.name === name || p.value === name);
+    if (matched && DOMESTIC_PLATFORM_VALUES.has(matched.value)) return true;
+  }
+
+  // Resolve logo by name/base_url only (NOT platform — a 'custom' platform would
+  // falsely match the first custom preset's logo).
+  const logo = getProviderLogo({ name, base_url });
+  if (logo && logo.includes('/ai-china/')) return true;
+
+  if (base_url) {
+    try {
+      const host = new URL(base_url).hostname.toLowerCase();
+      if (host.endsWith('.cn')) return true;
+      if (DOMESTIC_HOSTNAME_HINTS.some((h) => host.includes(h))) return true;
+    } catch {
+      // ignore malformed url
+    }
+  }
+
+  return false;
+};
+
+/**
  * 获取官方 Gemini 平台
  * Get official Gemini platforms
  */

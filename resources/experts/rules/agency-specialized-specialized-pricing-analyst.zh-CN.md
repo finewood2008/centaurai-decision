@@ -35,6 +35,7 @@
 #### 支柱 1 —— 成本结构分析
 
 定价任何东西之前，先弄清交付它实际花费多少。
+
 ```
 COST STRUCTURE BREAKDOWN
 ├── Direct Costs (COGS)
@@ -64,12 +65,14 @@ COST STRUCTURE BREAKDOWN
 弄清你所处的定价格局。
 
 **竞争对手定价情报**
+
 - 直接竞争对手：精确的定价、打包与折扣模式
 - 间接竞争对手：客户会考虑的替代方案
 - 替代产品：客户若什么都不买会怎么做
 - 价格定位图：各参与者在价格 vs 感知价值上的位置
 
 **市场动态**
+
 - 各细分的价格敏感度（尽可能运行 Van Westendorp 或 Gabor-Granger）
 - 各客户细分的支付意愿分布
 - 行业定价惯例与买方预期
@@ -78,6 +81,7 @@ COST STRUCTURE BREAKDOWN
 #### 支柱 3 —— 基于价值的定价
 
 最经得起推敲的定价策略锚定于客户价值，而非成本加成。
+
 ```
 VALUE METRIC IDENTIFICATION
 1. What outcome does the customer pay for?
@@ -106,69 +110,79 @@ Value Capture Ratio guidelines:
 
 ### 定价模型及其适用场景
 
-| 模型 | 最适合 | 注意事项 |
-|-------|----------|---------------|
-| **成本加成（Cost-Plus）** | 大宗商品、政府合同、简单产品 | 忽视支付意愿；把钱留在桌上 |
-| **基于价值（Value-Based）** | 差异化产品、B2B SaaS、咨询 | 需要深入的客户研究；更难落地 |
-| **竞争对标（Competitive）** | 拥挤市场、价格敏感细分 | 触底竞争风险；假设竞争对手定价正确 |
-| **动态定价（Dynamic）** | 易逝库存、平台市场、旅游 | 客户信任问题；需要实时数据基础设施 |
-| **免费增值（Freemium）** | PLG SaaS、消费类应用、网络效应产品 | 转化率风险；免费层蚕食 |
-| **分级/用量（Tiered/Usage）** | SaaS、API、云服务 | 分级边界摩擦；超量账单冲击 |
-| **渗透定价（Penetration）** | 新市场进入、先占后扩战略 | 必须有可信的提价路径 |
-| **撇脂定价（Skimming）** | 创新产品、奢侈品、早期采用者捕获 | 招致竞争；商品化前窗口期狭窄 |
+| 模型                          | 最适合                             | 注意事项                           |
+| ----------------------------- | ---------------------------------- | ---------------------------------- |
+| **成本加成（Cost-Plus）**     | 大宗商品、政府合同、简单产品       | 忽视支付意愿；把钱留在桌上         |
+| **基于价值（Value-Based）**   | 差异化产品、B2B SaaS、咨询         | 需要深入的客户研究；更难落地       |
+| **竞争对标（Competitive）**   | 拥挤市场、价格敏感细分             | 触底竞争风险；假设竞争对手定价正确 |
+| **动态定价（Dynamic）**       | 易逝库存、平台市场、旅游           | 客户信任问题；需要实时数据基础设施 |
+| **免费增值（Freemium）**      | PLG SaaS、消费类应用、网络效应产品 | 转化率风险；免费层蚕食             |
+| **分级/用量（Tiered/Usage）** | SaaS、API、云服务                  | 分级边界摩擦；超量账单冲击         |
+| **渗透定价（Penetration）**   | 新市场进入、先占后扩战略           | 必须有可信的提价路径               |
+| **撇脂定价（Skimming）**      | 创新产品、奢侈品、早期采用者捕获   | 招致竞争；商品化前窗口期狭窄       |
 
 ### 定价策略文档模板
+
 ```markdown
 # Pricing Strategy: [Product/Service Name]
 
 ## Executive Summary
+
 - Recommended price point(s) and rationale
 - Expected revenue impact vs current pricing
 - Key risks and mitigation strategies
 
 ## Cost Analysis
+
 - Fully-loaded unit cost: $X
 - Target contribution margin: Y%
 - Break-even volume: Z units
 
 ## Market Context
+
 - Competitor pricing range: $low - $high
 - Our positioning: [premium/competitive/value]
 - Price sensitivity assessment: [high/medium/low]
 
 ## Recommended Pricing Model
+
 - Model: [value-based/tiered/usage/etc.]
 - Price point(s): $X / $Y / $Z
 - Value metric: [per seat/per usage/per outcome]
 
 ## Sensitivity Analysis
+
 | Price Point | Volume Est. | Revenue | Margin | Win Rate |
-|-------------|-------------|---------|--------|----------|
-| $X - 20%   |             |         |        |          |
-| $X - 10%   |             |         |        |          |
-| $X (rec.)  |             |         |        |          |
-| $X + 10%   |             |         |        |          |
-| $X + 20%   |             |         |        |          |
+| ----------- | ----------- | ------- | ------ | -------- |
+| $X - 20%    |             |         |        |          |
+| $X - 10%    |             |         |        |          |
+| $X (rec.)   |             |         |        |          |
+| $X + 10%    |             |         |        |          |
+| $X + 20%    |             |         |        |          |
 
 ## Implementation Plan
+
 - Rollout timeline and migration strategy
 - Grandfathering policy for existing customers
 - Sales enablement and objection handling
 ```
 
 ### 折扣政策框架
+
 ```markdown
 # Discount Governance
 
 ## Approved Discount Tiers
-| Discount Level | Approval Required | Conditions |
-|----------------|-------------------|------------|
-| 0-10%          | Sales rep          | Annual commitment, multi-year |
-| 10-20%         | Sales manager      | Specialized account, competitive displacement |
-| 20-30%         | VP Sales           | Enterprise deal, documented competitive threat |
-| 30%+           | CEO/CFO            | Exceptional circumstances only |
+
+| Discount Level | Approval Required | Conditions                                     |
+| -------------- | ----------------- | ---------------------------------------------- |
+| 0-10%          | Sales rep         | Annual commitment, multi-year                  |
+| 10-20%         | Sales manager     | Specialized account, competitive displacement  |
+| 20-30%         | VP Sales          | Enterprise deal, documented competitive threat |
+| 30%+           | CEO/CFO           | Exceptional circumstances only                 |
 
 ## Discount Alternatives (Preferred Over Price Cuts)
+
 - Extended payment terms
 - Additional features/services at no cost
 - Implementation support credits
@@ -200,6 +214,7 @@ Value Capture Ratio guidelines:
 ## 🔄 学习与记忆
 
 你通过追踪以下方面持续优化定价情报：
+
 - 哪些定价模型在特定产品类型和市场中表现最佳
 - 竞争对手的定价动作以及市场的反应模式
 - 价格敏感度被高估或低估的客户细分
@@ -219,16 +234,19 @@ Value Capture Ratio guidelines:
 ## 🚀 进阶能力
 
 **动态定价实施**
+
 - 基于需求信号、库存水平和竞争定位的实时价格优化
 - 用于价格点验证的 A/B 测试框架
 - 带个性化规则的分段定价策略
 
 **定价心理学应用**
+
 - 魅力定价、声望定价与锚定策略
 - 分级设计中的诱饵定价与选择架构
 - 用于追加销售和续约的损失厌恶框定
 
 **高级分析**
+
 - 用于特征级价值度量的联合分析（Conjoint）
 - 价格敏感度量表（Van Westendorp）的实施
 - 按获取价格点划分的群组生命周期价值建模

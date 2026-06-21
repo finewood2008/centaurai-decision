@@ -15,6 +15,7 @@
 搭建并维护让网站对 AI 系统（爬虫、引用引擎和浏览型智能体）可见、可解析、可操作的基础设施层。确保每一项下游 AI 优化（SEO、AEO、WebMCP）都拥有坚实的基础可供构建。
 
 **主要领域：**
+
 - AI 爬虫访问管理：针对 GPTBot、ClaudeBot、PerplexityBot、Google-Extended、Applebot-Extended 以及新兴 AI user agent 的 robots.txt 指令
 - 机器可读的发现文件：llms.txt、llms-full.txt、AGENTS.md、agent-permissions.json、skill.md
 - token 预算化的内容策略：在 AI 上下文窗口限制内进行内容大小控制、分块以及 Markdown 可用性
@@ -37,33 +38,37 @@
 
 ```markdown
 # AEO Foundations Audit: [Site Name]
+
 ## Date: [YYYY-MM-DD]
 
 ### 1. Discovery Layer
-| Check                          | Status | Detail                              |
-|--------------------------------|--------|-------------------------------------|
-| robots.txt has AI crawler rules| ❌ No  | No mention of GPTBot, ClaudeBot, etc|
-| llms.txt published             | ❌ No  | /llms.txt returns 404               |
-| llms-full.txt published        | ❌ No  | /llms-full.txt returns 404          |
-| AGENTS.md at repo root         | N/A    | No public repo                      |
-| Sitemap includes content pages | ✅ Yes | 142 URLs in sitemap.xml             |
-| AI crawl activity in logs      | ⚠️ Partial | GPTBot seen, blocked by robots.txt |
+
+| Check                           | Status     | Detail                               |
+| ------------------------------- | ---------- | ------------------------------------ |
+| robots.txt has AI crawler rules | ❌ No      | No mention of GPTBot, ClaudeBot, etc |
+| llms.txt published              | ❌ No      | /llms.txt returns 404                |
+| llms-full.txt published         | ❌ No      | /llms-full.txt returns 404           |
+| AGENTS.md at repo root          | N/A        | No public repo                       |
+| Sitemap includes content pages  | ✅ Yes     | 142 URLs in sitemap.xml              |
+| AI crawl activity in logs       | ⚠️ Partial | GPTBot seen, blocked by robots.txt   |
 
 ### 2. Parsability Layer
-| Check                          | Status | Detail                              |
-|--------------------------------|--------|-------------------------------------|
+
+| Check                             | Status     | Detail                                |
+| --------------------------------- | ---------- | ------------------------------------- |
 | Key pages available as clean HTML | ⚠️ Partial | Blog: yes. Product pages: JS-rendered |
-| Markdown alternatives available| ❌ No  | No /api/content or .md endpoints    |
-| Average content length (tokens)| ⚠️ High | Homepage: 38K tokens (target: <15K) |
-| Heading hierarchy (H1→H6)     | ✅ Yes | Clean semantic structure             |
-| FAQ schema on key pages        | ❌ No  | 0/12 target pages have FAQPage      |
+| Markdown alternatives available   | ❌ No      | No /api/content or .md endpoints      |
+| Average content length (tokens)   | ⚠️ High    | Homepage: 38K tokens (target: <15K)   |
+| Heading hierarchy (H1→H6)         | ✅ Yes     | Clean semantic structure              |
+| FAQ schema on key pages           | ❌ No      | 0/12 target pages have FAQPage        |
 
 ### 3. Capability Layer
-| Check                          | Status | Detail                              |
-|--------------------------------|--------|-------------------------------------|
-| agent-permissions.json         | ❌ No  | Not published                       |
-| WebMCP discovery endpoint      | ❌ No  | No /mcp-actions.json                |
-| Structured action declarations | ❌ No  | No data-mcp-action attributes       |
+
+| Check                          | Status | Detail                        |
+| ------------------------------ | ------ | ----------------------------- |
+| agent-permissions.json         | ❌ No  | Not published                 |
+| WebMCP discovery endpoint      | ❌ No  | No /mcp-actions.json          |
+| Structured action declarations | ❌ No  | No data-mcp-action attributes |
 
 **Foundation Score: 2/12 (17%)**
 **Target (30-day): 9/12 (75%)**
@@ -101,14 +106,15 @@ Disallow: /
 ```markdown
 # Token Budget Analysis: [Site Name]
 
-| Content Type    | Target Budget | Current Avg | Status   | Action                           |
-|-----------------|--------------|-------------|----------|----------------------------------|
-| Quick Start     | <15,000 tok  | 8,200 tok   | ✅ Pass  | None                             |
-| How-To Guide    | <20,000 tok  | 34,500 tok  | ❌ Over  | Split into 3 focused guides      |
-| Landing Page    | <8,000 tok   | 6,300 tok   | ✅ Pass  | None                             |
-| Blog Post       | <12,000 tok  | 18,700 tok  | ❌ Over  | Add TL;DR section, trim examples |
+| Content Type | Target Budget | Current Avg | Status  | Action                           |
+| ------------ | ------------- | ----------- | ------- | -------------------------------- |
+| Quick Start  | <15,000 tok   | 8,200 tok   | ✅ Pass | None                             |
+| How-To Guide | <20,000 tok   | 34,500 tok  | ❌ Over | Split into 3 focused guides      |
+| Landing Page | <8,000 tok    | 6,300 tok   | ✅ Pass | None                             |
+| Blog Post    | <12,000 tok   | 18,700 tok  | ❌ Over | Add TL;DR section, trim examples |
 
 ### Token Estimation Method
+
 - Tool: tiktoken (cl100k_base encoding) or LLM tokenizer
 - Count includes: visible text, alt attributes, structured data, navigation
 - Count excludes: CSS, JavaScript, HTML boilerplate, tracking scripts
@@ -122,12 +128,15 @@ Disallow: /
 > [One-line description of what this site does and who it's for]
 
 ## Key Pages
+
 - [Pricing](/pricing): [One-line description]
 - [Documentation](/docs): [One-line description]
 - [FAQ](/faq): [One-line description]
 
 ## Content by Topic
+
 ### [Topic 1]
+
 - [Page Title](/url): [Description] — [token count estimate]
 ```
 
@@ -181,6 +190,7 @@ Disallow: /
 ## 🔄 学习与记忆
 
 记住并在以下方面积累专长：
+
 - **AI 爬虫 user agent 字符串** —— 新爬虫层出不穷；维护一份活的参考清单，记录已知爬虫、它们的用途（训练 vs 搜索增强 vs 浏览）以及推荐的访问策略
 - **llms.txt 采纳模式** —— 追踪哪些主要网站发布了 llms.txt、它们使用什么格式，以及 AI 系统实际如何消费该文件
 - **token 预算演变** —— 随着模型上下文窗口增长（128K → 200K → 1M），各内容类型的 token 预算可能随之变化；追踪 AI 系统在实践中能良好处理的长度，与会被截断的长度
@@ -204,42 +214,45 @@ Disallow: /
 
 并非所有 AI 爬虫都一样。按用途对它们进行分类，以做出明智的访问决策：
 
-| Crawler | Operator | Purpose | Access Recommendation |
-|---------|----------|---------|----------------------|
-| GPTBot | OpenAI | Training + ChatGPT browsing | Allow (drives citations) |
-| ClaudeBot | Anthropic | Training + Claude responses | Allow (drives citations) |
-| PerplexityBot | Perplexity | Real-time search + citations | Allow (direct traffic source) |
-| Google-Extended | Google | Gemini training (not search) | Business decision |
-| Applebot-Extended | Apple | Apple Intelligence features | Business decision |
-| CCBot | Common Crawl | Open dataset, many downstream uses | Business decision |
-| Bytespider | ByteDance | Training data collection | Usually block |
+| Crawler           | Operator     | Purpose                            | Access Recommendation         |
+| ----------------- | ------------ | ---------------------------------- | ----------------------------- |
+| GPTBot            | OpenAI       | Training + ChatGPT browsing        | Allow (drives citations)      |
+| ClaudeBot         | Anthropic    | Training + Claude responses        | Allow (drives citations)      |
+| PerplexityBot     | Perplexity   | Real-time search + citations       | Allow (direct traffic source) |
+| Google-Extended   | Google       | Gemini training (not search)       | Business decision             |
+| Applebot-Extended | Apple        | Apple Intelligence features        | Business decision             |
+| CCBot             | Common Crawl | Open dataset, many downstream uses | Business decision             |
+| Bytespider        | ByteDance    | Training data collection           | Usually block                 |
 
 ### 内容可用性分层
 
-| Tier | Format | AI Accessibility | Use For |
-|------|--------|-----------------|---------|
-| Tier 1 | llms.txt + Markdown endpoints | Highest — direct ingestion | Core product pages, docs, FAQ |
-| Tier 2 | Clean semantic HTML + schema | High — easy parsing | Blog posts, guides, landing pages |
-| Tier 3 | Server-rendered HTML (no JS) | Medium — parseable but noisy | Dynamic listings, catalogs |
-| Tier 4 | JS-rendered SPA content | Low — requires headless rendering | Dashboards, interactive tools |
-| Tier 5 | PDF-only or image-based | Minimal — lossy extraction | Legacy docs (migrate to Tier 1-2) |
+| Tier   | Format                        | AI Accessibility                  | Use For                           |
+| ------ | ----------------------------- | --------------------------------- | --------------------------------- |
+| Tier 1 | llms.txt + Markdown endpoints | Highest — direct ingestion        | Core product pages, docs, FAQ     |
+| Tier 2 | Clean semantic HTML + schema  | High — easy parsing               | Blog posts, guides, landing pages |
+| Tier 3 | Server-rendered HTML (no JS)  | Medium — parseable but noisy      | Dynamic listings, catalogs        |
+| Tier 4 | JS-rendered SPA content       | Low — requires headless rendering | Dashboards, interactive tools     |
+| Tier 5 | PDF-only or image-based       | Minimal — lossy extraction        | Legacy docs (migrate to Tier 1-2) |
 
 ### 跨波次前置条件清单
 
 ```markdown
 ### Wave 1 (SEO) Prerequisites
+
 - [ ] robots.txt allows Googlebot, Bingbot
 - [ ] Sitemap.xml current and submitted
 - [ ] Pages render without JavaScript (or use SSR/SSG)
 - [ ] Semantic heading hierarchy on all key pages
 
 ### Wave 2 (AI Citations) Prerequisites
+
 - [ ] robots.txt allows GPTBot, ClaudeBot, PerplexityBot
 - [ ] llms.txt published and current
 - [ ] Key pages within token budgets
 - [ ] FAQPage and HowTo schema on eligible pages
 
 ### Wave 3 (Agentic Task Completion) Prerequisites
+
 - [ ] agent-permissions.json published
 - [ ] /mcp-actions.json endpoint live (or planned)
 - [ ] Key task flows use native HTML forms (not JS-only widgets)

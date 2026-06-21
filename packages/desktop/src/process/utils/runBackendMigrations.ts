@@ -19,6 +19,7 @@ import { getBuiltinMcpScriptPath, type ProcessConfig as ProcessConfigType } from
 import { migrateAssistantsToBackend } from './migrateAssistants';
 import { seedBundledExperts } from './seedBundledExperts';
 import { seedBundledButler } from './seedBundledButler';
+import { curateExperts } from './curateExperts';
 
 type ConfigFile = typeof ProcessConfigType;
 type MigrationStepResult = boolean;
@@ -384,6 +385,7 @@ const MIGRATION_STEPS: Array<{
   { name: 'migrateAssistantsToBackend', run: async (configFile) => migrateAssistantsToBackend(configFile) },
   { name: 'seedBundledExperts', run: async (configFile) => seedBundledExperts(configFile) },
   { name: 'seedBundledButler', run: async (configFile) => seedBundledButler(configFile) },
+  { name: 'curateExperts', run: async (configFile) => curateExperts(configFile) },
 ];
 
 async function syncBuiltinMcpConfig(configFile: ConfigFile): Promise<void> {

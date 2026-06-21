@@ -19,7 +19,8 @@ const T0 = 0;
  */
 const CLEAN_WHITE_TOKENS: Record<string, string> = {
   // Fonts → system (no brand font)
-  '--app-font-sans': "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif",
+  '--app-font-sans':
+    "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif",
   // AOU ramp → original blue-gray
   '--aou-1': '#eff0f6',
   '--aou-2': '#e5e7f0',

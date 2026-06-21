@@ -18,6 +18,7 @@ import { AgentPillBarSkeleton } from './components/GuidSkeleton';
 import GuidActionRow from './components/GuidActionRow';
 import GuidInputCard from './components/GuidInputCard';
 import GuidModelSelector from './components/GuidModelSelector';
+import GuidDomesticModelRow from './components/GuidDomesticModelRow';
 import HomeRightRail from './components/HomeRightRail';
 import SpeechInputButton from '@/renderer/components/chat/SpeechInputButton';
 import MentionDropdown, { MentionSelectorBadge } from './components/MentionDropdown';
@@ -824,6 +825,16 @@ const GuidPage: React.FC = () => {
                   onSelectAgent={handleSelectAgentFromPillBar}
                 />
               ) : null}
+
+              {/* When CentaurAI (aionrs) is selected, surface a quick-select row of
+                  domestic model providers; shares state with the chat-box dropdown. */}
+              {isGeminiMode && (agentSelection.availableAgents?.length ?? 0) > 0 && (
+                <GuidDomesticModelRow
+                  modelList={modelSelection.modelList}
+                  current_model={modelSelection.current_model}
+                  setCurrentModel={modelSelection.setCurrentModel}
+                />
+              )}
 
               <GuidInputCard
                 input={guidInput.input}
