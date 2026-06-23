@@ -101,6 +101,15 @@
     "dropHere": "Solte os arquivos para enviar",
     "renameTitle": "Renomear",
     "newFolderTitle": "Nova pasta",
-    "namePlaceholder": "Digite um nome"
+    "namePlaceholder": "Digite um nome",
+    "trash": "Lixeira",
+    "emptyTrash": "Esvaziar lixeira",
+    "emptyConfirm": "Excluir permanentemente tudo na lixeira? Isso não pode ser desfeito.",
+    "restore": "Restaurar",
+    "restoreFailed": "Falha ao restaurar",
+    "purge": "Excluir definitivamente",
+    "purgeConfirm": "Excluir permanentemente \"{{name}}\"? Isso não pode ser desfeito.",
+    "trashEmpty": "A lixeira está vazia",
+    "deletedAt": "Excluído"
   }
 }

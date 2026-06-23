@@ -718,6 +718,19 @@ export const nasDriveLocal = {
   uploadFromPath: bridge.buildProvider<{ relPath: string } | null, { path?: string; sourcePath: string; name: string }>(
     'nas-drive.upload-from-path'
   ),
+  // Recycle-folder management — admin desktop only (no HTTP route exists).
+  trashList: bridge.buildProvider<NasTrashEntryDTO[], void>('nas-drive.trash-list'),
+  trashRestore: bridge.buildProvider<{ relPath: string } | null, { trashName: string }>('nas-drive.trash-restore'),
+  trashRemove: bridge.buildProvider<boolean, { trashName: string }>('nas-drive.trash-remove'),
+  trashEmpty: bridge.buildProvider<boolean, void>('nas-drive.trash-empty'),
+};
+
+export type NasTrashEntryDTO = {
+  trashName: string;
+  originalName: string;
+  isDir: boolean;
+  size: number;
+  deletedAt: number;
 };
 
 // ---------------------------------------------------------------------------

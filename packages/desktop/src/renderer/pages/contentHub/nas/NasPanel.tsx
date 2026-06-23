@@ -11,7 +11,17 @@ import { Button, Input, Message, Modal, Popconfirm } from '@arco-design/web-reac
 import { Delete, Download, Editor, FileText, FolderClose, FolderPlus, Refresh, Right, Upload } from '@icon-park/react';
 import { useTranslation } from 'react-i18next';
 import { useNas } from './useNas';
-import { downloadNasFile, openNasFile, type NasEntry } from '@/renderer/services/NasService';
+import {
+  downloadNasFile,
+  emptyNasTrash,
+  isNasAdmin,
+  listNasTrash,
+  openNasFile,
+  purgeNasTrash,
+  restoreNasTrash,
+  type NasEntry,
+  type NasTrashEntry,
+} from '@/renderer/services/NasService';
 import { formatFileSize } from '@/renderer/services/FileService';
 import EmptyState from '../components/EmptyState';
 
@@ -37,6 +47,11 @@ const NasPanel: React.FC<NasPanelProps> = ({ search = '' }) => {
   const [busy, setBusy] = useState(false);
   // Naming dialog (shared by "new folder" and "rename").
   const [dialog, setDialog] = useState<{ mode: 'mkdir' | 'rename'; entry?: NasEntry; value: string } | null>(null);
+  // Recycle-bin view (admin desktop only).
+  const admin = isNasAdmin();
+  const [trashView, setTrashView] = useState(false);
+  const [trash, setTrash] = useState<NasTrashEntry[]>([]);
+  const [trashLoading, setTrashLoading] = useState(false);
 
   const q = search.trim().toLowerCase();
   const visible = q ? entries.filter((e) => e.name.toLowerCase().includes(q)) : entries;
@@ -65,6 +80,23 @@ const NasPanel: React.FC<NasPanelProps> = ({ search = '' }) => {
     } finally {
       setBusy(false);
     }
+  };
+
+  const loadTrash = async () => {
+    setTrashLoading(true);
+    try {
+      setTrash(await listNasTrash());
+    } finally {
+      setTrashLoading(false);
+    }
+  };
+  const openTrash = () => {
+    setTrashView(true);
+    void loadTrash();
+  };
+  const closeTrash = () => {
+    setTrashView(false);
+    refresh();
   };
 
   const doUpload = (files: FileList | File[] | null) => {
@@ -118,6 +150,107 @@ const NasPanel: React.FC<NasPanelProps> = ({ search = '' }) => {
     return <EmptyState message={t('contentHub.nas.unavailable')} loadingMessage={t('contentHub.nas.loading')} />;
   }
 
+  if (trashView) {
+    return (
+      <div className='flex-1 flex flex-col min-h-0 px-16px pb-16px'>
+        <div className='flex items-center gap-8px py-12px text-13px shrink-0'>
+          <span className='cursor-pointer text-t-secondary hover:text-t-primary' onClick={closeTrash}>
+            ← {t('contentHub.nas.root')}
+          </span>
+          <Right theme='outline' size={12} className='text-t-tertiary' />
+          <span className='text-t-primary'>{t('contentHub.nas.trash')}</span>
+          {trash.length > 0 && (
+            <Popconfirm
+              focusLock
+              title={t('contentHub.nas.emptyConfirm')}
+              okText={t('contentHub.nas.emptyTrash')}
+              cancelText={t('contentHub.nas.cancel')}
+              onOk={() =>
+                run(async () => {
+                  await emptyNasTrash();
+                  await loadTrash();
+                }, 'contentHub.nas.deleteFailed')
+              }
+            >
+              <Button
+                type='text'
+                size='mini'
+                status='danger'
+                className='ml-auto'
+                icon={<Delete theme='outline' size={14} />}
+              >
+                {t('contentHub.nas.emptyTrash')}
+              </Button>
+            </Popconfirm>
+          )}
+        </div>
+        {trash.length === 0 ? (
+          <EmptyState
+            loading={trashLoading}
+            message={t('contentHub.nas.trashEmpty')}
+            loadingMessage={t('contentHub.nas.loading')}
+          />
+        ) : (
+          <div className='flex-1 overflow-auto min-h-0'>
+            <div className='flex items-center gap-12px px-12px py-8px text-12px text-t-tertiary border-b border-b-solid border-b-[var(--color-border-2)]'>
+              <span className='flex-1'>{t('contentHub.nas.colName')}</span>
+              <span className='w-100px text-right'>{t('contentHub.nas.colSize')}</span>
+              <span className='w-140px text-right'>{t('contentHub.nas.deletedAt')}</span>
+              <span className='w-140px' />
+            </div>
+            {trash.map((e) => (
+              <div
+                key={e.trashName}
+                className='flex items-center gap-12px px-12px py-10px text-13px rd-6px hover:bg-fill-2 group'
+              >
+                <span className='flex-1 flex items-center gap-8px truncate'>
+                  {e.isDir ? (
+                    <FolderClose theme='outline' size={16} className='text-[var(--color-warning-6)] shrink-0' />
+                  ) : (
+                    <FileText theme='outline' size={16} className='text-t-tertiary shrink-0' />
+                  )}
+                  <span className='truncate text-t-primary'>{e.originalName}</span>
+                </span>
+                <span className='w-100px text-right text-t-secondary'>{e.isDir ? '—' : formatFileSize(e.size)}</span>
+                <span className='w-140px text-right text-t-secondary'>{formatDate(e.deletedAt)}</span>
+                <span className='w-140px flex justify-end gap-2px opacity-0 group-hover:opacity-100 transition-opacity'>
+                  <Button
+                    type='text'
+                    size='mini'
+                    onClick={() =>
+                      run(async () => {
+                        await restoreNasTrash(e.trashName);
+                        await loadTrash();
+                      }, 'contentHub.nas.restoreFailed')
+                    }
+                  >
+                    {t('contentHub.nas.restore')}
+                  </Button>
+                  <Popconfirm
+                    focusLock
+                    title={t('contentHub.nas.purgeConfirm', { name: e.originalName })}
+                    okText={t('contentHub.nas.purge')}
+                    cancelText={t('contentHub.nas.cancel')}
+                    onOk={() =>
+                      run(async () => {
+                        await purgeNasTrash(e.trashName);
+                        await loadTrash();
+                      }, 'contentHub.nas.deleteFailed')
+                    }
+                  >
+                    <Button type='text' size='mini' status='danger'>
+                      {t('contentHub.nas.purge')}
+                    </Button>
+                  </Popconfirm>
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div
       className='flex-1 flex flex-col min-h-0 px-16px pb-16px relative'
@@ -160,6 +293,11 @@ const NasPanel: React.FC<NasPanelProps> = ({ search = '' }) => {
           <Button type='text' size='mini' icon={<Refresh theme='outline' size={14} />} onClick={refresh}>
             {t('contentHub.nas.refresh')}
           </Button>
+          {admin && (
+            <Button type='text' size='mini' icon={<Delete theme='outline' size={14} />} onClick={openTrash}>
+              {t('contentHub.nas.trash')}
+            </Button>
+          )}
         </div>
         <input
           ref={fileInputRef}

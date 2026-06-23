@@ -101,6 +101,15 @@
     "dropHere": "拖放文件到此上传",
     "renameTitle": "重命名",
     "newFolderTitle": "新建文件夹",
-    "namePlaceholder": "请输入名称"
+    "namePlaceholder": "请输入名称",
+    "trash": "回收站",
+    "emptyTrash": "清空回收站",
+    "emptyConfirm": "永久删除回收站内全部内容？此操作不可恢复。",
+    "restore": "恢复",
+    "restoreFailed": "恢复失败",
+    "purge": "彻底删除",
+    "purgeConfirm": "永久删除「{{name}}」？此操作不可恢复。",
+    "trashEmpty": "回收站为空",
+    "deletedAt": "删除时间"
   }
 }

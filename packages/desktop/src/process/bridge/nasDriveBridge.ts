@@ -4,7 +4,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { nasFileInfo, nasList, nasMkdir, nasMove, nasRemove, nasUploadFromPath } from '@aionui/web-host';
+import {
+  nasFileInfo,
+  nasList,
+  nasMkdir,
+  nasMove,
+  nasRemove,
+  nasTrashEmpty,
+  nasTrashList,
+  nasTrashRemove,
+  nasTrashRestore,
+  nasUploadFromPath,
+} from '@aionui/web-host';
 import { ipcBridge } from '@/common';
 import { resolveNasRootDir } from '../utils/webuiConfig';
 
@@ -63,5 +74,30 @@ export function initNasDriveBridge(): void {
     if (!root) return null;
     const relPath = await nasUploadFromPath(root, path, sourcePath, name);
     return relPath == null ? null : { relPath };
+  });
+
+  ipcBridge.nasDriveLocal.trashList.provider(async () => {
+    const root = await resolveNasRootDir();
+    if (!root) return [];
+    return nasTrashList(root);
+  });
+
+  ipcBridge.nasDriveLocal.trashRestore.provider(async ({ trashName }) => {
+    const root = await resolveNasRootDir();
+    if (!root) return null;
+    const relPath = await nasTrashRestore(root, trashName);
+    return relPath == null ? null : { relPath };
+  });
+
+  ipcBridge.nasDriveLocal.trashRemove.provider(async ({ trashName }) => {
+    const root = await resolveNasRootDir();
+    if (!root) return false;
+    return nasTrashRemove(root, trashName);
+  });
+
+  ipcBridge.nasDriveLocal.trashEmpty.provider(async () => {
+    const root = await resolveNasRootDir();
+    if (!root) return false;
+    return nasTrashEmpty(root);
   });
 }

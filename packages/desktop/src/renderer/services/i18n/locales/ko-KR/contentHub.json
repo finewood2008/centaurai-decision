@@ -101,6 +101,15 @@
     "dropHere": "파일을 끌어다 놓아 업로드",
     "renameTitle": "이름 바꾸기",
     "newFolderTitle": "새 폴더",
-    "namePlaceholder": "이름 입력"
+    "namePlaceholder": "이름 입력",
+    "trash": "휴지통",
+    "emptyTrash": "휴지통 비우기",
+    "emptyConfirm": "휴지통의 모든 항목을 영구히 삭제할까요? 되돌릴 수 없습니다.",
+    "restore": "복원",
+    "restoreFailed": "복원 실패",
+    "purge": "영구 삭제",
+    "purgeConfirm": "\"{{name}}\"을(를) 영구히 삭제할까요? 되돌릴 수 없습니다.",
+    "trashEmpty": "휴지통이 비어 있습니다",
+    "deletedAt": "삭제일"
   }
 }

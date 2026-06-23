@@ -4,7 +4,18 @@ import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
 import type { AddressInfo } from 'node:net';
-import { handleNasDownload, handleNasList, handleNasPreview, resolveWithinRoot, type NasListing } from './nas-drive.js';
+import {
+  handleNasDownload,
+  handleNasList,
+  handleNasPreview,
+  resolveWithinRoot,
+  nasRemove,
+  nasTrashList,
+  nasTrashRestore,
+  nasTrashRemove,
+  nasTrashEmpty,
+  type NasListing,
+} from './nas-drive.js';
 
 /**
  * Spin up a real http server routing /api/nas/* through the handlers so the
@@ -164,5 +175,57 @@ describe('/api/nas/download & preview', () => {
     const port = await withServer(root);
     const resp = await fetch(`http://127.0.0.1:${port}/api/nas/download?path=${encodeURIComponent('../../etc/hosts')}`);
     expect(resp.status).toBe(404);
+  });
+});
+
+describe('NAS recycle-bin management (admin core)', () => {
+  it('lists, restores, purges, and empties the recycle folder', async () => {
+    const root = await makeRoot();
+    roots.push(root);
+    // Soft-delete two files.
+    await fs.writeFile(path.join(root, 'a.txt'), 'A');
+    await fs.writeFile(path.join(root, 'b.txt'), 'B');
+    expect(await nasRemove(root, 'a.txt')).toBe(true);
+    expect(await nasRemove(root, 'b.txt')).toBe(true);
+
+    let trash = await nasTrashList(root);
+    expect(trash.map((e) => e.originalName).sort()).toEqual(['a.txt', 'b.txt']);
+    expect(trash.every((e) => e.deletedAt > 0)).toBe(true);
+
+    // Restore a.txt → reappears in the root.
+    const a = trash.find((e) => e.originalName === 'a.txt')!;
+    const rel = await nasTrashRestore(root, a.trashName);
+    expect(rel).toBe('a.txt');
+    expect(await fs.readFile(path.join(root, 'a.txt'), 'utf8')).toBe('A');
+
+    // Purge b.txt permanently.
+    const b = (await nasTrashList(root)).find((e) => e.originalName === 'b.txt')!;
+    expect(await nasTrashRemove(root, b.trashName)).toBe(true);
+    expect(await nasTrashList(root)).toHaveLength(0);
+
+    // Empty is a no-op on an already-empty bin.
+    expect(await nasTrashEmpty(root)).toBe(true);
+  });
+
+  it('restore auto-renames when the original name is taken', async () => {
+    const root = await makeRoot();
+    roots.push(root);
+    await fs.writeFile(path.join(root, 'dup.txt'), 'old');
+    await nasRemove(root, 'dup.txt');
+    await fs.writeFile(path.join(root, 'dup.txt'), 'new'); // recreate same name
+    const t = (await nasTrashList(root))[0];
+    const rel = await nasTrashRestore(root, t.trashName);
+    expect(rel).not.toBe('dup.txt'); // current file preserved
+    expect(await fs.readFile(path.join(root, 'dup.txt'), 'utf8')).toBe('new');
+  });
+
+  it('rejects trash names that try to escape the recycle folder', async () => {
+    const root = await makeRoot();
+    roots.push(root);
+    await fs.writeFile(path.join(root, 'victim.txt'), 'V');
+    expect(await nasTrashRestore(root, '../victim.txt')).toBeNull();
+    expect(await nasTrashRemove(root, '../victim.txt')).toBe(false);
+    expect(await nasTrashRemove(root, 'sub/x')).toBe(false);
+    expect(await fs.readFile(path.join(root, 'victim.txt'), 'utf8')).toBe('V'); // untouched
   });
 });

@@ -101,6 +101,15 @@
     "dropHere": "Drop files to upload",
     "renameTitle": "Rename",
     "newFolderTitle": "New Folder",
-    "namePlaceholder": "Enter a name"
+    "namePlaceholder": "Enter a name",
+    "trash": "Recycle Bin",
+    "emptyTrash": "Empty Recycle Bin",
+    "emptyConfirm": "Permanently delete everything in the recycle bin? This cannot be undone.",
+    "restore": "Restore",
+    "restoreFailed": "Restore failed",
+    "purge": "Delete permanently",
+    "purgeConfirm": "Permanently delete \"{{name}}\"? This cannot be undone.",
+    "trashEmpty": "The recycle bin is empty",
+    "deletedAt": "Deleted"
   }
 }

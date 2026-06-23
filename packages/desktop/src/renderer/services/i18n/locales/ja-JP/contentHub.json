@@ -101,6 +101,15 @@
     "dropHere": "ファイルをドロップしてアップロード",
     "renameTitle": "名前を変更",
     "newFolderTitle": "新しいフォルダ",
-    "namePlaceholder": "名前を入力"
+    "namePlaceholder": "名前を入力",
+    "trash": "ごみ箱",
+    "emptyTrash": "ごみ箱を空にする",
+    "emptyConfirm": "ごみ箱の中身をすべて完全に削除しますか？元に戻せません。",
+    "restore": "復元",
+    "restoreFailed": "復元に失敗しました",
+    "purge": "完全に削除",
+    "purgeConfirm": "「{{name}}」を完全に削除しますか？元に戻せません。",
+    "trashEmpty": "ごみ箱は空です",
+    "deletedAt": "削除日時"
   }
 }

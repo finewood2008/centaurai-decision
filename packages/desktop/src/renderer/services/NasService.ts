@@ -52,6 +52,11 @@ function isAdminElectron(): boolean {
   return host === '127.0.0.1' || host === 'localhost';
 }
 
+/** True when this client is the admin desktop (recycle-bin management surface). */
+export function isNasAdmin(): boolean {
+  return isAdminElectron();
+}
+
 /** Resolve the origin serving /api/nas/* (HTTP transport only). */
 async function resolveBase(): Promise<string> {
   if (isBrowserMode()) return '';
@@ -198,4 +203,31 @@ export async function uploadNasFiles(parentRel: string, files: File[]): Promise<
     }
   }
   if (failed.length) throw new Error(`UPLOAD_FAILED:${failed.length}/${files.length}`);
+}
+
+// --- Recycle-bin management (admin desktop only; IPC, no HTTP route). ---
+
+export type NasTrashEntry = {
+  trashName: string;
+  originalName: string;
+  isDir: boolean;
+  size: number;
+  deletedAt: number;
+};
+
+export async function listNasTrash(): Promise<NasTrashEntry[]> {
+  if (!isAdminElectron()) return [];
+  return ipcBridge.nasDriveLocal.trashList.invoke();
+}
+
+export async function restoreNasTrash(trashName: string): Promise<void> {
+  await ipcBridge.nasDriveLocal.trashRestore.invoke({ trashName });
+}
+
+export async function purgeNasTrash(trashName: string): Promise<void> {
+  await ipcBridge.nasDriveLocal.trashRemove.invoke({ trashName });
+}
+
+export async function emptyNasTrash(): Promise<void> {
+  await ipcBridge.nasDriveLocal.trashEmpty.invoke();
 }

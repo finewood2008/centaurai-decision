@@ -51,6 +51,17 @@ export type NasEntry = {
   modifiedAt: number;
 };
 
+export type NasTrashEntry = {
+  /** The on-disk name inside .nas-trash ("<stamp>__<originalName>"). */
+  trashName: string;
+  /** The name the entry had before deletion. */
+  originalName: string;
+  isDir: boolean;
+  size: number;
+  /** Epoch milliseconds the entry was deleted (parsed from the stamp). */
+  deletedAt: number;
+};
+
 export type NasListing = {
   /** The directory listed, relative to root ("" for the root itself). */
   path: string;
@@ -297,6 +308,111 @@ export async function nasUploadFromPath(
     }
   }
   return null;
+}
+
+// ---------------------------------------------------------------------------
+// Recycle-folder management. ADMIN-ONLY (no HTTP routes): on a "全员共享" drive
+// any user may soft-delete (recoverable), but emptying/restoring the shared
+// recycle bin is destructive/privileged, so it is reachable solely via the
+// admin desktop IPC bridge — never over the LAN HTTP surface.
+// ---------------------------------------------------------------------------
+
+function parseTrashName(trashName: string): { originalName: string; deletedAt: number } {
+  const idx = trashName.indexOf('__');
+  if (idx < 0) return { originalName: trashName, deletedAt: 0 };
+  const stamp = trashName.slice(0, idx);
+  return { originalName: trashName.slice(idx + 2), deletedAt: parseInt(stamp.split('-')[0], 10) || 0 };
+}
+
+/** Resolve a direct child of the recycle folder by its on-disk name, or null. */
+async function resolveInTrash(rootDir: string, trashName: string): Promise<string | null> {
+  if (!trashName || trashName.includes('/') || trashName.includes('\\') || trashName.includes('\0')) return null;
+  if (trashName === '.' || trashName === '..') return null;
+  try {
+    const realRoot = await fs.promises.realpath(path.resolve(rootDir));
+    const trash = path.join(realRoot, TRASH_DIR);
+    const real = await fs.promises.realpath(path.join(trash, path.basename(trashName)));
+    // Must be a DIRECT child of the trash dir (rejects symlinks pointing out).
+    if (path.dirname(real) !== trash) return null;
+    return real;
+  } catch {
+    return null;
+  }
+}
+
+/** List the recycle folder's contents (most-recently deleted first). */
+export async function nasTrashList(rootDir: string): Promise<NasTrashEntry[]> {
+  let realRoot: string;
+  try {
+    realRoot = await fs.promises.realpath(path.resolve(rootDir));
+  } catch {
+    return [];
+  }
+  const trash = path.join(realRoot, TRASH_DIR);
+  let dirents: fs.Dirent[];
+  try {
+    dirents = await fs.promises.readdir(trash, { withFileTypes: true });
+  } catch {
+    return [];
+  }
+  const entries = await Promise.all(
+    dirents.map(async (d): Promise<NasTrashEntry | null> => {
+      try {
+        const st = await fs.promises.lstat(path.join(trash, d.name));
+        const { originalName, deletedAt } = parseTrashName(d.name);
+        return {
+          trashName: d.name,
+          originalName,
+          isDir: st.isDirectory(),
+          size: st.isDirectory() ? 0 : st.size,
+          deletedAt,
+        };
+      } catch {
+        return null;
+      }
+    })
+  );
+  return entries.filter((e): e is NasTrashEntry => e != null).sort((a, b) => b.deletedAt - a.deletedAt);
+}
+
+/** Restore a trashed entry back to the root (auto-renamed on collision). */
+export async function nasTrashRestore(rootDir: string, trashName: string): Promise<string | null> {
+  const real = await resolveInTrash(rootDir, trashName);
+  if (real == null) return null;
+  const realRoot = await fs.promises.realpath(path.resolve(rootDir));
+  const { originalName } = parseTrashName(path.basename(real));
+  const dest = await uniqueTarget(realRoot, sanitizeSegment(originalName));
+  await fs.promises.rename(real, dest);
+  return toRelPosix(rootDir, dest);
+}
+
+/** Permanently delete a single trashed entry. */
+export async function nasTrashRemove(rootDir: string, trashName: string): Promise<boolean> {
+  const real = await resolveInTrash(rootDir, trashName);
+  if (real == null) return false;
+  await fs.promises.rm(real, { recursive: true, force: true });
+  return true;
+}
+
+/** Permanently empty the recycle folder. */
+export async function nasTrashEmpty(rootDir: string): Promise<boolean> {
+  let realRoot: string;
+  try {
+    realRoot = await fs.promises.realpath(path.resolve(rootDir));
+  } catch {
+    return false;
+  }
+  const trash = path.join(realRoot, TRASH_DIR);
+  let names: string[];
+  try {
+    names = await fs.promises.readdir(trash);
+  } catch {
+    return true; // no trash dir → already empty
+  }
+  await Promise.all(
+    names.map((n) => fs.promises.rm(path.join(trash, n), { recursive: true, force: true }).catch(() => {}))
+  );
+  return true;
 }
 
 // ---------------------------------------------------------------------------

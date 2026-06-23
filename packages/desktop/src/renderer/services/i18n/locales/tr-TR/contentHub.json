@@ -101,6 +101,15 @@
     "dropHere": "Yüklemek için dosyaları bırakın",
     "renameTitle": "Yeniden Adlandır",
     "newFolderTitle": "Yeni Klasör",
-    "namePlaceholder": "Bir ad girin"
+    "namePlaceholder": "Bir ad girin",
+    "trash": "Geri Dönüşüm Kutusu",
+    "emptyTrash": "Geri dönüşüm kutusunu boşalt",
+    "emptyConfirm": "Geri dönüşüm kutusundaki her şey kalıcı olarak silinsin mi? Bu geri alınamaz.",
+    "restore": "Geri yükle",
+    "restoreFailed": "Geri yükleme başarısız",
+    "purge": "Kalıcı olarak sil",
+    "purgeConfirm": "\"{{name}}\" kalıcı olarak silinsin mi? Bu geri alınamaz.",
+    "trashEmpty": "Geri dönüşüm kutusu boş",
+    "deletedAt": "Silindi"
   }
 }
