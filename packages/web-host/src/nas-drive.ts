@@ -25,7 +25,15 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import type { IncomingMessage, ServerResponse } from 'node:http';
+
+/** Per-file upload cap. A NAS holds large media/datasets, so this is generous. */
+const NAS_MAX_UPLOAD_BYTES = 5 * 1024 * 1024 * 1024; // 5 GB
+/** Hidden recycle folder; deletes move here instead of hard-unlinking. */
+const TRASH_DIR = '.nas-trash';
+// Path separators and Windows-reserved characters (spaces/unicode survive).
+const UNSAFE_NAME_CHARS = /[/\\:*?"<>|]/g;
 
 export type NasEntry = {
   /** Display name (a single path segment, never contains a separator). */
@@ -117,6 +125,145 @@ async function isRealContained(rootDir: string, full: string): Promise<boolean> 
     // Missing path or broken symlink — treat as not contained / not found.
     return false;
   }
+}
+
+// ---------------------------------------------------------------------------
+// Write-side helpers (P2). Every mutation is confined to the root and never
+// touches the recycle folder; create/upload targets are validated via their
+// (existing) parent dir + a sanitized single-segment name, since the target
+// itself does not yet exist and so cannot be realpath-checked directly.
+// ---------------------------------------------------------------------------
+
+/** Collapse a user-supplied name to a safe single path segment. */
+function sanitizeSegment(name: string): string {
+  const base = path.basename(name).replace(UNSAFE_NAME_CHARS, '_').replace(/^\.+/, '').trim();
+  return base || 'untitled';
+}
+
+async function exists(p: string): Promise<boolean> {
+  try {
+    await fs.promises.stat(p);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Append " (n)" before the extension until the name is free (bounded). */
+async function uniqueTarget(dir: string, name: string): Promise<string> {
+  const first = path.join(dir, name);
+  if (!(await exists(first))) return first;
+  const dot = name.lastIndexOf('.');
+  const base = dot > 0 ? name.slice(0, dot) : name;
+  const ext = dot > 0 ? name.slice(dot) : '';
+  for (let i = 1; i < 10000; i++) {
+    const candidate = path.join(dir, `${base} (${i})${ext}`);
+    if (!(await exists(candidate))) return candidate;
+  }
+  return path.join(dir, `${base} (${crypto.randomBytes(4).toString('hex')})${ext}`);
+}
+
+/**
+ * Real path of an EXISTING, contained target that is neither the root itself nor
+ * inside the recycle folder. Null otherwise. Used by delete/move sources.
+ */
+async function resolveExisting(rootDir: string, relPath: string | null | undefined): Promise<string | null> {
+  const full = resolveWithinRoot(rootDir, relPath);
+  if (full == null) return null;
+  try {
+    const realRoot = await fs.promises.realpath(path.resolve(rootDir));
+    const real = await fs.promises.realpath(full);
+    if (real === realRoot) return null; // never operate on the root itself
+    if (!real.startsWith(realRoot + path.sep)) return null;
+    const trash = path.join(realRoot, TRASH_DIR);
+    if (real === trash || real.startsWith(trash + path.sep)) return null;
+    return real;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Real path of an EXISTING, contained directory usable as a create/upload/move
+ * destination parent. Rejects the recycle folder. Null otherwise.
+ */
+async function resolveParentDir(rootDir: string, parentRel: string | null | undefined): Promise<string | null> {
+  const full = resolveWithinRoot(rootDir, parentRel);
+  if (full == null) return null;
+  try {
+    const realRoot = await fs.promises.realpath(path.resolve(rootDir));
+    const real = await fs.promises.realpath(full);
+    if (real !== realRoot && !real.startsWith(realRoot + path.sep)) return null;
+    if (!(await fs.promises.stat(real)).isDirectory()) return null;
+    const trash = path.join(realRoot, TRASH_DIR);
+    if (real === trash || real.startsWith(trash + path.sep)) return null;
+    return real;
+  } catch {
+    return null;
+  }
+}
+
+/** Split a POSIX-ish relPath into [parentRel, name]. */
+function splitRel(relPath: string): { parentRel: string; name: string } {
+  const cleaned = (relPath ?? '').replace(/\\/g, '/').replace(/^\/+|\/+$/g, '');
+  const slash = cleaned.lastIndexOf('/');
+  if (slash < 0) return { parentRel: '', name: cleaned };
+  return { parentRel: cleaned.slice(0, slash), name: cleaned.slice(slash + 1) };
+}
+
+/** Create a sub-directory under `parentRel`. Returns its relPath, or null if forbidden. */
+export async function nasMkdir(
+  rootDir: string,
+  parentRel: string | null | undefined,
+  name: string
+): Promise<string | null> {
+  const parent = await resolveParentDir(rootDir, parentRel);
+  if (parent == null) return null;
+  const safe = sanitizeSegment(name);
+  const target = path.join(parent, safe);
+  await fs.promises.mkdir(target, { recursive: true });
+  return toRelPosix(rootDir, target);
+}
+
+/** Soft-delete a file/folder by moving it into the hidden recycle folder. */
+export async function nasRemove(rootDir: string, relPath: string | null | undefined): Promise<boolean> {
+  const real = await resolveExisting(rootDir, relPath);
+  if (real == null) return false;
+  const realRoot = await fs.promises.realpath(path.resolve(rootDir));
+  const trash = path.join(realRoot, TRASH_DIR);
+  await fs.promises.mkdir(trash, { recursive: true });
+  const stamp = `${Date.now()}-${crypto.randomBytes(3).toString('hex')}`;
+  await fs.promises.rename(real, path.join(trash, `${stamp}__${path.basename(real)}`));
+  return true;
+}
+
+/** Move/rename `fromRel` to `toRel` (parent + name). Auto-renames on collision. */
+export async function nasMove(rootDir: string, fromRel: string, toRel: string): Promise<boolean> {
+  const src = await resolveExisting(rootDir, fromRel);
+  if (src == null) return false;
+  const { parentRel, name } = splitRel(toRel);
+  const destParent = await resolveParentDir(rootDir, parentRel);
+  if (destParent == null) return false;
+  const safe = sanitizeSegment(name);
+  let dest = path.join(destParent, safe);
+  if (path.resolve(dest) === src) return true; // no-op rename
+  if (await exists(dest)) dest = await uniqueTarget(destParent, safe);
+  await fs.promises.rename(src, dest);
+  return true;
+}
+
+/** Copy a server-side file into `destParentRel` (admin IPC upload). Returns relPath. */
+export async function nasUploadFromPath(
+  rootDir: string,
+  destParentRel: string | null | undefined,
+  sourcePath: string,
+  name: string
+): Promise<string | null> {
+  const parent = await resolveParentDir(rootDir, destParentRel);
+  if (parent == null) return null;
+  const dest = await uniqueTarget(parent, sanitizeSegment(name));
+  await fs.promises.copyFile(sourcePath, dest);
+  return toRelPosix(rootDir, dest);
 }
 
 // ---------------------------------------------------------------------------
@@ -338,4 +485,150 @@ export function handleNasPreview(
   rootDir: string | undefined
 ): Promise<void> {
   return streamNasFile(req, res, rootDir, 'inline');
+}
+
+// ---------------------------------------------------------------------------
+// Write handlers (P2). All mutate under nasRootDir only and are auth-gated by
+// static-server when the WebUI is LAN-exposed (allowRemote).
+// ---------------------------------------------------------------------------
+
+function queryParam(req: IncomingMessage, key: string): string {
+  return new URL(req.url ?? '', 'http://localhost').searchParams.get(key) ?? '';
+}
+
+/** POST /api/nas/upload?path=<dir>&name=<file> — body = raw file bytes. */
+export async function handleNasUpload(
+  req: IncomingMessage,
+  res: ServerResponse,
+  rootDir: string | undefined
+): Promise<void> {
+  if (!rootDir) {
+    sendJson(res, 503, { success: false, error: 'NAS_DISABLED' });
+    return;
+  }
+  const rawName = queryParam(req, 'name');
+  if (!rawName) {
+    sendJson(res, 400, { success: false, error: 'MISSING_NAME' });
+    return;
+  }
+  const parent = await resolveParentDir(rootDir, queryParam(req, 'path'));
+  if (parent == null) {
+    sendJson(res, 403, { success: false, error: 'FORBIDDEN' });
+    return;
+  }
+  const full = await uniqueTarget(parent, sanitizeSegment(rawName));
+
+  // Stream the body to disk with a size cap. Manual write+backpressure (not
+  // pipe + a 'data' listener) — the static-server TCP peek/splice layer stalls
+  // when both are mixed (see shared-drive.ts).
+  let size = 0;
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const out = fs.createWriteStream(full);
+      let settled = false;
+      const fail = (err: Error) => {
+        if (settled) return;
+        settled = true;
+        out.destroy();
+        fs.promises.rm(full, { force: true }).finally(() => reject(err));
+      };
+      out.on('error', fail);
+      req.on('error', fail);
+      req.on('aborted', () => fail(new Error('ABORTED')));
+      req.on('data', (chunk: Buffer) => {
+        if (settled) return;
+        size += chunk.length;
+        if (size > NAS_MAX_UPLOAD_BYTES) {
+          fail(new Error('TOO_LARGE'));
+          return;
+        }
+        if (!out.write(chunk)) {
+          req.pause();
+          out.once('drain', () => req.resume());
+        }
+      });
+      req.on('end', () => {
+        if (settled) return;
+        out.end(() => {
+          settled = true;
+          resolve();
+        });
+      });
+    });
+  } catch (err) {
+    await fs.promises.rm(full, { force: true }).catch(() => {});
+    const tooLarge = err instanceof Error && err.message === 'TOO_LARGE';
+    sendJson(res, tooLarge ? 413 : 500, { success: false, error: tooLarge ? 'TOO_LARGE' : 'WRITE_ERROR' });
+    return;
+  }
+  sendJson(res, 200, { success: true, data: { relPath: toRelPosix(rootDir, full), size } });
+}
+
+/** POST /api/nas/mkdir?path=<parent>&name=<folder> */
+export async function handleNasMkdir(
+  req: IncomingMessage,
+  res: ServerResponse,
+  rootDir: string | undefined
+): Promise<void> {
+  if (!rootDir) {
+    sendJson(res, 503, { success: false, error: 'NAS_DISABLED' });
+    return;
+  }
+  const name = queryParam(req, 'name');
+  if (!name) {
+    sendJson(res, 400, { success: false, error: 'MISSING_NAME' });
+    return;
+  }
+  try {
+    const relPath = await nasMkdir(rootDir, queryParam(req, 'path'), name);
+    if (relPath == null) {
+      sendJson(res, 403, { success: false, error: 'FORBIDDEN' });
+      return;
+    }
+    sendJson(res, 200, { success: true, data: { relPath } });
+  } catch {
+    sendJson(res, 500, { success: false, error: 'MKDIR_FAILED' });
+  }
+}
+
+/** POST /api/nas/move?from=<rel>&to=<rel> */
+export async function handleNasMove(
+  req: IncomingMessage,
+  res: ServerResponse,
+  rootDir: string | undefined
+): Promise<void> {
+  if (!rootDir) {
+    sendJson(res, 503, { success: false, error: 'NAS_DISABLED' });
+    return;
+  }
+  const from = queryParam(req, 'from');
+  const to = queryParam(req, 'to');
+  if (!from || !to) {
+    sendJson(res, 400, { success: false, error: 'MISSING_ARG' });
+    return;
+  }
+  try {
+    const ok = await nasMove(rootDir, from, to);
+    sendJson(res, ok ? 200 : 403, { success: ok, ...(ok ? {} : { error: 'FORBIDDEN' }) });
+  } catch {
+    sendJson(res, 500, { success: false, error: 'MOVE_FAILED' });
+  }
+}
+
+/** DELETE /api/nas/remove?path=<rel> — soft-delete to the recycle folder. */
+export async function handleNasRemove(
+  req: IncomingMessage,
+  res: ServerResponse,
+  rootDir: string | undefined
+): Promise<void> {
+  if (!rootDir) {
+    sendJson(res, 503, { success: false, error: 'NAS_DISABLED' });
+    return;
+  }
+  try {
+    const ok = await nasRemove(rootDir, queryParam(req, 'path'));
+    sendJson(res, ok ? 200 : 404, { success: ok, ...(ok ? {} : { error: 'NOT_FOUND' }) });
+  } catch {
+    sendJson(res, 500, { success: false, error: 'REMOVE_FAILED' });
+  }
 }

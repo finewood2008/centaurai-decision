@@ -85,6 +85,22 @@
     "download": "Download",
     "colName": "Name",
     "colSize": "Size",
-    "colModified": "Modified"
+    "colModified": "Modified",
+    "upload": "Upload",
+    "newFolder": "New Folder",
+    "rename": "Rename",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "ok": "OK",
+    "deleteConfirm": "Delete \"{{name}}\"? It will be moved to the recycle folder.",
+    "uploadDone": "Upload complete",
+    "uploadFailed": "Upload failed",
+    "mkdirFailed": "Could not create folder",
+    "renameFailed": "Rename failed",
+    "deleteFailed": "Delete failed",
+    "dropHere": "Drop files to upload",
+    "renameTitle": "Rename",
+    "newFolderTitle": "New Folder",
+    "namePlaceholder": "Enter a name"
   }
 }

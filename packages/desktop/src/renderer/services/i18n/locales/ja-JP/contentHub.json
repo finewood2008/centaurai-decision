@@ -85,6 +85,22 @@
     "download": "ダウンロード",
     "colName": "名前",
     "colSize": "サイズ",
-    "colModified": "更新日時"
+    "colModified": "更新日時",
+    "upload": "アップロード",
+    "newFolder": "新しいフォルダ",
+    "rename": "名前を変更",
+    "delete": "削除",
+    "cancel": "キャンセル",
+    "ok": "OK",
+    "deleteConfirm": "「{{name}}」を削除しますか？ごみ箱フォルダに移動します。",
+    "uploadDone": "アップロード完了",
+    "uploadFailed": "アップロードに失敗しました",
+    "mkdirFailed": "フォルダを作成できませんでした",
+    "renameFailed": "名前の変更に失敗しました",
+    "deleteFailed": "削除に失敗しました",
+    "dropHere": "ファイルをドロップしてアップロード",
+    "renameTitle": "名前を変更",
+    "newFolderTitle": "新しいフォルダ",
+    "namePlaceholder": "名前を入力"
   }
 }

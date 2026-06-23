@@ -85,6 +85,22 @@
     "download": "下載",
     "colName": "名稱",
     "colSize": "大小",
-    "colModified": "修改時間"
+    "colModified": "修改時間",
+    "upload": "上傳",
+    "newFolder": "新增資料夾",
+    "rename": "重新命名",
+    "delete": "刪除",
+    "cancel": "取消",
+    "ok": "確定",
+    "deleteConfirm": "刪除「{{name}}」？將移至回收資料夾，可復原。",
+    "uploadDone": "上傳完成",
+    "uploadFailed": "上傳失敗",
+    "mkdirFailed": "新增資料夾失敗",
+    "renameFailed": "重新命名失敗",
+    "deleteFailed": "刪除失敗",
+    "dropHere": "拖放檔案至此上傳",
+    "renameTitle": "重新命名",
+    "newFolderTitle": "新增資料夾",
+    "namePlaceholder": "請輸入名稱"
   }
 }

@@ -712,6 +712,12 @@ export const nasDriveLocal = {
   fileInfo: bridge.buildProvider<{ path: string; name: string; mime: string; size: number } | null, { path: string }>(
     'nas-drive.file-info'
   ),
+  mkdir: bridge.buildProvider<{ relPath: string } | null, { path?: string; name: string }>('nas-drive.mkdir'),
+  remove: bridge.buildProvider<boolean, { path: string }>('nas-drive.remove'),
+  move: bridge.buildProvider<boolean, { from: string; to: string }>('nas-drive.move'),
+  uploadFromPath: bridge.buildProvider<{ relPath: string } | null, { path?: string; sourcePath: string; name: string }>(
+    'nas-drive.upload-from-path'
+  ),
 };
 
 // ---------------------------------------------------------------------------

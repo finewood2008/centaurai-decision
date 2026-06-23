@@ -26,7 +26,15 @@ import {
   handleSharedRemove,
   handleSharedUpload,
 } from './shared-drive.js';
-import { handleNasDownload, handleNasList, handleNasPreview } from './nas-drive.js';
+import {
+  handleNasDownload,
+  handleNasList,
+  handleNasMkdir,
+  handleNasMove,
+  handleNasPreview,
+  handleNasRemove,
+  handleNasUpload,
+} from './nas-drive.js';
 import { type AuthGate, createAuthGate } from './webui-auth-gate.js';
 
 export type StaticServerOptions = {
@@ -511,6 +519,14 @@ export async function startStaticServer(opts: StaticServerOptions): Promise<Stat
         if (req.url.startsWith('/api/nas/list')) await handleNasList(req, res, opts.nasRootDir);
         else if (req.url.startsWith('/api/nas/download')) await handleNasDownload(req, res, opts.nasRootDir);
         else if (req.url.startsWith('/api/nas/preview')) await handleNasPreview(req, res, opts.nasRootDir);
+        else if (req.url.startsWith('/api/nas/upload') && req.method === 'POST')
+          await handleNasUpload(req, res, opts.nasRootDir);
+        else if (req.url.startsWith('/api/nas/mkdir') && req.method === 'POST')
+          await handleNasMkdir(req, res, opts.nasRootDir);
+        else if (req.url.startsWith('/api/nas/move') && req.method === 'POST')
+          await handleNasMove(req, res, opts.nasRootDir);
+        else if (req.url.startsWith('/api/nas/remove') && req.method === 'DELETE')
+          await handleNasRemove(req, res, opts.nasRootDir);
         else {
           res.writeHead(404, { 'content-type': 'application/json' });
           res.end(JSON.stringify({ success: false, error: 'NOT_FOUND' }));

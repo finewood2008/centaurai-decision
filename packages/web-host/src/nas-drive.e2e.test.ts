@@ -158,4 +158,108 @@ describe('NAS e2e — LAN exposed (gate active)', () => {
     const resp = await fetch(`${localUrl}/api/nas/download?path=readme.txt`);
     expect(resp.status).toBe(401);
   });
+
+  it('rejects unauthenticated WRITE routes with 401', async () => {
+    const { localUrl } = await start(true);
+    const up = await fetch(`${localUrl}/api/nas/upload?path=&name=x.txt`, { method: 'POST', body: 'data' });
+    expect(up.status).toBe(401);
+    const mk = await fetch(`${localUrl}/api/nas/mkdir?path=&name=evil`, { method: 'POST' });
+    expect(mk.status).toBe(401);
+    const rm = await fetch(`${localUrl}/api/nas/remove?path=readme.txt`, { method: 'DELETE' });
+    expect(rm.status).toBe(401);
+    // The file must still be there.
+    expect(await fs.readFile(path.join(nasRoot, 'readme.txt'), 'utf8')).toBe('hello world');
+  });
 });
+
+describe('NAS e2e — write side (loopback)', () => {
+  it('mkdir creates a folder that appears in the listing', async () => {
+    const { localUrl } = await start(false);
+    const mk = await fetch(`${localUrl}/api/nas/mkdir?path=&name=${encodeURIComponent('新建文件夹')}`, {
+      method: 'POST',
+    });
+    expect(mk.status).toBe(200);
+    const list = await (await fetch(`${localUrl}/api/nas/list`)).json();
+    expect(list.data.entries.map((e: { name: string }) => e.name)).toContain('新建文件夹');
+    expect(await fs.stat(path.join(nasRoot, '新建文件夹')).then((s) => s.isDirectory())).toBe(true);
+  });
+
+  it('uploads a file into a sub-folder', async () => {
+    const { localUrl } = await start(false);
+    const up = await fetch(`${localUrl}/api/nas/upload?path=docs&name=note.txt`, {
+      method: 'POST',
+      body: 'body bytes',
+    });
+    expect(up.status).toBe(200);
+    expect((await up.json()).data.relPath).toBe('docs/note.txt');
+    expect(await fs.readFile(path.join(nasRoot, 'docs', 'note.txt'), 'utf8')).toBe('body bytes');
+  });
+
+  it('auto-renames on collision instead of overwriting', async () => {
+    const { localUrl } = await start(false);
+    const up = await fetch(`${localUrl}/api/nas/upload?path=&name=readme.txt`, { method: 'POST', body: 'NEW' });
+    const rel = (await up.json()).data.relPath as string;
+    expect(rel).not.toBe('readme.txt'); // original preserved
+    expect(rel).toMatch(/readme \(1\)\.txt$/);
+    expect(await fs.readFile(path.join(nasRoot, 'readme.txt'), 'utf8')).toBe('hello world'); // untouched
+  });
+
+  it('renames a file via move', async () => {
+    const { localUrl } = await start(false);
+    const mv = await fetch(`${localUrl}/api/nas/move?from=readme.txt&to=${encodeURIComponent('renamed.txt')}`, {
+      method: 'POST',
+    });
+    expect(mv.status).toBe(200);
+    expect(await exists(path.join(nasRoot, 'readme.txt'))).toBe(false);
+    expect(await fs.readFile(path.join(nasRoot, 'renamed.txt'), 'utf8')).toBe('hello world');
+  });
+
+  it('soft-deletes to the recycle folder (recoverable, hidden from listing)', async () => {
+    const { localUrl } = await start(false);
+    const rm = await fetch(`${localUrl}/api/nas/remove?path=readme.txt`, { method: 'DELETE' });
+    expect(rm.status).toBe(200);
+    expect(await exists(path.join(nasRoot, 'readme.txt'))).toBe(false);
+    // Gone from the listing (trash is a dotfile).
+    const list = await (await fetch(`${localUrl}/api/nas/list`)).json();
+    expect(list.data.entries.map((e: { name: string }) => e.name)).not.toContain('readme.txt');
+    // But recoverable on disk inside .nas-trash.
+    const trash = await fs.readdir(path.join(nasRoot, '.nas-trash'));
+    expect(trash.some((n) => n.endsWith('__readme.txt'))).toBe(true);
+  });
+
+  it('refuses to write outside the root (containment)', async () => {
+    const { localUrl } = await start(false);
+    const up = await fetch(`${localUrl}/api/nas/upload?path=${encodeURIComponent('../..')}&name=evil.txt`, {
+      method: 'POST',
+      body: 'x',
+    });
+    expect(up.status).toBe(403);
+    const mk = await fetch(`${localUrl}/api/nas/mkdir?path=${encodeURIComponent('../..')}&name=evil`, {
+      method: 'POST',
+    });
+    expect(mk.status).toBe(403);
+    const mv = await fetch(`${localUrl}/api/nas/move?from=readme.txt&to=${encodeURIComponent('../../escaped.txt')}`, {
+      method: 'POST',
+    });
+    expect(mv.status).toBe(403);
+    expect(await exists(path.join(nasRoot, 'readme.txt'))).toBe(true); // not moved out
+  });
+
+  it('refuses to delete the root itself or escape via traversal', async () => {
+    const { localUrl } = await start(false);
+    const rmRoot = await fetch(`${localUrl}/api/nas/remove?path=`, { method: 'DELETE' });
+    expect(rmRoot.status).toBe(404);
+    const rmEsc = await fetch(`${localUrl}/api/nas/remove?path=${encodeURIComponent('../OUTSIDE_SECRET.txt')}`, {
+      method: 'DELETE',
+    });
+    expect(rmEsc.status).toBe(404);
+    expect(await fs.readFile(outsideSecret, 'utf8')).toBe('TOP-SECRET-OUTSIDE-ROOT'); // untouched
+  });
+});
+
+async function exists(p: string): Promise<boolean> {
+  return fs
+    .stat(p)
+    .then(() => true)
+    .catch(() => false);
+}

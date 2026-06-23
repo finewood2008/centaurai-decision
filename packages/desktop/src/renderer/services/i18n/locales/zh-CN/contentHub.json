@@ -85,6 +85,22 @@
     "download": "下载",
     "colName": "名称",
     "colSize": "大小",
-    "colModified": "修改时间"
+    "colModified": "修改时间",
+    "upload": "上传",
+    "newFolder": "新建文件夹",
+    "rename": "重命名",
+    "delete": "删除",
+    "cancel": "取消",
+    "ok": "确定",
+    "deleteConfirm": "删除「{{name}}」？将移入回收文件夹，可恢复。",
+    "uploadDone": "上传完成",
+    "uploadFailed": "上传失败",
+    "mkdirFailed": "新建文件夹失败",
+    "renameFailed": "重命名失败",
+    "deleteFailed": "删除失败",
+    "dropHere": "拖放文件到此上传",
+    "renameTitle": "重命名",
+    "newFolderTitle": "新建文件夹",
+    "namePlaceholder": "请输入名称"
   }
 }

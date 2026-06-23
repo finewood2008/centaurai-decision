@@ -85,6 +85,22 @@
     "download": "Baixar",
     "colName": "Nome",
     "colSize": "Tamanho",
-    "colModified": "Modificado"
+    "colModified": "Modificado",
+    "upload": "Enviar",
+    "newFolder": "Nova pasta",
+    "rename": "Renomear",
+    "delete": "Excluir",
+    "cancel": "Cancelar",
+    "ok": "OK",
+    "deleteConfirm": "Excluir \"{{name}}\"? Será movido para a pasta de reciclagem.",
+    "uploadDone": "Envio concluído",
+    "uploadFailed": "Falha no envio",
+    "mkdirFailed": "Não foi possível criar a pasta",
+    "renameFailed": "Falha ao renomear",
+    "deleteFailed": "Falha ao excluir",
+    "dropHere": "Solte os arquivos para enviar",
+    "renameTitle": "Renomear",
+    "newFolderTitle": "Nova pasta",
+    "namePlaceholder": "Digite um nome"
   }
 }

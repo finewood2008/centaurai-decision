@@ -85,6 +85,22 @@
     "download": "Скачать",
     "colName": "Имя",
     "colSize": "Размер",
-    "colModified": "Изменён"
+    "colModified": "Изменён",
+    "upload": "Загрузить",
+    "newFolder": "Новая папка",
+    "rename": "Переименовать",
+    "delete": "Удалить",
+    "cancel": "Отмена",
+    "ok": "ОК",
+    "deleteConfirm": "Удалить «{{name}}»? Будет перемещено в корзину.",
+    "uploadDone": "Загрузка завершена",
+    "uploadFailed": "Не удалось загрузить",
+    "mkdirFailed": "Не удалось создать папку",
+    "renameFailed": "Не удалось переименовать",
+    "deleteFailed": "Не удалось удалить",
+    "dropHere": "Перетащите файлы для загрузки",
+    "renameTitle": "Переименовать",
+    "newFolderTitle": "Новая папка",
+    "namePlaceholder": "Введите имя"
   }
 }

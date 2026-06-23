@@ -85,6 +85,22 @@
     "download": "İndir",
     "colName": "Ad",
     "colSize": "Boyut",
-    "colModified": "Değiştirilme"
+    "colModified": "Değiştirilme",
+    "upload": "Yükle",
+    "newFolder": "Yeni Klasör",
+    "rename": "Yeniden Adlandır",
+    "delete": "Sil",
+    "cancel": "İptal",
+    "ok": "Tamam",
+    "deleteConfirm": "\"{{name}}\" silinsin mi? Geri dönüşüm klasörüne taşınacak.",
+    "uploadDone": "Yükleme tamamlandı",
+    "uploadFailed": "Yükleme başarısız",
+    "mkdirFailed": "Klasör oluşturulamadı",
+    "renameFailed": "Yeniden adlandırma başarısız",
+    "deleteFailed": "Silme başarısız",
+    "dropHere": "Yüklemek için dosyaları bırakın",
+    "renameTitle": "Yeniden Adlandır",
+    "newFolderTitle": "Yeni Klasör",
+    "namePlaceholder": "Bir ad girin"
   }
 }

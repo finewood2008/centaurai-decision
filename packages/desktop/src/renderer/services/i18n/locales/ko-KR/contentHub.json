@@ -85,6 +85,22 @@
     "download": "다운로드",
     "colName": "이름",
     "colSize": "크기",
-    "colModified": "수정한 날짜"
+    "colModified": "수정한 날짜",
+    "upload": "업로드",
+    "newFolder": "새 폴더",
+    "rename": "이름 바꾸기",
+    "delete": "삭제",
+    "cancel": "취소",
+    "ok": "확인",
+    "deleteConfirm": "\"{{name}}\"을(를) 삭제할까요? 휴지통 폴더로 이동합니다.",
+    "uploadDone": "업로드 완료",
+    "uploadFailed": "업로드 실패",
+    "mkdirFailed": "폴더를 만들 수 없습니다",
+    "renameFailed": "이름 바꾸기 실패",
+    "deleteFailed": "삭제 실패",
+    "dropHere": "파일을 끌어다 놓아 업로드",
+    "renameTitle": "이름 바꾸기",
+    "newFolderTitle": "새 폴더",
+    "namePlaceholder": "이름 입력"
   }
 }

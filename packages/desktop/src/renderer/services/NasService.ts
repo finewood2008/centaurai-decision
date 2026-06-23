@@ -108,3 +108,67 @@ export async function downloadNasFile(relPath: string): Promise<void> {
   }
   window.open(await nasDownloadUrl(relPath), '_blank');
 }
+
+// --- Mutations (P2). Admin → main-process IPC; browser/distributed → HTTP. ---
+
+/** Create a sub-folder `name` under directory `parentRel`. */
+export async function createNasFolder(parentRel: string, name: string): Promise<void> {
+  if (isAdminElectron()) {
+    const r = await ipcBridge.nasDriveLocal.mkdir.invoke({ path: parentRel, name });
+    if (!r) throw new Error('MKDIR_FORBIDDEN');
+    return;
+  }
+  const base = await resolveBase();
+  const resp = await fetch(
+    `${base}/api/nas/mkdir?path=${encodeURIComponent(parentRel)}&name=${encodeURIComponent(name)}`,
+    {
+      method: 'POST',
+    }
+  );
+  if (!resp.ok) throw new Error(`nas mkdir failed: ${resp.status}`);
+}
+
+/** Soft-delete a file/folder (moved to the recycle folder). */
+export async function removeNasEntry(relPath: string): Promise<void> {
+  if (isAdminElectron()) {
+    await ipcBridge.nasDriveLocal.remove.invoke({ path: relPath });
+    return;
+  }
+  const base = await resolveBase();
+  const resp = await fetch(`${base}/api/nas/remove?path=${encodeURIComponent(relPath)}`, { method: 'DELETE' });
+  if (!resp.ok) throw new Error(`nas remove failed: ${resp.status}`);
+}
+
+/** Rename/move `fromRel` to `toRel` (parent + name). */
+export async function moveNasEntry(fromRel: string, toRel: string): Promise<void> {
+  if (isAdminElectron()) {
+    await ipcBridge.nasDriveLocal.move.invoke({ from: fromRel, to: toRel });
+    return;
+  }
+  const base = await resolveBase();
+  const resp = await fetch(`${base}/api/nas/move?from=${encodeURIComponent(fromRel)}&to=${encodeURIComponent(toRel)}`, {
+    method: 'POST',
+  });
+  if (!resp.ok) throw new Error(`nas move failed: ${resp.status}`);
+}
+
+/** Upload OS/browser files into directory `parentRel`. */
+export async function uploadNasFiles(parentRel: string, files: File[]): Promise<void> {
+  for (const file of files) {
+    const localPath = (file as File & { path?: string }).path;
+    if (isAdminElectron() && localPath) {
+      await ipcBridge.nasDriveLocal.uploadFromPath.invoke({ path: parentRel, sourcePath: localPath, name: file.name });
+      continue;
+    }
+    const base = await resolveBase();
+    const resp = await fetch(
+      `${base}/api/nas/upload?path=${encodeURIComponent(parentRel)}&name=${encodeURIComponent(file.name)}`,
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/octet-stream' },
+        body: file,
+      }
+    );
+    if (!resp.ok) throw new Error(`nas upload failed: ${resp.status}`);
+  }
+}
