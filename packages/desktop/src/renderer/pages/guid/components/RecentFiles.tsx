@@ -16,6 +16,7 @@ import type { IDirOrFile } from '@/common/adapter/ipcBridge';
 import type { TChatConversation } from '@/common/config/storage';
 import { getCurrentFrontendUserId } from '@/common/utils/frontendUserScope';
 import { filterConversationsWithChannelScope } from '@/renderer/utils/user/conversationVisibility';
+import { useGeneratedFilesAutoRefresh } from '@/renderer/hooks/workspace/useGeneratedFilesAutoRefresh';
 import styles from '../index.module.css';
 
 export interface FileEntry {
@@ -283,6 +284,10 @@ const RecentFiles: React.FC<RecentFilesProps> = ({
     const timer = setInterval(loadFiles, 30000);
     return () => clearInterval(timer);
   }, [loadFiles]);
+
+  // Live-refresh on agent file writes. Re-fetch the conversation list (not just
+  // files) so outputs from a freshly created conversation also appear.
+  useGeneratedFilesAutoRefresh(loadVisibleConversations);
 
   const handleOpen = async (path: string) => {
     try {

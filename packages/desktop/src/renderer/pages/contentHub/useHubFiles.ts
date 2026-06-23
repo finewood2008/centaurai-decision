@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ipcBridge } from '@/common';
 import { filterConversationsWithChannelScope } from '@/renderer/utils/user/conversationVisibility';
+import { useGeneratedFilesAutoRefresh } from '@/renderer/hooks/workspace/useGeneratedFilesAutoRefresh';
 import { fetchRecentFiles } from '@/renderer/pages/guid/components/RecentFiles';
 import { getContentTypeByExtension } from '@/renderer/pages/conversation/Preview/fileUtils';
 import type { FileEntry, HubConversationGroup, HubFileKind } from './types';
@@ -42,6 +43,11 @@ export function useHubFiles(search: string) {
   useEffect(() => {
     void loadFiles();
   }, [loadFiles]);
+
+  // Live-refresh while the hub is open: when any agent finishes writing files,
+  // re-enumerate (loadFiles re-fetches conversations too, so brand-new
+  // conversations' outputs surface without a manual reload).
+  useGeneratedFilesAutoRefresh(loadFiles);
 
   // Files matching the search box, sorted newest-first.
   const searched = useMemo(() => {

@@ -10,6 +10,8 @@
  * Reads provider config from environment variables.
  */
 
+import os from 'node:os';
+import path from 'node:path';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
@@ -109,7 +111,12 @@ IMPORTANT: When user provides multiple images, ALWAYS pass ALL images to the ima
       }
 
       const proxy = process.env.AIONUI_IMG_PROXY || undefined;
-      const workspaceDir = workspace_dir || process.cwd();
+      // Never fall back to process.cwd(): for a spawned stdio MCP process that's
+      // an unpredictable (possibly read-only / non-user) directory, so generated
+      // images would silently vanish. Prefer the caller's workspace, then a
+      // parent-provided dir, then a stable temp folder.
+      const workspaceDir =
+        workspace_dir || process.env.AIONUI_IMG_OUTPUT_DIR || path.join(os.tmpdir(), 'centaurai-images');
 
       const result = await executeImageGeneration({ prompt, image_uris }, provider, workspaceDir, proxy);
 
