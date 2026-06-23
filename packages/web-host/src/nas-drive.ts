@@ -195,6 +195,15 @@ async function uniqueTarget(dir: string, name: string): Promise<string> {
  * Real path of an EXISTING, contained target that is neither the root itself nor
  * inside the recycle folder. Null otherwise. Used by delete/move sources.
  */
+/** True if `real` is, or lives inside, a reserved internal dir (.nas-trash / .nas-index). */
+function isReservedPath(realRoot: string, real: string): boolean {
+  for (const reserved of [TRASH_DIR, INDEX_DIR]) {
+    const dir = path.join(realRoot, reserved);
+    if (real === dir || real.startsWith(dir + path.sep)) return true;
+  }
+  return false;
+}
+
 async function resolveExisting(rootDir: string, relPath: string | null | undefined): Promise<string | null> {
   const full = resolveWithinRoot(rootDir, relPath);
   if (full == null) return null;
@@ -203,8 +212,7 @@ async function resolveExisting(rootDir: string, relPath: string | null | undefin
     const real = await fs.promises.realpath(full);
     if (real === realRoot) return null; // never operate on the root itself
     if (!real.startsWith(realRoot + path.sep)) return null;
-    const trash = path.join(realRoot, TRASH_DIR);
-    if (real === trash || real.startsWith(trash + path.sep)) return null;
+    if (isReservedPath(realRoot, real)) return null;
     return real;
   } catch {
     return null;
@@ -223,8 +231,7 @@ async function resolveParentDir(rootDir: string, parentRel: string | null | unde
     const real = await fs.promises.realpath(full);
     if (real !== realRoot && !real.startsWith(realRoot + path.sep)) return null;
     if (!(await fs.promises.stat(real)).isDirectory()) return null;
-    const trash = path.join(realRoot, TRASH_DIR);
-    if (real === trash || real.startsWith(trash + path.sep)) return null;
+    if (isReservedPath(realRoot, real)) return null;
     return real;
   } catch {
     return null;
