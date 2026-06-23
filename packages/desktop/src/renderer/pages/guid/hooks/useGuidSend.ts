@@ -125,7 +125,9 @@ export const useGuidSend = (deps: GuidSendDeps): GuidSendResult => {
     const isCustomWorkspace = !!dir;
     const finalWorkspace = dir || '';
 
-    // 向量知识库：勾选后才检索（与智囊团共用 retrieveKnowledgeContext）
+    // Knowledge base: retrieve only when enabled (shared with TeamBrain via retrieveKnowledgeContext).
+    // `enrichedInput` is only used as the message content sent to the model; the conversation title (`name`)
+    // should always use the original `input` to avoid polluting titles with the retrieval prefix.
     let enrichedInput = input;
     if (searchKnowledgeBase && input.trim()) {
       try {
@@ -189,7 +191,7 @@ export const useGuidSend = (deps: GuidSendDeps): GuidSendResult => {
       const nanobotAgentInfo = agentInfo || findAgentByKey(selectedAgentKey);
       const nanobotConversationParams = buildAgentConversationParams({
         backend: nanobotAgentInfo?.backend || 'nanobot',
-        name: enrichedInput,
+        name: input,
         agent_name: nanobotAgentInfo?.name,
         preset_assistant_id,
         workspace: finalWorkspace,
@@ -240,7 +242,7 @@ export const useGuidSend = (deps: GuidSendDeps): GuidSendResult => {
       try {
         const conversation = await ipcBridge.conversation.create.invoke({
           type: 'aionrs',
-          name: enrichedInput,
+          name: input,
           model: current_model,
           extra: {
             default_files: files,
@@ -307,7 +309,7 @@ export const useGuidSend = (deps: GuidSendDeps): GuidSendResult => {
       const agentBackend = acpBackend || selectedAgent;
       const agentConversationParams = buildAgentConversationParams({
         backend: agentBackend,
-        name: enrichedInput,
+        name: input,
         // For row-scoped rows (custom ACP / remote) the backend factory
         // needs the actual catalog id — `backend` collapses to the `custom`
         // slot so it cannot discriminate between rows on its own.
