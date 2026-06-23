@@ -337,7 +337,7 @@ const NasPanel: React.FC<NasPanelProps> = ({ search = '' }) => {
               type='text'
               size='mini'
               onClick={() => setIndexConfirm(true)}
-              disabled={!!indexJob && indexJob.p.phase === 'indexing'}
+              disabled={!!indexJob && indexJob.p.phase !== 'done' && indexJob.p.phase !== 'error'}
             >
               {t('contentHub.nas.index')}
             </Button>

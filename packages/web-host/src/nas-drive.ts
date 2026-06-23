@@ -458,12 +458,23 @@ export async function nasWalk(
 ): Promise<NasWalkFile[]> {
   const start = resolveWithinRoot(rootDir, relPath);
   if (start == null || !(await isRealContained(rootDir, start))) throw new Error('NAS_PATH_FORBIDDEN');
+  // Reject a reserved internal dir as the START — the per-entry dotfile skip
+  // below only filters CHILDREN, so without this an explicit path=.nas-index /
+  // .nas-trash would walk the manifest + recycled files into the knowledge base.
+  const realRoot = await fs.promises.realpath(path.resolve(rootDir)).catch(() => path.resolve(rootDir));
+  const realStart = await fs.promises.realpath(start).catch(() => start);
+  if (isReservedPath(realRoot, realStart)) throw new Error('NAS_PATH_FORBIDDEN');
+
   const exts = new Set([
     ...INDEXABLE_TEXT_EXT,
     ...INDEXABLE_IMAGE_EXT,
     ...(opts?.includeVideo ? INDEXABLE_VIDEO_EXT : []),
   ]);
   const out: NasWalkFile[] = [];
+  // Visited real directory paths — guards against symlink CYCLES (an in-root
+  // symlink to an ancestor would otherwise be re-walked ~40× until ELOOP,
+  // emitting each file under it many times with distinct relPaths).
+  const visited = new Set<string>([realStart]);
   const walk = async (dir: string): Promise<void> => {
     let dirents: fs.Dirent[];
     try {
@@ -472,7 +483,7 @@ export async function nasWalk(
       return;
     }
     for (const d of dirents) {
-      if (d.name.startsWith('.')) continue; // dotfiles incl. .nas-trash
+      if (d.name.startsWith('.')) continue; // dotfiles incl. .nas-trash / .nas-index
       const full = path.join(dir, d.name);
       if (!(await isRealContained(rootDir, full))) continue; // escaping symlink
       let st: fs.Stats;
@@ -482,6 +493,9 @@ export async function nasWalk(
         continue;
       }
       if (st.isDirectory()) {
+        const realDir = await fs.promises.realpath(full).catch(() => full);
+        if (visited.has(realDir)) continue; // already walked this real dir → cycle
+        visited.add(realDir);
         await walk(full);
         continue;
       }
@@ -508,7 +522,12 @@ export type NasIndexProgress = {
 
 /** Manifest entry: change key (size+mtime) + the vector-DB doc id we uploaded. */
 type IndexManifestEntry = { size: number; mtimeMs: number; docId: string; indexedAt: number };
-type IndexManifest = { version: number; files: Record<string, IndexManifestEntry> };
+type IndexManifest = {
+  version: number;
+  files: Record<string, IndexManifestEntry>;
+  /** Doc ids whose delete failed (orphans) — retried at the next sync. */
+  pendingDeletes?: string[];
+};
 
 async function readIndexManifest(rootDir: string): Promise<IndexManifest> {
   try {
@@ -531,16 +550,52 @@ async function writeIndexManifest(rootDir: string, manifest: IndexManifest): Pro
   await fs.promises.rename(tmp, path.join(dir, 'manifest.json'));
 }
 
-/** DELETE a previously-uploaded doc from the vector DB (best-effort). */
-async function deleteVectorDoc(endpoint: string, docId: string): Promise<void> {
+/**
+ * DELETE a previously-uploaded doc. Returns true only when the doc is gone
+ * (2xx) or already absent (404). A network/5xx failure returns false so the
+ * caller can keep the id for a retry instead of silently orphaning it.
+ */
+async function deleteVectorDoc(endpoint: string, docId: string): Promise<boolean> {
+  if (!docId) return true;
   try {
-    await fetch(`${endpoint}/api/documents/${encodeURIComponent(docId)}`, {
+    const resp = await fetch(`${endpoint}/api/documents/${encodeURIComponent(docId)}`, {
       method: 'DELETE',
       headers: { 'X-Requested-By': 'centaur-vdb' },
     });
+    return resp.ok || resp.status === 404;
   } catch {
-    // best-effort; a stale entry is tolerable, a crash is not
+    return false;
   }
+}
+
+/**
+ * For a queued (video) upload, poll the job until it leaves the queue. Returns
+ * 'done' / 'failed', or 'pending' if it is still processing after a bounded
+ * wait (we then optimistically accept it — the server keeps working on it). A
+ * synchronous upload (no job) is treated as 'done' by the caller and never
+ * reaches here. Honors cancellation.
+ */
+async function waitForVectorJob(
+  endpoint: string,
+  docId: string,
+  isCancelled?: () => boolean
+): Promise<'done' | 'failed' | 'pending'> {
+  const deadline = Date.now() + 45_000; // bound: catch fast failures, don't block hours
+  while (Date.now() < deadline) {
+    if (isCancelled?.()) return 'pending';
+    try {
+      const resp = await fetch(`${endpoint}/api/jobs/${encodeURIComponent(docId)}`, {
+        headers: { 'X-Requested-By': 'centaur-vdb' },
+      });
+      const state = resp.ok ? ((await resp.json()) as { state?: string }).state : undefined;
+      if (state === 'done') return 'done';
+      if (state === 'failed') return 'failed';
+    } catch {
+      // transient; keep polling until the deadline
+    }
+    await new Promise((r) => setTimeout(r, 1500));
+  }
+  return 'pending';
 }
 
 /**
@@ -602,6 +657,15 @@ export async function indexNasFolder(
   prog.phase = 'indexing';
   emit();
 
+  // Orphans whose delete failed on a prior run — retry, keep the ones that fail.
+  const pending = new Set<string>(manifest.pendingDeletes ?? []);
+  const orphan = async (docId: string | undefined) => {
+    if (!docId) return;
+    if (await deleteVectorDoc(endpoint, docId)) pending.delete(docId);
+    else pending.add(docId);
+  };
+  for (const docId of [...pending]) await orphan(docId);
+
   const seen = new Set<string>();
   for (const f of files) {
     if (opts.isCancelled?.()) break;
@@ -628,16 +692,28 @@ export async function indexNasFolder(
         headers: { 'X-Requested-By': 'centaur-vdb' },
         body: form,
       });
-      if (resp.ok) {
-        // Replace the previous version (avoid a duplicate) once the new one lands.
-        if (prev?.docId) await deleteVectorDoc(endpoint, prev.docId);
-        const body = (await resp.json().catch(() => ({}))) as { doc_id?: string; saved_path?: string };
-        const docId = body.doc_id || body.saved_path || '';
-        manifest.files[f.relPath] = { size: f.size, mtimeMs: f.modifiedAt, docId, indexedAt: Date.now() };
-        prog.done++;
-      } else {
+      if (!resp.ok) {
         prog.failed++;
+        emit();
+        continue;
       }
+      const body = (await resp.json().catch(() => ({}))) as { doc_id?: string; saved_path?: string; queued?: boolean };
+      const docId = body.doc_id || body.saved_path || '';
+      // Queued (video) uploads index in the background — confirm they don't
+      // fail outright before counting them as done.
+      if (body.queued && docId) {
+        const state = await waitForVectorJob(endpoint, docId, opts.isCancelled);
+        if (state === 'failed') {
+          await orphan(docId); // remove the failed partial; next run retries
+          prog.failed++;
+          emit();
+          continue;
+        }
+      }
+      // New version landed → drop the previous one (retry-tracked on failure).
+      if (prev?.docId && prev.docId !== docId) await orphan(prev.docId);
+      manifest.files[f.relPath] = { size: f.size, mtimeMs: f.modifiedAt, docId, indexedAt: Date.now() };
+      prog.done++;
     } catch {
       prog.failed++;
     }
@@ -648,14 +724,14 @@ export async function indexNasFolder(
   if (!opts.isCancelled?.()) {
     for (const rel of Object.keys(manifest.files)) {
       if (!inScope(rel) || seen.has(rel)) continue;
-      const docId = manifest.files[rel].docId;
-      if (docId) await deleteVectorDoc(endpoint, docId);
+      await orphan(manifest.files[rel].docId);
       delete manifest.files[rel];
       prog.pruned++;
       emit();
     }
   }
 
+  manifest.pendingDeletes = [...pending];
   try {
     await writeIndexManifest(rootDir, manifest);
   } catch {

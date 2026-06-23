@@ -261,3 +261,35 @@ describe('nasWalk (knowledge-base indexing enumeration)', () => {
     await expect(nasWalk(root, '../..')).rejects.toThrow();
   });
 });
+
+describe('nasWalk hardening (P3a review)', () => {
+  it('does not amplify on an in-root symlink cycle', async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), 'nas-cycle-'));
+    roots.push(root);
+    await fs.mkdir(path.join(root, 'a/b'), { recursive: true });
+    await fs.writeFile(path.join(root, 'doc.md'), '# d');
+    await fs.writeFile(path.join(root, 'a/b/note.txt'), 'n');
+    let cycled = true;
+    try {
+      await fs.symlink('../..', path.join(root, 'a/b/loop')); // resolves back to root
+    } catch {
+      cycled = false;
+    }
+    if (!cycled) return;
+    const files = await nasWalk(root, '');
+    // Each real file appears exactly once; the cycle is not re-walked.
+    expect(files.filter((f) => f.relPath === 'doc.md')).toHaveLength(1);
+    expect(files.filter((f) => f.relPath === 'a/b/note.txt')).toHaveLength(1);
+    expect(files.some((f) => f.relPath.includes('loop/'))).toBe(false);
+  });
+
+  it('refuses a reserved internal dir as the start path', async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), 'nas-resv-'));
+    roots.push(root);
+    await fs.mkdir(path.join(root, '.nas-index'), { recursive: true });
+    await fs.mkdir(path.join(root, '.nas-trash'), { recursive: true });
+    await fs.writeFile(path.join(root, '.nas-index', 'manifest.json'), '{}');
+    await expect(nasWalk(root, '.nas-index')).rejects.toThrow();
+    await expect(nasWalk(root, '.nas-trash')).rejects.toThrow();
+  });
+});

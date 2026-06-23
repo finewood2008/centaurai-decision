@@ -22,9 +22,13 @@ import {
 import { ipcBridge } from '@/common';
 import { resolveNasRootDir } from '../utils/webuiConfig';
 
-// In-memory index-job registry. Admin-desktop only; jobs live for the session.
+// In-memory index-job registry. Admin-desktop only.
 type IndexJob = NasIndexProgress & { cancelled?: boolean };
 const indexJobs = new Map<string, IndexJob>();
+// Single-flight: at most one index job per resolved root at a time, so two runs
+// can't race on the shared manifest and orphan docs in the knowledge base.
+const activeIndexByRoot = new Map<string, string>();
+const TERMINAL = (p?: IndexJob) => p?.phase === 'done' || p?.phase === 'error';
 
 /**
  * Enterprise network drive (read-only) — main-process IPC for the admin desktop
@@ -110,8 +114,8 @@ export function initNasDriveBridge(): void {
 
   ipcBridge.nasDriveLocal.indexFolder.provider(async ({ path: relPath, endpoint, includeVideo }) => {
     const root = await resolveNasRootDir();
-    const jobId = crypto.randomUUID();
     if (!root) {
+      const jobId = crypto.randomUUID();
       indexJobs.set(jobId, {
         phase: 'error',
         total: 0,
@@ -123,6 +127,13 @@ export function initNasDriveBridge(): void {
       });
       return { jobId };
     }
+    // Single-flight: if an index for this root is still running, return its id
+    // instead of starting a competing run that would clobber the manifest.
+    const running = activeIndexByRoot.get(root);
+    if (running && !TERMINAL(indexJobs.get(running))) return { jobId: running };
+
+    const jobId = crypto.randomUUID();
+    activeIndexByRoot.set(root, jobId);
     indexJobs.set(jobId, { phase: 'walking', total: 0, done: 0, failed: 0, skipped: 0, pruned: 0 });
     // Fire and forget; the renderer polls indexStatus.
     void indexNasFolder(root, relPath, {
@@ -133,18 +144,25 @@ export function initNasDriveBridge(): void {
         indexJobs.set(jobId, { ...p, cancelled });
       },
       isCancelled: () => indexJobs.get(jobId)?.cancelled === true,
-    }).catch((err) => {
-      const prev = indexJobs.get(jobId);
-      indexJobs.set(jobId, {
-        phase: 'error',
-        total: prev?.total ?? 0,
-        done: prev?.done ?? 0,
-        failed: prev?.failed ?? 0,
-        skipped: prev?.skipped ?? 0,
-        pruned: prev?.pruned ?? 0,
-        error: String((err as Error)?.message ?? err),
+    })
+      .catch((err) => {
+        const prev = indexJobs.get(jobId);
+        indexJobs.set(jobId, {
+          phase: 'error',
+          total: prev?.total ?? 0,
+          done: prev?.done ?? 0,
+          failed: prev?.failed ?? 0,
+          skipped: prev?.skipped ?? 0,
+          pruned: prev?.pruned ?? 0,
+          error: String((err as Error)?.message ?? err),
+        });
+      })
+      .finally(() => {
+        if (activeIndexByRoot.get(root) === jobId) activeIndexByRoot.delete(root);
+        // Evict the finished job after a grace period so the renderer can read
+        // its terminal state, keeping the registry from growing unbounded.
+        setTimeout(() => indexJobs.delete(jobId), 60_000);
       });
-    });
     return { jobId };
   });
 
