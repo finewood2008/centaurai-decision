@@ -550,6 +550,29 @@ const handleAppReady = async (): Promise<void> => {
     console.warn('[AionUi] Failed to set media permission handler:', e);
   }
 
+  // Scoped CORS bypass for the embedded image workbench (半人马 AI 图形工作台).
+  // Image-generation providers such as Google Gemini (generativelanguage.googleapis.com)
+  // do not send CORS headers, which blocks direct browser calls. We inject permissive CORS
+  // headers ONLY on the dedicated workbench partition session — which only ever loads our
+  // trusted bundled SPA — so users can call any image-model API directly with a pasted key.
+  // The app's default session is untouched, so the blast radius is limited to that sandbox.
+  try {
+    const workbenchSession = session.fromPartition('persist:centaur-image-workbench');
+    workbenchSession.webRequest.onHeadersReceived({ urls: ['https://*/*'] }, (details, callback) => {
+      const responseHeaders: Record<string, string[]> = {};
+      for (const [key, value] of Object.entries(details.responseHeaders || {})) {
+        if (/^access-control-allow-/i.test(key)) continue;
+        responseHeaders[key] = Array.isArray(value) ? value : [String(value)];
+      }
+      responseHeaders['Access-Control-Allow-Origin'] = ['*'];
+      responseHeaders['Access-Control-Allow-Methods'] = ['GET, POST, PUT, PATCH, DELETE, OPTIONS'];
+      responseHeaders['Access-Control-Allow-Headers'] = ['*'];
+      callback({ responseHeaders });
+    });
+  } catch (e) {
+    console.warn('[AionUi] Failed to set image-workbench CORS shim:', e);
+  }
+
   if (!app.isPackaged) {
     try {
       const { default: installExtension, REACT_DEVELOPER_TOOLS } = await import('electron-devtools-installer');

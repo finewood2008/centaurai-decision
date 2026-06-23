@@ -13,6 +13,14 @@
     "cardDesc": "集中處理所有圖片任務：可以從文字生圖，也可以上傳參考圖修改、重繪和修復。",
     "empty": "暫無可用的圖片處理能力。"
   },
+  "videoWorkbench": {
+    "title": "半人馬視訊工作台",
+    "subtitle": "本地優先的瀏覽器影片編輯器 —— 匯入素材、時間軸剪輯、GPU 合成、匯出 MP4/WebM,全程在本機完成。",
+    "cardDesc": "半人馬自有的影片剪輯工作台:匯入片段、時間軸編輯、加特效並匯出,全部本地執行。",
+    "starting": "正在啟動視訊工作台…",
+    "startFailed": "無法連接視訊工作台,請確認本地影片服務已啟動。",
+    "retry": "重試"
+  },
   "agent": "執行 Agent",
   "agentPlaceholder": "選擇一個 Agent",
   "noAgent": "沒有可用的 Agent",

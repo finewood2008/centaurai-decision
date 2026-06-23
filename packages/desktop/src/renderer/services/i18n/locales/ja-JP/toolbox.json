@@ -13,6 +13,14 @@
     "cardDesc": "One place for image work: generate from text, upload references, edit, redraw, and restore images.",
     "empty": "No image processing capabilities are available."
   },
+  "videoWorkbench": {
+    "title": "Centaur Video Workbench",
+    "subtitle": "Local-first browser video editor — import clips, edit on a timeline, GPU compositing and MP4/WebM export, all on your device.",
+    "cardDesc": "Centaur's own video workbench: import clips, edit on a timeline, add effects and export — runs locally.",
+    "starting": "Starting the video workbench…",
+    "startFailed": "Could not reach the video workbench. Make sure the local video service is running.",
+    "retry": "Retry"
+  },
   "agent": "Agent",
   "agentPlaceholder": "Select an agent",
   "noAgent": "No available agent",

@@ -1383,6 +1383,27 @@ export const webui = {
 };
 
 // ---------------------------------------------------------------------------
+// Centaur Video Workbench (opencut-classic / Next.js). The main process spawns
+// the local dev server on demand so the embedded webview has a backing origin;
+// an already-running healthy server on the port is reused instead of spawned.
+// ---------------------------------------------------------------------------
+export type IVideoStudioStatus = {
+  running: boolean;
+  port?: number;
+  url?: string;
+  /** True when an already-running server was reused instead of spawned. */
+  reused?: boolean;
+  error?: string;
+};
+
+export const videostudio = {
+  getStatus: bridge.buildProvider<IVideoStudioStatus, void>('videostudio.get-status'),
+  start: bridge.buildProvider<IVideoStudioStatus, void>('videostudio.start'),
+  stop: bridge.buildProvider<void, void>('videostudio.stop'),
+  statusChanged: bridge.buildEmitter<IVideoStudioStatus>('videostudio.status-changed'),
+};
+
+// ---------------------------------------------------------------------------
 // LAN discovery (distributed-client model). The desktop client browses for
 // CentaurAI servers advertised on the LAN (see process/discovery/lanDiscovery).
 // Structurally compatible with `DiscoveredServer` in that module.

@@ -13,6 +13,14 @@
     "cardDesc": "Centaur's own AI graphics workbench: paste an image-model key to generate, edit and repaint images, with reference images, masks and batch.",
     "empty": "No image processing capabilities are available."
   },
+  "videoWorkbench": {
+    "title": "Centaur Video Workbench",
+    "subtitle": "Local-first browser video editor — import clips, edit on a timeline, GPU compositing and MP4/WebM export, all on your device.",
+    "cardDesc": "Centaur's own video workbench: import clips, edit on a timeline, add effects and export — runs locally.",
+    "starting": "Starting the video workbench…",
+    "startFailed": "Could not reach the video workbench. Make sure the local video service is running.",
+    "retry": "Retry"
+  },
   "agent": "Agent",
   "agentPlaceholder": "Select an agent",
   "noAgent": "No available agent",

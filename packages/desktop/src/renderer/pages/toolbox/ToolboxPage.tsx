@@ -4,12 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Alert, Button, Empty, Input } from '@arco-design/web-react';
+import { Alert, Button, Empty, Input, Spin } from '@arco-design/web-react';
 import {
   ArrowRight,
   Avatar,
   BookOne,
   Bowl,
+  EditMovie,
   IdCard,
   Left,
   Magic,
@@ -26,6 +27,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { ipcBridge } from '@/common';
 import WebviewHost from '@/renderer/components/media/WebviewHost';
 import { useAgents } from '@/renderer/hooks/agent/useAgents';
 import type { AgentMetadata } from '@/renderer/utils/model/agentTypes';
@@ -278,6 +280,12 @@ const WorkbenchCard: React.FC<{
   </Button>
 );
 
+/**
+ * Local Centaur Video Workbench server origin. Served by the desktop launcher
+ * or `bun run dev` in the opencut-classic project; embedded via WebviewHost.
+ */
+const VIDEO_WORKBENCH_URL = 'http://localhost:3000/projects';
+
 /** Common AI Toolbox — a grid of practical, form-driven AI tools. */
 const ToolboxPage: React.FC<ToolboxPageProps> = ({ mode = 'toolbox' }) => {
   const { t } = useTranslation();
@@ -292,6 +300,10 @@ const ToolboxPage: React.FC<ToolboxPageProps> = ({ mode = 'toolbox' }) => {
   const visibleTools = isWorkbenchMode ? workbenchTools : imageTools;
   const [activeTool, setActiveTool] = useState<ToolDef | null>(null);
   const [imageWorkbenchOpen, setImageWorkbenchOpen] = useState(!isWorkbenchMode);
+  const [videoWorkbenchOpen, setVideoWorkbenchOpen] = useState(false);
+  const [videoServer, setVideoServer] = useState<{ state: 'starting' | 'ready' | 'error'; error?: string }>({
+    state: 'starting',
+  });
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<ToolboxCategory>('all');
   const lastRunRef = useRef<LastRun | null>(null);
@@ -319,6 +331,13 @@ const ToolboxPage: React.FC<ToolboxPageProps> = ({ mode = 'toolbox' }) => {
       .toLowerCase()
       .includes(keyword);
   const showImageWorkbenchCard = isWorkbenchMode && category !== 'workbench' && imageWorkbenchMatches;
+  const videoWorkbenchMatches =
+    !keyword ||
+    [t('toolbox.videoWorkbench.title'), t('toolbox.videoWorkbench.cardDesc'), t('toolbox.videoWorkbench.subtitle')]
+      .join(' ')
+      .toLowerCase()
+      .includes(keyword);
+  const showVideoWorkbenchCard = isWorkbenchMode && category !== 'workbench' && videoWorkbenchMatches;
 
   const filteredTools = visibleTools.filter((tool) => {
     if (category !== 'all' && tool.category !== category) return false;
@@ -442,6 +461,31 @@ const ToolboxPage: React.FC<ToolboxPageProps> = ({ mode = 'toolbox' }) => {
     setImageWorkbenchOpen(false);
   }, [reset]);
 
+  const startVideoServer = useCallback(() => {
+    setVideoServer({ state: 'starting' });
+    void ipcBridge.videostudio.start
+      .invoke()
+      .then((videoStatus) => {
+        setVideoServer(videoStatus.running ? { state: 'ready' } : { state: 'error', error: videoStatus.error });
+      })
+      .catch((err: unknown) => {
+        setVideoServer({ state: 'error', error: err instanceof Error ? err.message : String(err) });
+      });
+  }, []);
+
+  const openVideoWorkbench = useCallback(() => {
+    reset();
+    lastRunRef.current = null;
+    setVideoWorkbenchOpen(true);
+    startVideoServer();
+  }, [reset, startVideoServer]);
+
+  const closeVideoWorkbench = useCallback(() => {
+    reset();
+    lastRunRef.current = null;
+    setVideoWorkbenchOpen(false);
+  }, [reset]);
+
   const handleRun = useCallback(
     (tool: ToolDef, agent: AgentMetadata | null, values: ToolFormValues) => {
       lastRunRef.current = { tool, agent, values };
@@ -501,10 +545,74 @@ const ToolboxPage: React.FC<ToolboxPageProps> = ({ mode = 'toolbox' }) => {
     );
   };
 
+  const renderVideoWorkbench = () => {
+    return (
+      <div className='flex flex-col gap-16px'>
+        <div className='flex flex-col gap-16px lg:flex-row lg:items-end lg:justify-between'>
+          <div className='flex min-w-0 items-start gap-14px'>
+            {isWorkbenchMode && (
+              <Button className='mt-5px' shape='circle' icon={<Left />} onClick={closeVideoWorkbench} />
+            )}
+            <div className='centaur-mark h-52px w-52px shrink-0'>
+              <EditMovie size={26} />
+            </div>
+            <div className='min-w-0'>
+              <div className='centaur-eyebrow'>CENTAUR · VIDEO WORKBENCH</div>
+              <div className='mt-2px text-26px font-900 leading-32px' style={{ color: 'var(--centaur-ink)' }}>
+                {t('toolbox.videoWorkbench.title')}
+              </div>
+              <div className='mt-5px max-w-760px text-14px leading-21px' style={{ color: 'var(--centaur-ink-soft)' }}>
+                {t('toolbox.videoWorkbench.subtitle')}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          className='centaur-card relative w-full overflow-hidden'
+          style={{ height: '78vh', minHeight: 520, padding: 0, borderRadius: 'var(--centaur-radius-sm)' }}
+        >
+          {videoServer.state === 'ready' ? (
+            <WebviewHost
+              url={VIDEO_WORKBENCH_URL}
+              id='centaur-video-workbench'
+              partition='persist:centaur-video-workbench'
+              className='h-full w-full'
+              style={{ height: '100%', minHeight: 520 }}
+            />
+          ) : (
+            <div
+              className='flex h-full w-full flex-col items-center justify-center gap-12px'
+              style={{ minHeight: 520 }}
+            >
+              {videoServer.state === 'starting' ? (
+                <>
+                  <Spin size={28} />
+                  <div className='text-14px' style={{ color: 'var(--centaur-ink-soft)' }}>
+                    {t('toolbox.videoWorkbench.starting')}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className='max-w-420px text-center text-14px' style={{ color: 'var(--centaur-ink-soft)' }}>
+                    {t('toolbox.videoWorkbench.startFailed')}
+                  </div>
+                  <Button onClick={startVideoServer}>{t('toolbox.videoWorkbench.retry')}</Button>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className='centaur-brand w-full min-h-full box-border overflow-y-auto'>
       <div className='mx-auto flex w-full max-w-1280px box-border flex-col gap-20px p-24px'>
-        {imageWorkbenchOpen ? (
+        {videoWorkbenchOpen ? (
+          renderVideoWorkbench()
+        ) : imageWorkbenchOpen ? (
           renderImageWorkbench()
         ) : !activeTool ? (
           <>
@@ -585,7 +693,7 @@ const ToolboxPage: React.FC<ToolboxPageProps> = ({ mode = 'toolbox' }) => {
               })}
             </div>
 
-            {showImageWorkbenchCard || filteredTools.length > 0 ? (
+            {showImageWorkbenchCard || showVideoWorkbenchCard || filteredTools.length > 0 ? (
               <div className='grid grid-cols-1 gap-16px md:grid-cols-2 xl:grid-cols-3'>
                 {showImageWorkbenchCard && (
                   <WorkbenchCard
@@ -600,6 +708,16 @@ const ToolboxPage: React.FC<ToolboxPageProps> = ({ mode = 'toolbox' }) => {
                       t('toolbox.tools.product.title'),
                     ]}
                     onOpen={openImageWorkbench}
+                  />
+                )}
+                {showVideoWorkbenchCard && (
+                  <WorkbenchCard
+                    title={t('toolbox.videoWorkbench.title')}
+                    desc={t('toolbox.videoWorkbench.cardDesc')}
+                    icon={<EditMovie size={24} />}
+                    meta={t('toolbox.categories.workbench')}
+                    chips={[t('toolbox.videoWorkbench.title')]}
+                    onOpen={openVideoWorkbench}
                   />
                 )}
                 {filteredTools.map((tool) => (
