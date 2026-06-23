@@ -26,7 +26,8 @@
     "copyPath": "パスをコピー",
     "download": "ダウンロード",
     "showInFolder": "フォルダーで表示",
-    "shareToTeam": "チームに共有"
+    "shareToTeam": "チームに共有",
+    "saveToNas": "ネットワークドライブに保存"
   },
   "share": {
     "uploading": "共有中...",
@@ -118,6 +119,11 @@
     "indexScanning": "フォルダをスキャン中…",
     "indexProgress": "ナレッジベースへ索引中… {{done}}/{{total}}（スキップ {{skipped}}、失敗 {{failed}}）",
     "indexDone": "索引完了：成功 {{done}}、スキップ {{skipped}}、失敗 {{failed}}",
-    "indexFailed": "索引に失敗しました"
+    "indexFailed": "索引に失敗しました",
+    "pickFolderTitle": "ネットワークドライブの保存先を選択",
+    "saveHere": "ここに保存",
+    "noSubfolders": "サブフォルダがありません",
+    "savedToNas": "ネットワークドライブに保存しました",
+    "saveToNasFailed": "ネットワークドライブへの保存に失敗しました"
   }
 }

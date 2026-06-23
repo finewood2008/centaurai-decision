@@ -46,7 +46,8 @@
     "copyPath": "Copy path",
     "download": "Download",
     "showInFolder": "Show in folder",
-    "shareToTeam": "Share to team"
+    "shareToTeam": "Share to team",
+    "saveToNas": "Save to network drive"
   },
   "share": {
     "uploading": "Sharing...",
@@ -118,6 +119,11 @@
     "indexScanning": "Scanning folder…",
     "indexProgress": "Indexing to knowledge base… {{done}}/{{total}} (skipped {{skipped}}, failed {{failed}})",
     "indexDone": "Indexing complete: {{done}} indexed, {{skipped}} skipped, {{failed}} failed",
-    "indexFailed": "Indexing failed"
+    "indexFailed": "Indexing failed",
+    "pickFolderTitle": "Choose a network-drive folder",
+    "saveHere": "Save here",
+    "noSubfolders": "No subfolders",
+    "savedToNas": "Saved to the network drive",
+    "saveToNasFailed": "Could not save to the network drive"
   }
 }

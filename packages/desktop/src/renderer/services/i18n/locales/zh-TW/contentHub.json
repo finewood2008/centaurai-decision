@@ -26,7 +26,8 @@
     "copyPath": "複製路徑",
     "download": "下載",
     "showInFolder": "在資料夾中顯示",
-    "shareToTeam": "共享到團隊"
+    "shareToTeam": "共享到團隊",
+    "saveToNas": "另存到網路硬碟"
   },
   "share": {
     "uploading": "正在共享...",
@@ -118,6 +119,11 @@
     "indexScanning": "正在掃描資料夾…",
     "indexProgress": "正在索引到知識庫… {{done}}/{{total}}（略過 {{skipped}}，失敗 {{failed}}）",
     "indexDone": "索引完成：成功 {{done}}，略過 {{skipped}}，失敗 {{failed}}",
-    "indexFailed": "索引失敗"
+    "indexFailed": "索引失敗",
+    "pickFolderTitle": "選擇網路硬碟目標資料夾",
+    "saveHere": "儲存到此處",
+    "noSubfolders": "沒有子資料夾",
+    "savedToNas": "已儲存到網路硬碟",
+    "saveToNasFailed": "儲存到網路硬碟失敗"
   }
 }

@@ -26,7 +26,8 @@
     "copyPath": "Yolu kopyala",
     "download": "İndir",
     "showInFolder": "Klasörde göster",
-    "shareToTeam": "Ekiple paylaş"
+    "shareToTeam": "Ekiple paylaş",
+    "saveToNas": "Ağ sürücüsüne kaydet"
   },
   "share": {
     "uploading": "Paylaşılıyor...",
@@ -118,6 +119,11 @@
     "indexScanning": "Klasör taranıyor…",
     "indexProgress": "Bilgi tabanına indeksleniyor… {{done}}/{{total}} (atlanan {{skipped}}, başarısız {{failed}})",
     "indexDone": "İndeksleme tamamlandı: {{done}} indekslendi, {{skipped}} atlandı, {{failed}} başarısız",
-    "indexFailed": "İndeksleme başarısız"
+    "indexFailed": "İndeksleme başarısız",
+    "pickFolderTitle": "Ağ sürücüsü klasörü seçin",
+    "saveHere": "Buraya kaydet",
+    "noSubfolders": "Alt klasör yok",
+    "savedToNas": "Ağ sürücüsüne kaydedildi",
+    "saveToNasFailed": "Ağ sürücüsüne kaydedilemedi"
   }
 }

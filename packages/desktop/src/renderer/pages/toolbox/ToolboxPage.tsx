@@ -26,6 +26,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import WebviewHost from '@/renderer/components/media/WebviewHost';
 import { useAgents } from '@/renderer/hooks/agent/useAgents';
 import type { AgentMetadata } from '@/renderer/utils/model/agentTypes';
 import { ResultPanel } from './components/ResultPanel';
@@ -291,7 +292,6 @@ const ToolboxPage: React.FC<ToolboxPageProps> = ({ mode = 'toolbox' }) => {
   const visibleTools = isWorkbenchMode ? workbenchTools : imageTools;
   const [activeTool, setActiveTool] = useState<ToolDef | null>(null);
   const [imageWorkbenchOpen, setImageWorkbenchOpen] = useState(!isWorkbenchMode);
-  const [activeImageToolId, setActiveImageToolId] = useState<string>('');
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<ToolboxCategory>('all');
   const lastRunRef = useRef<LastRun | null>(null);
@@ -300,17 +300,16 @@ const ToolboxPage: React.FC<ToolboxPageProps> = ({ mode = 'toolbox' }) => {
     setImageWorkbenchOpen(!isWorkbenchMode);
   }, [isWorkbenchMode]);
 
-  useEffect(() => {
-    if (imageTools.length === 0) {
-      setActiveImageToolId('');
-      return;
+  // Embedded 半人马 AI 图形工作台 — bundled static SPA under the renderer publicDir
+  // (public/centaur-image-workbench). Resolve relative to the renderer origin so it works
+  // both in dev (vite server) and in the packaged build (file://).
+  const workbenchUrl = useMemo(() => {
+    try {
+      return new URL('centaur-image-workbench/index.html', window.location.href).toString();
+    } catch {
+      return 'centaur-image-workbench/index.html';
     }
-    if (!activeImageToolId || !imageTools.some((tool) => tool.id === activeImageToolId)) {
-      setActiveImageToolId(imageTools[0].id);
-    }
-  }, [activeImageToolId, imageTools]);
-
-  const activeImageTool = imageTools.find((tool) => tool.id === activeImageToolId) ?? imageTools[0] ?? null;
+  }, []);
 
   const keyword = query.trim().toLowerCase();
   const imageWorkbenchMatches =
@@ -443,15 +442,6 @@ const ToolboxPage: React.FC<ToolboxPageProps> = ({ mode = 'toolbox' }) => {
     setImageWorkbenchOpen(false);
   }, [reset]);
 
-  const selectImageTool = useCallback(
-    (toolId: string) => {
-      reset();
-      lastRunRef.current = null;
-      setActiveImageToolId(toolId);
-    },
-    [reset]
-  );
-
   const handleRun = useCallback(
     (tool: ToolDef, agent: AgentMetadata | null, values: ToolFormValues) => {
       lastRunRef.current = { tool, agent, values };
@@ -473,23 +463,8 @@ const ToolboxPage: React.FC<ToolboxPageProps> = ({ mode = 'toolbox' }) => {
   );
 
   const renderImageWorkbench = () => {
-    const imageReadiness = activeImageTool ? checkToolReadiness(activeImageTool) : null;
-    const imageToolReady = !imageReadiness || imageReadiness.ready;
-    const imageReadinessAlert =
-      imageReadiness && imageReadiness.ready === false ? (
-        <Alert
-          type='warning'
-          content={t(imageReadiness.reasonKey)}
-          action={
-            <Button size='mini' type='text' onClick={() => void navigate(imageReadiness.settingsRoute)}>
-              {t('toolbox.goToSettings')}
-            </Button>
-          }
-        />
-      ) : null;
-
     return (
-      <>
+      <div className='flex flex-col gap-16px'>
         <div className='flex flex-col gap-16px lg:flex-row lg:items-end lg:justify-between'>
           <div className='flex min-w-0 items-start gap-14px'>
             {isWorkbenchMode && (
@@ -510,81 +485,19 @@ const ToolboxPage: React.FC<ToolboxPageProps> = ({ mode = 'toolbox' }) => {
           </div>
         </div>
 
-        <div className='centaur-card p-14px' style={{ borderRadius: 'var(--centaur-radius-sm)' }}>
-          <div className='flex flex-wrap items-center gap-8px'>
-            {imageTools.map((tool) => {
-              const active = activeImageTool?.id === tool.id;
-              return (
-                <Button
-                  key={tool.id}
-                  size='small'
-                  type={active ? 'primary' : 'text'}
-                  className='!rounded-full !px-14px'
-                  style={
-                    active
-                      ? { boxShadow: 'var(--centaur-shadow-clay)' }
-                      : {
-                          background: 'var(--centaur-bg-warm)',
-                          color: 'var(--centaur-ink-soft)',
-                          border: '1px solid var(--centaur-line)',
-                        }
-                  }
-                  onClick={() => selectImageTool(tool.id)}
-                >
-                  {getToolTitle(tool, t)}
-                </Button>
-              );
-            })}
-          </div>
+        <div
+          className='centaur-card relative w-full overflow-hidden'
+          style={{ height: '78vh', minHeight: 520, padding: 0, borderRadius: 'var(--centaur-radius-sm)' }}
+        >
+          <WebviewHost
+            url={workbenchUrl}
+            id='centaur-image-workbench'
+            partition='persist:centaur-image-workbench'
+            className='h-full w-full'
+            style={{ height: '100%', minHeight: 520 }}
+          />
         </div>
-
-        {activeImageTool ? (
-          <>
-            <div className='centaur-card p-16px' style={{ borderRadius: 'var(--centaur-radius-sm)' }}>
-              <div className='flex min-w-0 items-center gap-12px'>
-                <div
-                  className='flex h-44px w-44px shrink-0 items-center justify-center rounded-14px'
-                  style={{ background: 'var(--centaur-gold-tint)', color: 'var(--centaur-gold-deep)' }}
-                >
-                  <ToolIcon name={activeImageTool.icon} size={22} />
-                </div>
-                <div className='min-w-0'>
-                  <div className='truncate text-18px font-700 leading-24px' style={{ color: 'var(--centaur-ink)' }}>
-                    {getToolTitle(activeImageTool, t)}
-                  </div>
-                  <div className='mt-3px text-13px leading-20px' style={{ color: 'var(--centaur-ink-soft)' }}>
-                    {getToolDesc(activeImageTool, t)}
-                  </div>
-                </div>
-              </div>
-            </div>
-            {imageReadinessAlert}
-            <div className='grid grid-cols-1 gap-20px lg:grid-cols-[400px_minmax(0,1fr)] lg:items-start'>
-              <div className='w-full'>
-                <ToolForm
-                  key={activeImageTool.id}
-                  tool={activeImageTool}
-                  agents={agents}
-                  running={status === 'running'}
-                  disabled={!imageToolReady}
-                  onRun={handleRun}
-                />
-              </div>
-              <ResultPanel
-                status={status}
-                result={result}
-                error={error}
-                onOpenConversation={handleOpenConversation}
-                onRegenerate={handleRegenerate}
-              />
-            </div>
-          </>
-        ) : (
-          <div className='centaur-card py-44px'>
-            <Empty description={t('toolbox.imageWorkbench.empty')} />
-          </div>
-        )}
-      </>
+      </div>
     );
   };
 

@@ -46,7 +46,8 @@
     "copyPath": "复制路径",
     "download": "下载",
     "showInFolder": "在文件夹中显示",
-    "shareToTeam": "共享到团队"
+    "shareToTeam": "共享到团队",
+    "saveToNas": "另存到网盘"
   },
   "share": {
     "uploading": "正在共享...",
@@ -118,6 +119,11 @@
     "indexScanning": "正在扫描文件夹…",
     "indexProgress": "正在索引到知识库… {{done}}/{{total}}（跳过 {{skipped}}，失败 {{failed}}）",
     "indexDone": "索引完成：成功 {{done}}，跳过 {{skipped}}，失败 {{failed}}",
-    "indexFailed": "索引失败"
+    "indexFailed": "索引失败",
+    "pickFolderTitle": "选择网盘目标文件夹",
+    "saveHere": "保存到此处",
+    "noSubfolders": "没有子文件夹",
+    "savedToNas": "已保存到网盘",
+    "saveToNasFailed": "保存到网盘失败"
   }
 }

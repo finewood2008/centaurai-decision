@@ -4,7 +4,7 @@
  * WorkspaceContextMenu). Closes on outside click / Escape via the parent.
  */
 import React from 'react';
-import { Copy, Download, FolderOpen, PreviewOpen, Share } from '@icon-park/react';
+import { Copy, Download, FolderClose, FolderOpen, PreviewOpen, Share } from '@icon-park/react';
 import { useTranslation } from 'react-i18next';
 import type { FileEntry } from '../types';
 
@@ -17,11 +17,13 @@ type HubContextMenuProps = {
   onDownload: (file: FileEntry) => void;
   onReveal: (file: FileEntry) => void;
   onShare: (file: FileEntry) => void;
+  /** Admin-only "save to network drive"; omitted (hidden) for non-admin clients. */
+  onSaveToNas?: (file: FileEntry) => void;
   onClose: () => void;
 };
 
 const MENU_W = 200;
-const MENU_H = 230;
+const MENU_H = 270;
 const BTN =
   'w-full flex items-center gap-8px px-14px py-6px text-13px text-left text-t-primary rounded-md transition-colors hover:bg-fill-2 border-none bg-transparent cursor-pointer';
 
@@ -32,6 +34,7 @@ const HubContextMenu: React.FC<HubContextMenuProps> = ({
   onDownload,
   onReveal,
   onShare,
+  onSaveToNas,
   onClose,
 }) => {
   const { t } = useTranslation();
@@ -69,6 +72,11 @@ const HubContextMenu: React.FC<HubContextMenuProps> = ({
           <button className={BTN} onClick={run(onShare)}>
             <Share size='14' /> {t('contentHub.actions.shareToTeam')}
           </button>
+          {onSaveToNas && (
+            <button className={BTN} onClick={run(onSaveToNas)}>
+              <FolderClose size='14' /> {t('contentHub.actions.saveToNas')}
+            </button>
+          )}
           <div className='h-1px my-2px bg-[var(--color-border-2)]' />
           <button className={BTN} onClick={run(onCopyPath)}>
             <Copy size='14' /> {t('contentHub.actions.copyPath')}

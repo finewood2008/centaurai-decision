@@ -252,3 +252,14 @@ export async function pollNasIndex(jobId: string): Promise<NasIndexProgress | nu
 export async function cancelNasIndex(jobId: string): Promise<void> {
   await ipcBridge.nasDriveLocal.indexCancel.invoke({ jobId });
 }
+
+/**
+ * Copy a server-side file (e.g. an AI artifact at its absolute workspace path)
+ * into a NAS destination folder. Admin desktop only — uses the server-side
+ * copy IPC so the bytes are never re-uploaded over the LAN, and an arbitrary
+ * source path is never trusted from a browser client.
+ */
+export async function saveToNas(sourcePath: string, destRel: string, name: string): Promise<void> {
+  const r = await ipcBridge.nasDriveLocal.uploadFromPath.invoke({ path: destRel, sourcePath, name });
+  if (!r) throw new Error('SAVE_TO_NAS_FAILED');
+}

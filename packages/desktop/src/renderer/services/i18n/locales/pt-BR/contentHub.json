@@ -26,7 +26,8 @@
     "copyPath": "Copiar caminho",
     "download": "Baixar",
     "showInFolder": "Mostrar na pasta",
-    "shareToTeam": "Compartilhar com a equipe"
+    "shareToTeam": "Compartilhar com a equipe",
+    "saveToNas": "Salvar na unidade de rede"
   },
   "share": {
     "uploading": "Compartilhando...",
@@ -118,6 +119,11 @@
     "indexScanning": "Escaneando pasta…",
     "indexProgress": "Indexando na base… {{done}}/{{total}} (ignorados {{skipped}}, falhas {{failed}})",
     "indexDone": "Indexação concluída: {{done}} indexados, {{skipped}} ignorados, {{failed}} falhas",
-    "indexFailed": "Falha na indexação"
+    "indexFailed": "Falha na indexação",
+    "pickFolderTitle": "Escolha uma pasta na unidade de rede",
+    "saveHere": "Salvar aqui",
+    "noSubfolders": "Sem subpastas",
+    "savedToNas": "Salvo na unidade de rede",
+    "saveToNasFailed": "Não foi possível salvar na unidade de rede"
   }
 }

@@ -3,14 +3,14 @@
   "subtitle": "Common image AI workflows for images, posters, ID photos, and product shots.",
   "workbench": {
     "title": "AI Workbench",
-    "subtitle": "Scenario-based AI workbenches, currently including Image Workbench and Hong Kong Tax Workbench.",
+    "subtitle": "Scenario-based AI workbenches, currently including the Centaur AI Graphics Workbench and Hong Kong Tax Workbench.",
     "searchPlaceholder": "Search workbenches or tools",
     "empty": "No workbenches or tools match the current filters."
   },
   "imageWorkbench": {
-    "title": "Image Workbench",
-    "subtitle": "Generate images, edit reference images, create posters, avatars, product shots, ID photos, illustrations, food photos, and restore old photos in one workspace.",
-    "cardDesc": "One place for image work: generate from text, upload references, edit, redraw, and restore images.",
+    "title": "Centaur AI Graphics Workbench",
+    "subtitle": "Paste an image-model API key and go — text-to-image, reference-image editing, mask repaint, batch generation and gallery, all stored locally, no GPU needed.",
+    "cardDesc": "Centaur's own AI graphics workbench: paste an image-model key to generate, edit and repaint images, with reference images, masks and batch.",
     "empty": "No image processing capabilities are available."
   },
   "agent": "Agent",
