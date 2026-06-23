@@ -10,6 +10,7 @@
  */
 import { getBaseUrl } from '@/common/adapter/httpBridge';
 import { ipcBridge } from '@/common';
+import { downloadFileFromPath } from '@/renderer/utils/file/download';
 
 type Win = Window & { __backendPort?: number; __backendHost?: string };
 
@@ -38,7 +39,19 @@ function backendHost(): string {
   return (typeof window !== 'undefined' && (window as Win).__backendHost) || '127.0.0.1';
 }
 
-/** Resolve the origin serving /api/nas/* (same logic as SharedDriveService). */
+/**
+ * Admin host: an Electron renderer whose backend is local → use main-process
+ * IPC. This reads the drive directly and works even when the WebUI server is
+ * off or LAN-exposed (where the desktop renderer holds no gate cookie and the
+ * HTTP routes would 401). Browser / distributed clients use HTTP.
+ */
+function isAdminElectron(): boolean {
+  if (isBrowserMode()) return false;
+  const host = backendHost();
+  return host === '127.0.0.1' || host === 'localhost';
+}
+
+/** Resolve the origin serving /api/nas/* (HTTP transport only). */
 async function resolveBase(): Promise<string> {
   if (isBrowserMode()) return '';
   const host = backendHost();
@@ -51,6 +64,10 @@ async function resolveBase(): Promise<string> {
 export type NasListResult = { listing: NasListing; disabled: boolean };
 
 export async function listNas(relPath = ''): Promise<NasListResult> {
+  if (isAdminElectron()) {
+    const r = await ipcBridge.nasDriveLocal.list.invoke({ path: relPath });
+    return { listing: { path: r.path, entries: r.entries }, disabled: r.disabled };
+  }
   const base = await resolveBase();
   const q = relPath ? `?path=${encodeURIComponent(relPath)}` : '';
   const resp = await fetch(`${base}/api/nas/list${q}`);
@@ -72,12 +89,22 @@ export async function nasPreviewUrl(relPath: string): Promise<string> {
   return `${base}/api/nas/preview?path=${encodeURIComponent(relPath)}`;
 }
 
-/** Open a file for viewing in a new tab (inline preview). */
+/** Open a file for viewing (admin: system handler; web: new tab). */
 export async function openNasFile(relPath: string): Promise<void> {
+  if (isAdminElectron()) {
+    const info = await ipcBridge.nasDriveLocal.fileInfo.invoke({ path: relPath });
+    if (info) await ipcBridge.shell.openFile.invoke(info.path);
+    return;
+  }
   window.open(await nasPreviewUrl(relPath), '_blank');
 }
 
-/** Trigger a browser download of a file. */
+/** Download a file (admin: native save from local path; web: browser download). */
 export async function downloadNasFile(relPath: string): Promise<void> {
+  if (isAdminElectron()) {
+    const info = await ipcBridge.nasDriveLocal.fileInfo.invoke({ path: relPath });
+    if (info) await downloadFileFromPath(info.path, info.name);
+    return;
+  }
   window.open(await nasDownloadUrl(relPath), '_blank');
 }

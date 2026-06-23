@@ -38,8 +38,12 @@ const DESKTOP_NAS_ROOT_KEY = 'webui.desktop.nasRootDir';
  * The admin points this at the company's large shared disk via Settings; an
  * AIONUI_NAS_ROOT env override wins for headless/test setups. Returns undefined
  * (NAS disabled) when unset or the configured path is not an existing dir.
+ *
+ * Exported so the admin-desktop IPC bridge (nasDriveBridge) resolves the same
+ * root the WebUI static-server serves. Uses async stat — a synchronous stat on
+ * a hung NFS/SMB mount would stall the whole main process at startup.
  */
-async function resolveNasRootDir(): Promise<string | undefined> {
+export async function resolveNasRootDir(): Promise<string | undefined> {
   let candidate = process.env.AIONUI_NAS_ROOT?.trim();
   if (!candidate) {
     try {
@@ -52,7 +56,7 @@ async function resolveNasRootDir(): Promise<string | undefined> {
   }
   if (!candidate) return undefined;
   try {
-    if (fs.statSync(candidate).isDirectory()) return candidate;
+    if ((await fs.promises.stat(candidate)).isDirectory()) return candidate;
   } catch {
     // Configured path missing / unreadable — disable rather than crash startup.
   }

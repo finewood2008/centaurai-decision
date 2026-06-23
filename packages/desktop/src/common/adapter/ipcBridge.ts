@@ -686,6 +686,34 @@ export const sharedDriveLocal = {
   ),
 };
 
+export type NasEntryDTO = {
+  name: string;
+  /** Path relative to the drive root, POSIX-separated. */
+  relPath: string;
+  isDir: boolean;
+  size: number;
+  modifiedAt: number;
+};
+
+export type NasListingDTO = {
+  path: string;
+  entries: NasEntryDTO[];
+  /** True when the admin has not configured a network-drive root. */
+  disabled: boolean;
+};
+
+// Main-process IPC for the enterprise network drive (read-only), used by the
+// ADMIN desktop renderer. Reads the local nasRootDir directly so browsing works
+// regardless of whether the WebUI server is running or LAN-exposed (in which
+// case the desktop renderer holds no gate cookie and the HTTP routes would 401).
+// Browser / distributed clients use the HTTP routes (/api/nas/*) instead.
+export const nasDriveLocal = {
+  list: bridge.buildProvider<NasListingDTO, { path?: string }>('nas-drive.list'),
+  fileInfo: bridge.buildProvider<{ path: string; name: string; mime: string; size: number } | null, { path: string }>(
+    'nas-drive.file-info'
+  ),
+};
+
 // ---------------------------------------------------------------------------
 // Speech to Text — routed to backend
 // ---------------------------------------------------------------------------

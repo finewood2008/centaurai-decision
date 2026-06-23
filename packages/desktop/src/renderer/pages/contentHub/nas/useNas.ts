@@ -17,6 +17,9 @@ export function useNas() {
 
   const load = useCallback(async (target: string) => {
     setLoading(true);
+    // Drop the previous folder's rows immediately so navigation shows the
+    // loading state rather than stale (clickable) rows from the old directory.
+    setEntries([]);
     try {
       const { listing, disabled: isDisabled } = await listNas(target);
       setEntries(listing.entries);

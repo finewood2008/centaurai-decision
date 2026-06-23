@@ -102,9 +102,9 @@ const NasPanel: React.FC<NasPanelProps> = ({ search = '' }) => {
             <div
               key={entry.relPath}
               className='flex items-center gap-12px px-12px py-10px text-13px rd-6px hover:bg-fill-2 cursor-pointer group'
-              onDoubleClick={() => onRowOpen(entry)}
+              onClick={() => onRowOpen(entry)}
             >
-              <span className='flex-1 flex items-center gap-8px truncate' onClick={() => onRowOpen(entry)}>
+              <span className='flex-1 flex items-center gap-8px truncate'>
                 {entry.isDir ? (
                   <FolderClose theme='outline' size={16} className='text-[var(--color-warning-6)] shrink-0' />
                 ) : (

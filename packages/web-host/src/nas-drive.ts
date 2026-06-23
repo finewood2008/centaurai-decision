@@ -100,6 +100,25 @@ function toRelPosix(rootDir: string, full: string): string {
   return rel.split(path.sep).join('/');
 }
 
+/**
+ * Containment check after symlink resolution. `resolveWithinRoot` only inspects
+ * the path STRING, so a symlink that lives inside the root but points outside it
+ * would otherwise let `..`-free requests read arbitrary server files. We resolve
+ * the real (symlink-followed) path of both the target and the root and require
+ * the target to stay inside. Symlinks that stay within the root are still
+ * allowed. Returns true only when `full` exists and is contained.
+ */
+async function isRealContained(rootDir: string, full: string): Promise<boolean> {
+  try {
+    const realRoot = await fs.promises.realpath(path.resolve(rootDir));
+    const real = await fs.promises.realpath(full);
+    return real === realRoot || real.startsWith(realRoot + path.sep);
+  } catch {
+    // Missing path or broken symlink — treat as not contained / not found.
+    return false;
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Core operations — shared by the HTTP handlers and the admin IPC bridge.
 // ---------------------------------------------------------------------------
@@ -112,6 +131,9 @@ function toRelPosix(rootDir: string, full: string): string {
 export async function nasList(rootDir: string, relPath?: string | null): Promise<NasListing> {
   const dir = resolveWithinRoot(rootDir, relPath);
   if (dir == null) throw new Error('NAS_PATH_FORBIDDEN');
+  // The dir may be reached via a symlink that escapes the root — readdir would
+  // then leak an outside directory's contents. Reject unless it really stays in.
+  if (!(await isRealContained(rootDir, dir))) throw new Error('NAS_PATH_FORBIDDEN');
 
   let dirents: fs.Dirent[];
   try {
@@ -128,6 +150,8 @@ export async function nasList(rootDir: string, relPath?: string | null): Promise
       .map(async (dirent): Promise<NasEntry | null> => {
         const full = path.join(dir, dirent.name);
         try {
+          // Skip entries whose real path escapes the root (escaping symlinks).
+          if (!(await isRealContained(rootDir, full))) return null;
           const st = await fs.promises.stat(full);
           const isDir = st.isDirectory();
           return {
@@ -147,7 +171,9 @@ export async function nasList(rootDir: string, relPath?: string | null): Promise
 
   entries.sort((a, b) => {
     if (a.isDir !== b.isDir) return a.isDir ? -1 : 1;
-    return a.name.localeCompare(b.name);
+    // Pin the collation so ordering is stable regardless of the server's
+    // LANG/LC_* locale; numeric so "file2" sorts before "file10".
+    return a.name.localeCompare(b.name, 'en', { numeric: true, sensitivity: 'base' });
   });
   return { path: toRelPosix(rootDir, dir), entries };
 }
@@ -158,6 +184,9 @@ export type NasFileInfo = { path: string; name: string; mime: string; size: numb
 export async function nasFileInfo(rootDir: string, relPath: string | null | undefined): Promise<NasFileInfo | null> {
   const full = resolveWithinRoot(rootDir, relPath);
   if (full == null) return null;
+  // Reject files whose real (symlink-resolved) path escapes the root, so a
+  // symlink inside the drive cannot be used to read arbitrary server files.
+  if (!(await isRealContained(rootDir, full))) return null;
   try {
     const st = await fs.promises.stat(full);
     if (!st.isFile()) return null;
@@ -194,32 +223,39 @@ export async function handleNasList(
   }
 }
 
+type RangeResult = { start: number; end: number } | 'unsatisfiable' | null;
+
 /**
- * Parse a single-range "bytes=start-end" header against a known size. Returns
- * null for absent/unsupported/unsatisfiable ranges (caller falls back to 200).
+ * Parse a single "bytes=start-end" range header against a known size, per
+ * RFC 7233:
+ *   - null            → no/garbage range header; caller serves 200 (full body).
+ *   - 'unsatisfiable' → well-formed but cannot be met; caller serves 416.
+ *   - { start, end }  → a satisfiable range; caller serves 206.
+ * Multi-range ("bytes=0-1,2-3") is not supported and is treated as garbage
+ * (ignored → 200) rather than mis-served.
  */
-function parseRange(header: string | undefined, size: number): { start: number; end: number } | null {
+function parseRange(header: string | undefined, size: number): RangeResult {
   if (!header) return null;
   const m = /^bytes=(\d*)-(\d*)$/.exec(header.trim());
-  if (!m) return null;
+  if (!m) return null; // malformed / multi-range → ignore, serve full body
   const hasStart = m[1] !== '';
   const hasEnd = m[2] !== '';
+  if (!hasStart && !hasEnd) return null; // "bytes=-" → ignore
   let start: number;
   let end: number;
   if (hasStart) {
     start = parseInt(m[1], 10);
     end = hasEnd ? parseInt(m[2], 10) : size - 1;
-  } else if (hasEnd) {
-    // Suffix range: last N bytes.
-    const n = parseInt(m[2], 10);
-    if (n === 0) return null;
+  } else {
+    // Suffix range: last N bytes. N === 0 is unsatisfiable.
+    const n = parseInt(m[1] === '' ? m[2] : m[2], 10);
+    if (n === 0) return 'unsatisfiable';
     start = Math.max(0, size - n);
     end = size - 1;
-  } else {
-    return null;
   }
   end = Math.min(end, size - 1);
-  if (start > end || start < 0) return null;
+  // A start past EOF, or an inverted range, is well-formed but unsatisfiable.
+  if (start >= size || start > end || start < 0) return 'unsatisfiable';
   return { start, end };
 }
 
@@ -239,9 +275,28 @@ async function streamNasFile(
     return;
   }
 
+  // HEAD: answer with metadata headers only — never open a read stream (avoids
+  // an fd / first-byte read on a slow network mount).
+  if (req.method === 'HEAD') {
+    res.writeHead(200, {
+      'content-type': disposition === 'inline' ? info.mime : 'application/octet-stream',
+      'accept-ranges': 'bytes',
+      'content-length': String(info.size),
+    });
+    res.end();
+    return;
+  }
+
   const filename = encodeURIComponent(info.name);
   const contentType = disposition === 'inline' ? info.mime : 'application/octet-stream';
   const range = parseRange(req.headers.range, info.size);
+
+  if (range === 'unsatisfiable') {
+    // RFC 7233 §4.4: well-formed but out-of-bounds range → 416 + the full size.
+    res.writeHead(416, { 'content-range': `bytes */${info.size}`, 'accept-ranges': 'bytes' });
+    res.end();
+    return;
+  }
 
   if (range) {
     const { start, end } = range;
