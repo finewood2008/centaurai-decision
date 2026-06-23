@@ -11,7 +11,9 @@
  */
 import { getBaseUrl } from '@/common/adapter/httpBridge';
 import { ipcBridge } from '@/common';
+import { configService } from '@/common/config/configService';
 import { downloadFileFromPath } from '@/renderer/utils/file/download';
+import type { NasIndexProgressDTO } from '@/common/adapter/ipcBridge';
 
 type Win = Window & { __backendPort?: number; __backendHost?: string };
 
@@ -230,4 +232,23 @@ export async function purgeNasTrash(trashName: string): Promise<void> {
 
 export async function emptyNasTrash(): Promise<void> {
   await ipcBridge.nasDriveLocal.trashEmpty.invoke();
+}
+
+// --- Knowledge-base indexing (admin desktop only; IPC, no HTTP route). ---
+
+export type NasIndexProgress = NasIndexProgressDTO;
+
+/** Start indexing a NAS folder into the knowledge base; returns a job id to poll. */
+export async function startNasIndex(relPath: string, includeVideo: boolean): Promise<string> {
+  const endpoint = (configService.get('vectorDB.endpoint') ?? 'http://127.0.0.1:8618').replace(/\/+$/, '');
+  const { jobId } = await ipcBridge.nasDriveLocal.indexFolder.invoke({ path: relPath, endpoint, includeVideo });
+  return jobId;
+}
+
+export async function pollNasIndex(jobId: string): Promise<NasIndexProgress | null> {
+  return ipcBridge.nasDriveLocal.indexStatus.invoke({ jobId });
+}
+
+export async function cancelNasIndex(jobId: string): Promise<void> {
+  await ipcBridge.nasDriveLocal.indexCancel.invoke({ jobId });
 }

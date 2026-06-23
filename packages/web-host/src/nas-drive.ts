@@ -416,6 +416,251 @@ export async function nasTrashEmpty(rootDir: string): Promise<boolean> {
 }
 
 // ---------------------------------------------------------------------------
+// Knowledge-base indexing (P3a). ADMIN-ONLY (admin desktop IPC, no HTTP route).
+// "Index this folder" recursively walks a NAS subtree and POSTs each supported
+// file to the local vector DB's /api/upload (copy-in). The vector DB dedups by
+// content hash, so re-indexing is idempotent. Never touches /api/reindex (that
+// wipes the whole collection, including office-assistant outputs).
+// ---------------------------------------------------------------------------
+
+/** File types the local vector DB can ingest (mirrors its config). */
+const INDEXABLE_TEXT_EXT = ['pdf', 'docx', 'md', 'txt'];
+const INDEXABLE_IMAGE_EXT = ['jpg', 'jpeg', 'png', 'bmp', 'gif', 'webp'];
+const INDEXABLE_VIDEO_EXT = ['mp4', 'mov', 'mkv', 'webm', 'avi', 'm4v'];
+/** Per-file cap for indexing uploads — read fully into memory, so kept modest. */
+const NAS_INDEX_MAX_BYTES = 500 * 1024 * 1024; // 500 MB
+/** Hidden folder holding the index manifest (uploaded doc ids + change keys). */
+const INDEX_DIR = '.nas-index';
+
+export type NasWalkFile = { relPath: string; absPath: string; size: number; modifiedAt: number; ext: string };
+
+function extOf(name: string): string {
+  const dot = name.lastIndexOf('.');
+  return dot < 0 ? '' : name.slice(dot + 1).toLowerCase();
+}
+
+/**
+ * Recursively collect indexable files under a NAS sub-path. Reuses the same
+ * containment guards as the read path at every level, skips dotfiles (incl.
+ * .nas-trash) and any entry whose real path escapes the root.
+ */
+export async function nasWalk(
+  rootDir: string,
+  relPath: string | null | undefined,
+  opts?: { includeVideo?: boolean }
+): Promise<NasWalkFile[]> {
+  const start = resolveWithinRoot(rootDir, relPath);
+  if (start == null || !(await isRealContained(rootDir, start))) throw new Error('NAS_PATH_FORBIDDEN');
+  const exts = new Set([
+    ...INDEXABLE_TEXT_EXT,
+    ...INDEXABLE_IMAGE_EXT,
+    ...(opts?.includeVideo ? INDEXABLE_VIDEO_EXT : []),
+  ]);
+  const out: NasWalkFile[] = [];
+  const walk = async (dir: string): Promise<void> => {
+    let dirents: fs.Dirent[];
+    try {
+      dirents = await fs.promises.readdir(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const d of dirents) {
+      if (d.name.startsWith('.')) continue; // dotfiles incl. .nas-trash
+      const full = path.join(dir, d.name);
+      if (!(await isRealContained(rootDir, full))) continue; // escaping symlink
+      let st: fs.Stats;
+      try {
+        st = await fs.promises.stat(full);
+      } catch {
+        continue;
+      }
+      if (st.isDirectory()) {
+        await walk(full);
+        continue;
+      }
+      const ext = extOf(d.name);
+      if (!exts.has(ext)) continue;
+      out.push({ relPath: toRelPosix(rootDir, full), absPath: full, size: st.size, modifiedAt: st.mtimeMs, ext });
+    }
+  };
+  await walk(start);
+  return out;
+}
+
+export type NasIndexProgress = {
+  phase: 'walking' | 'indexing' | 'done' | 'error';
+  total: number;
+  done: number;
+  failed: number;
+  skipped: number;
+  /** Entries removed from the index because the source file is gone. */
+  pruned: number;
+  current?: string;
+  error?: string;
+};
+
+/** Manifest entry: change key (size+mtime) + the vector-DB doc id we uploaded. */
+type IndexManifestEntry = { size: number; mtimeMs: number; docId: string; indexedAt: number };
+type IndexManifest = { version: number; files: Record<string, IndexManifestEntry> };
+
+async function readIndexManifest(rootDir: string): Promise<IndexManifest> {
+  try {
+    const realRoot = await fs.promises.realpath(path.resolve(rootDir));
+    const raw = await fs.promises.readFile(path.join(realRoot, INDEX_DIR, 'manifest.json'), 'utf-8');
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === 'object' && parsed.files) return parsed as IndexManifest;
+  } catch {
+    // missing / corrupt → start fresh
+  }
+  return { version: 1, files: {} };
+}
+
+async function writeIndexManifest(rootDir: string, manifest: IndexManifest): Promise<void> {
+  const realRoot = await fs.promises.realpath(path.resolve(rootDir));
+  const dir = path.join(realRoot, INDEX_DIR);
+  await fs.promises.mkdir(dir, { recursive: true });
+  const tmp = path.join(dir, `.manifest.${process.pid}.${crypto.randomBytes(4).toString('hex')}.tmp`);
+  await fs.promises.writeFile(tmp, JSON.stringify(manifest, null, 2), 'utf-8');
+  await fs.promises.rename(tmp, path.join(dir, 'manifest.json'));
+}
+
+/** DELETE a previously-uploaded doc from the vector DB (best-effort). */
+async function deleteVectorDoc(endpoint: string, docId: string): Promise<void> {
+  try {
+    await fetch(`${endpoint}/api/documents/${encodeURIComponent(docId)}`, {
+      method: 'DELETE',
+      headers: { 'X-Requested-By': 'centaur-vdb' },
+    });
+  } catch {
+    // best-effort; a stale entry is tolerable, a crash is not
+  }
+}
+
+/**
+ * Sync a NAS subtree into the vector DB knowledge base at `endpoint`.
+ *
+ * Because /api/upload UUID-prefixes every file, re-POSTing the same file creates
+ * a DUPLICATE (its content-hash dedup is keyed on the unique saved path, so it
+ * never fires across uploads). We therefore keep our own manifest of what we've
+ * indexed (change key = size+mtime, plus the vector-DB doc id) under
+ * `<root>/.nas-index/` and make indexing a proper SYNC:
+ *   - unchanged file (same size+mtime) → skip
+ *   - new / changed file → (delete the old doc if any) + upload, record doc id
+ *   - file that disappeared from the subtree → delete its doc, drop from manifest
+ * Serialized (the vector DB indexer is single-worker). Honors `isCancelled`.
+ */
+export async function indexNasFolder(
+  rootDir: string,
+  relPath: string | null | undefined,
+  opts: {
+    endpoint: string;
+    includeVideo?: boolean;
+    onProgress?: (p: NasIndexProgress) => void;
+    isCancelled?: () => boolean;
+  }
+): Promise<NasIndexProgress> {
+  const endpoint = opts.endpoint.trim().replace(/\/+$/, '');
+  const prog: NasIndexProgress = { phase: 'walking', total: 0, done: 0, failed: 0, skipped: 0, pruned: 0 };
+  const emit = () => opts.onProgress?.({ ...prog });
+  emit();
+  if (!/^https?:\/\//i.test(endpoint)) {
+    prog.phase = 'error';
+    prog.error = 'INVALID_ENDPOINT';
+    emit();
+    return prog;
+  }
+
+  // Canonical subtree prefix, for scoping the prune pass to what we walked.
+  const startAbs = resolveWithinRoot(rootDir, relPath);
+  if (startAbs == null) {
+    prog.phase = 'error';
+    prog.error = 'NAS_PATH_FORBIDDEN';
+    emit();
+    return prog;
+  }
+  const scope = toRelPosix(rootDir, startAbs);
+  const inScope = (rel: string) => scope === '' || rel === scope || rel.startsWith(scope + '/');
+
+  let files: NasWalkFile[];
+  try {
+    files = await nasWalk(rootDir, relPath, { includeVideo: opts.includeVideo });
+  } catch {
+    prog.phase = 'error';
+    prog.error = 'NAS_PATH_FORBIDDEN';
+    emit();
+    return prog;
+  }
+  const manifest = await readIndexManifest(rootDir);
+  prog.total = files.length;
+  prog.phase = 'indexing';
+  emit();
+
+  const seen = new Set<string>();
+  for (const f of files) {
+    if (opts.isCancelled?.()) break;
+    seen.add(f.relPath);
+    prog.current = f.relPath;
+    emit();
+    const prev = manifest.files[f.relPath];
+    if (prev && prev.size === f.size && prev.mtimeMs === f.modifiedAt) {
+      prog.skipped++; // unchanged since last index
+      emit();
+      continue;
+    }
+    if (f.size > NAS_INDEX_MAX_BYTES) {
+      prog.skipped++;
+      emit();
+      continue;
+    }
+    try {
+      const buf = await fs.promises.readFile(f.absPath);
+      const form = new FormData();
+      form.append('file', new Blob([buf]), path.basename(f.absPath));
+      const resp = await fetch(`${endpoint}/api/upload`, {
+        method: 'POST',
+        headers: { 'X-Requested-By': 'centaur-vdb' },
+        body: form,
+      });
+      if (resp.ok) {
+        // Replace the previous version (avoid a duplicate) once the new one lands.
+        if (prev?.docId) await deleteVectorDoc(endpoint, prev.docId);
+        const body = (await resp.json().catch(() => ({}))) as { doc_id?: string; saved_path?: string };
+        const docId = body.doc_id || body.saved_path || '';
+        manifest.files[f.relPath] = { size: f.size, mtimeMs: f.modifiedAt, docId, indexedAt: Date.now() };
+        prog.done++;
+      } else {
+        prog.failed++;
+      }
+    } catch {
+      prog.failed++;
+    }
+    emit();
+  }
+
+  // Prune: files we had indexed under this subtree that are gone now.
+  if (!opts.isCancelled?.()) {
+    for (const rel of Object.keys(manifest.files)) {
+      if (!inScope(rel) || seen.has(rel)) continue;
+      const docId = manifest.files[rel].docId;
+      if (docId) await deleteVectorDoc(endpoint, docId);
+      delete manifest.files[rel];
+      prog.pruned++;
+      emit();
+    }
+  }
+
+  try {
+    await writeIndexManifest(rootDir, manifest);
+  } catch {
+    // manifest write failed — index still happened; next run may re-add dupes
+  }
+  prog.phase = 'done';
+  prog.current = undefined;
+  emit();
+  return prog;
+}
+
+// ---------------------------------------------------------------------------
 // Core operations — shared by the HTTP handlers and the admin IPC bridge.
 // ---------------------------------------------------------------------------
 

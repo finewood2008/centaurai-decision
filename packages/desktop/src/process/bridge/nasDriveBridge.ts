@@ -4,7 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import crypto from 'node:crypto';
 import {
+  indexNasFolder,
   nasFileInfo,
   nasList,
   nasMkdir,
@@ -15,9 +17,14 @@ import {
   nasTrashRemove,
   nasTrashRestore,
   nasUploadFromPath,
+  type NasIndexProgress,
 } from '@aionui/web-host';
 import { ipcBridge } from '@/common';
 import { resolveNasRootDir } from '../utils/webuiConfig';
+
+// In-memory index-job registry. Admin-desktop only; jobs live for the session.
+type IndexJob = NasIndexProgress & { cancelled?: boolean };
+const indexJobs = new Map<string, IndexJob>();
 
 /**
  * Enterprise network drive (read-only) — main-process IPC for the admin desktop
@@ -99,5 +106,54 @@ export function initNasDriveBridge(): void {
     const root = await resolveNasRootDir();
     if (!root) return false;
     return nasTrashEmpty(root);
+  });
+
+  ipcBridge.nasDriveLocal.indexFolder.provider(async ({ path: relPath, endpoint, includeVideo }) => {
+    const root = await resolveNasRootDir();
+    const jobId = crypto.randomUUID();
+    if (!root) {
+      indexJobs.set(jobId, {
+        phase: 'error',
+        total: 0,
+        done: 0,
+        failed: 0,
+        skipped: 0,
+        pruned: 0,
+        error: 'NAS_DISABLED',
+      });
+      return { jobId };
+    }
+    indexJobs.set(jobId, { phase: 'walking', total: 0, done: 0, failed: 0, skipped: 0, pruned: 0 });
+    // Fire and forget; the renderer polls indexStatus.
+    void indexNasFolder(root, relPath, {
+      endpoint: endpoint || 'http://127.0.0.1:8618',
+      includeVideo,
+      onProgress: (p) => {
+        const cancelled = indexJobs.get(jobId)?.cancelled;
+        indexJobs.set(jobId, { ...p, cancelled });
+      },
+      isCancelled: () => indexJobs.get(jobId)?.cancelled === true,
+    }).catch((err) => {
+      const prev = indexJobs.get(jobId);
+      indexJobs.set(jobId, {
+        phase: 'error',
+        total: prev?.total ?? 0,
+        done: prev?.done ?? 0,
+        failed: prev?.failed ?? 0,
+        skipped: prev?.skipped ?? 0,
+        pruned: prev?.pruned ?? 0,
+        error: String((err as Error)?.message ?? err),
+      });
+    });
+    return { jobId };
+  });
+
+  ipcBridge.nasDriveLocal.indexStatus.provider(async ({ jobId }) => indexJobs.get(jobId) ?? null);
+
+  ipcBridge.nasDriveLocal.indexCancel.provider(async ({ jobId }) => {
+    const job = indexJobs.get(jobId);
+    if (!job) return false;
+    job.cancelled = true;
+    return true;
   });
 }

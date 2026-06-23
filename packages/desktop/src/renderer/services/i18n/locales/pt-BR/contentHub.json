@@ -110,6 +110,14 @@
     "purge": "Excluir definitivamente",
     "purgeConfirm": "Excluir permanentemente \"{{name}}\"? Isso não pode ser desfeito.",
     "trashEmpty": "A lixeira está vazia",
-    "deletedAt": "Excluído"
+    "deletedAt": "Excluído",
+    "index": "Indexar na base",
+    "indexTitle": "Indexar pasta na base de conhecimento",
+    "indexDesc": "Indexa recursivamente os arquivos suportados em \"{{folder}}\" na base de conhecimento para torná-los pesquisáveis. Reexecutar é seguro (arquivos inalterados são ignorados).",
+    "indexVideo": "Incluir vídeos (lento: transcrição + OCR)",
+    "indexScanning": "Escaneando pasta…",
+    "indexProgress": "Indexando na base… {{done}}/{{total}} (ignorados {{skipped}}, falhas {{failed}})",
+    "indexDone": "Indexação concluída: {{done}} indexados, {{skipped}} ignorados, {{failed}} falhas",
+    "indexFailed": "Falha na indexação"
   }
 }

@@ -110,6 +110,14 @@
     "purge": "Delete permanently",
     "purgeConfirm": "Permanently delete \"{{name}}\"? This cannot be undone.",
     "trashEmpty": "The recycle bin is empty",
-    "deletedAt": "Deleted"
+    "deletedAt": "Deleted",
+    "index": "Index to KB",
+    "indexTitle": "Index folder to knowledge base",
+    "indexDesc": "Recursively index supported files under \"{{folder}}\" into the knowledge base so they become searchable. Re-running is safe (unchanged files are skipped).",
+    "indexVideo": "Include videos (slow: transcription + OCR)",
+    "indexScanning": "Scanning folder…",
+    "indexProgress": "Indexing to knowledge base… {{done}}/{{total}} (skipped {{skipped}}, failed {{failed}})",
+    "indexDone": "Indexing complete: {{done}} indexed, {{skipped}} skipped, {{failed}} failed",
+    "indexFailed": "Indexing failed"
   }
 }

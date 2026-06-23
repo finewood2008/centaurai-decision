@@ -110,6 +110,14 @@
     "purge": "彻底删除",
     "purgeConfirm": "永久删除「{{name}}」？此操作不可恢复。",
     "trashEmpty": "回收站为空",
-    "deletedAt": "删除时间"
+    "deletedAt": "删除时间",
+    "index": "索引到知识库",
+    "indexTitle": "把文件夹索引到知识库",
+    "indexDesc": "递归索引「{{folder}}」下的可识别文件到知识库，使其可被检索。重复执行是安全的（未变更的文件会跳过）。",
+    "indexVideo": "包含视频（较慢：转写 + OCR）",
+    "indexScanning": "正在扫描文件夹…",
+    "indexProgress": "正在索引到知识库… {{done}}/{{total}}（跳过 {{skipped}}，失败 {{failed}}）",
+    "indexDone": "索引完成：成功 {{done}}，跳过 {{skipped}}，失败 {{failed}}",
+    "indexFailed": "索引失败"
   }
 }

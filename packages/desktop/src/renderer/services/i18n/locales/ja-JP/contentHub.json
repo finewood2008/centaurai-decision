@@ -110,6 +110,14 @@
     "purge": "完全に削除",
     "purgeConfirm": "「{{name}}」を完全に削除しますか？元に戻せません。",
     "trashEmpty": "ごみ箱は空です",
-    "deletedAt": "削除日時"
+    "deletedAt": "削除日時",
+    "index": "ナレッジへ索引",
+    "indexTitle": "フォルダをナレッジベースに索引",
+    "indexDesc": "「{{folder}}」配下の対応ファイルを再帰的にナレッジベースへ索引し、検索可能にします。再実行は安全です（変更のないファイルはスキップ）。",
+    "indexVideo": "動画を含める（低速：文字起こし + OCR）",
+    "indexScanning": "フォルダをスキャン中…",
+    "indexProgress": "ナレッジベースへ索引中… {{done}}/{{total}}（スキップ {{skipped}}、失敗 {{failed}}）",
+    "indexDone": "索引完了：成功 {{done}}、スキップ {{skipped}}、失敗 {{failed}}",
+    "indexFailed": "索引に失敗しました"
   }
 }

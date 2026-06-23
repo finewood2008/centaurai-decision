@@ -110,6 +110,14 @@
     "purge": "영구 삭제",
     "purgeConfirm": "\"{{name}}\"을(를) 영구히 삭제할까요? 되돌릴 수 없습니다.",
     "trashEmpty": "휴지통이 비어 있습니다",
-    "deletedAt": "삭제일"
+    "deletedAt": "삭제일",
+    "index": "지식베이스 색인",
+    "indexTitle": "폴더를 지식베이스에 색인",
+    "indexDesc": "\"{{folder}}\" 아래의 지원 파일을 지식베이스에 재귀적으로 색인하여 검색 가능하게 합니다. 다시 실행해도 안전합니다(변경되지 않은 파일은 건너뜀).",
+    "indexVideo": "동영상 포함(느림: 전사 + OCR)",
+    "indexScanning": "폴더 스캔 중…",
+    "indexProgress": "지식베이스에 색인 중… {{done}}/{{total}}(건너뜀 {{skipped}}, 실패 {{failed}})",
+    "indexDone": "색인 완료: 성공 {{done}}, 건너뜀 {{skipped}}, 실패 {{failed}}",
+    "indexFailed": "색인 실패"
   }
 }

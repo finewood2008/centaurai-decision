@@ -5,7 +5,7 @@ export { startStaticServer, stopStaticServer } from './static-server.js';
 export type { StaticServerOptions, StaticServerHandle } from './static-server.js';
 export type { SharedFile, SharedCategory, SharedAddInput } from './shared-drive.js';
 export { sharedList, sharedCategories, sharedRemove, sharedBlobInfo, sharedAddFromPath } from './shared-drive.js';
-export type { NasEntry, NasListing, NasFileInfo, NasTrashEntry } from './nas-drive.js';
+export type { NasEntry, NasListing, NasFileInfo, NasTrashEntry, NasWalkFile, NasIndexProgress } from './nas-drive.js';
 export {
   nasList,
   nasFileInfo,
@@ -18,6 +18,8 @@ export {
   nasTrashRestore,
   nasTrashRemove,
   nasTrashEmpty,
+  nasWalk,
+  indexNasFolder,
 } from './nas-drive.js';
 
 // Backend launcher exports (M4)

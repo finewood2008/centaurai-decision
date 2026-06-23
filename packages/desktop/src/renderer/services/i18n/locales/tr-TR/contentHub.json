@@ -110,6 +110,14 @@
     "purge": "Kalıcı olarak sil",
     "purgeConfirm": "\"{{name}}\" kalıcı olarak silinsin mi? Bu geri alınamaz.",
     "trashEmpty": "Geri dönüşüm kutusu boş",
-    "deletedAt": "Silindi"
+    "deletedAt": "Silindi",
+    "index": "Bilgi tabanına ekle",
+    "indexTitle": "Klasörü bilgi tabanına indeksle",
+    "indexDesc": "\"{{folder}}\" altındaki desteklenen dosyaları bilgi tabanına özyinelemeli olarak indeksleyerek aranabilir hale getirir. Yeniden çalıştırmak güvenlidir (değişmeyen dosyalar atlanır).",
+    "indexVideo": "Videoları dahil et (yavaş: deşifre + OCR)",
+    "indexScanning": "Klasör taranıyor…",
+    "indexProgress": "Bilgi tabanına indeksleniyor… {{done}}/{{total}} (atlanan {{skipped}}, başarısız {{failed}})",
+    "indexDone": "İndeksleme tamamlandı: {{done}} indekslendi, {{skipped}} atlandı, {{failed}} başarısız",
+    "indexFailed": "İndeksleme başarısız"
   }
 }

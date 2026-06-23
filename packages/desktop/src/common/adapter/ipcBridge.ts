@@ -723,6 +723,24 @@ export const nasDriveLocal = {
   trashRestore: bridge.buildProvider<{ relPath: string } | null, { trashName: string }>('nas-drive.trash-restore'),
   trashRemove: bridge.buildProvider<boolean, { trashName: string }>('nas-drive.trash-remove'),
   trashEmpty: bridge.buildProvider<boolean, void>('nas-drive.trash-empty'),
+  // Knowledge-base indexing — admin desktop only. indexFolder starts a job and
+  // returns its id; the renderer polls indexStatus until phase === 'done'.
+  indexFolder: bridge.buildProvider<{ jobId: string }, { path?: string; endpoint?: string; includeVideo?: boolean }>(
+    'nas-drive.index-folder'
+  ),
+  indexStatus: bridge.buildProvider<NasIndexProgressDTO | null, { jobId: string }>('nas-drive.index-status'),
+  indexCancel: bridge.buildProvider<boolean, { jobId: string }>('nas-drive.index-cancel'),
+};
+
+export type NasIndexProgressDTO = {
+  phase: 'walking' | 'indexing' | 'done' | 'error';
+  total: number;
+  done: number;
+  failed: number;
+  skipped: number;
+  pruned: number;
+  current?: string;
+  error?: string;
 };
 
 export type NasTrashEntryDTO = {

@@ -110,6 +110,14 @@
     "purge": "徹底刪除",
     "purgeConfirm": "永久刪除「{{name}}」？此操作無法復原。",
     "trashEmpty": "資源回收筒是空的",
-    "deletedAt": "刪除時間"
+    "deletedAt": "刪除時間",
+    "index": "索引到知識庫",
+    "indexTitle": "將資料夾索引到知識庫",
+    "indexDesc": "遞迴索引「{{folder}}」下可識別的檔案到知識庫，使其可被檢索。重複執行是安全的（未變更的檔案會略過）。",
+    "indexVideo": "包含影片（較慢：轉寫 + OCR）",
+    "indexScanning": "正在掃描資料夾…",
+    "indexProgress": "正在索引到知識庫… {{done}}/{{total}}（略過 {{skipped}}，失敗 {{failed}}）",
+    "indexDone": "索引完成：成功 {{done}}，略過 {{skipped}}，失敗 {{failed}}",
+    "indexFailed": "索引失敗"
   }
 }

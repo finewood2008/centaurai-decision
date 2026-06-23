@@ -14,6 +14,7 @@ import {
   nasTrashRestore,
   nasTrashRemove,
   nasTrashEmpty,
+  nasWalk,
   type NasListing,
 } from './nas-drive.js';
 
@@ -227,5 +228,36 @@ describe('NAS recycle-bin management (admin core)', () => {
     expect(await nasTrashRemove(root, '../victim.txt')).toBe(false);
     expect(await nasTrashRemove(root, 'sub/x')).toBe(false);
     expect(await fs.readFile(path.join(root, 'victim.txt'), 'utf8')).toBe('V'); // untouched
+  });
+});
+
+describe('nasWalk (knowledge-base indexing enumeration)', () => {
+  it('recurses, filters to indexable types, skips dotfiles and videos by default', async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), 'nas-walk-'));
+    roots.push(root);
+    await fs.mkdir(path.join(root, 'docs/sub'), { recursive: true });
+    await fs.mkdir(path.join(root, '.nas-trash'), { recursive: true });
+    await fs.writeFile(path.join(root, 'a.md'), '# a');
+    await fs.writeFile(path.join(root, 'notes.txt'), 'n');
+    await fs.writeFile(path.join(root, 'pic.png'), 'p');
+    await fs.writeFile(path.join(root, 'ignore.log'), 'x'); // unsupported ext
+    await fs.writeFile(path.join(root, 'docs/sub/deep.pdf'), 'd');
+    await fs.writeFile(path.join(root, 'clip.mp4'), 'v'); // video
+    await fs.writeFile(path.join(root, '.nas-trash', 'gone.md'), 'trashed'); // must be skipped
+
+    const noVideo = await nasWalk(root, '');
+    const rels = noVideo.map((f) => f.relPath).sort();
+    expect(rels).toEqual(['a.md', 'docs/sub/deep.pdf', 'notes.txt', 'pic.png']);
+    expect(rels).not.toContain('ignore.log');
+    expect(rels.some((r) => r.includes('.nas-trash'))).toBe(false);
+
+    const withVideo = await nasWalk(root, '', { includeVideo: true });
+    expect(withVideo.map((f) => f.relPath)).toContain('clip.mp4');
+  });
+
+  it('throws on a traversal path', async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), 'nas-walk2-'));
+    roots.push(root);
+    await expect(nasWalk(root, '../..')).rejects.toThrow();
   });
 });

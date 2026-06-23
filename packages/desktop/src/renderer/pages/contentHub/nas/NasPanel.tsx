@@ -6,20 +6,24 @@
  * new folder, rename, and delete (soft-delete to a recycle folder). Backed by
  * the web-host /api/nas/* routes (or admin IPC) via NasService.
  */
-import React, { useMemo, useRef, useState } from 'react';
-import { Button, Input, Message, Modal, Popconfirm } from '@arco-design/web-react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Button, Checkbox, Input, Message, Modal, Popconfirm } from '@arco-design/web-react';
 import { Delete, Download, Editor, FileText, FolderClose, FolderPlus, Refresh, Right, Upload } from '@icon-park/react';
 import { useTranslation } from 'react-i18next';
 import { useNas } from './useNas';
 import {
+  cancelNasIndex,
   downloadNasFile,
   emptyNasTrash,
   isNasAdmin,
   listNasTrash,
   openNasFile,
+  pollNasIndex,
   purgeNasTrash,
   restoreNasTrash,
+  startNasIndex,
   type NasEntry,
+  type NasIndexProgress,
   type NasTrashEntry,
 } from '@/renderer/services/NasService';
 import { formatFileSize } from '@/renderer/services/FileService';
@@ -52,6 +56,41 @@ const NasPanel: React.FC<NasPanelProps> = ({ search = '' }) => {
   const [trashView, setTrashView] = useState(false);
   const [trash, setTrash] = useState<NasTrashEntry[]>([]);
   const [trashLoading, setTrashLoading] = useState(false);
+  // Knowledge-base indexing (admin).
+  const [indexConfirm, setIndexConfirm] = useState(false);
+  const [indexVideo, setIndexVideo] = useState(false);
+  const [indexJob, setIndexJob] = useState<{ jobId: string; p: NasIndexProgress } | null>(null);
+
+  // Poll the running index job until it finishes.
+  useEffect(() => {
+    if (!indexJob || indexJob.p.phase === 'done' || indexJob.p.phase === 'error') return;
+    const timer = setInterval(async () => {
+      let p: NasIndexProgress | null = null;
+      try {
+        p = await pollNasIndex(indexJob.jobId);
+      } catch {
+        p = null;
+      }
+      if (!p) return;
+      setIndexJob((prev) => (prev && prev.jobId === indexJob.jobId ? { jobId: prev.jobId, p } : prev));
+      if (p.phase === 'done') {
+        Message.success(t('contentHub.nas.indexDone', { done: p.done, skipped: p.skipped, failed: p.failed }));
+      } else if (p.phase === 'error') {
+        Message.error(t('contentHub.nas.indexFailed'));
+      }
+    }, 1200);
+    return () => clearInterval(timer);
+  }, [indexJob, t]);
+
+  const startIndex = async () => {
+    setIndexConfirm(false);
+    try {
+      const jobId = await startNasIndex(path, indexVideo);
+      setIndexJob({ jobId, p: { phase: 'walking', total: 0, done: 0, failed: 0, skipped: 0, pruned: 0 } });
+    } catch {
+      Message.error(t('contentHub.nas.indexFailed'));
+    }
+  };
 
   const q = search.trim().toLowerCase();
   const visible = q ? entries.filter((e) => e.name.toLowerCase().includes(q)) : entries;
@@ -294,6 +333,16 @@ const NasPanel: React.FC<NasPanelProps> = ({ search = '' }) => {
             {t('contentHub.nas.refresh')}
           </Button>
           {admin && (
+            <Button
+              type='text'
+              size='mini'
+              onClick={() => setIndexConfirm(true)}
+              disabled={!!indexJob && indexJob.p.phase === 'indexing'}
+            >
+              {t('contentHub.nas.index')}
+            </Button>
+          )}
+          {admin && (
             <Button type='text' size='mini' icon={<Delete theme='outline' size={14} />} onClick={openTrash}>
               {t('contentHub.nas.trash')}
             </Button>
@@ -310,6 +359,32 @@ const NasPanel: React.FC<NasPanelProps> = ({ search = '' }) => {
           }}
         />
       </div>
+
+      {/* Knowledge-base indexing progress banner */}
+      {indexJob && indexJob.p.phase !== 'done' && indexJob.p.phase !== 'error' && (
+        <div className='mb-8px shrink-0 rd-8px bg-fill-2 px-12px py-8px text-12px text-t-secondary flex items-center gap-8px'>
+          <span>
+            {indexJob.p.phase === 'walking'
+              ? t('contentHub.nas.indexScanning')
+              : t('contentHub.nas.indexProgress', {
+                  done: indexJob.p.done,
+                  total: indexJob.p.total,
+                  skipped: indexJob.p.skipped,
+                  failed: indexJob.p.failed,
+                })}
+          </span>
+          <Button
+            type='text'
+            size='mini'
+            className='ml-auto'
+            onClick={() => {
+              void cancelNasIndex(indexJob.jobId);
+            }}
+          >
+            {t('contentHub.nas.cancel')}
+          </Button>
+        </div>
+      )}
 
       {/* Listing */}
       {visible.length === 0 ? (
@@ -410,6 +485,23 @@ const NasPanel: React.FC<NasPanelProps> = ({ search = '' }) => {
           onChange={(v) => setDialog((d) => (d ? { ...d, value: v } : d))}
           onPressEnter={submitDialog}
         />
+      </Modal>
+
+      {/* Index-to-knowledge-base confirm */}
+      <Modal
+        visible={indexConfirm}
+        title={t('contentHub.nas.indexTitle')}
+        okText={t('contentHub.nas.index')}
+        cancelText={t('contentHub.nas.cancel')}
+        onOk={startIndex}
+        onCancel={() => setIndexConfirm(false)}
+      >
+        <div className='text-13px text-t-secondary leading-relaxed mb-12px'>
+          {t('contentHub.nas.indexDesc', { folder: path || t('contentHub.nas.root') })}
+        </div>
+        <Checkbox checked={indexVideo} onChange={setIndexVideo}>
+          {t('contentHub.nas.indexVideo')}
+        </Checkbox>
       </Modal>
     </div>
   );
