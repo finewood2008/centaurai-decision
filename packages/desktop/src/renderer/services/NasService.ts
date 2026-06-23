@@ -1,12 +1,13 @@
 /**
- * NasService — client for the enterprise LAN network drive (read-only, P1).
+ * NasService — client for the enterprise LAN network drive (read + write).
  *
  * The network drive is the company's large shared disk, mounted by the admin
- * server and browsed by every LAN user. Unlike SharedDriveService (which has a
- * main-process IPC path for the admin), the network drive is served only over
- * the host's web-host static-server at /api/nas/*. Those routes are NOT served
- * by aioncore, so callers resolve their own base URL — identical to the base
- * resolution SharedDriveService uses.
+ * server and browsed/managed by every LAN user. Two transports, like
+ * SharedDriveService: the admin desktop renderer (loopback) uses main-process
+ * IPC (works even when the WebUI is off or LAN-exposed, where the desktop
+ * renderer holds no gate cookie); browser / distributed clients use the HTTP
+ * routes on the host's web-host static-server (NOT served by aioncore, so HTTP
+ * callers resolve their own base URL).
  */
 import { getBaseUrl } from '@/common/adapter/httpBridge';
 import { ipcBridge } from '@/common';

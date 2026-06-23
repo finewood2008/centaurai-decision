@@ -1,26 +1,30 @@
 /**
- * Enterprise LAN network drive ("共享盘 · 文件") — READ-ONLY (P1).
+ * Enterprise LAN network drive ("共享盘 · 文件") — read + write.
  *
  * Unlike the artifact board in shared-drive.ts (a managed blob store keyed by a
  * manifest), this surface maps 1:1 onto a real directory tree on the server —
  * the admin points `nasRootDir` at the company's large shared disk (e.g. a 2TB
- * mount) and every LAN user can browse / download / preview it. No manifest, no
- * id indirection: scales to tens of thousands of files because listing is just
- * `readdir` of a sub-path.
+ * mount) and every LAN user can browse / download / preview / upload / organize
+ * it. No manifest, no id indirection: scales to tens of thousands of files
+ * because listing is just `readdir` of a sub-path.
  *
  * Like shared-drive.ts and downloads.ts these routes are served LOCALLY by
  * static-server (NOT proxied to aioncore) so they are reachable identically by
  * the admin Electron renderer, browser WebUI, and distributed Electron clients.
  *
- *   GET /api/nas/list?path=<relPath>      → { data: { path, entries: NasEntry[] } }
- *   GET /api/nas/download?path=<relPath>  → the file (attachment, Range-capable)
- *   GET /api/nas/preview?path=<relPath>   → the file (inline, Range-capable)
+ *   GET    /api/nas/list?path=<relPath>          → { data: { path, entries } }
+ *   GET    /api/nas/download|preview?path=<rel>  → the file (Range-capable)
+ *   POST   /api/nas/upload?path=<dir>&name=      → raw body, auto-renames
+ *   POST   /api/nas/mkdir?path=<parent>&name=
+ *   POST   /api/nas/move?from=<rel>&to=<rel>
+ *   DELETE /api/nas/remove?path=<rel>            → soft-delete to .nas-trash
  *
  * Visibility is "everyone on the LAN" (no per-user access control — by product
- * decision). The one non-negotiable boundary is PATH CONTAINMENT: every request
- * path is resolved and rejected unless it stays inside `nasRootDir`, so `..`
- * can never escape to the rest of the server's filesystem. Writes are out of
- * scope for P1 — this module never mutates anything.
+ * decision); writes are auth-gated on LAN exactly like reads. The one
+ * non-negotiable boundary is PATH CONTAINMENT: no read OR write may touch
+ * anything outside `nasRootDir` — `..` is rejected, symlinks are resolved and
+ * re-checked, and writes use lstat + O_EXCL so an upload can never be written
+ * through a symlink to outside the root. Deletes are soft (recoverable).
  */
 
 import fs from 'node:fs';
