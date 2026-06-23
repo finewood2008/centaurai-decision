@@ -20,6 +20,7 @@ import EmptyState from './components/EmptyState';
 import ShareToTeamModal from './components/ShareToTeamModal';
 import HubContextMenu, { type HubMenuState } from './components/HubContextMenu';
 import SharedLibraryPanel from './shared/SharedLibraryPanel';
+import NasPanel from './nas/NasPanel';
 import KnowledgeBasePanel from './knowledge/KnowledgeBasePanel';
 import { useHubFiles } from './useHubFiles';
 import { useHubPreview } from './useHubPreview';
@@ -32,6 +33,7 @@ import type { FileEntry, HubMineView, HubSection } from './types';
 /** Map the legacy ?tab= deep-link onto the new section + mine-view model. */
 const parseInitialTab = (value: string | null): { section: HubSection; mineView: HubMineView } => {
   if (value === 'shared') return { section: 'shared', mineView: 'all' };
+  if (value === 'nas') return { section: 'nas', mineView: 'all' };
   if (value === 'knowledge') return { section: 'knowledge', mineView: 'all' };
   if (value === 'byConversation') return { section: 'mine', mineView: 'byConversation' };
   if (value === 'byType') return { section: 'mine', mineView: 'byType' };
@@ -153,6 +155,7 @@ const ContentHubPage: React.FC = () => {
 
   const renderBody = () => {
     if (section === 'shared') return <SharedLibraryPanel search={search} />;
+    if (section === 'nas') return <NasPanel search={search} />;
     if (section === 'knowledge') return <KnowledgeBasePanel search={search} />;
     return renderMine();
   };

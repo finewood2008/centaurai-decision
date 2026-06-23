@@ -5,7 +5,7 @@
  */
 
 import { WEBUI_DEFAULT_PORT } from '@/common/config/constants';
-import { shell, webui, type IWebUIStatus } from '@/common/adapter/ipcBridge';
+import { dialog, shell, webui, type IWebUIStatus } from '@/common/adapter/ipcBridge';
 import { isBackendHttpError } from '@/common/adapter/httpBridge';
 import { configService } from '@/common/config/configService';
 import AionModal from '@/renderer/components/base/AionModal';
@@ -64,6 +64,7 @@ const QRCodeSVGLazy = React.lazy(async () => {
 
 const DESKTOP_WEBUI_ENABLED_KEY = 'webui.desktop.enabled';
 const DESKTOP_WEBUI_ALLOW_REMOTE_KEY = 'webui.desktop.allowRemote';
+const DESKTOP_NAS_ROOT_KEY = 'webui.desktop.nasRootDir';
 
 /**
  * WebUI 设置内容组件
@@ -84,6 +85,7 @@ const WebuiModalContent: React.FC = () => {
   const port = WEBUI_DEFAULT_PORT;
   const [webuiEnabled, setWebuiEnabled] = useState(false);
   const [allowRemotePreference, setAllowRemotePreference] = useState(false);
+  const [nasRootDir, setNasRootDir] = useState<string>('');
   const [cachedIP, setCachedIP] = useState<string | null>(null);
   const [cachedPassword, setCachedPassword] = useState<string | null>(null);
   // 标记密码是否可以明文显示（首次启动且未复制过）/ Flag for plaintext password display (first startup and not copied)
@@ -108,6 +110,9 @@ const WebuiModalContent: React.FC = () => {
     try {
       const savedAllowRemote = configService.get(DESKTOP_WEBUI_ALLOW_REMOTE_KEY) ?? false;
       setAllowRemotePreference(savedAllowRemote === true);
+
+      const savedNasRoot = configService.get(DESKTOP_NAS_ROOT_KEY);
+      setNasRootDir(typeof savedNasRoot === 'string' ? savedNasRoot : '');
 
       // getStatus goes via IPC to the Electron main process which tracks the
       // WebUI lifecycle; backend does not know it's being wrapped.
@@ -380,6 +385,36 @@ const WebuiModalContent: React.FC = () => {
         Message.error(t('settings.webui.operationFailed'));
       }
     }
+  };
+
+  // 网盘根目录：持久化后若服务在运行则重启以重新读取根目录 /
+  // Network-drive root: persist, then restart the running WebUI so the static
+  // server re-reads nasRootDir (it is read only at startup).
+  const persistNasRoot = async (dir: string) => {
+    setNasRootDir(dir);
+    try {
+      await configService.set(DESKTOP_NAS_ROOT_KEY, dir);
+      if (status?.running) {
+        await webui.start.invoke({ port, allowRemote: allowRemotePreference });
+      }
+      Message.success(t('settings.webui.nasRootSaved'));
+    } catch (error) {
+      console.error('[WebuiModal] Failed to persist NAS root:', error);
+      Message.error(t('settings.webui.operationFailed'));
+    }
+  };
+
+  const handlePickNasRoot = () => {
+    dialog.showOpen
+      .invoke({ defaultPath: nasRootDir || undefined, properties: ['openDirectory'] })
+      .then((paths) => {
+        if (paths?.[0]) void persistNasRoot(paths[0]);
+      })
+      .catch((error) => console.error('Failed to open directory dialog:', error));
+  };
+
+  const handleClearNasRoot = () => {
+    void persistNasRoot('');
   };
 
   // 复制内容 / Copy content
@@ -675,6 +710,25 @@ const WebuiModalContent: React.FC = () => {
             }
           >
             <Switch checked={allowRemotePreference} onChange={handleAllowRemoteChange} />
+          </PreferenceRow>
+
+          {/* 网盘根目录 / Network-drive root */}
+          <PreferenceRow label={t('settings.webui.nasRoot')} description={t('settings.webui.nasRootDesc')}>
+            <div className='flex items-center gap-8px min-w-0'>
+              <Tooltip content={nasRootDir || t('settings.webui.nasRootNotSet')}>
+                <span className='text-12px text-t-secondary font-mono truncate max-w-180px'>
+                  {nasRootDir || t('settings.webui.nasRootNotSet')}
+                </span>
+              </Tooltip>
+              <Button size='small' className='rd-100px' onClick={handlePickNasRoot}>
+                {t('settings.webui.nasRootSelect')}
+              </Button>
+              {nasRootDir && (
+                <Button size='small' type='text' onClick={handleClearNasRoot}>
+                  {t('settings.webui.nasRootClear')}
+                </Button>
+              )}
+            </div>
           </PreferenceRow>
         </div>
 

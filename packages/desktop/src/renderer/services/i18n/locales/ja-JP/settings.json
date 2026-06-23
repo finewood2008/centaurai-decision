@@ -1005,5 +1005,11 @@
   "webui.downloadClient.otherOs": "Other",
   "client": "Local Client",
   "webui.downloadClient.latest": "Latest",
-  "webui.downloadClient.unknownVersion": "Other version"
+  "webui.downloadClient.unknownVersion": "Other version",
+  "webui.nasRoot": "ネットワークドライブのルート",
+  "webui.nasRootDesc": "企業の共有ディスク（例: 2TB ドライブ）を指定します。LAN ユーザーは「コンテンツハブ → ネットワークドライブ」で読み取り専用で閲覧できます。変更すると WebUI が再起動します。",
+  "webui.nasRootNotSet": "未設定",
+  "webui.nasRootSelect": "フォルダを選択",
+  "webui.nasRootClear": "クリア",
+  "webui.nasRootSaved": "ネットワークドライブのルートを保存しました"
 }

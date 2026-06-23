@@ -1041,5 +1041,11 @@
   "webui.downloadClient.otherOs": "其他系统",
   "client": "本地客户端",
   "webui.downloadClient.latest": "最新",
-  "webui.downloadClient.unknownVersion": "其他版本"
+  "webui.downloadClient.unknownVersion": "其他版本",
+  "webui.nasRoot": "网盘根目录",
+  "webui.nasRootDesc": "指向企业共享磁盘（如 2TB 共享盘）。局域网用户可在「内容中心 → 网盘」只读浏览。修改后将重启 WebUI 生效。",
+  "webui.nasRootNotSet": "未设置",
+  "webui.nasRootSelect": "选择文件夹",
+  "webui.nasRootClear": "清除",
+  "webui.nasRootSaved": "网盘根目录已保存"
 }

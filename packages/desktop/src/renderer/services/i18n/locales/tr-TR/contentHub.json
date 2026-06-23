@@ -11,7 +11,8 @@
     "byConversation": "Sohbete Göre",
     "byType": "Türe Göre",
     "shared": "Paylaşılan Kitaplık",
-    "knowledge": "Bilgi Tabanı"
+    "knowledge": "Bilgi Tabanı",
+    "nas": "Ağ Sürücüsü"
   },
   "type": {
     "all": "Tümü",
@@ -73,5 +74,17 @@
     "empty": "Bilgi tabanı boş",
     "unreachable": "Vektör veritabanına ulaşılamıyor — servisin çalıştığından emin olun",
     "openDesktopOnly": "Kaynak dosyaları açmak yalnızca masaüstünde geçerlidir"
+  },
+  "nas": {
+    "root": "Tüm Dosyalar",
+    "empty": "Bu klasör boş",
+    "loading": "Yükleniyor…",
+    "disabled": "Yönetici henüz paylaşılan bir disk yapılandırmadı",
+    "unavailable": "Ağ sürücüsü kullanılamıyor — WebUI sunucusu çalışmıyor",
+    "refresh": "Yenile",
+    "download": "İndir",
+    "colName": "Ad",
+    "colSize": "Boyut",
+    "colModified": "Değiştirilme"
   }
 }

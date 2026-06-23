@@ -31,6 +31,33 @@ function resolveInstallerDir(): string {
 const DESKTOP_WEBUI_ENABLED_KEY = 'webui.desktop.enabled';
 const DESKTOP_WEBUI_ALLOW_REMOTE_KEY = 'webui.desktop.allowRemote';
 const DESKTOP_WEBUI_PORT_KEY = 'webui.desktop.port';
+const DESKTOP_NAS_ROOT_KEY = 'webui.desktop.nasRootDir';
+
+/**
+ * Resolve the enterprise network-drive root browsed read-only at /api/nas/*.
+ * The admin points this at the company's large shared disk via Settings; an
+ * AIONUI_NAS_ROOT env override wins for headless/test setups. Returns undefined
+ * (NAS disabled) when unset or the configured path is not an existing dir.
+ */
+async function resolveNasRootDir(): Promise<string | undefined> {
+  let candidate = process.env.AIONUI_NAS_ROOT?.trim();
+  if (!candidate) {
+    try {
+      const settings = await httpRequest<Record<string, unknown>>('GET', '/api/settings/client');
+      const raw = settings?.[DESKTOP_NAS_ROOT_KEY];
+      if (typeof raw === 'string' && raw.trim()) candidate = raw.trim();
+    } catch (error) {
+      console.error('[WebUI] Failed to read NAS root from backend:', error);
+    }
+  }
+  if (!candidate) return undefined;
+  try {
+    if (fs.statSync(candidate).isDirectory()) return candidate;
+  } catch {
+    // Configured path missing / unreadable — disable rather than crash startup.
+  }
+  return undefined;
+}
 
 /**
  * Read WebUI preferences from the backend's /api/settings/client store.
@@ -265,6 +292,9 @@ export async function startDesktopWebUI(opts: { port?: number; allowRemote?: boo
     installerDir: resolveInstallerDir(),
     // Enterprise LAN shared library, served at /api/shared-drive/*.
     sharedDriveDir: path.join(getDataPath(), 'sharedDrive'),
+    // Enterprise LAN network drive (the company's large shared disk), browsed
+    // read-only at /api/nas/*. Undefined when unconfigured → endpoints disabled.
+    nasRootDir: await resolveNasRootDir(),
     // Must align with the desktop IPC path's backend dataDir (src/index.ts), otherwise
     // users see divergent SQLite state between desktop app and bundled WebUI.
     dataDir: getDataPath(),

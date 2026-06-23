@@ -11,7 +11,8 @@
     "byConversation": "依對話",
     "byType": "依類型",
     "shared": "共享庫",
-    "knowledge": "知識庫"
+    "knowledge": "知識庫",
+    "nas": "網路硬碟"
   },
   "type": {
     "all": "全部",
@@ -73,5 +74,17 @@
     "empty": "知識庫為空",
     "unreachable": "無法連線向量庫，請確認服務已啟動",
     "openDesktopOnly": "僅桌面端可開啟原始檔案"
+  },
+  "nas": {
+    "root": "全部檔案",
+    "empty": "此資料夾為空",
+    "loading": "載入中…",
+    "disabled": "管理員尚未設定共享磁碟",
+    "unavailable": "網路硬碟無法使用 —— WebUI 服務未執行",
+    "refresh": "重新整理",
+    "download": "下載",
+    "colName": "名稱",
+    "colSize": "大小",
+    "colModified": "修改時間"
   }
 }

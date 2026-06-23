@@ -11,7 +11,8 @@
     "byConversation": "대화별",
     "byType": "유형별",
     "shared": "공유 라이브러리",
-    "knowledge": "지식 베이스"
+    "knowledge": "지식 베이스",
+    "nas": "네트워크 드라이브"
   },
   "type": {
     "all": "전체",
@@ -73,5 +74,17 @@
     "empty": "지식 베이스가 비어 있습니다",
     "unreachable": "벡터 DB에 연결할 수 없습니다. 서비스 실행 여부를 확인하세요",
     "openDesktopOnly": "소스 파일 열기는 데스크톱에서만 가능합니다"
+  },
+  "nas": {
+    "root": "모든 파일",
+    "empty": "이 폴더는 비어 있습니다",
+    "loading": "불러오는 중…",
+    "disabled": "관리자가 아직 공유 디스크를 구성하지 않았습니다",
+    "unavailable": "네트워크 드라이브를 사용할 수 없습니다 — WebUI 서버가 실행되고 있지 않습니다",
+    "refresh": "새로 고침",
+    "download": "다운로드",
+    "colName": "이름",
+    "colSize": "크기",
+    "colModified": "수정한 날짜"
   }
 }

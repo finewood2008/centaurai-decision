@@ -11,7 +11,8 @@
     "byConversation": "By Conversation",
     "byType": "By Type",
     "shared": "Shared Library",
-    "knowledge": "Knowledge Base"
+    "knowledge": "Knowledge Base",
+    "nas": "Network Drive"
   },
   "mineView": {
     "all": "All",
@@ -73,5 +74,17 @@
     "copyFailed": "Copy failed",
     "downloadFailed": "Download failed",
     "openFailed": "Cannot open"
+  },
+  "nas": {
+    "root": "All Files",
+    "empty": "This folder is empty",
+    "loading": "Loading…",
+    "disabled": "No shared disk has been configured by the administrator yet",
+    "unavailable": "Network drive unavailable — the WebUI server is not running",
+    "refresh": "Refresh",
+    "download": "Download",
+    "colName": "Name",
+    "colSize": "Size",
+    "colModified": "Modified"
   }
 }

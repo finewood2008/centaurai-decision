@@ -14,6 +14,7 @@ type HubTabBarProps = {
 const SECTIONS: { key: HubSection; labelKey: string }[] = [
   { key: 'mine', labelKey: 'contentHub.tabs.mine' },
   { key: 'shared', labelKey: 'contentHub.tabs.shared' },
+  { key: 'nas', labelKey: 'contentHub.tabs.nas' },
   { key: 'knowledge', labelKey: 'contentHub.tabs.knowledge' },
 ];
 

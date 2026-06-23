@@ -11,7 +11,8 @@
     "byConversation": "按会话",
     "byType": "按类型",
     "shared": "共享库",
-    "knowledge": "知识库"
+    "knowledge": "知识库",
+    "nas": "网盘"
   },
   "mineView": {
     "all": "全部",
@@ -73,5 +74,17 @@
     "copyFailed": "复制失败",
     "downloadFailed": "下载失败",
     "openFailed": "无法打开"
+  },
+  "nas": {
+    "root": "全部文件",
+    "empty": "此文件夹为空",
+    "loading": "加载中…",
+    "disabled": "管理员尚未配置共享磁盘",
+    "unavailable": "网盘不可用 —— WebUI 服务未运行",
+    "refresh": "刷新",
+    "download": "下载",
+    "colName": "名称",
+    "colSize": "大小",
+    "colModified": "修改时间"
   }
 }

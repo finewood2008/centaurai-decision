@@ -11,7 +11,8 @@
     "byConversation": "会話別",
     "byType": "種類別",
     "shared": "共有ライブラリ",
-    "knowledge": "ナレッジベース"
+    "knowledge": "ナレッジベース",
+    "nas": "ネットワークドライブ"
   },
   "type": {
     "all": "すべて",
@@ -73,5 +74,17 @@
     "empty": "ナレッジベースは空です",
     "unreachable": "ベクトルDBに接続できません。サービスが起動しているか確認してください",
     "openDesktopOnly": "ソースファイルを開けるのはデスクトップのみです"
+  },
+  "nas": {
+    "root": "すべてのファイル",
+    "empty": "このフォルダは空です",
+    "loading": "読み込み中…",
+    "disabled": "管理者が共有ディスクをまだ設定していません",
+    "unavailable": "ネットワークドライブを利用できません — WebUI サーバーが起動していません",
+    "refresh": "更新",
+    "download": "ダウンロード",
+    "colName": "名前",
+    "colSize": "サイズ",
+    "colModified": "更新日時"
   }
 }

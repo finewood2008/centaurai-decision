@@ -1040,5 +1040,11 @@
   "webui.downloadClient.otherOs": "Other",
   "client": "Local Client",
   "webui.downloadClient.latest": "Latest",
-  "webui.downloadClient.unknownVersion": "Other version"
+  "webui.downloadClient.unknownVersion": "Other version",
+  "webui.nasRoot": "Network Drive Root",
+  "webui.nasRootDesc": "Point to the company shared disk (e.g. a 2TB drive). LAN users browse it read-only under Content Hub → Network Drive. Changing it restarts the WebUI.",
+  "webui.nasRootNotSet": "Not set",
+  "webui.nasRootSelect": "Choose Folder",
+  "webui.nasRootClear": "Clear",
+  "webui.nasRootSaved": "Network drive root saved"
 }

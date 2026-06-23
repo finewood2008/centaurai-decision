@@ -39,6 +39,8 @@ export type WebHostOptions = {
   installerDir?: string;
   /** Directory hosting the enterprise LAN shared library, served at /api/shared-drive/*. */
   sharedDriveDir?: string;
+  /** Root of the enterprise LAN network drive, browsed read-only at /api/nas/*. */
+  nasRootDir?: string;
   dataDir?: string;
   logDir?: string;
   dirs?: BackendSystemDirs;

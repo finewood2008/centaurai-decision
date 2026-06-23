@@ -1003,5 +1003,11 @@
   "webui.downloadClient.otherOs": "Other",
   "client": "Local Client",
   "webui.downloadClient.latest": "Latest",
-  "webui.downloadClient.unknownVersion": "Other version"
+  "webui.downloadClient.unknownVersion": "Other version",
+  "webui.nasRoot": "Ağ Sürücüsü Kökü",
+  "webui.nasRootDesc": "Şirketin paylaşılan diskini (ör. 2 TB sürücü) belirtin. LAN kullanıcıları bunu İçerik Merkezi → Ağ Sürücüsü altında salt okunur tarar. Değiştirmek WebUI’yi yeniden başlatır.",
+  "webui.nasRootNotSet": "Ayarlanmadı",
+  "webui.nasRootSelect": "Klasör Seç",
+  "webui.nasRootClear": "Temizle",
+  "webui.nasRootSaved": "Ağ sürücüsü kökü kaydedildi"
 }

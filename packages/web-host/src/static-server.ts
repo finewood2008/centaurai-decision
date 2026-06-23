@@ -26,6 +26,7 @@ import {
   handleSharedRemove,
   handleSharedUpload,
 } from './shared-drive.js';
+import { handleNasDownload, handleNasList, handleNasPreview } from './nas-drive.js';
 import { type AuthGate, createAuthGate } from './webui-auth-gate.js';
 
 export type StaticServerOptions = {
@@ -43,6 +44,11 @@ export type StaticServerOptions = {
    * /api/shared-drive/*. Omit to disable sharing (list returns []).
    */
   sharedDriveDir?: string;
+  /**
+   * Root of the enterprise LAN network drive (the company's large shared disk),
+   * browsed read-only at /api/nas/*. Omit to disable (list returns []).
+   */
+  nasRootDir?: string;
 };
 
 export type StaticServerHandle = {
@@ -492,6 +498,19 @@ export async function startStaticServer(opts: StaticServerOptions): Promise<Stat
           await handleSharedPreview(req, res, opts.sharedDriveDir);
         else if (req.url.startsWith('/api/shared-drive/remove') && req.method === 'DELETE')
           await handleSharedRemove(req, res, opts.sharedDriveDir);
+        else {
+          res.writeHead(404, { 'content-type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'NOT_FOUND' }));
+        }
+        return;
+      }
+
+      // /api/nas/* — enterprise LAN network drive (read-only), served LOCALLY
+      // (NOT proxied to aioncore). Must come before the generic /api/* proxy.
+      if (req.url.startsWith('/api/nas/')) {
+        if (req.url.startsWith('/api/nas/list')) await handleNasList(req, res, opts.nasRootDir);
+        else if (req.url.startsWith('/api/nas/download')) await handleNasDownload(req, res, opts.nasRootDir);
+        else if (req.url.startsWith('/api/nas/preview')) await handleNasPreview(req, res, opts.nasRootDir);
         else {
           res.writeHead(404, { 'content-type': 'application/json' });
           res.end(JSON.stringify({ success: false, error: 'NOT_FOUND' }));

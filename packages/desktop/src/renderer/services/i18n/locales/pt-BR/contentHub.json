@@ -11,7 +11,8 @@
     "byConversation": "Por Conversa",
     "byType": "Por Tipo",
     "shared": "Biblioteca Compartilhada",
-    "knowledge": "Base de Conhecimento"
+    "knowledge": "Base de Conhecimento",
+    "nas": "Unidade de Rede"
   },
   "type": {
     "all": "Todos",
@@ -73,5 +74,17 @@
     "empty": "Base de conhecimento vazia",
     "unreachable": "Não foi possível acessar o banco vetorial — verifique se o serviço está em execução",
     "openDesktopOnly": "Abrir arquivos de origem é exclusivo do desktop"
+  },
+  "nas": {
+    "root": "Todos os arquivos",
+    "empty": "Esta pasta está vazia",
+    "loading": "Carregando…",
+    "disabled": "O administrador ainda não configurou um disco compartilhado",
+    "unavailable": "Unidade de rede indisponível — o servidor WebUI não está em execução",
+    "refresh": "Atualizar",
+    "download": "Baixar",
+    "colName": "Nome",
+    "colSize": "Tamanho",
+    "colModified": "Modificado"
   }
 }

@@ -4,7 +4,7 @@
 import type { FileEntry } from '@/renderer/pages/guid/components/RecentFiles';
 
 /** Top-level sections of the Content Hub. */
-export type HubSection = 'mine' | 'shared' | 'knowledge';
+export type HubSection = 'mine' | 'shared' | 'nas' | 'knowledge';
 
 /** Sub-views within the 我的产物 (mine) section. */
 export type HubMineView = 'all' | 'byConversation' | 'byType';

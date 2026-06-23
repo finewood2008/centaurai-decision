@@ -1006,5 +1006,11 @@
   "webui.downloadClient.otherOs": "Other",
   "client": "Local Client",
   "webui.downloadClient.latest": "Latest",
-  "webui.downloadClient.unknownVersion": "Other version"
+  "webui.downloadClient.unknownVersion": "Other version",
+  "webui.nasRoot": "Raiz da unidade de rede",
+  "webui.nasRootDesc": "Aponte para o disco compartilhado da empresa (ex.: uma unidade de 2 TB). Usuários da LAN o navegam somente leitura em Central de Conteúdo → Unidade de Rede. Alterar reinicia o WebUI.",
+  "webui.nasRootNotSet": "Não definido",
+  "webui.nasRootSelect": "Escolher pasta",
+  "webui.nasRootClear": "Limpar",
+  "webui.nasRootSaved": "Raiz da unidade de rede salva"
 }

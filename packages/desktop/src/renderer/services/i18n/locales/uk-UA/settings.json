@@ -923,5 +923,11 @@
   "webui.downloadClient.otherOs": "Other",
   "client": "Local Client",
   "webui.downloadClient.latest": "Latest",
-  "webui.downloadClient.unknownVersion": "Other version"
+  "webui.downloadClient.unknownVersion": "Other version",
+  "webui.nasRoot": "Корінь мережевого диска",
+  "webui.nasRootDesc": "Вкажіть спільний диск компанії (наприклад, диск на 2 ТБ). Користувачі локальної мережі переглядають його лише для читання в розділі «Центр контенту → Мережевий диск». Зміна перезапускає WebUI.",
+  "webui.nasRootNotSet": "Не задано",
+  "webui.nasRootSelect": "Вибрати теку",
+  "webui.nasRootClear": "Очистити",
+  "webui.nasRootSaved": "Корінь мережевого диска збережено"
 }

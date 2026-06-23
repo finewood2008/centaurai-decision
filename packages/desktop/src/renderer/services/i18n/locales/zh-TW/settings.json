@@ -1013,5 +1013,11 @@
   "webui.downloadClient.otherOs": "其他系統",
   "client": "本機用戶端",
   "webui.downloadClient.latest": "最新",
-  "webui.downloadClient.unknownVersion": "其他版本"
+  "webui.downloadClient.unknownVersion": "其他版本",
+  "webui.nasRoot": "網路硬碟根目錄",
+  "webui.nasRootDesc": "指向企業共享磁碟（如 2TB 共享碟）。區域網路使用者可在「內容中心 → 網路硬碟」唯讀瀏覽。修改後將重新啟動 WebUI 生效。",
+  "webui.nasRootNotSet": "未設定",
+  "webui.nasRootSelect": "選擇資料夾",
+  "webui.nasRootClear": "清除",
+  "webui.nasRootSaved": "網路硬碟根目錄已儲存"
 }

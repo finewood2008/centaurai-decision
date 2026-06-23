@@ -1005,5 +1005,11 @@
   "webui.downloadClient.otherOs": "Other",
   "client": "Local Client",
   "webui.downloadClient.latest": "Latest",
-  "webui.downloadClient.unknownVersion": "Other version"
+  "webui.downloadClient.unknownVersion": "Other version",
+  "webui.nasRoot": "Корень сетевого диска",
+  "webui.nasRootDesc": "Укажите общий диск компании (например, диск на 2 ТБ). Пользователи локальной сети просматривают его только для чтения в разделе «Центр контента → Сетевой диск». Изменение перезапускает WebUI.",
+  "webui.nasRootNotSet": "Не задано",
+  "webui.nasRootSelect": "Выбрать папку",
+  "webui.nasRootClear": "Очистить",
+  "webui.nasRootSaved": "Корень сетевого диска сохранён"
 }
