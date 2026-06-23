@@ -7,6 +7,11 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Left, Right, Refresh, Loading } from '@icon-park/react';
 
+/** Imperative handle to run JS inside the embedded page (host → guest). */
+export type WebviewControl = {
+  executeScript: (code: string) => Promise<unknown>;
+};
+
 export interface WebviewHostProps {
   /** URL to display */
   url: string;
@@ -24,6 +29,8 @@ export interface WebviewHostProps {
   onDidFinishLoad?: () => void;
   /** Called when the page fails to load */
   onDidFailLoad?: (errorCode: number, errorDescription: string) => void;
+  /** Populated with an imperative control once the webview is mounted. */
+  controlRef?: React.MutableRefObject<WebviewControl | null>;
 }
 
 const MIN_ZOOM_FACTOR = 0.75;
@@ -48,11 +55,28 @@ const WebviewHost: React.FC<WebviewHostProps> = ({
   style,
   onDidFinishLoad,
   onDidFailLoad,
+  controlRef,
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
   const webviewRef = useRef<Electron.WebviewTag | null>(null);
   const autoFitPendingRef = useRef(false);
+
+  // Expose an imperative control so a sibling component (e.g. the Video
+  // Workbench agent chat) can run scripts inside the embedded editor.
+  useEffect(() => {
+    if (!controlRef) return;
+    controlRef.current = {
+      executeScript: async (code: string) => {
+        const el = webviewRef.current;
+        if (!el) throw new Error('webview_not_ready');
+        return el.executeJavaScript(code);
+      },
+    };
+    return () => {
+      controlRef.current = null;
+    };
+  }, [controlRef]);
 
   // Navigation state
   const [currentUrl, setCurrentUrl] = useState(url);
@@ -325,6 +349,7 @@ const WebviewHost: React.FC<WebviewHostProps> = ({
     };
 
     const handleDidFailLoad = (event: any) => {
+      if (event.isMainFrame === false || event.errorCode === -3) return;
       setIsLoading(false);
       onDidFailLoad?.(event.errorCode, event.errorDescription);
     };

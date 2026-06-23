@@ -28,7 +28,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { ipcBridge } from '@/common';
-import WebviewHost from '@/renderer/components/media/WebviewHost';
+import WebviewHost, { type WebviewControl } from '@/renderer/components/media/WebviewHost';
+import VideoAgentChat from './video-agent/VideoAgentChat';
 import { useAgents } from '@/renderer/hooks/agent/useAgents';
 import type { AgentMetadata } from '@/renderer/utils/model/agentTypes';
 import { ResultPanel } from './components/ResultPanel';
@@ -68,6 +69,23 @@ type ToolboxPageProps = {
 
 const getToolTitle = (tool: ToolDef, t: (key: string) => string) => tool.titleText ?? t(tool.titleKey);
 const getToolDesc = (tool: ToolDef, t: (key: string) => string) => tool.descText ?? t(tool.descKey);
+
+const IMAGE2_WORKBENCH_PROFILE = {
+  profileName: 'TokenClub Image2',
+  apiUrl: 'http://8.209.228.147:8080/v1',
+  model: 'gpt-image-2',
+  apiMode: 'images',
+  streamImages: 'false',
+  streamPartialImages: '0',
+  disableServiceWorker: 'true',
+} as const;
+
+const addImage2WorkbenchProfile = (url: URL): URL => {
+  for (const [key, value] of Object.entries(IMAGE2_WORKBENCH_PROFILE)) {
+    url.searchParams.set(key, value);
+  }
+  return url;
+};
 
 /** Warm-domain tone palette (clay / gold / green / deep-clay) per BRAND_GUIDE.md. */
 type Tone = { surface: string; icon: string; rail: string; dot: string };
@@ -307,20 +325,17 @@ const ToolboxPage: React.FC<ToolboxPageProps> = ({ mode = 'toolbox' }) => {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<ToolboxCategory>('all');
   const lastRunRef = useRef<LastRun | null>(null);
+  const videoControlRef = useRef<WebviewControl | null>(null);
 
   useEffect(() => {
     setImageWorkbenchOpen(!isWorkbenchMode);
   }, [isWorkbenchMode]);
 
-  // Embedded 半人马 AI 图形工作台 — bundled static SPA under the renderer publicDir
-  // (public/centaur-image-workbench). Resolve relative to the renderer origin so it works
-  // both in dev (vite server) and in the packaged build (file://).
+  // Embedded 半人马 AI 图形工作台. Use a main-process protocol so the workbench
+  // does not depend on the renderer dev-server port.
   const workbenchUrl = useMemo(() => {
-    try {
-      return new URL('centaur-image-workbench/index.html', window.location.href).toString();
-    } catch {
-      return 'centaur-image-workbench/index.html';
-    }
+    const url = new URL('centaur-image-workbench://app/index.html');
+    return addImage2WorkbenchProfile(url).toString();
   }, []);
 
   const keyword = query.trim().toLowerCase();
@@ -569,39 +584,45 @@ const ToolboxPage: React.FC<ToolboxPageProps> = ({ mode = 'toolbox' }) => {
         </div>
 
         <div
-          className='centaur-card relative w-full overflow-hidden'
+          className='centaur-card relative flex w-full overflow-hidden'
           style={{ height: '78vh', minHeight: 520, padding: 0, borderRadius: 'var(--centaur-radius-sm)' }}
         >
-          {videoServer.state === 'ready' ? (
-            <WebviewHost
-              url={VIDEO_WORKBENCH_URL}
-              id='centaur-video-workbench'
-              partition='persist:centaur-video-workbench'
-              className='h-full w-full'
-              style={{ height: '100%', minHeight: 520 }}
-            />
-          ) : (
-            <div
-              className='flex h-full w-full flex-col items-center justify-center gap-12px'
-              style={{ minHeight: 520 }}
-            >
-              {videoServer.state === 'starting' ? (
-                <>
-                  <Spin size={28} />
-                  <div className='text-14px' style={{ color: 'var(--centaur-ink-soft)' }}>
-                    {t('toolbox.videoWorkbench.starting')}
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className='max-w-420px text-center text-14px' style={{ color: 'var(--centaur-ink-soft)' }}>
-                    {t('toolbox.videoWorkbench.startFailed')}
-                  </div>
-                  <Button onClick={startVideoServer}>{t('toolbox.videoWorkbench.retry')}</Button>
-                </>
-              )}
-            </div>
-          )}
+          <div className='relative h-full min-w-0 flex-1'>
+            {videoServer.state === 'ready' ? (
+              <WebviewHost
+                url={VIDEO_WORKBENCH_URL}
+                id='centaur-video-workbench'
+                partition='persist:centaur-video-workbench'
+                controlRef={videoControlRef}
+                className='h-full w-full'
+                style={{ height: '100%', minHeight: 520 }}
+              />
+            ) : (
+              <div
+                className='flex h-full w-full flex-col items-center justify-center gap-12px'
+                style={{ minHeight: 520 }}
+              >
+                {videoServer.state === 'starting' ? (
+                  <>
+                    <Spin size={28} />
+                    <div className='text-14px' style={{ color: 'var(--centaur-ink-soft)' }}>
+                      {t('toolbox.videoWorkbench.starting')}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className='max-w-420px text-center text-14px' style={{ color: 'var(--centaur-ink-soft)' }}>
+                      {t('toolbox.videoWorkbench.startFailed')}
+                    </div>
+                    <Button onClick={startVideoServer}>{t('toolbox.videoWorkbench.retry')}</Button>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+          <div className='h-full w-340px shrink-0' style={{ borderLeft: '1px solid var(--centaur-line)' }}>
+            <VideoAgentChat control={videoControlRef} />
+          </div>
         </div>
       </div>
     );
@@ -715,8 +736,8 @@ const ToolboxPage: React.FC<ToolboxPageProps> = ({ mode = 'toolbox' }) => {
                     title={t('toolbox.videoWorkbench.title')}
                     desc={t('toolbox.videoWorkbench.cardDesc')}
                     icon={<EditMovie size={24} />}
-                    meta={t('toolbox.categories.workbench')}
-                    chips={[t('toolbox.videoWorkbench.title')]}
+                    meta={t('toolbox.videoWorkbench.category')}
+                    chips={[]}
                     onOpen={openVideoWorkbench}
                   />
                 )}

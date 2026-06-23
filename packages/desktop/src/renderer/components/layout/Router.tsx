@@ -29,10 +29,25 @@ const WorkbenchPage = React.lazy(() => import('@renderer/pages/workbench'));
 const AdvisorsPage = React.lazy(() => import('@renderer/pages/advisors/AdvisorsPage'));
 const ContentHubPage = React.lazy(() => import('@renderer/pages/contentHub'));
 
+function isDynamicImportFetchError(error: Error): boolean {
+  return /Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module/i.test(
+    error.message
+  );
+}
+
 /** Shown in place of a crashed page (instead of blanking the whole app). */
 const RouteErrorFallback: React.FC<{ error: Error; onRetry: () => void }> = ({ error, onRetry }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const shouldReload = isDynamicImportFetchError(error);
+  const handleRetry = () => {
+    if (shouldReload) {
+      window.location.reload();
+      return;
+    }
+    onRetry();
+  };
+
   return (
     <div className='flex h-full w-full items-center justify-center p-24px'>
       <Result
@@ -44,7 +59,7 @@ const RouteErrorFallback: React.FC<{ error: Error; onRetry: () => void }> = ({ e
           </span>
         }
         extra={[
-          <Button key='retry' type='primary' onClick={onRetry}>
+          <Button key='retry' type='primary' onClick={handleRetry}>
             {t('common.routeError.retry', { defaultValue: '重试' })}
           </Button>,
           <Button key='home' onClick={() => navigate('/guid')}>

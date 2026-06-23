@@ -13,7 +13,7 @@ import { captureBackendStartupFailure, initSentry, scheduleStartupLogReport, set
 initSentry();
 
 import './process/utils/configureConsoleLog';
-import { app, BrowserWindow, ipcMain, nativeImage, powerMonitor, session } from 'electron';
+import { app, BrowserWindow, ipcMain, nativeImage, powerMonitor, protocol, session } from 'electron';
 import fixPath from 'fix-path';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -223,6 +223,71 @@ let disposeCronResumeListener: (() => void) | null = null;
 // Flag tracking whether the backend subprocess started successfully. Read by
 // the deferred runBackendMigrations trigger in createWindow().
 let backendStartedOk = false;
+
+const IMAGE_WORKBENCH_PROTOCOL = 'centaur-image-workbench';
+
+function getImageWorkbenchRoot(): string {
+  if (app.isPackaged) {
+    return path.join(__dirname, '../renderer/centaur-image-workbench');
+  }
+  return path.resolve(process.cwd(), 'public/centaur-image-workbench');
+}
+
+function getStaticContentType(filePath: string): string {
+  const ext = path.extname(filePath).toLowerCase();
+  switch (ext) {
+    case '.html':
+      return 'text/html; charset=utf-8';
+    case '.js':
+      return 'text/javascript; charset=utf-8';
+    case '.css':
+      return 'text/css; charset=utf-8';
+    case '.json':
+    case '.webmanifest':
+      return 'application/json; charset=utf-8';
+    case '.svg':
+      return 'image/svg+xml';
+    case '.png':
+      return 'image/png';
+    case '.jpg':
+    case '.jpeg':
+      return 'image/jpeg';
+    case '.webp':
+      return 'image/webp';
+    case '.woff':
+      return 'font/woff';
+    case '.woff2':
+      return 'font/woff2';
+    case '.ttf':
+      return 'font/ttf';
+    default:
+      return 'application/octet-stream';
+  }
+}
+
+function registerImageWorkbenchProtocol(): void {
+  protocol.handle(IMAGE_WORKBENCH_PROTOCOL, async (request) => {
+    const root = getImageWorkbenchRoot();
+    const url = new URL(request.url);
+    const requestedPath = decodeURIComponent(url.pathname.replace(/^\/+/, '')) || 'index.html';
+    const filePath = path.resolve(root, requestedPath);
+
+    if (filePath !== root && !filePath.startsWith(`${root}${path.sep}`)) {
+      return new Response('Forbidden', { status: 403 });
+    }
+
+    try {
+      const data = await fs.promises.readFile(filePath);
+      return new Response(data, {
+        headers: {
+          'Content-Type': getStaticContentType(filePath),
+        },
+      });
+    } catch {
+      return new Response('Not Found', { status: 404 });
+    }
+  });
+}
 let backendStartupFailed = false;
 let backendStartupFailureInfo: BackendStartupFailureInfo | null = null;
 let rendererInitialLanguage: string | null = null;
@@ -538,6 +603,7 @@ const handleAppReady = async (): Promise<void> => {
   const t0 = performance.now();
   const mark = (label: string) => console.log(`[AionUi:ready] ${label} +${Math.round(performance.now() - t0)}ms`);
   mark('start');
+  registerImageWorkbenchProtocol();
 
   // Grant microphone / audio capture so voice input works natively (this is the
   // whole point of the distributed client — a LAN browser over HTTP can't).
@@ -558,7 +624,7 @@ const handleAppReady = async (): Promise<void> => {
   // The app's default session is untouched, so the blast radius is limited to that sandbox.
   try {
     const workbenchSession = session.fromPartition('persist:centaur-image-workbench');
-    workbenchSession.webRequest.onHeadersReceived({ urls: ['https://*/*'] }, (details, callback) => {
+    workbenchSession.webRequest.onHeadersReceived({ urls: ['http://*/*', 'https://*/*'] }, (details, callback) => {
       const responseHeaders: Record<string, string[]> = {};
       for (const [key, value] of Object.entries(details.responseHeaders || {})) {
         if (/^access-control-allow-/i.test(key)) continue;
@@ -567,7 +633,10 @@ const handleAppReady = async (): Promise<void> => {
       responseHeaders['Access-Control-Allow-Origin'] = ['*'];
       responseHeaders['Access-Control-Allow-Methods'] = ['GET, POST, PUT, PATCH, DELETE, OPTIONS'];
       responseHeaders['Access-Control-Allow-Headers'] = ['*'];
-      callback({ responseHeaders });
+      callback({
+        responseHeaders,
+        statusLine: details.method === 'OPTIONS' ? 'HTTP/1.1 204 No Content' : undefined,
+      });
     });
   } catch (e) {
     console.warn('[AionUi] Failed to set image-workbench CORS shim:', e);

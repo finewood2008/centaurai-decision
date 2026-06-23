@@ -3,7 +3,7 @@
   "subtitle": "常用圖片 AI 工作流，填寫表單即可生成圖片、海報、證件照和商品圖。",
   "workbench": {
     "title": "AI 工作台",
-    "subtitle": "把常用 AI 能力按業務場景整理成工作台，目前包含圖片工作台和香港報稅工作台。",
+    "subtitle": "把常用 AI 能力按業務場景整理成工作台，目前包含圖片工作台和影片工作台。",
     "searchPlaceholder": "搜尋工作台或工具",
     "empty": "沒有符合目前篩選條件的工作台或工具。"
   },
@@ -14,12 +14,20 @@
     "empty": "暫無可用的圖片處理能力。"
   },
   "videoWorkbench": {
-    "title": "半人馬視訊工作台",
+    "title": "半人馬AI視訊工作台",
     "subtitle": "本地優先的瀏覽器影片編輯器 —— 匯入素材、時間軸剪輯、GPU 合成、匯出 MP4/WebM,全程在本機完成。",
     "cardDesc": "半人馬自有的影片剪輯工作台:匯入片段、時間軸編輯、加特效並匯出,全部本地執行。",
     "starting": "正在啟動視訊工作台…",
     "startFailed": "無法連接視訊工作台,請確認本地影片服務已啟動。",
-    "retry": "重試"
+    "retry": "重試",
+    "category": "視訊工作台"
+  },
+  "videoAgent": {
+    "title": "AI 助手",
+    "agent": "智能體",
+    "placeholder": "告訴 AI 你想怎麼剪…",
+    "empty": "選一個智能體,用自然語言描述剪輯需求,它會直接操作時間軸。",
+    "thinking": "處理中…"
   },
   "agent": "執行 Agent",
   "agentPlaceholder": "選擇一個 Agent",
@@ -80,10 +88,6 @@
     "photoRestore": {
       "title": "老照片修復",
       "desc": "修復增強老照片,可選上色。"
-    },
-    "hkTaxWorkbench": {
-      "title": "香港報稅工作台",
-      "desc": "調用 LedgerLens 與本機 CLI，將香港銀行月結單整理成報稅底稿 Excel。"
     }
   },
   "fields": {
@@ -190,50 +194,6 @@
     },
     "restoreColorize": {
       "label": "上色"
-    },
-    "hkClientName": {
-      "label": "客戶名稱",
-      "placeholder": "例如：某某貿易有限公司"
-    },
-    "hkFilingYear": {
-      "label": "報稅年度",
-      "placeholder": "例如：2025/26 或 2025"
-    },
-    "hkWorkspacePath": {
-      "label": "LedgerLens 本機目錄",
-      "placeholder": "例如：~/Documents/Aistation/ledgerlens"
-    },
-    "hkModule": {
-      "label": "處理模組"
-    },
-    "hkWorkflowMode": {
-      "label": "處理方式"
-    },
-    "hkBankCode": {
-      "label": "銀行 / 平台"
-    },
-    "hkLlmBackend": {
-      "label": "抽取後端"
-    },
-    "hkStatementPdfs": {
-      "label": "銀行月結單 PDF",
-      "placeholder": "選擇同一銀行的一份或多份 PDF"
-    },
-    "hkExtractJson": {
-      "label": "已抽取 JSON",
-      "placeholder": "選擇 LedgerLens dump-json 檔案"
-    },
-    "hkDocumentFiles": {
-      "label": "合約 / 發票 / 收據檔案",
-      "placeholder": "選擇 PDF、Word、Excel、圖片或 txt 檔案"
-    },
-    "hkOutputName": {
-      "label": "輸出檔名",
-      "placeholder": "例如：客戶名_2025_香港報稅明細帳.xlsx"
-    },
-    "hkExtraNotes": {
-      "label": "補充要求",
-      "placeholder": "例如：只處理港幣帳戶、保留原始幣種、需要產生複核摘要…"
     }
   },
   "options": {
@@ -323,35 +283,6 @@
     "restoreColorize": {
       "keep": "保持原樣",
       "colorize": "自動上色"
-    },
-    "hkModule": {
-      "bankLedger": "銀行月結單 → 審計級明細帳",
-      "documents": "合約 / 發票抽取 → 三表覆核工作簿"
-    },
-    "hkWorkflowMode": {
-      "parse": "解析 PDF 並產生 Excel",
-      "fromJson": "用 JSON 直接產生 Excel",
-      "demo": "示範資料試跑"
-    },
-    "hkBankCode": {
-      "auto": "自動識別",
-      "hsbc": "滙豐銀行 hsbc",
-      "ocbc": "華僑銀行 ocbc",
-      "hangseng": "恆生銀行 hangseng",
-      "boc": "中銀香港 boc",
-      "scb": "渣打銀行 scb",
-      "citi": "花旗銀行 citi",
-      "dbs": "星展銀行 dbs",
-      "payoneer": "Payoneer",
-      "worldfirst": "萬里匯 worldfirst",
-      "other": "其它銀行 other"
-    },
-    "hkLlmBackend": {
-      "auto": "自動偵測",
-      "mock": "mock 離線佔位",
-      "anthropic": "Anthropic / Claude",
-      "openai": "OpenAI 相容",
-      "cli": "本機 Claude CLI"
     }
   },
   "searchPlaceholder": "搜尋圖片工具",

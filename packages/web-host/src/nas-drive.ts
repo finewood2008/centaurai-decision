@@ -664,7 +664,7 @@ export async function indexNasFolder(
     if (await deleteVectorDoc(endpoint, docId)) pending.delete(docId);
     else pending.add(docId);
   };
-  for (const docId of [...pending]) await orphan(docId);
+  for (const docId of Array.from(pending)) await orphan(docId);
 
   const seen = new Set<string>();
   for (const f of files) {
