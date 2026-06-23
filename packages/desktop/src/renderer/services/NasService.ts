@@ -152,23 +152,49 @@ export async function moveNasEntry(fromRel: string, toRel: string): Promise<void
   if (!resp.ok) throw new Error(`nas move failed: ${resp.status}`);
 }
 
-/** Upload OS/browser files into directory `parentRel`. */
-export async function uploadNasFiles(parentRel: string, files: File[]): Promise<void> {
-  for (const file of files) {
-    const localPath = (file as File & { path?: string }).path;
-    if (isAdminElectron() && localPath) {
-      await ipcBridge.nasDriveLocal.uploadFromPath.invoke({ path: parentRel, sourcePath: localPath, name: file.name });
-      continue;
-    }
-    const base = await resolveBase();
-    const resp = await fetch(
-      `${base}/api/nas/upload?path=${encodeURIComponent(parentRel)}&name=${encodeURIComponent(file.name)}`,
-      {
-        method: 'POST',
-        headers: { 'content-type': 'application/octet-stream' },
-        body: file,
-      }
-    );
-    if (!resp.ok) throw new Error(`nas upload failed: ${resp.status}`);
+/**
+ * Resolve a dropped/selected File to its on-disk path in Electron. `File.path`
+ * was removed in Electron 32+, so the admin path MUST go through
+ * webUtils.getPathForFile (exposed as window.electronAPI.getPathForFile);
+ * `File.path` remains only as a legacy fallback.
+ */
+function localPathOf(file: File): string | undefined {
+  try {
+    const viaApi = window.electronAPI?.getPathForFile?.(file);
+    if (viaApi) return viaApi;
+  } catch {
+    // getPathForFile throws for non-OS File objects — fall through.
   }
+  return (file as File & { path?: string }).path || undefined;
+}
+
+/**
+ * Upload OS/browser files into directory `parentRel`, one at a time (sequential
+ * avoids saturating the NAS with many concurrent multi-GB streams). Every file
+ * is attempted; if any fail the count is thrown so the caller can report it.
+ */
+export async function uploadNasFiles(parentRel: string, files: File[]): Promise<void> {
+  const failed: string[] = [];
+  for (const file of files) {
+    try {
+      const localPath = isAdminElectron() ? localPathOf(file) : undefined;
+      if (localPath) {
+        await ipcBridge.nasDriveLocal.uploadFromPath.invoke({
+          path: parentRel,
+          sourcePath: localPath,
+          name: file.name,
+        });
+        continue;
+      }
+      const base = await resolveBase();
+      const resp = await fetch(
+        `${base}/api/nas/upload?path=${encodeURIComponent(parentRel)}&name=${encodeURIComponent(file.name)}`,
+        { method: 'POST', headers: { 'content-type': 'application/octet-stream' }, body: file }
+      );
+      if (!resp.ok) throw new Error(String(resp.status));
+    } catch {
+      failed.push(file.name);
+    }
+  }
+  if (failed.length) throw new Error(`UPLOAD_FAILED:${failed.length}/${files.length}`);
 }

@@ -136,13 +136,26 @@ async function isRealContained(rootDir: string, full: string): Promise<boolean> 
 
 /** Collapse a user-supplied name to a safe single path segment. */
 function sanitizeSegment(name: string): string {
-  const base = path.basename(name).replace(UNSAFE_NAME_CHARS, '_').replace(/^\.+/, '').trim();
+  // Trim FIRST, then strip leading/trailing dots, so a whitespace-padded
+  // "  .. " can never survive as a relative segment.
+  const base = path
+    .basename(name)
+    .replace(UNSAFE_NAME_CHARS, '_')
+    .trim()
+    .replace(/^\.+|\.+$/g, '')
+    .trim();
   return base || 'untitled';
 }
 
+/**
+ * True if `p` already names something on disk. Uses lstat (NOT stat) so a
+ * symlink — even a broken one pointing outside the root — counts as occupied.
+ * Critical: were this stat(), a broken in-root symlink would look "free" and an
+ * upload would be written THROUGH it to outside the root.
+ */
 async function exists(p: string): Promise<boolean> {
   try {
-    await fs.promises.stat(p);
+    await fs.promises.lstat(p);
     return true;
   } catch {
     return false;
@@ -232,8 +245,11 @@ export async function nasRemove(rootDir: string, relPath: string | null | undefi
   const realRoot = await fs.promises.realpath(path.resolve(rootDir));
   const trash = path.join(realRoot, TRASH_DIR);
   await fs.promises.mkdir(trash, { recursive: true });
-  const stamp = `${Date.now()}-${crypto.randomBytes(3).toString('hex')}`;
-  await fs.promises.rename(real, path.join(trash, `${stamp}__${path.basename(real)}`));
+  // uniqueTarget + a wide random token so a second deletion of a same-named
+  // file in the same millisecond can never clobber the earlier one in trash.
+  const stamp = `${Date.now()}-${crypto.randomBytes(6).toString('hex')}`;
+  const dest = await uniqueTarget(trash, `${stamp}__${path.basename(real)}`);
+  await fs.promises.rename(real, dest);
   return true;
 }
 
@@ -246,7 +262,9 @@ export async function nasMove(rootDir: string, fromRel: string, toRel: string): 
   if (destParent == null) return false;
   const safe = sanitizeSegment(name);
   let dest = path.join(destParent, safe);
-  if (path.resolve(dest) === src) return true; // no-op rename
+  if (dest === src) return true; // no-op rename
+  // Refuse moving a directory into itself or a descendant (rename would EINVAL).
+  if (destParent === src || destParent.startsWith(src + path.sep)) return false;
   if (await exists(dest)) dest = await uniqueTarget(destParent, safe);
   await fs.promises.rename(src, dest);
   return true;
@@ -261,9 +279,20 @@ export async function nasUploadFromPath(
 ): Promise<string | null> {
   const parent = await resolveParentDir(rootDir, destParentRel);
   if (parent == null) return null;
-  const dest = await uniqueTarget(parent, sanitizeSegment(name));
-  await fs.promises.copyFile(sourcePath, dest);
-  return toRelPosix(rootDir, dest);
+  const safe = sanitizeSegment(name);
+  // COPYFILE_EXCL → never overwrite (and never copy THROUGH a symlink at the
+  // destination name); re-pick a free name on the rare concurrent collision.
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const dest = await uniqueTarget(parent, safe);
+    try {
+      await fs.promises.copyFile(sourcePath, dest, fs.constants.COPYFILE_EXCL);
+      return toRelPosix(rootDir, dest);
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code === 'EEXIST') continue;
+      throw err;
+    }
+  }
+  return null;
 }
 
 // ---------------------------------------------------------------------------
@@ -516,21 +545,43 @@ export async function handleNasUpload(
     sendJson(res, 403, { success: false, error: 'FORBIDDEN' });
     return;
   }
-  const full = await uniqueTarget(parent, sanitizeSegment(rawName));
 
-  // Stream the body to disk with a size cap. Manual write+backpressure (not
-  // pipe + a 'data' listener) — the static-server TCP peek/splice layer stalls
-  // when both are mixed (see shared-drive.ts).
+  // Atomically claim a fresh name with O_EXCL ('wx'). This both prevents two
+  // concurrent same-name uploads from clobbering each other (the loser retries)
+  // AND refuses to follow a symlink, so an upload can never be written THROUGH
+  // a dangling in-root symlink to a path outside the root.
+  const safe = sanitizeSegment(rawName);
+  let fh: Awaited<ReturnType<typeof fs.promises.open>> | null = null;
+  let full = '';
+  for (let attempt = 0; attempt < 5 && !fh; attempt++) {
+    full = await uniqueTarget(parent, safe);
+    try {
+      fh = await fs.promises.open(full, 'wx');
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code === 'EEXIST') continue;
+      sendJson(res, 500, { success: false, error: 'WRITE_ERROR' });
+      return;
+    }
+  }
+  if (!fh) {
+    sendJson(res, 500, { success: false, error: 'WRITE_ERROR' });
+    return;
+  }
+
+  // Stream the body to the claimed fd with a size cap. Manual write+backpressure
+  // (not pipe + a 'data' listener) — the static-server TCP peek/splice layer
+  // stalls when both are mixed (see shared-drive.ts). autoClose:false: we own
+  // the FileHandle and close it exactly once in the finally below.
   let size = 0;
   try {
     await new Promise<void>((resolve, reject) => {
-      const out = fs.createWriteStream(full);
+      const out = fs.createWriteStream('', { fd: fh.fd, autoClose: false });
       let settled = false;
       const fail = (err: Error) => {
         if (settled) return;
         settled = true;
         out.destroy();
-        fs.promises.rm(full, { force: true }).finally(() => reject(err));
+        reject(err);
       };
       out.on('error', fail);
       req.on('error', fail);
@@ -556,11 +607,13 @@ export async function handleNasUpload(
       });
     });
   } catch (err) {
+    await fh.close().catch(() => {});
     await fs.promises.rm(full, { force: true }).catch(() => {});
     const tooLarge = err instanceof Error && err.message === 'TOO_LARGE';
     sendJson(res, tooLarge ? 413 : 500, { success: false, error: tooLarge ? 'TOO_LARGE' : 'WRITE_ERROR' });
     return;
   }
+  await fh.close().catch(() => {});
   sendJson(res, 200, { success: true, data: { relPath: toRelPosix(rootDir, full), size } });
 }
 

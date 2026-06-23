@@ -245,6 +245,48 @@ describe('NAS e2e — write side (loopback)', () => {
     expect(await exists(path.join(nasRoot, 'readme.txt'))).toBe(true); // not moved out
   });
 
+  it('does NOT write through a dangling in-root symlink to outside the root', async () => {
+    // Plant a broken symlink inside the root pointing OUTSIDE (target absent).
+    const outsideTarget = path.join(path.dirname(nasRoot), 'VICTIM.txt');
+    let planted = true;
+    try {
+      await fs.symlink(outsideTarget, path.join(nasRoot, 'sneaky.txt'));
+    } catch {
+      planted = false;
+    }
+    if (!planted) return; // no symlink support
+    const { localUrl } = await start(false);
+    const up = await fetch(`${localUrl}/api/nas/upload?path=&name=sneaky.txt`, { method: 'POST', body: 'PWNED' });
+    // Whatever the status, nothing may be written outside the root.
+    expect(await exists(outsideTarget)).toBe(false);
+    if (up.ok) {
+      // If it "succeeded", the bytes must have landed on an auto-renamed file
+      // INSIDE the root, never via the symlink.
+      const rel = (await up.json()).data.relPath as string;
+      expect(rel).not.toBe('sneaky.txt');
+    }
+  });
+
+  it('keeps both deletions recoverable when same-named files are deleted in turn', async () => {
+    const { localUrl } = await start(false);
+    const del = async () => (await fetch(`${localUrl}/api/nas/remove?path=readme.txt`, { method: 'DELETE' })).status;
+    expect(await del()).toBe(200);
+    await fs.writeFile(path.join(nasRoot, 'readme.txt'), 'second version');
+    expect(await del()).toBe(200);
+    const trash = await fs.readdir(path.join(nasRoot, '.nas-trash'));
+    expect(trash.filter((n) => n.endsWith('__readme.txt')).length).toBe(2); // neither clobbered
+  });
+
+  it('refuses to move a folder into its own descendant', async () => {
+    const { localUrl } = await start(false);
+    await fetch(`${localUrl}/api/nas/mkdir?path=docs&name=sub2`, { method: 'POST' });
+    const mv = await fetch(`${localUrl}/api/nas/move?from=docs&to=${encodeURIComponent('docs/sub2/docs')}`, {
+      method: 'POST',
+    });
+    expect(mv.status).toBe(403);
+    expect(await exists(path.join(nasRoot, 'docs'))).toBe(true); // intact
+  });
+
   it('refuses to delete the root itself or escape via traversal', async () => {
     const { localUrl } = await start(false);
     const rmRoot = await fetch(`${localUrl}/api/nas/remove?path=`, { method: 'DELETE' });
