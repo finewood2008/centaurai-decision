@@ -824,7 +824,7 @@ const handleAppReady = async (): Promise<void> => {
             markBackendReady(backendPort, 'backendManager.lateReady');
           },
         },
-        resolvePreferredBackendPort()
+        resolvePreferredBackendPort(process.env, app.isPackaged)
       );
     },
     onStarted: (backendPort) => {

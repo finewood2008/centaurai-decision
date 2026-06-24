@@ -167,7 +167,8 @@ export async function fetchSharedAsFile(id: string, name: string): Promise<File>
   const url = await sharedDownloadUrl(id);
   const resp = await fetch(url);
   if (!resp.ok) throw new Error(`shared-drive fetch failed: ${resp.status}`);
-  return new File([await resp.blob()], name, { type: (await resp.blob()).type });
+  const blob = await resp.blob();
+  return new File([blob], name, { type: blob.type || 'application/octet-stream' });
 }
 
 /**

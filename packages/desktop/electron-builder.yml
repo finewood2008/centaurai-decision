@@ -123,6 +123,9 @@ extraResources:
   # Bundled App Store app payloads (electron shell + dist), copied to userData on install
   - from: resources/appstore-bundles
     to: appstore-bundles
+  # Bundled CentaurAI butler (管家) + its skills seeded into the backend on startup
+  - from: resources/butler
+    to: butler
   # Native client installers served by the WebUI at /api/downloads/* (not public)
   - from: resources/client-installers
     to: client-installers

@@ -233,7 +233,10 @@ export function removeChannelUserBindingForUser(
   return next;
 }
 
-export function removeChannelUserBindingFromAllUsers(bindings: ChannelBindings, channelUserId: string): ChannelBindings {
+export function removeChannelUserBindingFromAllUsers(
+  bindings: ChannelBindings,
+  channelUserId: string
+): ChannelBindings {
   const next: ChannelBindings = {};
   Object.entries(bindings).forEach(([userId, userIds]) => {
     const remaining = userIds.filter((id) => id !== channelUserId);
@@ -280,7 +283,10 @@ export function isChannelUserVisibleForUser(
   return isAdminFrontendUser(currentUserId);
 }
 
-function isChannelUserVisibleForCurrentUser(channelUserId: string, bindings: ChannelBindings = readChannelBindings()): boolean {
+function isChannelUserVisibleForCurrentUser(
+  channelUserId: string,
+  bindings: ChannelBindings = readChannelBindings()
+): boolean {
   return isChannelUserVisibleForUser(channelUserId, getCurrentFrontendUserId(), bindings);
 }
 

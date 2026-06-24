@@ -65,7 +65,11 @@ const Seat: React.FC<{ agent: TeamAgent; isLeader: boolean; active: boolean }> =
   );
 };
 
-const CompactSeat: React.FC<{ agent: TeamAgent; isLeader: boolean; active: boolean }> = ({ agent, isLeader, active }) => {
+const CompactSeat: React.FC<{ agent: TeamAgent; isLeader: boolean; active: boolean }> = ({
+  agent,
+  isLeader,
+  active,
+}) => {
   const { t } = useTranslation();
   return (
     <div

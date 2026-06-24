@@ -514,6 +514,23 @@ export async function startStaticServer(opts: StaticServerOptions): Promise<Stat
         return;
       }
 
+      // Provider config is admin/desktop-owned. WebUI browser clients may READ
+      // providers (the direct-connect "直连模型" flow reads provider.api_key to
+      // build its create payload) but must NOT mutate them — "read-only" is
+      // otherwise enforced only by hiding buttons in the renderer. Reject writes;
+      // let GET fall through to the generic proxy. Desktop bypasses this server.
+      // NOTE: GET still returns provider api_key to authenticated LAN clients —
+      // closing that leak needs a separate decision (it would break direct-connect
+      // unless the backend resolves keys server-side). Tracked as finding A1.
+      if (
+        req.method !== 'GET' &&
+        (req.url === '/api/providers' || req.url.startsWith('/api/providers?') || req.url.startsWith('/api/providers/'))
+      ) {
+        res.writeHead(403, { 'content-type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: 'READ_ONLY' }));
+        return;
+      }
+
       // /api/downloads/* — client installer downloads, served LOCALLY from the
       // bundled installer dir (NOT proxied to aioncore). Must come before the
       // generic /api/* proxy below.

@@ -61,7 +61,7 @@ export function createAuthGate(opts?: { secret?: Buffer; secure?: boolean }): Au
   const sign = (payload: string): string => createHmac('sha256', secret).update(payload).digest('base64url');
 
   const cookieAttrs = (maxAgeSec: number): string => {
-    const attrs = ['Path=/', 'HttpOnly', 'SameSite=Lax', `Max-Age=${maxAgeSec}`];
+    const attrs = ['Path=/', 'HttpOnly', 'SameSite=Strict', `Max-Age=${maxAgeSec}`];
     if (secure) attrs.push('Secure');
     return attrs.join('; ');
   };

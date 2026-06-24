@@ -90,8 +90,12 @@ import {
 import { fromBackendCompareResult, type RawCompareResult } from './fileSnapshotMapper';
 import {
   absoluteToRelativePath,
+  fromBackendDirOrFileList,
+  fromBackendFileMetadata,
   fromBackendWorkspaceFlatFiles,
   fromBackendWorkspaceList,
+  type RawDirOrFile,
+  type RawFileMetadata,
   type RawWorkspaceFlatFile,
 } from './workspaceMapper';
 import {
@@ -502,7 +506,8 @@ export const autoUpdate = {
 
 export const starOffice = {
   detectUrl: httpPost<{ url: string | null }, { preferredUrl?: string; force?: boolean; timeoutMs?: number }>(
-    '/api/star-office/detect'
+    '/api/star-office/detect',
+    (p) => ({ preferred_url: p.preferredUrl, force: p.force, timeout_ms: p.timeoutMs })
   ),
 };
 
@@ -542,7 +547,10 @@ export const imageGen = {
 // ---------------------------------------------------------------------------
 
 export const fs = {
-  getFilesByDir: httpPost<Array<IDirOrFile>, { dir: string; root: string }>('/api/fs/dir'),
+  getFilesByDir: withResponseMap(
+    httpPost<Array<RawDirOrFile>, { dir: string; root: string }>('/api/fs/dir'),
+    fromBackendDirOrFileList
+  ),
   listWorkspaceFiles: withResponseMap(
     httpPost<Array<RawWorkspaceFlatFile>, { root: string }>('/api/fs/list'),
     fromBackendWorkspaceFlatFiles
@@ -566,7 +574,10 @@ export const fs = {
     }
   >('/api/fs/zip'),
   cancelZip: httpPost<boolean, { request_id: string }>('/api/fs/zip/cancel'),
-  getFileMetadata: httpPost<IFileMetadata, { path: string; workspace?: string }>('/api/fs/metadata'),
+  getFileMetadata: withResponseMap(
+    httpPost<RawFileMetadata, { path: string; workspace?: string }>('/api/fs/metadata'),
+    fromBackendFileMetadata
+  ),
   copyFilesToWorkspace: httpPost<
     { copied_files: string[]; failed_files?: Array<{ path: string; error: string }> },
     { file_paths: string[]; workspace: string; source_root?: string }

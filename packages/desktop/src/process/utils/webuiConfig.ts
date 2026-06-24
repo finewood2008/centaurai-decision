@@ -86,8 +86,22 @@ async function resolveImageWorkbenchKey(): Promise<string | undefined> {
   return undefined;
 }
 
+type WebUIDesktopPreferences = {
+  enabled: boolean;
+  allowRemote: boolean;
+  port: number | undefined;
+};
+
 /**
  * Read WebUI preferences from the backend's /api/settings/client store.
+ *
+ * Returns `null` when the backend could not be reached — deliberately distinct
+ * from `{ enabled: false }`. Conflating the two was the bug behind "LAN access
+ * dies on every restart": at boot the backend is often still starting (health
+ * check pending) when auto-restore runs, the read threw, and the old code
+ * swallowed that as `enabled:false`, so the WebUI silently never came back up
+ * until the user re-toggled it in Settings. The caller now retries on `null`
+ * instead of giving up. See {@link restoreDesktopWebUIFromPreferences}.
  *
  * Historical note: this used to read from `ProcessConfig` (a local JSON file).
  * The renderer's `configService` was migrated to the backend HTTP store, but
@@ -97,11 +111,7 @@ async function resolveImageWorkbenchKey(): Promise<string | undefined> {
  * yet the Settings page still showed the Switch as "on" (reading the SQLite
  * value), so users clicked the saved URL and got ERR_CONNECTION_REFUSED.
  */
-async function readWebUIDesktopPreferences(): Promise<{
-  enabled: boolean;
-  allowRemote: boolean;
-  port: number | undefined;
-}> {
+async function readWebUIDesktopPreferences(): Promise<WebUIDesktopPreferences | null> {
   try {
     const settings = await httpRequest<Record<string, unknown>>('GET', '/api/settings/client');
     const enabled = settings?.[DESKTOP_WEBUI_ENABLED_KEY] === true;
@@ -109,9 +119,32 @@ async function readWebUIDesktopPreferences(): Promise<{
     const rawPort = settings?.[DESKTOP_WEBUI_PORT_KEY];
     const port = typeof rawPort === 'number' && rawPort > 0 ? rawPort : undefined;
     return { enabled, allowRemote, port };
-  } catch (error) {
-    console.error('[WebUI] Failed to read preferences from backend:', error);
-    return { enabled: false, allowRemote: false, port: undefined };
+  } catch {
+    // Backend not reachable yet (still starting) — signal "unknown", not "off".
+    return null;
+  }
+}
+
+/**
+ * Poll {@link readWebUIDesktopPreferences} until the backend answers or the
+ * deadline elapses. Auto-restore fires right after the main window is created,
+ * which on a normally-loaded machine reliably beats the backend's HTTP server
+ * coming up; a single read would lose that race every launch. We retry on a
+ * fixed interval so a slow backend start just delays restore rather than
+ * cancelling it. Returns the preferences once read, or `null` if the backend
+ * never became reachable within the deadline.
+ */
+async function readWebUIDesktopPreferencesWithRetry(
+  deadlineMs = 60_000,
+  intervalMs = 1_000
+): Promise<WebUIDesktopPreferences | null> {
+  const deadline = Date.now() + deadlineMs;
+  // First attempt is immediate; loop only if the backend is not up yet.
+  for (;;) {
+    const prefs = await readWebUIDesktopPreferences();
+    if (prefs !== null) return prefs;
+    if (Date.now() >= deadline) return null;
+    await new Promise((resolve) => setTimeout(resolve, intervalMs));
   }
 }
 
@@ -400,7 +433,15 @@ export function getDesktopWebUIStatus(): {
 }
 
 export const restoreDesktopWebUIFromPreferences = async (): Promise<void> => {
-  const { enabled, allowRemote, port } = await readWebUIDesktopPreferences();
+  const prefs = await readWebUIDesktopPreferencesWithRetry();
+  if (prefs === null) {
+    // Backend never answered within the deadline. Leave the persisted
+    // preference untouched (it may well be enabled) so the next launch retries,
+    // rather than disabling it and stranding LAN users permanently.
+    console.error('[WebUI] Auto-restore: backend did not become reachable in time; will retry next launch');
+    return;
+  }
+  const { enabled, allowRemote, port } = prefs;
   if (!enabled) return;
 
   const preferredPort = port ?? DEFAULT_WEBUI_PORT;

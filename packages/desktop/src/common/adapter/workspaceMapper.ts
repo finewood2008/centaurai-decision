@@ -4,10 +4,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { IDirOrFile, IWorkspaceFlatFile } from './ipcBridge';
+import type { IDirOrFile, IFileMetadata, IWorkspaceFlatFile } from './ipcBridge';
 
 type RawFsEntry = { name: string; type: string };
 export type RawWorkspaceFlatFile = { name: string; full_path: string; relative_path: string };
+
+/** Raw `/api/fs/metadata` response — snake_case, as serialized by the backend. */
+export type RawFileMetadata = {
+  name: string;
+  path: string;
+  size: number;
+  type: string;
+  last_modified: number;
+  is_directory?: boolean;
+};
 
 /** Raw `/api/fs/dir` tree node — snake_case, as serialized by the backend. */
 export type RawDirOrFile = {
@@ -118,4 +128,22 @@ export function fromBackendWorkspaceFlatFiles(raw: RawWorkspaceFlatFile[]): IWor
     fullPath: item.full_path,
     relativePath: item.relative_path,
   }));
+}
+
+/**
+ * Map a `/api/fs/metadata` response from the backend's snake_case
+ * (`last_modified`/`is_directory`) into the camelCase {@link IFileMetadata}
+ * shape every consumer reads. Without this, `metadata.lastModified` and
+ * `metadata.isDirectory` are `undefined`, so drag-import treats folders as
+ * files and the preview live-refresh mtime poll never triggers.
+ */
+export function fromBackendFileMetadata(raw: RawFileMetadata): IFileMetadata {
+  return {
+    name: raw.name,
+    path: raw.path,
+    size: raw.size,
+    type: raw.type,
+    lastModified: raw.last_modified,
+    ...(raw.is_directory !== undefined ? { isDirectory: raw.is_directory } : {}),
+  };
 }
