@@ -59,10 +59,20 @@ export type ManifestRejectReason =
   | 'app-type-unsupported'
   | 'bridge-kind-unsupported';
 
-/** Result of validating one raw manifest. */
-export type ManifestValidationResult =
-  | { ok: true; manifest: AppManifest }
-  | { ok: false; reason: ManifestRejectReason; message: string };
+/**
+ * Result of validating one raw manifest. Flat (not a discriminated union)
+ * on purpose: the project's `tsc` runs without `strictNullChecks`, where
+ * `if (!result.ok)` does NOT narrow a `{ok:true}|{ok:false}` union, so a flat
+ * shape with optional fields type-checks cleanly for consumers under both
+ * strict and non-strict settings. `manifest` is set iff `ok`; `reason`/`message`
+ * are set iff not `ok`.
+ */
+export type ManifestValidationResult = {
+  ok: boolean;
+  manifest?: AppManifest;
+  reason?: ManifestRejectReason;
+  message?: string;
+};
 
 const reject = (reason: ManifestRejectReason, message: string): ManifestValidationResult => ({
   ok: false,

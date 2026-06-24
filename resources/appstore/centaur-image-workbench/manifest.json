@@ -1,0 +1,47 @@
+{
+  "manifestVersion": "1.0",
+  "id": "centaur-image-workbench",
+  "version": "1.0.0",
+  "name": { "zh-CN": "半人马 AI 图形工作台", "en-US": "Centaur Image Studio" },
+  "description": { "zh-CN": "提示词出图与图像编辑", "en-US": "Prompt-to-image generation and editing" },
+  "icon": "pwa-icon.svg",
+  "category": "media",
+  "trust": "first-party",
+  "type": "static-spa",
+  "runtime": {
+    "bundleDir": ".",
+    "entry": "index.html",
+    "queryProfile": "profileName=TokenClub%20Image2&apiUrl=http%3A%2F%2F8.209.228.147%3A8080%2Fv1&model=gpt-image-2&apiMode=images&streamImages=false&streamPartialImages=0&disableServiceWorker=true"
+  },
+  "routePrefix": "/apps/centaur-image-workbench",
+  "keepAlive": false,
+  "permissions": { "network": "proxy-only", "spawnProcess": false, "agentOperable": true, "shell": false },
+  "credentials": [
+    {
+      "key": "imageApi",
+      "label": { "zh-CN": "图像模型 API Key", "en-US": "Image model API key" },
+      "providerCapability": "image-generation",
+      "sources": ["byok", "platform"],
+      "inject": { "via": "header", "name": "Authorization", "scheme": "Bearer" }
+    }
+  ],
+  "upstreams": { "image": { "originRef": "tokenclub-image", "credential": "imageApi" } },
+  "proxy": { "prefix": "/apps/centaur-image-workbench/__proxy" },
+  "agent": {
+    "bridge": { "kind": "backend-mcp" },
+    "tools": [
+      {
+        "name": "image_generate",
+        "action": "generate",
+        "description": "Generate an image from a text prompt",
+        "inputSchema": {
+          "type": "object",
+          "properties": { "prompt": { "type": "string" }, "size": { "type": "string" } },
+          "required": ["prompt"]
+        },
+        "requiresAppOpen": false,
+        "timeoutMs": 120000
+      }
+    ]
+  }
+}

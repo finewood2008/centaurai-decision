@@ -117,6 +117,9 @@ extraResources:
   # Bundled expert library (agency advisors) seeded into the backend on startup
   - from: resources/experts
     to: experts
+  # Bundled App Store first-party app manifests (scanned by the appstore registry)
+  - from: resources/appstore
+    to: appstore
   # Native client installers served by the WebUI at /api/downloads/* (not public)
   - from: resources/client-installers
     to: client-installers
