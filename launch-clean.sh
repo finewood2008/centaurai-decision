@@ -33,6 +33,8 @@ cd /home/user/桌面/centaurai-aionui || exit 1
 export PATH="$HOME/.bun/bin:$PATH"
 export HTTP_PROXY=http://127.0.0.1:7897 HTTPS_PROXY=http://127.0.0.1:7897 ALL_PROXY=socks://127.0.0.1:7897 NO_PROXY=localhost,127.0.0.1,::1
 export http_proxy=http://127.0.0.1:7897 https_proxy=http://127.0.0.1:7897 all_proxy=socks://127.0.0.1:7897 no_proxy=localhost,127.0.0.1,::1
+# App Store standalone-app installers (per-OS), served to LAN users via /api/appstore/downloads/*
+export AIONUI_APPSTORE_INSTALLER_DIR="$HOME/.config/CentaurAI-Dev/appstore-installers"
 
 LOG="/home/user/桌面/centaurai-aionui/nohup.out"
 
