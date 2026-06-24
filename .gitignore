@@ -219,3 +219,6 @@ graphify-out/
 .graphify_python
 
 .snow/
+
+# Runtime launch log (launch-clean.sh) — never commit
+nohup.out
