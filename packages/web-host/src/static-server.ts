@@ -37,6 +37,7 @@ import {
   handleNasUpload,
 } from './nas-drive.js';
 import { handleImageWorkbenchProxy, handleImageWorkbenchStatic } from './image-workbench.js';
+import { handleVideoWorkbenchProxy } from './video-workbench.js';
 import { type AuthGate, createAuthGate } from './webui-auth-gate.js';
 
 export type StaticServerOptions = {
@@ -71,6 +72,12 @@ export type StaticServerOptions = {
    * browser. Omit to pass the client's Authorization through instead.
    */
   imageKey?: string;
+  /**
+   * Origin of the host's opencut server (run with basePath=/workbench/video),
+   * reverse-proxied at /workbench/video/* for browser/LAN users. Defaults to
+   * http://localhost:3000. Omit to use the default / env override.
+   */
+  videoUpstreamUrl?: string;
 };
 
 export type StaticServerHandle = {
@@ -594,6 +601,13 @@ export async function startStaticServer(opts: StaticServerOptions): Promise<Stat
       }
       if (req.url.startsWith('/workbench/image/') || req.url === '/workbench/image') {
         await handleImageWorkbenchStatic(req, res, imageWorkbenchDir);
+        return;
+      }
+
+      // /workbench/video/* — reverse proxy to the host opencut server (Next.js
+      // with basePath=/workbench/video). The full path is forwarded unchanged.
+      if (req.url.startsWith('/workbench/video/') || req.url === '/workbench/video') {
+        handleVideoWorkbenchProxy(req, res, opts.videoUpstreamUrl);
         return;
       }
 

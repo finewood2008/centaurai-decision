@@ -23,6 +23,11 @@ const VIDEO_DIR = '/home/user/opencut-classic/apps/web';
 const BUN_BIN = '/home/user/.bun/bin/bun';
 const VIDEO_PORT = 3000;
 const VIDEO_URL = `http://localhost:${VIDEO_PORT}`;
+// opencut runs under a subpath (Next basePath) so ONE instance works both in the
+// desktop <webview> (localhost:3000/workbench/video/...) and behind the WebUI
+// reverse proxy for LAN/browser users (/workbench/video/* → this server).
+const VIDEO_BASE_PATH = '/workbench/video';
+const VIDEO_HEALTH_URL = `${VIDEO_URL}${VIDEO_BASE_PATH}/api/health`;
 const READY_TIMEOUT_MS = 60_000;
 
 let child: ChildProcess | null = null;
@@ -30,8 +35,11 @@ let startInflight: Promise<IVideoStudioStatus> | null = null;
 
 async function isHealthy(): Promise<boolean> {
   try {
-    const res = await fetch(`${VIDEO_URL}/`, { signal: AbortSignal.timeout(1500) });
-    return res.status < 500;
+    // Probe the basePath health route: 200 only when a basePath-configured
+    // instance is up (a non-basePath instance answers 404 here), so we don't
+    // mistake the old root-served opencut for a ready one.
+    const res = await fetch(VIDEO_HEALTH_URL, { signal: AbortSignal.timeout(1500) });
+    return res.ok;
   } catch {
     return false;
   }
@@ -75,7 +83,13 @@ async function startVideoStudio(): Promise<IVideoStudioStatus> {
   if (!child || child.killed) {
     const proc = spawn(BUN_BIN, ['run', 'dev'], {
       cwd: VIDEO_DIR,
-      env: { ...process.env, PORT: String(VIDEO_PORT), NODE_ENV: 'development' },
+      env: {
+        ...process.env,
+        PORT: String(VIDEO_PORT),
+        NODE_ENV: 'development',
+        OPENCUT_BASE_PATH: VIDEO_BASE_PATH,
+        NEXT_PUBLIC_BASE_PATH: VIDEO_BASE_PATH,
+      },
       stdio: 'ignore',
     });
     child = proc;

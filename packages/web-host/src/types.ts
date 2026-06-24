@@ -45,6 +45,8 @@ export type WebHostOptions = {
   imageWorkbenchDir?: string;
   /** Server-held image API key, injected by the /workbench/image/__proxy/* proxy. */
   imageKey?: string;
+  /** Host opencut origin reverse-proxied at /workbench/video/* (default localhost:3000). */
+  videoUpstreamUrl?: string;
   dataDir?: string;
   logDir?: string;
   dirs?: BackendSystemDirs;

@@ -79,6 +79,7 @@ export async function startWebHost(opts: WebHostOptions): Promise<WebHostHandle>
       nasRootDir: opts.nasRootDir,
       imageWorkbenchDir: opts.imageWorkbenchDir,
       imageKey: opts.imageKey,
+      videoUpstreamUrl: opts.videoUpstreamUrl,
     });
   } catch (err) {
     // If static-server fails, clean up backend

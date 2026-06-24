@@ -679,6 +679,10 @@ const ElectronWebviewHost: React.FC<WebviewHostProps> = ({
  * Image workbench: `centaur-image-workbench://app/index.html?...` →
  * `<origin>/workbench/image/index.html?...`, with the in-app `apiUrl` repointed
  * at the same-origin key-injecting proxy (so no key travels through the browser).
+ *
+ * Video workbench: `http://localhost:3000/workbench/video/...` (the host opencut,
+ * run with basePath) → `<origin>/workbench/video/...`, served same-origin by the
+ * WebUI reverse proxy (localhost:3000 would be the browser's OWN machine).
  */
 export function adaptWorkbenchUrlForBrowser(rawUrl: string): string | null {
   if (rawUrl.startsWith('centaur-image-workbench://')) {
@@ -687,6 +691,10 @@ export function adaptWorkbenchUrlForBrowser(rawUrl: string): string | null {
     const params = new URLSearchParams(qIndex >= 0 ? rawUrl.slice(qIndex + 1) : '');
     params.set('apiUrl', `${origin}/workbench/image/__proxy/v1`);
     return `${origin}/workbench/image/index.html?${params.toString()}`;
+  }
+  if (rawUrl.startsWith('http://localhost:3000/workbench/video')) {
+    const u = new URL(rawUrl);
+    return `${window.location.origin}${u.pathname}${u.search}`;
   }
   return null;
 }
