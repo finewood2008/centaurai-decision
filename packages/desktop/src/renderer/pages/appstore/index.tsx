@@ -45,6 +45,107 @@ const embedUrlFor = (app: IAppStoreApp): string | null => {
   return null;
 };
 
+/** Warm-brand accent palette, picked deterministically per app id. */
+type Tone = { surface: string; icon: string; rail: string };
+const TONES: Tone[] = [
+  { surface: 'var(--centaur-clay-tint)', icon: 'var(--centaur-clay-deep)', rail: 'var(--centaur-clay)' },
+  { surface: 'var(--centaur-gold-tint)', icon: 'var(--centaur-gold-deep)', rail: 'var(--centaur-gold)' },
+  { surface: 'var(--centaur-green-tint)', icon: 'var(--centaur-green)', rail: 'var(--centaur-green)' },
+];
+const toneFor = (id: string): Tone => {
+  let hash = 0;
+  for (const ch of id) hash += ch.charCodeAt(0);
+  return TONES[hash % TONES.length];
+};
+
+const AppCard: React.FC<{
+  app: IAppStoreApp;
+  lang: string;
+  openLabel: string;
+  byokLabel: string;
+  onOpen: () => void;
+}> = ({ app, lang, openLabel, byokLabel, onOpen }) => {
+  const tone = toneFor(app.id);
+  return (
+    <div
+      role='button'
+      tabIndex={0}
+      onClick={onOpen}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onOpen();
+        }
+      }}
+      className='centaur-liftable group flex cursor-pointer flex-col overflow-hidden outline-none'
+      style={{
+        background: 'var(--centaur-card)',
+        border: '1px solid var(--centaur-line)',
+        borderRadius: 'var(--centaur-radius)',
+        boxShadow: 'var(--centaur-shadow-sm)',
+      }}
+    >
+      <div className='relative flex items-center gap-12px p-16px' style={{ background: tone.surface }}>
+        <div className='absolute bottom-0 left-0 h-3px w-full' style={{ background: tone.rail, opacity: 0.85 }} />
+        <div
+          className='flex h-46px w-46px shrink-0 items-center justify-center rounded-14px'
+          style={{ background: 'var(--centaur-card)', color: tone.icon, boxShadow: 'var(--centaur-shadow-sm)' }}
+        >
+          <Picture size={24} />
+        </div>
+        <div className='min-w-0 flex-1'>
+          <div className='truncate text-16px font-700 leading-22px' style={{ color: 'var(--centaur-ink)' }}>
+            {pickText(app.name, lang)}
+          </div>
+          <div
+            className='mt-4px inline-flex items-center rounded-8px px-7px py-1px text-11px font-500'
+            style={{
+              background: 'var(--centaur-card)',
+              color: 'var(--centaur-ink-mute)',
+              border: '1px solid var(--centaur-line)',
+            }}
+          >
+            {app.category}
+          </div>
+        </div>
+        <div
+          className='flex h-30px w-30px shrink-0 items-center justify-center rounded-10px transition-transform group-hover:translate-x-2px'
+          style={{ background: 'var(--centaur-card)', color: tone.icon }}
+        >
+          <ArrowRight size={15} />
+        </div>
+      </div>
+      <div className='flex flex-1 flex-col p-16px'>
+        <div
+          className='text-13px leading-20px line-clamp-2'
+          style={{ color: 'var(--centaur-ink-soft)', minHeight: 40 }}
+        >
+          {pickText(app.description, lang)}
+        </div>
+        <div
+          className='mt-14px flex items-center justify-between gap-10px pt-12px'
+          style={{ borderTop: '1px solid var(--centaur-line)' }}
+        >
+          <span
+            className='inline-flex items-center gap-5px truncate text-12px'
+            style={{ color: 'var(--centaur-ink-mute)' }}
+          >
+            <span className='h-6px w-6px rounded-full' style={{ background: tone.rail }} />
+            {byokLabel}
+          </span>
+          <span
+            className='inline-flex items-center gap-4px rounded-8px px-10px py-3px text-12px font-600 transition-colors'
+            style={{ background: tone.surface, color: tone.icon }}
+          >
+            {openLabel}
+            <ArrowRight size={12} />
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const AppStorePage: React.FC = () => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language;
@@ -72,7 +173,7 @@ const AppStorePage: React.FC = () => {
 
   if (openApp) {
     return (
-      <div className='flex h-full flex-col gap-16px p-24px'>
+      <div className='centaur-brand flex h-full flex-col gap-16px p-24px'>
         <div className='flex items-center gap-14px'>
           <Button shape='circle' icon={<Left />} onClick={() => setOpenApp(null)} />
           <div className='min-w-0'>
@@ -84,8 +185,13 @@ const AppStorePage: React.FC = () => {
         </div>
         {openUrl ? (
           <div
-            className='centaur-card relative w-full flex-1 overflow-hidden'
-            style={{ padding: 0, borderRadius: 'var(--centaur-radius-sm)', minHeight: 480 }}
+            className='relative w-full flex-1 overflow-hidden'
+            style={{
+              background: 'var(--centaur-card)',
+              border: '1px solid var(--centaur-line)',
+              borderRadius: 'var(--centaur-radius-sm)',
+              minHeight: 480,
+            }}
           >
             <WebviewHost
               url={openUrl}
@@ -103,17 +209,24 @@ const AppStorePage: React.FC = () => {
   }
 
   return (
-    <div className='flex h-full flex-col gap-20px overflow-auto p-24px'>
-      <div className='flex items-start gap-14px'>
-        <div className='centaur-mark h-52px w-52px shrink-0'>
+    <div className='centaur-brand mx-auto flex h-full w-full max-w-1080px flex-col gap-20px overflow-auto p-28px'>
+      <div className='flex items-start gap-16px pb-18px' style={{ borderBottom: '1px solid var(--centaur-line)' }}>
+        <div
+          className='flex h-54px w-54px shrink-0 items-center justify-center rounded-16px'
+          style={{
+            background: 'var(--centaur-clay-tint)',
+            color: 'var(--centaur-clay-deep)',
+            boxShadow: 'var(--centaur-shadow-sm)',
+          }}
+        >
           <Shop size={26} />
         </div>
         <div className='min-w-0'>
           <div className='centaur-eyebrow'>CENTAUR · APP STORE</div>
-          <div className='mt-2px text-26px font-900 leading-32px' style={{ color: 'var(--centaur-ink)' }}>
+          <div className='mt-2px text-28px font-900 leading-34px' style={{ color: 'var(--centaur-ink)' }}>
             {t('appstore.title')}
           </div>
-          <div className='mt-5px max-w-760px text-14px leading-21px' style={{ color: 'var(--centaur-ink-soft)' }}>
+          <div className='mt-6px max-w-720px text-14px leading-21px' style={{ color: 'var(--centaur-ink-soft)' }}>
             {t('appstore.subtitle')}
           </div>
         </div>
@@ -126,76 +239,16 @@ const AppStorePage: React.FC = () => {
       ) : apps.length === 0 ? (
         <Empty description={t('appstore.empty')} />
       ) : (
-        <div className='grid grid-cols-1 gap-16px sm:grid-cols-2 lg:grid-cols-3'>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 18 }}>
           {apps.map((app) => (
-            <Button
+            <AppCard
               key={app.id}
-              type='text'
-              className='centaur-card centaur-liftable group !h-auto !w-full !overflow-hidden !p-0 !text-left'
-              style={{ borderRadius: 'var(--centaur-radius)' }}
-              onClick={() => setOpenApp(app)}
-            >
-              <div className='flex min-h-200px w-full flex-col overflow-hidden'>
-                <div
-                  className='relative flex h-90px items-start justify-between gap-12px p-16px'
-                  style={{ background: 'var(--centaur-clay-tint)' }}
-                >
-                  <div className='centaur-rail absolute bottom-0 left-0 h-3px w-full' />
-                  <div className='flex min-w-0 items-center gap-12px'>
-                    <div
-                      className='flex h-46px w-46px shrink-0 items-center justify-center rounded-14px'
-                      style={{
-                        background: 'var(--centaur-card)',
-                        color: 'var(--centaur-clay-deep)',
-                        boxShadow: 'var(--centaur-shadow-sm)',
-                      }}
-                    >
-                      <Picture size={24} />
-                    </div>
-                    <div className='min-w-0'>
-                      <div className='truncate text-16px font-700 leading-22px' style={{ color: 'var(--centaur-ink)' }}>
-                        {pickText(app.name, lang)}
-                      </div>
-                      <div
-                        className='mt-4px inline-flex items-center rounded-8px px-7px py-1px text-11px font-500'
-                        style={{
-                          background: 'var(--centaur-card)',
-                          color: 'var(--centaur-ink-mute)',
-                          border: '1px solid var(--centaur-line)',
-                        }}
-                      >
-                        {app.category}
-                      </div>
-                    </div>
-                  </div>
-                  <div
-                    className='flex h-30px w-30px shrink-0 items-center justify-center rounded-10px transition-all group-hover:translate-x-2px'
-                    style={{ background: 'var(--centaur-card)', color: 'var(--centaur-clay)' }}
-                  >
-                    <ArrowRight size={15} />
-                  </div>
-                </div>
-                <div className='flex flex-1 flex-col p-16px'>
-                  <div
-                    className='min-h-42px text-13px leading-21px line-clamp-2'
-                    style={{ color: 'var(--centaur-ink-soft)' }}
-                  >
-                    {pickText(app.description, lang)}
-                  </div>
-                  <div
-                    className='mt-auto flex items-center justify-between gap-10px pt-12px'
-                    style={{ borderTop: '1px solid var(--centaur-line)' }}
-                  >
-                    <span className='truncate text-12px' style={{ color: 'var(--centaur-ink-mute)' }}>
-                      {t('appstore.byok')}
-                    </span>
-                    <span className='text-12px font-600' style={{ color: 'var(--centaur-clay)' }}>
-                      {t('appstore.open')}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </Button>
+              app={app}
+              lang={lang}
+              openLabel={t('appstore.open')}
+              byokLabel={t('appstore.byok')}
+              onOpen={() => setOpenApp(app)}
+            />
           ))}
         </div>
       )}
