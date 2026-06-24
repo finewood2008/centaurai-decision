@@ -1,0 +1,18 @@
+{
+  "name": "半人马 AI 图形工作台",
+  "short_name": "半人马图形",
+  "description": "半人马 AI 图形工作台 · 插入图像大模型 Key 即用的图像生成与编辑工作台",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F5F0E6",
+  "theme_color": "#C2693C",
+  "icons": [
+    {
+      "src": "./pwa-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

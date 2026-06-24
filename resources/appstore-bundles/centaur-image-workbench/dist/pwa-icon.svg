@@ -1,0 +1,36 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="ga" x1="80" y1="56" x2="432" y2="456" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#C2693C"/>
+      <stop offset="1" stop-color="#E3A24C"/>
+    </linearGradient>
+  </defs>
+  <rect x="32" y="32" width="448" height="448" rx="116" fill="url(#ga)"/>
+
+  <!-- mane (behind neck) -->
+  <path d="M201 200 C168 222 156 270 166 332 C184 300 192 256 218 218 Z" fill="#F6DCB8"/>
+  <path d="M226 188 C200 206 188 244 196 292 C212 266 220 236 244 210 Z" fill="#F6DCB8" opacity="0.85"/>
+
+  <!-- horse head, profile facing right -->
+  <path d="M178 408
+    C152 344 152 252 206 196
+    L230 150 L244 120 L262 158
+    L278 150 L292 122 L306 166
+    C342 182 374 216 390 260
+    L399 297
+    C397 312 389 320 374 320
+    L351 318
+    C339 333 322 341 300 341
+    C268 349 232 351 210 373
+    C198 384 189 396 178 408 Z" fill="#FFF8EC"/>
+
+  <!-- eye -->
+  <circle cx="322" cy="226" r="11" fill="#A24B22"/>
+  <!-- nostril -->
+  <ellipse cx="379" cy="298" rx="8" ry="6" fill="#A24B22"/>
+
+  <!-- image badge (sun + mountains = picture) bottom-right -->
+  <circle cx="392" cy="392" r="50" fill="#FFF8EC"/>
+  <circle cx="409" cy="375" r="8" fill="#C2693C"/>
+  <path d="M361 415 L384 388 L397 403 L411 385 L425 415 Z" fill="#C2693C"/>
+</svg>

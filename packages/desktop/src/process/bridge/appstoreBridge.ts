@@ -14,28 +14,50 @@
 
 import { app } from 'electron';
 import { spawn } from 'node:child_process';
-import { promises as fs } from 'node:fs';
+import { existsSync, promises as fs } from 'node:fs';
 import path from 'node:path';
 import { ipcBridge } from '@/common';
 import { getApps } from '@process/appstore/registry';
 import { listAppRecords, setAppInstalled } from '@process/appstore/appState';
 import { ProcessConfig } from '@process/utils/initStorage';
 
-/**
- * Per-app desktop launch bundle. `source` dirs (`copy`) are placed in the
- * managed install dir; `entry` is the Electron main run there. Dev paths for
- * now (a packaged bundle source replaces these later).
- */
-const APP_BUNDLES: Record<string, { source: string; copy: string[]; entry: string }> = {
-  'centaur-image-workbench': {
-    source: '/home/user/桌面/gpt_image_playground',
-    copy: ['electron', 'dist'],
-    entry: 'electron/main.cjs',
-  },
+/** The Electron entry within each app's bundle (for managed launch). */
+const APP_ENTRY: Record<string, string> = {
+  'centaur-image-workbench': 'electron/main.cjs',
 };
+
+/**
+ * Locate an app's bundled payload (electron shell + dist), shipped in
+ * resources/appstore-bundles/<id> (extraResources) so it's present on BOTH the
+ * admin desktop and the LAN client — "install" is a local copy, no server fetch.
+ */
+function resolveAppstoreBundleDir(id: string): string | null {
+  const candidates: string[] = [];
+  if (process.env.AIONUI_APPSTORE_BUNDLES_DIR) candidates.push(path.join(process.env.AIONUI_APPSTORE_BUNDLES_DIR, id));
+  const rp = (process as NodeJS.Process & { resourcesPath?: string }).resourcesPath;
+  if (rp) candidates.push(path.join(rp, 'appstore-bundles', id));
+  candidates.push(path.join(process.cwd(), 'resources', 'appstore-bundles', id));
+  for (const dir of candidates) {
+    if (existsSync(dir)) return dir;
+  }
+  return null;
+}
 
 function appInstallDir(id: string): string {
   return path.join(app.getPath('userData'), 'appstore-apps', id);
+}
+
+/** Copy an app's bundled payload into its default install dir and mark it installed. */
+async function installBundle(id: string): Promise<{ ok: boolean; error?: string }> {
+  const src = resolveAppstoreBundleDir(id);
+  if (!src) return { ok: false, error: 'NO_BUNDLE' };
+  const dest = appInstallDir(id);
+  await fs.rm(dest, { recursive: true, force: true });
+  await fs.mkdir(path.dirname(dest), { recursive: true });
+  await fs.cp(src, dest, { recursive: true });
+  await setAppInstalled(ProcessConfig, id, true);
+  console.info(`[AppStore] installed '${id}' → ${dest}`);
+  return { ok: true };
 }
 
 export function initAppstoreBridge(): void {
@@ -69,20 +91,10 @@ export function initAppstoreBridge(): void {
     }
   });
 
-  // Managed install — copy the app bundle into a default dir under userData.
+  // Managed install — copy the bundled app payload into a default dir under userData.
   ipcBridge.appstore.install.provider(async ({ id }) => {
-    const bundle = APP_BUNDLES[id];
-    if (!bundle) return { ok: false, error: 'NO_BUNDLE' };
     try {
-      const dest = appInstallDir(id);
-      await fs.rm(dest, { recursive: true, force: true });
-      await fs.mkdir(dest, { recursive: true });
-      for (const sub of bundle.copy) {
-        await fs.cp(path.join(bundle.source, sub), path.join(dest, sub), { recursive: true });
-      }
-      await setAppInstalled(ProcessConfig, id, true);
-      console.info(`[AppStore] installed '${id}' → ${dest}`);
-      return { ok: true };
+      return await installBundle(id);
     } catch (error) {
       console.error('[AppStore] install failed:', error);
       return { ok: false, error: String(error) };
@@ -90,15 +102,21 @@ export function initAppstoreBridge(): void {
   });
 
   // Managed launch — spawn the installed app as its own standalone window.
+  // Self-heals: if the payload is missing (stale install flag, deleted dir), it
+  // re-installs from the bundle first so "打开" always works.
   ipcBridge.appstore.launch.provider(async ({ id }) => {
-    const bundle = APP_BUNDLES[id];
-    if (!bundle) return { ok: false, error: 'NO_BUNDLE' };
+    const entry = APP_ENTRY[id];
+    if (!entry) return { ok: false, error: 'NO_BUNDLE' };
     try {
-      const entry = path.join(appInstallDir(id), bundle.entry);
-      await fs.access(entry);
+      const entryPath = path.join(appInstallDir(id), entry);
+      if (!existsSync(entryPath)) {
+        const reinstall = await installBundle(id);
+        if (!reinstall.ok) return reinstall;
+      }
+      await fs.access(entryPath);
       const env = { ...process.env };
       delete env.ELECTRON_RUN_AS_NODE; // ensure the child boots as an Electron app, not node
-      const child = spawn(process.execPath, [entry, '--no-sandbox', '--disable-gpu'], {
+      const child = spawn(process.execPath, [entryPath, '--no-sandbox', '--disable-gpu'], {
         detached: true,
         stdio: 'ignore',
         env,

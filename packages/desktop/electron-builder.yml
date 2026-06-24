@@ -120,6 +120,9 @@ extraResources:
   # Bundled App Store first-party app manifests (scanned by the appstore registry)
   - from: resources/appstore
     to: appstore
+  # Bundled App Store app payloads (electron shell + dist), copied to userData on install
+  - from: resources/appstore-bundles
+    to: appstore-bundles
   # Native client installers served by the WebUI at /api/downloads/* (not public)
   - from: resources/client-installers
     to: client-installers

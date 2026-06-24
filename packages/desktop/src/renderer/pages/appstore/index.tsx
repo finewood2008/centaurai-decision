@@ -57,8 +57,9 @@ const AppCard: React.FC<{
   t: TFn;
   desktop: boolean;
   busy: boolean;
-  onOpen: () => void;
-}> = ({ app, lang, t, desktop, busy, onOpen }) => {
+  onInstall: () => void;
+  onLaunch: () => void;
+}> = ({ app, lang, t, desktop, busy, onInstall, onLaunch }) => {
   const tone = toneFor(app.id);
   const artifacts: IAppStoreArtifact[] = app.artifacts || [];
   const comingSoon = artifacts.length === 0;
@@ -126,30 +127,37 @@ const AppCard: React.FC<{
             className='mt-14px flex flex-col gap-10px pt-12px'
             style={{ borderTop: '1px solid var(--centaur-line)' }}
           >
-            {desktop && (
-              <Button type='primary' long icon={<Play />} loading={busy} onClick={onOpen}>
-                {busy ? t('appstore.working') : t('appstore.openHere')}
-              </Button>
+            {desktop ? (
+              app.installed ? (
+                <Button type='primary' long icon={<Play />} loading={busy} onClick={onLaunch}>
+                  {busy ? t('appstore.working') : t('appstore.open')}
+                </Button>
+              ) : (
+                <Button type='primary' long icon={<Download />} loading={busy} onClick={onInstall}>
+                  {busy ? t('appstore.downloading') : t('appstore.download')}
+                </Button>
+              )
+            ) : (
+              <div
+                className='flex flex-wrap items-center gap-x-10px gap-y-4px text-12px'
+                style={{ color: 'var(--centaur-ink-mute)' }}
+              >
+                <span className='inline-flex items-center gap-4px'>
+                  <Download size={13} />
+                  {t('appstore.getInstaller')}
+                </span>
+                {artifacts.map((a) => (
+                  <a
+                    key={a.os}
+                    className='cursor-pointer font-600'
+                    style={{ color: tone.icon }}
+                    onClick={() => triggerDownload(app.id, a.file)}
+                  >
+                    {osLabel(a.os)}
+                  </a>
+                ))}
+              </div>
             )}
-            <div
-              className='flex flex-wrap items-center gap-x-10px gap-y-4px text-12px'
-              style={{ color: 'var(--centaur-ink-mute)' }}
-            >
-              <span className='inline-flex items-center gap-4px'>
-                <Download size={13} />
-                {t('appstore.getInstaller')}
-              </span>
-              {artifacts.map((a) => (
-                <a
-                  key={a.os}
-                  className='cursor-pointer font-600'
-                  style={{ color: tone.icon }}
-                  onClick={() => triggerDownload(app.id, a.file)}
-                >
-                  {osLabel(a.os)}
-                </a>
-              ))}
-            </div>
           </div>
         )}
       </div>
@@ -185,21 +193,32 @@ const AppStorePage: React.FC = () => {
     };
   }, [desktop]);
 
-  const handleOpen = useCallback(async (target: IAppStoreApp) => {
+  // Managed install: copy the bundled payload to the default dir; card then shows 打开.
+  const handleInstall = useCallback(async (target: IAppStoreApp) => {
     setBusy(target.id);
     try {
-      // Always (re)install the bundle into the managed dir — idempotent and cheap,
-      // and avoids relying on a possibly-stale installed flag.
-      const installed = await ipcBridge.appstore.install.invoke({ id: target.id });
-      if (!installed.ok) {
-        Message.error(installed.error || 'install failed');
+      const res = await ipcBridge.appstore.install.invoke({ id: target.id });
+      if (!res.ok) {
+        Message.error(res.error || 'install failed');
         return;
       }
       setApps((arr) => arr.map((a) => (a.id === target.id ? { ...a, installed: true } : a)));
-      const launched = await ipcBridge.appstore.launch.invoke({ id: target.id });
-      if (!launched.ok) Message.error(launched.error || 'launch failed');
     } catch (error) {
-      console.error('[AppStore] open failed', error);
+      console.error('[AppStore] install failed', error);
+      Message.error(String(error));
+    } finally {
+      setBusy((b) => (b === target.id ? null : b));
+    }
+  }, []);
+
+  // Managed launch: open the installed app as a standalone window (entry on the card).
+  const handleLaunch = useCallback(async (target: IAppStoreApp) => {
+    setBusy(target.id);
+    try {
+      const res = await ipcBridge.appstore.launch.invoke({ id: target.id });
+      if (!res.ok) Message.error(res.error || 'launch failed');
+    } catch (error) {
+      console.error('[AppStore] launch failed', error);
       Message.error(String(error));
     } finally {
       setBusy((b) => (b === target.id ? null : b));
@@ -246,7 +265,8 @@ const AppStorePage: React.FC = () => {
               t={t}
               desktop={desktop}
               busy={busy === app.id}
-              onOpen={() => handleOpen(app)}
+              onInstall={() => handleInstall(app)}
+              onLaunch={() => handleLaunch(app)}
             />
           ))}
         </div>
