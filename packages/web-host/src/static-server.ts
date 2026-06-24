@@ -19,7 +19,7 @@ import net, { type Socket } from 'node:net';
 import path from 'node:path';
 import serveHandler from 'serve-handler';
 import { handleDownloadGet, handleDownloadsList } from './downloads.js';
-import { handleAppDownloadGet, handleAppDownloadsList } from './app-downloads.js';
+import { handleAppDownloadGet, handleAppDownloadsList, handleAppstoreList } from './app-downloads.js';
 import {
   handleSharedCategories,
   handleSharedDownload,
@@ -535,6 +535,12 @@ export async function startStaticServer(opts: StaticServerOptions): Promise<Stat
       }
       if (req.url.startsWith('/api/appstore/downloads/get')) {
         await handleAppDownloadGet(req, res);
+        return;
+      }
+      // /api/appstore/list — app catalog for LAN/WebUI browsers (ipcBridge
+      // appstore.* providers live in the Electron main, unreachable from WebUI).
+      if (req.url.startsWith('/api/appstore/list')) {
+        await handleAppstoreList(req, res);
         return;
       }
 

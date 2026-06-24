@@ -167,10 +167,14 @@ const AppStorePage: React.FC = () => {
 
   useEffect(() => {
     let alive = true;
-    ipcBridge.appstore.list
-      .invoke()
+    // Desktop reaches the Electron-main provider via ipcBridge; LAN/WebUI browsers
+    // can't (ipcBridge routes to aioncore), so they fetch the catalog over HTTP.
+    const load: Promise<{ apps: IAppStoreApp[] }> = desktop
+      ? ipcBridge.appstore.list.invoke()
+      : fetch('/api/appstore/list').then((r) => r.json());
+    load
       .then((res) => {
-        if (alive) setApps(res.apps);
+        if (alive) setApps(res.apps || []);
       })
       .catch((error) => console.error('[AppStore] list failed', error))
       .finally(() => {
@@ -179,7 +183,7 @@ const AppStorePage: React.FC = () => {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [desktop]);
 
   const handleOpen = useCallback(async (target: IAppStoreApp) => {
     setBusy(target.id);
