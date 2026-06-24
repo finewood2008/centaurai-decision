@@ -14,6 +14,7 @@ import {
   LinkCloud,
   Puzzle,
   Robot,
+  Shop,
   Speed,
   System,
   User,
@@ -35,6 +36,7 @@ export const BUILTIN_TAB_IDS = [
   'appearance',
   'webui',
   'client',
+  'appstore',
   'users',
   'pet',
   'system',
@@ -125,6 +127,12 @@ const SettingsSider: React.FC<{ collapsed?: boolean; tooltipEnabled?: boolean }>
         icon: <Download />,
         path: 'client',
       },
+      appstore: {
+        id: 'appstore',
+        label: t('appstore.title'),
+        icon: <Shop />,
+        path: 'appstore',
+      },
       users: {
         id: 'users',
         label: t('settings.users'),
@@ -141,7 +149,9 @@ const SettingsSider: React.FC<{ collapsed?: boolean; tooltipEnabled?: boolean }>
     // so it's hidden on the desktop admin and shown only in browser mode.
     const result: SiderItem[] = BUILTIN_TAB_IDS.filter((id) =>
       id === 'client' ? !isDesktop : isDesktop || (id !== 'pet' && id !== 'users')
-    ).map((id) => builtinMap[id]);
+    )
+      .map((id) => builtinMap[id])
+      .filter((item): item is SiderItem => Boolean(item));
 
     // Extension tabs with position anchoring
     const beforeMap = new Map<string, IExtensionSettingsTab[]>();

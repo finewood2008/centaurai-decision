@@ -23,6 +23,13 @@ import { handleDownloadGet, handleDownloadsList } from './downloads.js';
 const APP_ID_RE = /^[a-z0-9-]+$/;
 
 /**
+ * Apps delisted from the App Store catalog. The image workbench is embedded
+ * inline (served at /workbench/image/*), not a download-gated store card.
+ * Mirror of STORE_HIDDEN_APP_IDS in the desktop appstoreBridge.
+ */
+const STORE_HIDDEN_APP_IDS = new Set<string>(['centaur-image-workbench']);
+
+/**
  * Locate the bundled App Store MANIFEST dir (resources/appstore). web-host runs
  * in the main process, so process.resourcesPath / cwd resolve like the desktop
  * registry. Env AIONUI_APPSTORE_DIR overrides.
@@ -54,9 +61,10 @@ export async function handleAppstoreList(_req: IncomingMessage, res: ServerRespo
         .map((e) => e.name)
         .sort();
       for (const id of entries) {
+        if (STORE_HIDDEN_APP_IDS.has(id)) continue;
         try {
           const m = JSON.parse(await fsp.readFile(path.join(dir, id, 'manifest.json'), 'utf-8'));
-          if (m && typeof m.id === 'string') {
+          if (m && typeof m.id === 'string' && !STORE_HIDDEN_APP_IDS.has(m.id)) {
             apps.push({
               id: m.id,
               name: m.name || {},

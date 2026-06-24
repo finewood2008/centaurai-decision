@@ -9,7 +9,13 @@ import { blurActiveElement } from '@renderer/utils/ui/focus';
 import { useThemeContext } from '@renderer/hooks/context/ThemeContext';
 import { useAllCronJobs } from '@renderer/pages/cron/useCronJobs';
 import { useTeamCreatedRedirect } from '@renderer/pages/team/hooks/useTeamCreatedRedirect';
-import { SiderToolbar, SiderSearchEntry, SiderScheduledEntry, SiderAppStoreEntry, SiderFilesEntry } from './SiderNav';
+import {
+  SiderToolbar,
+  SiderSearchEntry,
+  SiderScheduledEntry,
+  SiderFilesEntry,
+  WorkbenchSiderSection,
+} from './SiderNav';
 import SiderFooter from './SiderFooter';
 import CronJobSiderSection from './CronJobSiderSection';
 import TeamSiderSection from './TeamSiderSection';
@@ -91,19 +97,6 @@ const Sider: React.FC<SiderProps> = ({ onSessionClick, collapsed = false }) => {
     closePreview();
     setIsBatchMode(false);
     Promise.resolve(navigate('/scheduled')).catch((error) => {
-      console.error('Navigation failed:', error);
-    });
-    if (onSessionClick) {
-      onSessionClick();
-    }
-  };
-
-  const handleAppStoreClick = () => {
-    cleanupSiderTooltips();
-    blurActiveElement();
-    closePreview();
-    setIsBatchMode(false);
-    Promise.resolve(navigate('/appstore')).catch((error) => {
       console.error('Navigation failed:', error);
     });
     if (onSessionClick) {
@@ -212,13 +205,6 @@ const Sider: React.FC<SiderProps> = ({ onSessionClick, collapsed = false }) => {
               siderTooltipProps={siderTooltipProps}
               onClick={handleScheduledClick}
             />
-            <SiderAppStoreEntry
-              isMobile={isMobile}
-              isActive={pathname === '/appstore'}
-              collapsed={collapsed}
-              siderTooltipProps={siderTooltipProps}
-              onClick={handleAppStoreClick}
-            />
             <SiderFilesEntry
               isMobile={isMobile}
               isActive={pathname === '/files'}
@@ -240,6 +226,13 @@ const Sider: React.FC<SiderProps> = ({ onSessionClick, collapsed = false }) => {
                   {...workspaceHistoryProps}
                   afterPinnedContent={
                     <>
+                      <WorkbenchSiderSection
+                        isMobile={isMobile}
+                        collapsed={collapsed}
+                        pathname={pathname}
+                        siderTooltipProps={siderTooltipProps}
+                        onSessionClick={onSessionClick}
+                      />
                       <TeamSiderSection
                         collapsed={collapsed}
                         pathname={pathname}

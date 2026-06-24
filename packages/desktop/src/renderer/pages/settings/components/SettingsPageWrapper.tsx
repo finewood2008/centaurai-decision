@@ -16,6 +16,7 @@ import {
   LinkCloud,
   Puzzle,
   Robot,
+  Shop,
   System,
   User,
 } from '@icon-park/react';
@@ -80,6 +81,12 @@ export function getBuiltinSettingsNavItems(isDesktop: boolean, t: TranslateFn): 
       icon: <Download theme='outline' size='16' />,
       path: 'client',
     },
+    appstore: {
+      id: 'appstore',
+      label: t('appstore.title'),
+      icon: <Shop theme='outline' size='16' />,
+      path: 'appstore',
+    },
     users: {
       id: 'users',
       label: t('settings.users'),
@@ -91,9 +98,9 @@ export function getBuiltinSettingsNavItems(isDesktop: boolean, t: TranslateFn): 
     about: { id: 'about', label: t('settings.about'), icon: <Info theme='outline' size='16' />, path: 'about' },
   };
 
-  return BUILTIN_TAB_IDS.filter((id) =>
-    id === 'client' ? !isDesktop : isDesktop || (id !== 'pet' && id !== 'users')
-  ).map((id) => builtinMap[id]);
+  return BUILTIN_TAB_IDS.filter((id) => (id === 'client' ? !isDesktop : isDesktop || (id !== 'pet' && id !== 'users')))
+    .map((id) => builtinMap[id])
+    .filter((item): item is NavItem => Boolean(item));
 }
 
 const SettingsPageWrapper: React.FC<SettingsPageWrapperProps> = ({ children, className, contentClassName }) => {

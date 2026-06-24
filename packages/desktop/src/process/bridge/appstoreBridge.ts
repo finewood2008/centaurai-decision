@@ -27,6 +27,14 @@ const APP_ENTRY: Record<string, string> = {
 };
 
 /**
+ * Apps hidden from the App Store catalog. The image workbench is now embedded
+ * inline under the 「AI工作台」 sider section (and served to LAN browsers over
+ * /workbench/image/*), so it no longer appears as a download-gated store card.
+ * Its manifest is kept for the inline proxy/agent wiring; it is just delisted.
+ */
+const STORE_HIDDEN_APP_IDS = new Set<string>(['centaur-image-workbench']);
+
+/**
  * Locate an app's bundled payload (electron shell + dist), shipped in
  * resources/appstore-bundles/<id> (extraResources) so it's present on BOTH the
  * admin desktop and the LAN client — "install" is a local copy, no server fetch.
@@ -63,7 +71,8 @@ async function installBundle(id: string): Promise<{ ok: boolean; error?: string 
 export function initAppstoreBridge(): void {
   ipcBridge.appstore.list.provider(async () => {
     try {
-      const [manifests, records] = await Promise.all([getApps(), listAppRecords(ProcessConfig)]);
+      const [allManifests, records] = await Promise.all([getApps(), listAppRecords(ProcessConfig)]);
+      const manifests = allManifests.filter((manifest) => !STORE_HIDDEN_APP_IDS.has(manifest.id));
       return {
         apps: manifests.map((manifest) => ({
           id: manifest.id,

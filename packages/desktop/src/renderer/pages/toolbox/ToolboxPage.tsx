@@ -26,7 +26,7 @@ import {
 } from '@icon-park/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ipcBridge } from '@/common';
 import WebviewHost, { type WebviewControl } from '@/renderer/components/media/WebviewHost';
 import { isElectronDesktop } from '@/renderer/utils/platform';
@@ -312,16 +312,20 @@ const VIDEO_WORKBENCH_URL = 'http://localhost:3000/workbench/video/projects';
 const ToolboxPage: React.FC<ToolboxPageProps> = ({ mode = 'toolbox' }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { agents } = useAgents();
   const { status, result, error, run, reset } = useToolboxRun();
   const isWorkbenchMode = mode === 'workbench';
+  // Deep-link target (?app=image) — the sider 「AI工作台」 entry opens the
+  // embedded 半人马 AI 图形工作台 directly instead of the workbench hub.
+  const deepLinkImage = isWorkbenchMode && searchParams.get('app') === 'image';
 
   const tools = useToolboxTools();
   const imageTools = useMemo(() => tools.filter((tool) => tool.category === 'image'), [tools]);
   const workbenchTools = useMemo(() => tools.filter((tool) => tool.category === 'workbench'), [tools]);
   const visibleTools = isWorkbenchMode ? workbenchTools : imageTools;
   const [activeTool, setActiveTool] = useState<ToolDef | null>(null);
-  const [imageWorkbenchOpen, setImageWorkbenchOpen] = useState(!isWorkbenchMode);
+  const [imageWorkbenchOpen, setImageWorkbenchOpen] = useState(!isWorkbenchMode || deepLinkImage);
   const [videoWorkbenchOpen, setVideoWorkbenchOpen] = useState(false);
   const [videoServer, setVideoServer] = useState<{ state: 'starting' | 'ready' | 'error'; error?: string }>({
     state: 'starting',
@@ -332,8 +336,8 @@ const ToolboxPage: React.FC<ToolboxPageProps> = ({ mode = 'toolbox' }) => {
   const videoControlRef = useRef<WebviewControl | null>(null);
 
   useEffect(() => {
-    setImageWorkbenchOpen(!isWorkbenchMode);
-  }, [isWorkbenchMode]);
+    setImageWorkbenchOpen(!isWorkbenchMode || deepLinkImage);
+  }, [isWorkbenchMode, deepLinkImage]);
 
   // Embedded 半人马 AI 图形工作台. Use a main-process protocol so the workbench
   // does not depend on the renderer dev-server port.
