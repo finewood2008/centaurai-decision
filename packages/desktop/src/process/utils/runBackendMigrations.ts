@@ -169,6 +169,9 @@ function buildDefaultMcpServers(): McpImportServer[] {
     args: ['-y', 'chrome-devtools-mcp@latest'],
   };
 
+  const videoEditorScript = getBuiltinMcpScriptPath('builtin-mcp-video-editor');
+  const videoEditorConfig = { command: 'node', args: [videoEditorScript] };
+
   return [
     {
       name: BUILTIN_CHROME_DEVTOOLS_NAME,
@@ -181,6 +184,19 @@ function buildDefaultMcpServers(): McpImportServer[] {
         args: chromeConfig.args,
       },
       original_json: JSON.stringify({ mcpServers: { [BUILTIN_CHROME_DEVTOOLS_NAME]: chromeConfig } }, null, 2),
+    },
+    {
+      name: 'centaur-video-editor',
+      description:
+        'Drive the Centaur Video Workbench editor (read timeline, add text/clips, split, trim, speed, effects, export). Active while the Video Workbench is open.',
+      enabled: true,
+      builtin: true,
+      transport: {
+        type: 'stdio',
+        command: videoEditorConfig.command,
+        args: videoEditorConfig.args,
+      },
+      original_json: JSON.stringify({ mcpServers: { 'centaur-video-editor': videoEditorConfig } }, null, 2),
     },
   ];
 }
@@ -276,6 +292,13 @@ async function ensureBootstrapMcpServersInDb(configFile: ConfigFile): Promise<vo
 
   if (missing.length > 0) {
     await mcpService.batchImportServers.invoke({ servers: missing });
+  }
+
+  // Centaur Video Editor MCP is on by default so the Video Workbench assistant
+  // works out of the box. Enable it if a prior seed left it disabled.
+  const existingVideoEditor = existingByName.get('centaur-video-editor');
+  if (existingVideoEditor && existingVideoEditor.enabled !== true) {
+    await mcpService.toggleServer.invoke({ id: existingVideoEditor.id });
   }
 
   const existingChromeDevtools = existingByName.get(BUILTIN_CHROME_DEVTOOLS_NAME);

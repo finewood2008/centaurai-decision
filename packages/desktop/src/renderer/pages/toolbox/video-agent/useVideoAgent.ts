@@ -6,26 +6,22 @@
 
 import { useCallback, useRef, useState } from 'react';
 import { ipcBridge } from '@/common';
-import type { IConversationTurnCompletedEvent } from '@/common/adapter/ipcBridge';
+import type { IConversationTurnCompletedEvent, IResponseMessage } from '@/common/adapter/ipcBridge';
+import { transformMessage } from '@/common/chat/chatLib';
 import { getFullAutoMode } from '@/common/types/agent/agentModes';
 import { buildCliAgentParams } from '@/renderer/pages/conversation/utils/createConversationParams';
-import type { WebviewControl } from '@/renderer/components/media/WebviewHost';
+import { ensureBackendMcpCatalog, toSessionMcpServer } from '@/renderer/hooks/mcp/catalog';
 import type { AgentMetadata } from '@/renderer/utils/model/agentTypes';
-import {
-  buildVideoAgentPrompt,
-  parseActions,
-  readStateJson,
-  runVideoAction,
-  type VideoActionResult,
-} from './videoAgentActions';
+import { buildVideoAgentPrompt } from './videoAgentActions';
 
 const TURN_TIMEOUT_MS = 4 * 60 * 1000;
+/** Stable name of the built-in Video Workbench MCP server (see runBackendMigrations). */
+const VIDEO_EDITOR_MCP_NAME = 'centaur-video-editor';
 
 export type VideoChatMessage = {
   id: string;
   role: 'user' | 'assistant' | 'error';
   text: string;
-  actions?: VideoActionResult[];
 };
 
 export type UseVideoAgent = {
@@ -38,16 +34,13 @@ export type UseVideoAgent = {
 let seq = 0;
 const nextId = () => `vc-${Date.now()}-${seq++}`;
 
-/** Strip the JSON action block so only the agent's narration is shown. */
-function narration(text: string): string {
-  return text.replace(/```(?:json)?[\s\S]*?```/gi, '').trim();
-}
-
 /**
- * Drives the chosen CentaurAI agent to operate the embedded video editor.
- * `getControl` returns the live WebviewControl for the editor webview.
+ * Runs the chosen CentaurAI agent against the embedded video editor. The agent
+ * performs edits by CALLING the video_* MCP tools (built-in `centaur-video-editor`
+ * server), which POST to the editor command bus — so editing is reliable and we
+ * never parse JSON from the reply. We just surface the agent's text.
  */
-export function useVideoAgent(getControl: () => WebviewControl | null): UseVideoAgent {
+export function useVideoAgent(): UseVideoAgent {
   const [messages, setMessages] = useState<VideoChatMessage[]>([]);
   const [busy, setBusy] = useState(false);
   const convRef = useRef<{ id: string; agentId: string } | null>(null);
@@ -64,6 +57,21 @@ export function useVideoAgent(getControl: () => WebviewControl | null): UseVideo
     const params = await buildCliAgentParams(agent, '');
     params.name = 'Video Workbench';
     params.extra.session_mode = getFullAutoMode(backend);
+    // Keep these ephemeral assistant runs out of the main history sidebar.
+    (params.extra as Record<string, unknown>).hidden_from_sidebar = true;
+    // Attach the built-in Video Workbench MCP (centaur-video-editor) to THIS
+    // session, so the agent actually has the video_* tools. Built-in servers must
+    // ride on `selected_session_mcp_servers` — `selected_mcp_server_ids` excludes
+    // built-ins. This mirrors how the main composer wires MCP in useGuidSend.
+    try {
+      const { allServers } = await ensureBackendMcpCatalog();
+      const videoServer = allServers.find((server) => server.name === VIDEO_EDITOR_MCP_NAME);
+      if (videoServer) {
+        params.extra.selected_session_mcp_servers = [toSessionMcpServer(videoServer)];
+      }
+    } catch {
+      // Non-fatal: without it the agent will simply report it lacks the tools.
+    }
     const conversation = await ipcBridge.conversation.create.invoke(params);
     if (!conversation?.id) throw new Error('conversation_create_failed');
     convRef.current = { id: conversation.id, agentId: agent.id };
@@ -72,13 +80,26 @@ export function useVideoAgent(getControl: () => WebviewControl | null): UseVideo
 
   const runTurn = useCallback(async (conversationId: string, input: string): Promise<string> => {
     const unsub: Array<() => void> = [];
+    // ACP agents stream their reply via responseStream; last_message.content is
+    // often null. Accumulate the streamed assistant text and use that.
+    let streamed = '';
     try {
+      unsub.push(
+        ipcBridge.acpConversation.responseStream.on((message: IResponseMessage) => {
+          if (message.conversation_id !== conversationId) return;
+          const tm = transformMessage(message);
+          if (tm && tm.type === 'text') {
+            const piece = (tm.content as { content?: string })?.content ?? '';
+            streamed = message.replace ? piece : streamed + piece;
+          }
+        })
+      );
       const completion = new Promise<IConversationTurnCompletedEvent>((resolve, reject) => {
         const timer = setTimeout(() => reject(new Error('turn_timeout')), TURN_TIMEOUT_MS);
         unsub.push(
           ipcBridge.conversation.turnCompleted.on((event: IConversationTurnCompletedEvent) => {
             if (event.session_id !== conversationId) return;
-            if (event.status === 'finished' || event.can_send_message === true) {
+            if (event.status === 'finished') {
               clearTimeout(timer);
               resolve(event);
             }
@@ -87,6 +108,7 @@ export function useVideoAgent(getControl: () => WebviewControl | null): UseVideo
       });
       await ipcBridge.conversation.sendMessage.invoke({ conversation_id: conversationId, input, files: [] });
       const finished = await completion;
+      if (streamed.trim()) return streamed;
       const content = finished.last_message?.content;
       return typeof content === 'string' ? content : '';
     } finally {
@@ -97,29 +119,13 @@ export function useVideoAgent(getControl: () => WebviewControl | null): UseVideo
   const send = useCallback(
     async (text: string, agent: AgentMetadata) => {
       if (runningRef.current || !text.trim()) return;
-      const control = getControl();
-      if (!control) {
-        setMessages((m) => [...m, { id: nextId(), role: 'error', text: 'editor_not_ready' }]);
-        return;
-      }
       runningRef.current = true;
       setBusy(true);
       setMessages((m) => [...m, { id: nextId(), role: 'user', text }]);
       try {
         const conversationId = await ensureConversation(agent);
-        const stateJson = await readStateJson(control);
-        const reply = await runTurn(conversationId, buildVideoAgentPrompt(stateJson, text));
-
-        const actions = parseActions(reply);
-        const results: VideoActionResult[] = [];
-        for (const action of actions) {
-          // eslint-disable-next-line no-await-in-loop
-          results.push(await runVideoAction(control, action));
-        }
-        setMessages((m) => [
-          ...m,
-          { id: nextId(), role: 'assistant', text: narration(reply) || '已处理。', actions: results },
-        ]);
+        const reply = await runTurn(conversationId, buildVideoAgentPrompt(text));
+        setMessages((m) => [...m, { id: nextId(), role: 'assistant', text: reply.trim() || '完成。' }]);
       } catch (e) {
         setMessages((m) => [...m, { id: nextId(), role: 'error', text: e instanceof Error ? e.message : String(e) }]);
       } finally {
@@ -127,7 +133,7 @@ export function useVideoAgent(getControl: () => WebviewControl | null): UseVideo
         setBusy(false);
       }
     },
-    [ensureConversation, getControl, runTurn]
+    [ensureConversation, runTurn]
   );
 
   return { messages, busy, send, reset };

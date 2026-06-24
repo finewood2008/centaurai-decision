@@ -33,22 +33,20 @@ export const VIDEO_ACTION_VOCAB = `Available actions (each takes a single JSON o
 - seek({ sec }) / undo({}) / redo({}) / export({ format? }).
 All times are in SECONDS. Use element ids taken from getState.`;
 
-/** Build the system instruction sent to the agent for a turn. */
-export function buildVideoAgentPrompt(stateJson: string, userMessage: string): string {
+/** Build the instruction sent to the agent for a turn. The agent edits the
+ *  timeline by CALLING the video_* MCP tools (not by emitting JSON). */
+export function buildVideoAgentPrompt(userMessage: string): string {
   return [
-    'You are the editing assistant inside Centaur AI Video Workbench. You operate a real video editor on the user’s behalf.',
+    'You are the editing assistant inside Centaur AI Video Workbench. You operate a real video editor for the user by calling the video_* tools (video_get_state, video_add_text, video_add_clip, video_split_clip, video_set_clip_duration, video_set_speed, video_delete_clip, video_add_effect, video_export, video_undo, ...).',
     '',
-    VIDEO_ACTION_VOCAB,
-    '',
-    'Current timeline state (JSON):',
-    '```json',
-    stateJson,
-    '```',
+    'Workflow — follow every time:',
+    '1. Call video_get_state first to understand the current timeline (clips, ids, durations, media).',
+    '2. UNDERSTAND the request. If it is ambiguous or missing key details, infer the most likely intent from the state; if still unclear, ask ONE short clarifying question and stop (do not edit yet).',
+    '3. If clear, tell the user a brief one-sentence plan.',
+    '4. THEN make the edits by calling the video_* tools, using ids from video_get_state. Prefer small, reversible steps.',
+    '5. Briefly report what you did, in the user’s language.',
     '',
     `User request: ${userMessage}`,
-    '',
-    'Reply with: (1) one short sentence describing what you will do, then (2) a fenced ```json code block containing {"actions":[{"name":"<action>","args":{...}}, ...]}.',
-    'Only use actions and element ids that exist. Do NOT call any other tools or edit files. If no edit is needed, return {"actions":[]}.',
   ].join('\n');
 }
 
