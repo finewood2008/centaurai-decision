@@ -1,6 +1,6 @@
 {
   "title": "应用商店",
-  "subtitle": "下载应用、插入你自己的 Key，即可开始使用。",
+  "subtitle": "下载适配你系统的应用，插入自己的 Key，独立运行使用。",
   "open": "打开",
   "download": "下载",
   "downloading": "下载中…",
@@ -11,5 +11,8 @@
   "category": "分类",
   "starting": "正在启动…",
   "startFailed": "应用启动失败。",
-  "retry": "重试"
+  "retry": "重试",
+  "comingSoon": "即将推出",
+  "downloadFor": "下载（{{os}}）",
+  "otherSystems": "其他系统："
 }

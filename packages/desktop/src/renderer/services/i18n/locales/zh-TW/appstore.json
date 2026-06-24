@@ -1,6 +1,6 @@
 {
   "title": "應用商店",
-  "subtitle": "下載應用、插入你自己的 Key，即可開始使用。",
+  "subtitle": "下載適配你系統的應用，插入自己的 Key，獨立執行使用。",
   "open": "開啟",
   "download": "下載",
   "downloading": "下載中…",
@@ -11,5 +11,8 @@
   "category": "分類",
   "starting": "正在啟動…",
   "startFailed": "應用啟動失敗。",
-  "retry": "重試"
+  "retry": "重試",
+  "comingSoon": "即將推出",
+  "downloadFor": "下載（{{os}}）",
+  "otherSystems": "其他系統："
 }

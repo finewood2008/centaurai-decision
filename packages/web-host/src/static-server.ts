@@ -19,6 +19,7 @@ import net, { type Socket } from 'node:net';
 import path from 'node:path';
 import serveHandler from 'serve-handler';
 import { handleDownloadGet, handleDownloadsList } from './downloads.js';
+import { handleAppDownloadGet, handleAppDownloadsList } from './app-downloads.js';
 import {
   handleSharedCategories,
   handleSharedDownload,
@@ -522,6 +523,18 @@ export async function startStaticServer(opts: StaticServerOptions): Promise<Stat
       }
       if (req.url.startsWith('/api/downloads/get')) {
         await handleDownloadGet(req, res, opts.installerDir);
+        return;
+      }
+
+      // /api/appstore/downloads/* — standalone App Store app installers, served
+      // from an external admin dir. Reaches here only AFTER the auth gate (these
+      // require login, unlike /api/downloads/* which is pre-login allowed).
+      if (req.url.startsWith('/api/appstore/downloads/list')) {
+        await handleAppDownloadsList(req, res);
+        return;
+      }
+      if (req.url.startsWith('/api/appstore/downloads/get')) {
+        await handleAppDownloadGet(req, res);
         return;
       }
 

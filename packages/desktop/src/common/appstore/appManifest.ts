@@ -212,6 +212,32 @@ export type AppAgent = {
   tools: AppAgentTool[];
 };
 
+export type AppArtifactOs = 'windows' | 'macos' | 'linux';
+export type AppArtifactArch = 'x64' | 'arm64';
+
+/**
+ * One downloadable, per-OS standalone build of an app. The App Store serves it
+ * from the host installer dir via /api/appstore/downloads/get. `version` is the
+ * AUTHORITATIVE version (the on-disk filename only confirms the file exists).
+ */
+export type AppDownloadArtifact = {
+  os: AppArtifactOs;
+  arch?: AppArtifactArch;
+  /** Exact served filename (basename only), e.g. `CentaurImage-1.0.0-windows-x64.exe`. */
+  file: string;
+  /** Lowercase extension, e.g. `exe` | `msi` | `dmg` | `appimage` | `deb`. */
+  ext: string;
+  version: string;
+  size?: number;
+  /** Displayed on the card; not browser-verified in v1. */
+  sha256?: string;
+};
+
+/** Standalone-distribution metadata. Absent ⇒ the app is "coming soon" (no builds yet). */
+export type AppDistribution = {
+  artifacts: AppDownloadArtifact[];
+};
+
 /**
  * The complete, self-describing manifest for one App Store app.
  *
@@ -262,4 +288,7 @@ export type AppManifest = {
 
   /** Agent-operability — present when `permissions.agentOperable` is `true`. */
   agent?: AppAgent;
+
+  /** Standalone-distribution builds (per-OS downloads). Absent ⇒ "coming soon". */
+  distribution?: AppDistribution;
 };

@@ -43,5 +43,10 @@
         "timeoutMs": 120000
       }
     ]
+  },
+  "distribution": {
+    "artifacts": [
+      { "os": "windows", "arch": "x64", "file": "CentaurImageStudio-1.0.0-windows-x64.exe", "ext": "exe", "version": "1.0.0" }
+    ]
   }
 }

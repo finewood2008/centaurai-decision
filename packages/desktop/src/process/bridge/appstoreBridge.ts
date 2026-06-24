@@ -28,6 +28,7 @@ export function initAppstoreBridge(): void {
           type: manifest.type,
           enabled: records[manifest.id]?.enabled ?? false,
           installed: records[manifest.id]?.installed ?? false,
+          artifacts: manifest.distribution?.artifacts ?? [],
         })),
       };
     } catch (error) {

@@ -1,6 +1,6 @@
 {
   "title": "App Store",
-  "subtitle": "Download an app, plug in your own key, and start using it.",
+  "subtitle": "Download an app for your system, plug in your own key, and run it standalone.",
   "open": "Open",
   "download": "Download",
   "downloading": "Downloading…",
@@ -11,5 +11,8 @@
   "category": "Category",
   "starting": "Starting…",
   "startFailed": "Couldn't start the app.",
-  "retry": "Retry"
+  "retry": "Retry",
+  "comingSoon": "Coming soon",
+  "downloadFor": "Download for {{os}}",
+  "otherSystems": "Other systems:"
 }

@@ -1403,6 +1403,17 @@ export const videostudio = {
   statusChanged: bridge.buildEmitter<IVideoStudioStatus>('videostudio.status-changed'),
 };
 
+/** A per-OS downloadable standalone build, as exposed to the renderer. */
+export interface IAppStoreArtifact {
+  os: string;
+  arch?: string;
+  file: string;
+  ext: string;
+  version: string;
+  size?: number;
+  sha256?: string;
+}
+
 /** One App Store app as exposed to the renderer (localized text passed through as maps). */
 export interface IAppStoreApp {
   id: string;
@@ -1415,6 +1426,8 @@ export interface IAppStoreApp {
   enabled: boolean;
   /** Whether the user has installed ("downloaded") the app; gates opening. */
   installed: boolean;
+  /** Per-OS downloadable standalone builds. Empty ⇒ "coming soon". */
+  artifacts: IAppStoreArtifact[];
 }
 
 export interface IAppStoreListResult {
