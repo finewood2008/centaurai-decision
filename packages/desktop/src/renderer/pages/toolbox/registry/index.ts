@@ -215,12 +215,7 @@ const POSTER: ToolDef = {
 };
 
 /** Builtin tools shipped with the app, in display order. */
-export const BUILTIN_TOOLS: ToolDef[] = [
-  TEXT_TO_IMAGE,
-  IMAGE_EDIT,
-  POSTER,
-  ...SPECIALIZED_IMAGE_TOOLS,
-];
+export const BUILTIN_TOOLS: ToolDef[] = [TEXT_TO_IMAGE, IMAGE_EDIT, POSTER, ...SPECIALIZED_IMAGE_TOOLS];
 
 /**
  * Resolve the list of toolbox tools.

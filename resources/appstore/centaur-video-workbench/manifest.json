@@ -3,7 +3,10 @@
   "id": "centaur-video-workbench",
   "version": "1.0.0",
   "name": { "zh-CN": "半人马 AI 视频工作台", "en-US": "Centaur Video Studio" },
-  "description": { "zh-CN": "时间线剪辑、字幕与 MP4 导出，纯浏览器存储。", "en-US": "Timeline editing, captions and MP4 export — all in the browser." },
+  "description": {
+    "zh-CN": "时间线剪辑、字幕与 MP4 导出，纯浏览器存储。",
+    "en-US": "Timeline editing, captions and MP4 export — all in the browser."
+  },
   "icon": "icon.svg",
   "category": "media",
   "trust": "first-party",

@@ -1,1 +1,5 @@
 mobile/
+# Bundled App Store app build outputs (electron shell + minified SPA dist) — generated, not source
+resources/appstore-bundles/
+# Bundled image workbench SPA (built, copied into the desktop renderer) — generated, not source
+public/centaur-image-workbench/

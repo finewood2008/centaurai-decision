@@ -46,9 +46,27 @@
   },
   "distribution": {
     "artifacts": [
-      { "os": "windows", "arch": "x64", "file": "CentaurImageStudio-windows-x64.exe", "ext": "exe", "version": "1.0.0" },
-      { "os": "macos", "arch": "arm64", "file": "CentaurImageStudio-macos-arm64.dmg", "ext": "dmg", "version": "1.0.0" },
-      { "os": "linux", "arch": "x64", "file": "CentaurImageStudio-linux-x86_64.AppImage", "ext": "appimage", "version": "1.0.0" }
+      {
+        "os": "windows",
+        "arch": "x64",
+        "file": "CentaurImageStudio-windows-x64.exe",
+        "ext": "exe",
+        "version": "1.0.0"
+      },
+      {
+        "os": "macos",
+        "arch": "arm64",
+        "file": "CentaurImageStudio-macos-arm64.dmg",
+        "ext": "dmg",
+        "version": "1.0.0"
+      },
+      {
+        "os": "linux",
+        "arch": "x64",
+        "file": "CentaurImageStudio-linux-x86_64.AppImage",
+        "ext": "appimage",
+        "version": "1.0.0"
+      }
     ]
   }
 }
