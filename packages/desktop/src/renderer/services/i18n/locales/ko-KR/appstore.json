@@ -1,0 +1,21 @@
+{
+  "title": "App Store",
+  "subtitle": "Download an app for your system, plug in your own key, and run it standalone.",
+  "open": "Open",
+  "download": "Download",
+  "downloading": "Downloading…",
+  "installed": "Installed",
+  "back": "Back to store",
+  "empty": "No apps available yet.",
+  "byok": "Bring your own key",
+  "category": "Category",
+  "starting": "Starting…",
+  "startFailed": "Couldn't start the app.",
+  "retry": "Retry",
+  "comingSoon": "Coming soon",
+  "downloadFor": "Download for {{os}}",
+  "otherSystems": "Other systems:",
+  "openHere": "Open on this device",
+  "working": "Working…",
+  "getInstaller": "Installer:"
+}

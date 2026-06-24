@@ -20,6 +20,7 @@ import { migrateAssistantsToBackend } from './migrateAssistants';
 import { seedBundledExperts } from './seedBundledExperts';
 import { seedBundledButler } from './seedBundledButler';
 import { curateExperts } from './curateExperts';
+import { ensureBootstrapAppsInDb } from '@/process/appstore/ensureBootstrapAppsInDb';
 
 type ConfigFile = typeof ProcessConfigType;
 type MigrationStepResult = boolean;
@@ -405,6 +406,7 @@ const MIGRATION_STEPS: Array<{
     name: 'ensureBootstrapMcpServersInDb',
     run: async (configFile) => (await ensureBootstrapMcpServersInDb(configFile), true),
   },
+  { name: 'ensureBootstrapAppsInDb', run: async (configFile) => ensureBootstrapAppsInDb(configFile) },
   { name: 'migrateAssistantsToBackend', run: async (configFile) => migrateAssistantsToBackend(configFile) },
   { name: 'seedBundledExperts', run: async (configFile) => seedBundledExperts(configFile) },
   { name: 'seedBundledButler', run: async (configFile) => seedBundledButler(configFile) },

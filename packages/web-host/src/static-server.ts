@@ -16,8 +16,10 @@
 import http, { type IncomingMessage, type Server, type ServerResponse } from 'node:http';
 import { networkInterfaces } from 'node:os';
 import net, { type Socket } from 'node:net';
+import path from 'node:path';
 import serveHandler from 'serve-handler';
 import { handleDownloadGet, handleDownloadsList } from './downloads.js';
+import { handleAppDownloadGet, handleAppDownloadsList } from './app-downloads.js';
 import {
   handleSharedCategories,
   handleSharedDownload,
@@ -35,6 +37,8 @@ import {
   handleNasRemove,
   handleNasUpload,
 } from './nas-drive.js';
+import { handleImageWorkbenchProxy, handleImageWorkbenchStatic } from './image-workbench.js';
+import { handleVideoWorkbenchProxy } from './video-workbench.js';
 import { type AuthGate, createAuthGate } from './webui-auth-gate.js';
 
 export type StaticServerOptions = {
@@ -57,6 +61,24 @@ export type StaticServerOptions = {
    * browsed read-only at /api/nas/*. Omit to disable (list returns []).
    */
   nasRootDir?: string;
+  /**
+   * Directory holding the image workbench SPA dist, served to browser/LAN users
+   * at /workbench/image/*. Defaults to `<staticDir>/centaur-image-workbench`
+   * (where the desktop build copies it); set explicitly for tests.
+   */
+  imageWorkbenchDir?: string;
+  /**
+   * Server-held API key for the image workbench's upstream model API, injected
+   * by the /workbench/image/__proxy/* reverse proxy so it never reaches the
+   * browser. Omit to pass the client's Authorization through instead.
+   */
+  imageKey?: string;
+  /**
+   * Origin of the host's opencut server (run with basePath=/workbench/video),
+   * reverse-proxied at /workbench/video/* for browser/LAN users. Defaults to
+   * http://localhost:3000. Omit to use the default / env override.
+   */
+  videoUpstreamUrl?: string;
 };
 
 export type StaticServerHandle = {
@@ -452,6 +474,10 @@ export async function startStaticServer(opts: StaticServerOptions): Promise<Stat
   const requireAuth = allowRemote;
   const gate = createAuthGate();
 
+  // The image workbench SPA dist lives under the served static dir by default
+  // (the desktop build copies it to out/renderer/centaur-image-workbench).
+  const imageWorkbenchDir = opts.imageWorkbenchDir ?? path.join(opts.staticDir, 'centaur-image-workbench');
+
   // The HTTP server listens only on loopback — user traffic hits the outer
   // net.Server first. We route to this server for everything except WS
   // upgrades, which go straight to the backend via a raw TCP splice.
@@ -472,6 +498,14 @@ export async function startStaticServer(opts: StaticServerOptions): Promise<Stat
       // unauthenticated /api/* before any backend-bound or local API handler.
       if (requireAuth && enforceGate(req, res, gate, opts.backendPort)) return;
 
+      // /workbench/* (browser image/video workbench) lives outside /api/, so the
+      // gate above skips it — gate it explicitly when LAN-exposed.
+      if (requireAuth && req.url.startsWith('/workbench/') && !gate.isAuthorized(req.headers.cookie)) {
+        res.writeHead(401, { 'content-type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: 'UNAUTHENTICATED' }));
+        return;
+      }
+
       // Hide desktop/admin-only assistants (the 管家) from WebUI browser clients.
       // Always applied in WebUI mode — the butler is desktop-only regardless of
       // LAN exposure. Desktop talks to the backend directly, bypassing this.
@@ -489,6 +523,18 @@ export async function startStaticServer(opts: StaticServerOptions): Promise<Stat
       }
       if (req.url.startsWith('/api/downloads/get')) {
         await handleDownloadGet(req, res, opts.installerDir);
+        return;
+      }
+
+      // /api/appstore/downloads/* — standalone App Store app installers, served
+      // from an external admin dir. Reaches here only AFTER the auth gate (these
+      // require login, unlike /api/downloads/* which is pre-login allowed).
+      if (req.url.startsWith('/api/appstore/downloads/list')) {
+        await handleAppDownloadsList(req, res);
+        return;
+      }
+      if (req.url.startsWith('/api/appstore/downloads/get')) {
+        await handleAppDownloadGet(req, res);
         return;
       }
 
@@ -554,6 +600,27 @@ export async function startStaticServer(opts: StaticServerOptions): Promise<Stat
       // DB's /api/image. Endpoint + path come as query params.
       if (req.url.startsWith('/api/vector-image') && req.method === 'GET') {
         await handleVectorImage(req, res);
+        return;
+      }
+
+      // /workbench/image/* — image workbench for browser/LAN users. The desktop
+      // uses the centaur-image-workbench:// custom protocol instead; this serves
+      // the same SPA over HTTP plus a key-injecting proxy. The __proxy sub-route
+      // must be checked before the static catch (it is a sub-path), and matched
+      // WITH a trailing slash so the upstream path always starts with '/'.
+      if (req.url.startsWith('/workbench/image/__proxy/')) {
+        handleImageWorkbenchProxy(req, res, opts.imageKey);
+        return;
+      }
+      if (req.url.startsWith('/workbench/image/') || req.url === '/workbench/image') {
+        await handleImageWorkbenchStatic(req, res, imageWorkbenchDir);
+        return;
+      }
+
+      // /workbench/video/* — reverse proxy to the host opencut server (Next.js
+      // with basePath=/workbench/video). The full path is forwarded unchanged.
+      if (req.url.startsWith('/workbench/video/') || req.url === '/workbench/video') {
+        handleVideoWorkbenchProxy(req, res, opts.videoUpstreamUrl);
         return;
       }
 

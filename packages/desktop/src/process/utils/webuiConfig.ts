@@ -64,6 +64,29 @@ export async function resolveNasRootDir(): Promise<string | undefined> {
 }
 
 /**
+ * Resolve the server-held image workbench API key for browser/LAN users.
+ *
+ * Best-effort: an explicit `AIONUI_IMAGE_WORKBENCH_KEY` env wins, else we reuse
+ * the configured image-generation model's key. Undefined → the /workbench/image
+ * proxy passes the client's own Authorization through (the desktop behavior), so
+ * the feature still works; injecting a shared key just spares each LAN user from
+ * pasting one and keeps the key off the wire.
+ */
+async function resolveImageWorkbenchKey(): Promise<string | undefined> {
+  const fromEnv = process.env.AIONUI_IMAGE_WORKBENCH_KEY?.trim();
+  if (fromEnv) return fromEnv;
+  try {
+    const settings = await httpRequest<Record<string, unknown>>('GET', '/api/settings/client');
+    const model = settings?.['tools.imageGenerationModel'] as { api_key?: string } | undefined;
+    const key = model?.api_key?.trim();
+    if (key) return key;
+  } catch (error) {
+    console.error('[WebUI] Failed to read image workbench key from backend:', error);
+  }
+  return undefined;
+}
+
+/**
  * Read WebUI preferences from the backend's /api/settings/client store.
  *
  * Historical note: this used to read from `ProcessConfig` (a local JSON file).
@@ -299,6 +322,15 @@ export async function startDesktopWebUI(opts: { port?: number; allowRemote?: boo
     // Enterprise LAN network drive (the company's large shared disk), browsed
     // read-only at /api/nas/*. Undefined when unconfigured → endpoints disabled.
     nasRootDir: await resolveNasRootDir(),
+    // Image workbench for browser/LAN users. Mirror the desktop custom-protocol
+    // root (getImageWorkbenchRoot in index.ts): packaged → bundled under the
+    // renderer output; dev → the live public/ dist (out/renderer isn't copied
+    // until a build). The server injects the key into upstream calls so it never
+    // reaches the browser.
+    imageWorkbenchDir: app.isPackaged
+      ? path.join(__dirname, '../renderer/centaur-image-workbench')
+      : path.resolve(process.cwd(), 'public/centaur-image-workbench'),
+    imageKey: await resolveImageWorkbenchKey(),
     // Must align with the desktop IPC path's backend dataDir (src/index.ts), otherwise
     // users see divergent SQLite state between desktop app and bundled WebUI.
     dataDir: getDataPath(),

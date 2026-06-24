@@ -17,6 +17,7 @@ import { initUserManagementBridge } from './userManagementBridge';
 import { initSharedDriveBridge } from './sharedDriveBridge';
 import { initNasDriveBridge } from './nasDriveBridge';
 import { initVideostudioBridge } from './videostudioBridge';
+import { initAppstoreBridge } from './appstoreBridge';
 
 export type BridgeDependencies = Record<string, never>;
 
@@ -34,6 +35,7 @@ export function initAllBridges(_deps: BridgeDependencies = {}): void {
   initSharedDriveBridge();
   initNasDriveBridge();
   initVideostudioBridge();
+  initAppstoreBridge();
 }
 
 export {
@@ -50,6 +52,7 @@ export {
   initSharedDriveBridge,
   initNasDriveBridge,
   initVideostudioBridge,
+  initAppstoreBridge,
 };
 export { registerWindowMaximizeListeners } from './windowControlsBridge';
 export const disposeAllTeamSessions = (): Promise<void> => Promise.resolve();

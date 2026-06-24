@@ -88,7 +88,7 @@ interface TabDef {
 const tabs: TabDef[] = [
   { key: 'chat', label: 'Chat', icon: ChatIcon, path: '/guid' },
   { key: 'scheduled', label: 'Tasks', icon: ScheduledIcon, path: '/scheduled' },
-  { key: 'workbench', label: 'Workbench', icon: WorkbenchIcon, path: '/workbench' },
+  { key: 'appstore', label: 'Apps', icon: WorkbenchIcon, path: '/appstore' },
   { key: 'settings', label: 'Settings', icon: SettingsIcon, path: '/settings/model' },
 ];
 
@@ -104,7 +104,12 @@ const MobileTabBar: React.FC = () => {
 
   const getActiveKey = (): string => {
     if (location.pathname.startsWith('/scheduled')) return 'scheduled';
-    if (location.pathname.startsWith('/workbench') || location.pathname.startsWith('/toolbox')) return 'workbench';
+    if (
+      location.pathname.startsWith('/appstore') ||
+      location.pathname.startsWith('/workbench') ||
+      location.pathname.startsWith('/toolbox')
+    )
+      return 'appstore';
     if (location.pathname.startsWith('/settings')) return 'settings';
     // chat covers /guid, /conversation, /team
     return 'chat';

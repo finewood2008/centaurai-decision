@@ -29,6 +29,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { ipcBridge } from '@/common';
 import WebviewHost, { type WebviewControl } from '@/renderer/components/media/WebviewHost';
+import { isElectronDesktop } from '@/renderer/utils/platform';
 import VideoAgentChat from './video-agent/VideoAgentChat';
 import { useAgents } from '@/renderer/hooks/agent/useAgents';
 import type { AgentMetadata } from '@/renderer/utils/model/agentTypes';
@@ -302,7 +303,10 @@ const WorkbenchCard: React.FC<{
  * Local Centaur Video Workbench server origin. Served by the desktop launcher
  * or `bun run dev` in the opencut-classic project; embedded via WebviewHost.
  */
-const VIDEO_WORKBENCH_URL = 'http://localhost:3000/projects';
+// opencut runs under a Next basePath so one instance serves both the desktop
+// <webview> and the LAN reverse proxy. In a browser, WebviewHost rewrites this
+// localhost URL to the same-origin /workbench/video route.
+const VIDEO_WORKBENCH_URL = 'http://localhost:3000/workbench/video/projects';
 
 /** Common AI Toolbox — a grid of practical, form-driven AI tools. */
 const ToolboxPage: React.FC<ToolboxPageProps> = ({ mode = 'toolbox' }) => {
@@ -477,6 +481,21 @@ const ToolboxPage: React.FC<ToolboxPageProps> = ({ mode = 'toolbox' }) => {
   }, [reset]);
 
   const startVideoServer = useCallback(() => {
+    // Browser/LAN users can't start the host server over IPC — the host keeps
+    // opencut running and the WebUI reverse-proxies it. Probe its health first so
+    // a stopped host surfaces the card's error state instead of a raw 502 inside
+    // the iframe.
+    if (!isElectronDesktop()) {
+      setVideoServer({ state: 'starting' });
+      void fetch('/workbench/video/api/health')
+        .then((r) =>
+          setVideoServer(
+            r.ok ? { state: 'ready' } : { state: 'error', error: 'Video workbench is not available on the server' }
+          )
+        )
+        .catch(() => setVideoServer({ state: 'error', error: 'Video workbench is not available on the server' }));
+      return;
+    }
     setVideoServer({ state: 'starting' });
     void ipcBridge.videostudio.start
       .invoke()

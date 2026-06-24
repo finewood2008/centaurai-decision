@@ -9,7 +9,7 @@ import { blurActiveElement } from '@renderer/utils/ui/focus';
 import { useThemeContext } from '@renderer/hooks/context/ThemeContext';
 import { useAllCronJobs } from '@renderer/pages/cron/useCronJobs';
 import { useTeamCreatedRedirect } from '@renderer/pages/team/hooks/useTeamCreatedRedirect';
-import { SiderToolbar, SiderSearchEntry, SiderScheduledEntry, SiderWorkbenchEntry, SiderFilesEntry } from './SiderNav';
+import { SiderToolbar, SiderSearchEntry, SiderScheduledEntry, SiderAppStoreEntry, SiderFilesEntry } from './SiderNav';
 import SiderFooter from './SiderFooter';
 import CronJobSiderSection from './CronJobSiderSection';
 import TeamSiderSection from './TeamSiderSection';
@@ -98,12 +98,12 @@ const Sider: React.FC<SiderProps> = ({ onSessionClick, collapsed = false }) => {
     }
   };
 
-  const handleWorkbenchClick = () => {
+  const handleAppStoreClick = () => {
     cleanupSiderTooltips();
     blurActiveElement();
     closePreview();
     setIsBatchMode(false);
-    Promise.resolve(navigate('/workbench')).catch((error) => {
+    Promise.resolve(navigate('/appstore')).catch((error) => {
       console.error('Navigation failed:', error);
     });
     if (onSessionClick) {
@@ -204,12 +204,12 @@ const Sider: React.FC<SiderProps> = ({ onSessionClick, collapsed = false }) => {
               onConversationSelect={handleConversationSelect}
               onSessionClick={onSessionClick}
             />
-            <SiderWorkbenchEntry
+            <SiderAppStoreEntry
               isMobile={isMobile}
-              isActive={pathname === '/workbench' || pathname === '/toolbox'}
+              isActive={pathname === '/appstore'}
               collapsed={collapsed}
               siderTooltipProps={siderTooltipProps}
-              onClick={handleWorkbenchClick}
+              onClick={handleAppStoreClick}
             />
             {/* Scheduled tasks nav entry - fixed above scroll */}
             <SiderScheduledEntry

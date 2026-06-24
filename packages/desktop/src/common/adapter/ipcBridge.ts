@@ -1403,6 +1403,48 @@ export const videostudio = {
   statusChanged: bridge.buildEmitter<IVideoStudioStatus>('videostudio.status-changed'),
 };
 
+/** A per-OS downloadable standalone build, as exposed to the renderer. */
+export interface IAppStoreArtifact {
+  os: string;
+  arch?: string;
+  file: string;
+  ext: string;
+  version: string;
+  size?: number;
+  sha256?: string;
+}
+
+/** One App Store app as exposed to the renderer (localized text passed through as maps). */
+export interface IAppStoreApp {
+  id: string;
+  name: Record<string, string>;
+  description: Record<string, string>;
+  icon: string;
+  category: string;
+  type: string;
+  /** Admin intent for LAN exposure (future). */
+  enabled: boolean;
+  /** Whether the user has installed ("downloaded") the app; gates opening. */
+  installed: boolean;
+  /** Per-OS downloadable standalone builds. Empty ⇒ "coming soon". */
+  artifacts: IAppStoreArtifact[];
+}
+
+export interface IAppStoreListResult {
+  apps: IAppStoreApp[];
+}
+
+export type IAppStoreActionResult = { ok: boolean; error?: string };
+
+export const appstore = {
+  list: bridge.buildProvider<IAppStoreListResult, void>('appstore.list'),
+  setInstalled: bridge.buildProvider<void, { id: string; installed: boolean }>('appstore.set-installed'),
+  /** Managed install: place the app bundle in a default dir under userData (desktop). */
+  install: bridge.buildProvider<IAppStoreActionResult, { id: string }>('appstore.install'),
+  /** Managed launch: open the installed app as a standalone window (desktop). */
+  launch: bridge.buildProvider<IAppStoreActionResult, { id: string }>('appstore.launch'),
+};
+
 // ---------------------------------------------------------------------------
 // LAN discovery (distributed-client model). The desktop client browses for
 // CentaurAI servers advertised on the LAN (see process/discovery/lanDiscovery).

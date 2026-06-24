@@ -26,6 +26,7 @@ import pet from './pet.json';
 import toolbox from './toolbox.json';
 import advisors from './advisors.json';
 import contentHub from './contentHub.json';
+import appstore from './appstore.json';
 
 export default {
   common,
@@ -51,4 +52,5 @@ export default {
   toolbox,
   advisors,
   contentHub,
+  appstore,
 };

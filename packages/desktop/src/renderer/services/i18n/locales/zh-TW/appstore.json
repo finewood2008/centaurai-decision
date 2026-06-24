@@ -1,0 +1,21 @@
+{
+  "title": "應用商店",
+  "subtitle": "下載適配你系統的應用，插入自己的 Key，獨立執行使用。",
+  "open": "開啟",
+  "download": "下載",
+  "downloading": "下載中…",
+  "installed": "已安裝",
+  "back": "返回商店",
+  "empty": "暫無可用應用。",
+  "byok": "自帶 Key 即用",
+  "category": "分類",
+  "starting": "正在啟動…",
+  "startFailed": "應用啟動失敗。",
+  "retry": "重試",
+  "comingSoon": "即將推出",
+  "downloadFor": "下載（{{os}}）",
+  "otherSystems": "其他系統：",
+  "openHere": "在本機開啟",
+  "working": "處理中…",
+  "getInstaller": "下載安裝包："
+}
