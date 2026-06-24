@@ -30,15 +30,19 @@ type ConfigAccessor = {
 /** ConfigFile key holding the app-records map. */
 export const APPSTORE_APPS_KEY = 'appstore.apps';
 
-/** Admin intent for one app. */
-export type AppRecord = { enabled: boolean };
+/**
+ * Per-app state. `enabled` = admin intent for LAN exposure (future). `installed`
+ * = whether the user has "downloaded" the app (the install-gate); an app must be
+ * installed before it can be opened.
+ */
+export type AppRecord = { enabled: boolean; installed: boolean };
 
 /** All app records, keyed by app id. */
 export type AppRecords = Record<string, AppRecord>;
 
 const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
 
-/** Read the app-records map, tolerating absent/corrupt config (→ `{}`). */
+/** Read the app-records map, tolerating absent/corrupt config (→ `{}`). Booleans default to false. */
 export async function listAppRecords(configFile: ConfigFile): Promise<AppRecords> {
   const accessor = configFile as unknown as ConfigAccessor;
   let raw: unknown;
@@ -51,8 +55,8 @@ export async function listAppRecords(configFile: ConfigFile): Promise<AppRecords
 
   const records: AppRecords = {};
   for (const [id, rec] of Object.entries(raw)) {
-    if (isRecord(rec) && typeof rec.enabled === 'boolean') {
-      records[id] = { enabled: rec.enabled };
+    if (isRecord(rec)) {
+      records[id] = { enabled: rec.enabled === true, installed: rec.installed === true };
     }
   }
   return records;
@@ -65,6 +69,11 @@ export async function writeAppRecords(configFile: ConfigFile, records: AppRecord
   await accessor.set(APPSTORE_APPS_KEY, records);
 }
 
+const mergeRecord = (existing: AppRecord | undefined, patch: Partial<AppRecord>): AppRecord => ({
+  enabled: patch.enabled ?? existing?.enabled ?? false,
+  installed: patch.installed ?? existing?.installed ?? false,
+});
+
 /** Whether an app is enabled; `fallback` (default `false`) when it has no record. */
 export async function isAppEnabled(configFile: ConfigFile, id: string, fallback = false): Promise<boolean> {
   const records = await listAppRecords(configFile);
@@ -72,9 +81,22 @@ export async function isAppEnabled(configFile: ConfigFile, id: string, fallback 
   return record ? record.enabled : fallback;
 }
 
-/** Set one app's enabled state, preserving all other records. */
+/** Whether an app has been installed (downloaded). */
+export async function isAppInstalled(configFile: ConfigFile, id: string): Promise<boolean> {
+  const records = await listAppRecords(configFile);
+  return records[id]?.installed ?? false;
+}
+
+/** Set one app's enabled state, preserving its other fields and all other records. */
 export async function setAppEnabled(configFile: ConfigFile, id: string, enabled: boolean): Promise<void> {
   const records = await listAppRecords(configFile);
-  records[id] = { enabled };
+  records[id] = mergeRecord(records[id], { enabled });
+  await writeAppRecords(configFile, records);
+}
+
+/** Set one app's installed state, preserving its other fields and all other records. */
+export async function setAppInstalled(configFile: ConfigFile, id: string, installed: boolean): Promise<void> {
+  const records = await listAppRecords(configFile);
+  records[id] = mergeRecord(records[id], { installed });
   await writeAppRecords(configFile, records);
 }

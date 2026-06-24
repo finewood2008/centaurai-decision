@@ -37,7 +37,7 @@ export async function ensureBootstrapAppsInDb(configFile: ConfigFile, appstoreDi
   const seeded: string[] = [];
   for (const app of apps) {
     if (!(app.id in records)) {
-      records[app.id] = { enabled: false };
+      records[app.id] = { enabled: false, installed: false };
       seeded.push(app.id);
     }
   }

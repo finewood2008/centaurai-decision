@@ -112,14 +112,18 @@ describe('validateManifest — hard rejects', () => {
     if (!r.ok) expect(r.reason).toBe('missing-field');
   });
 
-  it('rejects deferred app types (local-service, remote-url)', () => {
-    for (const type of ['local-service', 'remote-url']) {
-      const raw = validRaw();
-      raw.type = type;
-      const r = validateManifest(raw);
-      expect(r.ok).toBe(false);
-      if (!r.ok) expect(r.reason).toBe('app-type-unsupported');
-    }
+  it('rejects the deferred app type (remote-url)', () => {
+    const raw = validRaw();
+    raw.type = 'remote-url';
+    const r = validateManifest(raw);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.reason).toBe('app-type-unsupported');
+  });
+
+  it('accepts local-service apps (e.g. the video workbench)', () => {
+    const raw = validRaw();
+    raw.type = 'local-service';
+    expect(validateManifest(raw).ok).toBe(true);
   });
 
   it('rejects deferred agent bridge kinds', () => {

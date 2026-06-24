@@ -11,7 +11,7 @@
 
 import { ipcBridge } from '@/common';
 import { getApps } from '@process/appstore/registry';
-import { listAppRecords } from '@process/appstore/appState';
+import { listAppRecords, setAppInstalled } from '@process/appstore/appState';
 import { ProcessConfig } from '@process/utils/initStorage';
 
 export function initAppstoreBridge(): void {
@@ -27,11 +27,20 @@ export function initAppstoreBridge(): void {
           category: manifest.category,
           type: manifest.type,
           enabled: records[manifest.id]?.enabled ?? false,
+          installed: records[manifest.id]?.installed ?? false,
         })),
       };
     } catch (error) {
       console.error('[AppStore] Failed to list apps:', error);
       return { apps: [] };
+    }
+  });
+
+  ipcBridge.appstore.setInstalled.provider(async ({ id, installed }) => {
+    try {
+      await setAppInstalled(ProcessConfig, id, installed);
+    } catch (error) {
+      console.error('[AppStore] Failed to set installed state:', error);
     }
   });
 }

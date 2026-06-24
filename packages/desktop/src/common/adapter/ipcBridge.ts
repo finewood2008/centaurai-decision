@@ -1411,7 +1411,10 @@ export interface IAppStoreApp {
   icon: string;
   category: string;
   type: string;
+  /** Admin intent for LAN exposure (future). */
   enabled: boolean;
+  /** Whether the user has installed ("downloaded") the app; gates opening. */
+  installed: boolean;
 }
 
 export interface IAppStoreListResult {
@@ -1420,6 +1423,7 @@ export interface IAppStoreListResult {
 
 export const appstore = {
   list: bridge.buildProvider<IAppStoreListResult, void>('appstore.list'),
+  setInstalled: bridge.buildProvider<void, { id: string; installed: boolean }>('appstore.set-installed'),
 };
 
 // ---------------------------------------------------------------------------

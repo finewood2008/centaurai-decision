@@ -37,8 +37,8 @@ export const APP_ROUTE_PREFIX_RE = /^\/apps\/[a-z0-9-]+$/;
  */
 export const FORBIDDEN_PATH_SEGMENTS = ['..', '%2e', '%2f', '\\'] as const;
 
-/** App types runnable in MVP-A. Others parse-then-reject as "deferred". */
-export const MVP_SUPPORTED_APP_TYPES = ['static-spa', 'native-panel'] as const;
+/** App types runnable now. `remote-url` parses-then-rejects as "deferred". */
+export const MVP_SUPPORTED_APP_TYPES = ['static-spa', 'native-panel', 'local-service'] as const;
 
 /** Agent bridge kinds runnable in MVP-A. */
 export const SUPPORTED_BRIDGE_KINDS = ['backend-mcp'] as const;
@@ -127,11 +127,11 @@ export const validateManifest = (raw: unknown, existing: readonly AppManifest[] 
   // ---- app type (MVP gate) ----
   if (typeof raw.type !== 'string') return reject('missing-field', `App "${raw.id}": "type" is required.`);
   if (!(MVP_SUPPORTED_APP_TYPES as readonly string[]).includes(raw.type)) {
-    const deferred = raw.type === 'local-service' || raw.type === 'remote-url';
+    const deferred = raw.type === 'remote-url';
     return reject(
       'app-type-unsupported',
       deferred
-        ? `App "${raw.id}": app type "${raw.type}" is deferred (local-service → MVP-B, remote-url → v3) and not runnable yet.`
+        ? `App "${raw.id}": app type "remote-url" is deferred (v3) and not runnable yet.`
         : `App "${raw.id}": unknown app type "${raw.type}".`
     );
   }

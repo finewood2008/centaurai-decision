@@ -1,9 +1,15 @@
 {
   "title": "App Store",
-  "subtitle": "Browse and open apps — plug in your own key and go.",
+  "subtitle": "Download an app, plug in your own key, and start using it.",
   "open": "Open",
+  "download": "Download",
+  "downloading": "Downloading…",
+  "installed": "Installed",
   "back": "Back to store",
   "empty": "No apps available yet.",
   "byok": "Bring your own key",
-  "category": "Category"
+  "category": "Category",
+  "starting": "Starting…",
+  "startFailed": "Couldn't start the app.",
+  "retry": "Retry"
 }

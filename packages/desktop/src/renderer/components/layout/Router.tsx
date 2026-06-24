@@ -24,8 +24,6 @@ const ComponentsShowcase = React.lazy(() => import('@renderer/pages/TestShowcase
 const ScheduledTasksPage = React.lazy(() => import('@renderer/pages/cron/ScheduledTasksPage'));
 const TaskDetailPage = React.lazy(() => import('@renderer/pages/cron/ScheduledTasksPage/TaskDetailPage'));
 const TeamIndex = React.lazy(() => import('@renderer/pages/team'));
-const ToolboxPage = React.lazy(() => import('@renderer/pages/toolbox'));
-const WorkbenchPage = React.lazy(() => import('@renderer/pages/workbench'));
 const AppStorePage = React.lazy(() => import('@renderer/pages/appstore'));
 const AdvisorsPage = React.lazy(() => import('@renderer/pages/advisors/AdvisorsPage'));
 const ContentHubPage = React.lazy(() => import('@renderer/pages/contentHub'));
@@ -176,9 +174,9 @@ const PanelRoute: React.FC<{ layout: React.ReactElement }> = ({ layout }) => {
           <Route path='/settings/ext/:tabId' element={withRouteFallback(ExtensionSettingsPage)} />
           <Route path='/settings' element={<Navigate to='/settings/model' replace />} />
           <Route path='/test/components' element={withRouteFallback(ComponentsShowcase)} />
-          <Route path='/toolbox' element={withRouteFallback(ToolboxPage)} />
-          <Route path='/workbench' element={withRouteFallback(WorkbenchPage)} />
           <Route path='/appstore' element={withRouteFallback(AppStorePage)} />
+          <Route path='/toolbox' element={<Navigate to='/appstore' replace />} />
+          <Route path='/workbench' element={<Navigate to='/appstore' replace />} />
           <Route path='/advisors' element={withRouteFallback(AdvisorsPage)} />
           <Route path='/files' element={withRouteFallback(ContentHubPage)} />
           <Route path='/scheduled' element={withRouteFallback(ScheduledTasksPage)} />

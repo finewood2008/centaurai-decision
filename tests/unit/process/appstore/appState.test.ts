@@ -5,7 +5,14 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { listAppRecords, isAppEnabled, setAppEnabled, APPSTORE_APPS_KEY } from '@/process/appstore/appState';
+import {
+  listAppRecords,
+  isAppEnabled,
+  isAppInstalled,
+  setAppEnabled,
+  setAppInstalled,
+  APPSTORE_APPS_KEY,
+} from '@/process/appstore/appState';
 
 type Cfg = Parameters<typeof listAppRecords>[0];
 
@@ -27,31 +34,48 @@ describe('appState', () => {
     expect(await listAppRecords(cfg)).toEqual({});
   });
 
-  it('setAppEnabled writes and listAppRecords reads back', async () => {
+  it('setAppEnabled writes and listAppRecords reads back (with installed default false)', async () => {
     const { cfg, store } = makeConfig();
     await setAppEnabled(cfg, 'app-a', true);
-    expect(await listAppRecords(cfg)).toEqual({ 'app-a': { enabled: true } });
-    expect(store.get(APPSTORE_APPS_KEY)).toEqual({ 'app-a': { enabled: true } });
+    expect(await listAppRecords(cfg)).toEqual({ 'app-a': { enabled: true, installed: false } });
+    expect(store.get(APPSTORE_APPS_KEY)).toEqual({ 'app-a': { enabled: true, installed: false } });
+  });
+
+  it('setAppInstalled and setAppEnabled merge (preserve the other field)', async () => {
+    const { cfg } = makeConfig();
+    await setAppInstalled(cfg, 'app-a', true);
+    expect(await listAppRecords(cfg)).toEqual({ 'app-a': { enabled: false, installed: true } });
+    await setAppEnabled(cfg, 'app-a', true);
+    expect(await listAppRecords(cfg)).toEqual({ 'app-a': { enabled: true, installed: true } });
   });
 
   it('setAppEnabled preserves other records', async () => {
-    const { cfg } = makeConfig({ [APPSTORE_APPS_KEY]: { 'app-a': { enabled: true } } });
+    const { cfg } = makeConfig({ [APPSTORE_APPS_KEY]: { 'app-a': { enabled: true, installed: true } } });
     await setAppEnabled(cfg, 'app-b', false);
-    expect(await listAppRecords(cfg)).toEqual({ 'app-a': { enabled: true }, 'app-b': { enabled: false } });
+    expect(await listAppRecords(cfg)).toEqual({
+      'app-a': { enabled: true, installed: true },
+      'app-b': { enabled: false, installed: false },
+    });
   });
 
-  it('isAppEnabled honors stored value and fallback', async () => {
-    const { cfg } = makeConfig({ [APPSTORE_APPS_KEY]: { 'app-a': { enabled: true } } });
+  it('isAppEnabled / isAppInstalled honor stored value and fallback', async () => {
+    const { cfg } = makeConfig({ [APPSTORE_APPS_KEY]: { 'app-a': { enabled: true, installed: true } } });
     expect(await isAppEnabled(cfg, 'app-a')).toBe(true);
+    expect(await isAppInstalled(cfg, 'app-a')).toBe(true);
     expect(await isAppEnabled(cfg, 'missing')).toBe(false);
+    expect(await isAppInstalled(cfg, 'missing')).toBe(false);
     expect(await isAppEnabled(cfg, 'missing', true)).toBe(true);
   });
 
-  it('tolerates corrupt config shapes', async () => {
+  it('normalizes legacy/partial records and tolerates non-object config', async () => {
     const garbage = makeConfig({ [APPSTORE_APPS_KEY]: 'garbage' });
     expect(await listAppRecords(garbage.cfg)).toEqual({});
-    const badShape = makeConfig({ [APPSTORE_APPS_KEY]: { x: { enabled: 'yes' } } });
-    expect(await listAppRecords(badShape.cfg)).toEqual({});
+    // a legacy record with only `enabled` → installed defaults false; bad-typed values coerce to false
+    const legacy = makeConfig({ [APPSTORE_APPS_KEY]: { a: { enabled: true }, b: { installed: 'yes' } } });
+    expect(await listAppRecords(legacy.cfg)).toEqual({
+      a: { enabled: true, installed: false },
+      b: { enabled: false, installed: false },
+    });
   });
 
   it('tolerates a get() that throws', async () => {

@@ -1,9 +1,15 @@
 {
   "title": "應用商店",
-  "subtitle": "瀏覽並開啟應用——插入你自己的 Key 即可使用。",
+  "subtitle": "下載應用、插入你自己的 Key，即可開始使用。",
   "open": "開啟",
+  "download": "下載",
+  "downloading": "下載中…",
+  "installed": "已安裝",
   "back": "返回商店",
   "empty": "暫無可用應用。",
   "byok": "自帶 Key 即用",
-  "category": "分類"
+  "category": "分類",
+  "starting": "正在啟動…",
+  "startFailed": "應用啟動失敗。",
+  "retry": "重試"
 }

@@ -54,10 +54,13 @@ afterAll(async () => {
 });
 
 describe('ensureBootstrapAppsInDb', () => {
-  it('seeds every bundled app as a disabled record', async () => {
+  it('seeds every bundled app as a disabled, not-installed record', async () => {
     const { cfg } = makeConfig();
     expect(await ensureBootstrapAppsInDb(cfg, root)).toBe(true);
-    expect(await listAppRecords(cfg)).toEqual({ 'alpha-app': { enabled: false }, 'beta-app': { enabled: false } });
+    expect(await listAppRecords(cfg)).toEqual({
+      'alpha-app': { enabled: false, installed: false },
+      'beta-app': { enabled: false, installed: false },
+    });
   });
 
   it('is idempotent on re-run', async () => {
@@ -73,8 +76,8 @@ describe('ensureBootstrapAppsInDb', () => {
     await setAppEnabled(cfg, 'alpha-app', true);
     await ensureBootstrapAppsInDb(cfg, root);
     const records = await listAppRecords(cfg);
-    expect(records['alpha-app']).toEqual({ enabled: true }); // preserved
-    expect(records['beta-app']).toEqual({ enabled: false }); // newly seeded
+    expect(records['alpha-app']).toEqual({ enabled: true, installed: false }); // preserved
+    expect(records['beta-app']).toEqual({ enabled: false, installed: false }); // newly seeded
   });
 
   it('is a no-op (returns true, writes nothing) when no apps are bundled', async () => {
