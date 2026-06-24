@@ -70,6 +70,6 @@ describe('createAuthGate', () => {
     const insecure = createAuthGate({ secret: FIXED_SECRET, secure: false }).mintCookie();
     expect(insecure).not.toContain('Secure');
     expect(insecure).toContain('HttpOnly');
-    expect(insecure).toContain('SameSite=Lax');
+    expect(insecure).toContain('SameSite=Strict');
   });
 });

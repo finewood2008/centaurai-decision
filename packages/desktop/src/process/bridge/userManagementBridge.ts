@@ -7,7 +7,11 @@
  */
 
 import { ipcBridge } from '@/common';
-import { ADMIN_FRONTEND_USER_ID, CHANNEL_BINDINGS_STORAGE_KEY, CONVERSATION_OWNER_EXTRA_KEY } from '@/common/utils/frontendUserScope';
+import {
+  ADMIN_FRONTEND_USER_ID,
+  CHANNEL_BINDINGS_STORAGE_KEY,
+  CONVERSATION_OWNER_EXTRA_KEY,
+} from '@/common/utils/frontendUserScope';
 import type { IUserRecord, ICreateUserParams } from '@/common/adapter/ipcBridge';
 import { getDataPath } from '@process/utils';
 import bcrypt from 'bcryptjs';
@@ -31,9 +35,9 @@ function readBackendError(res: Response): Promise<BackendErrorBody> {
 }
 
 function pruneChannelBindingsForDeletedUser(db: BetterSqlite3Driver, userId: string): void {
-  const row = db
-    .prepare('SELECT value FROM client_preferences WHERE key = ?')
-    .get(CHANNEL_BINDINGS_STORAGE_KEY) as { value?: string } | undefined;
+  const row = db.prepare('SELECT value FROM client_preferences WHERE key = ?').get(CHANNEL_BINDINGS_STORAGE_KEY) as
+    | { value?: string }
+    | undefined;
   if (!row?.value) return;
 
   let rawValue: unknown;

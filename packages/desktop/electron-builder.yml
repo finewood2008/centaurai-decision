@@ -117,6 +117,9 @@ extraResources:
   # Bundled expert library (agency advisors) seeded into the backend on startup
   - from: resources/experts
     to: experts
+  # Bundled CentaurAI butler (管家) + its skills seeded into the backend on startup
+  - from: resources/butler
+    to: butler
   # Native client installers served by the WebUI at /api/downloads/* (not public)
   - from: resources/client-installers
     to: client-installers

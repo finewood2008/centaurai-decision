@@ -12,6 +12,19 @@ describe('resolvePreferredBackendPort', () => {
     expect(resolvePreferredBackendPort({})).toBeUndefined();
   });
 
+  it('does not force the dev port when packaged even if NODE_ENV is development', () => {
+    expect(resolvePreferredBackendPort({ NODE_ENV: 'development' }, true)).toBeUndefined();
+    expect(
+      resolvePreferredBackendPort(
+        {
+          NODE_ENV: 'development',
+          AIONUI_BACKEND_PORT: '61234',
+        },
+        true
+      )
+    ).toBe(61234);
+  });
+
   it('lets explicit backend port environment variables win', () => {
     expect(
       resolvePreferredBackendPort({

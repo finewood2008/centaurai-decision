@@ -45,6 +45,7 @@ import {
   buildRoundPausePrompt,
   parsePlan,
   parseResolutionOptions,
+  stripResolutionMarkers,
   type PanelistBrief,
 } from './meetingPrompts';
 
@@ -751,7 +752,9 @@ class MeetingEngine {
         if (stale()) return;
         this.updateTurn(tid, { text: synth, status: synth ? 'done' : 'error' });
         const options = parseResolutionOptions(synth);
-        const plan = parsePlan(synth) || synth;
+        // When the model omits @@PLAN@@, fall back to the whole synthesis but strip the
+        // machine option markers so the 方案书 (panel/copy/.md/Word export) stays clean.
+        const plan = parsePlan(synth) || stripResolutionMarkers(synth);
         this.commit({ phase: 'resolution', runState: 'awaiting_decision', activeSlotId: null, options, plan });
         if (plan.trim() || options.length > 0) {
           const s = this.state;

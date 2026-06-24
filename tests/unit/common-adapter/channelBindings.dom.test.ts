@@ -19,7 +19,11 @@ vi.mock('@office-ai/platform', () => ({
 }));
 
 vi.mock('@/common/adapter/httpBridge', () => {
-  const makeProvider = (method: string, path: string | ((params: unknown) => string), mapBody?: (params: unknown) => unknown) => ({
+  const makeProvider = (
+    method: string,
+    path: string | ((params: unknown) => string),
+    mapBody?: (params: unknown) => unknown
+  ) => ({
     provider: vi.fn(),
     invoke: vi.fn((params?: unknown) => {
       const resolvedPath = typeof path === 'function' ? path(params) : path;
@@ -38,11 +42,16 @@ vi.mock('@/common/adapter/httpBridge', () => {
     httpPatch: (path: string | ((params: unknown) => string), mapBody?: (params: unknown) => unknown) =>
       makeProvider('PATCH', path, mapBody),
     httpDelete: (path: string | ((params: unknown) => string)) => makeProvider('DELETE', path),
-    stubProvider: vi.fn((_name: string, defaultValue: unknown) => ({ provider: vi.fn(), invoke: vi.fn(() => defaultValue) })),
-    withResponseMap: vi.fn((inner: { invoke: (params?: unknown) => Promise<unknown> }, map: (raw: unknown) => unknown) => ({
+    stubProvider: vi.fn((_name: string, defaultValue: unknown) => ({
       provider: vi.fn(),
-      invoke: vi.fn(async (params?: unknown) => map(await inner.invoke(params))),
+      invoke: vi.fn(() => defaultValue),
     })),
+    withResponseMap: vi.fn(
+      (inner: { invoke: (params?: unknown) => Promise<unknown> }, map: (raw: unknown) => unknown) => ({
+        provider: vi.fn(),
+        invoke: vi.fn(async (params?: unknown) => map(await inner.invoke(params))),
+      })
+    ),
     wsEmitter: vi.fn(() => ({ emit: vi.fn(), on: vi.fn(() => vi.fn()) })),
     wsMappedEmitter: vi.fn(() => ({ emit: vi.fn(), on: vi.fn(() => vi.fn()) })),
   };
@@ -91,11 +100,7 @@ describe('channel frontend bindings', () => {
     );
     mocks.httpRequest.mockImplementation((method: string, path: string) => {
       if (method === 'GET' && path === '/api/channel/users') {
-        return Promise.resolve([
-          rawChannelUser('wx-child'),
-          rawChannelUser('wx-admin'),
-          rawChannelUser('wx-unbound'),
-        ]);
+        return Promise.resolve([rawChannelUser('wx-child'), rawChannelUser('wx-admin'), rawChannelUser('wx-unbound')]);
       }
       if (method === 'GET' && path === '/api/settings/client') {
         return Promise.resolve({
@@ -116,7 +121,7 @@ describe('channel frontend bindings', () => {
     expect(mocks.httpRequest).toHaveBeenCalledWith('GET', '/api/settings/client');
     expect(mocks.httpRequest).not.toHaveBeenCalledWith(
       'GET',
-      `/api/settings/client?key=${encodeURIComponent(CHANNEL_BINDINGS_STORAGE_KEY)}`,
+      `/api/settings/client?key=${encodeURIComponent(CHANNEL_BINDINGS_STORAGE_KEY)}`
     );
   });
 
