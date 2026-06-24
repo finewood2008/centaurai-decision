@@ -72,6 +72,13 @@ export type I18nKey =
   | 'agentMode.switchSuccess'
   | 'agentMode.yolo'
   | 'agentMode.yoloNoSandbox'
+  | 'appstore.back'
+  | 'appstore.byok'
+  | 'appstore.category'
+  | 'appstore.empty'
+  | 'appstore.open'
+  | 'appstore.subtitle'
+  | 'appstore.title'
   | 'codex.config.export_success'
   | 'codex.config.import_failed'
   | 'codex.config.import_success'
@@ -2562,4 +2569,5 @@ export type I18nModule =
   | 'pet'
   | 'toolbox'
   | 'advisors'
-  | 'contentHub';
+  | 'contentHub'
+  | 'appstore';

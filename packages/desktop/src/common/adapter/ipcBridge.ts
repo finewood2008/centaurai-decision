@@ -1403,6 +1403,25 @@ export const videostudio = {
   statusChanged: bridge.buildEmitter<IVideoStudioStatus>('videostudio.status-changed'),
 };
 
+/** One App Store app as exposed to the renderer (localized text passed through as maps). */
+export interface IAppStoreApp {
+  id: string;
+  name: Record<string, string>;
+  description: Record<string, string>;
+  icon: string;
+  category: string;
+  type: string;
+  enabled: boolean;
+}
+
+export interface IAppStoreListResult {
+  apps: IAppStoreApp[];
+}
+
+export const appstore = {
+  list: bridge.buildProvider<IAppStoreListResult, void>('appstore.list'),
+};
+
 // ---------------------------------------------------------------------------
 // LAN discovery (distributed-client model). The desktop client browses for
 // CentaurAI servers advertised on the LAN (see process/discovery/lanDiscovery).
