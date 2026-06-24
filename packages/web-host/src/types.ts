@@ -41,6 +41,10 @@ export type WebHostOptions = {
   sharedDriveDir?: string;
   /** Root of the enterprise LAN network drive, browsed read-only at /api/nas/*. */
   nasRootDir?: string;
+  /** Image workbench SPA dist dir, served to browser/LAN users at /workbench/image/*. */
+  imageWorkbenchDir?: string;
+  /** Server-held image API key, injected by the /workbench/image/__proxy/* proxy. */
+  imageKey?: string;
   dataDir?: string;
   logDir?: string;
   dirs?: BackendSystemDirs;

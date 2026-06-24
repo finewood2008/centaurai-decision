@@ -6,6 +6,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Left, Right, Refresh, Loading } from '@icon-park/react';
+import { isElectronDesktop } from '@renderer/utils/platform';
 
 /** Imperative handle to run JS inside the embedded page (host → guest). */
 export type WebviewControl = {
@@ -46,7 +47,7 @@ const MAX_ZOOM_FACTOR = 1.5;
  * - Partition support for cache isolation
  * - Optional navigation bar (hidden by default for embedded use)
  */
-const WebviewHost: React.FC<WebviewHostProps> = ({
+const ElectronWebviewHost: React.FC<WebviewHostProps> = ({
   url,
   id: _id,
   showNavBar = false,
@@ -667,6 +668,84 @@ const WebviewHost: React.FC<WebviewHostProps> = ({
       </div>
     </div>
   );
+};
+
+/**
+ * Map a desktop workbench URL (a custom protocol / localhost the Electron host
+ * understands) to the same-origin HTTP URL the WebUI server serves for browser /
+ * LAN users. Returns null when the URL has no browser equivalent yet, so the
+ * caller can fall back to the raw URL.
+ *
+ * Image workbench: `centaur-image-workbench://app/index.html?...` →
+ * `<origin>/workbench/image/index.html?...`, with the in-app `apiUrl` repointed
+ * at the same-origin key-injecting proxy (so no key travels through the browser).
+ */
+export function adaptWorkbenchUrlForBrowser(rawUrl: string): string | null {
+  if (rawUrl.startsWith('centaur-image-workbench://')) {
+    const origin = window.location.origin;
+    const qIndex = rawUrl.indexOf('?');
+    const params = new URLSearchParams(qIndex >= 0 ? rawUrl.slice(qIndex + 1) : '');
+    params.set('apiUrl', `${origin}/workbench/image/__proxy/v1`);
+    return `${origin}/workbench/image/index.html?${params.toString()}`;
+  }
+  return null;
+}
+
+/**
+ * Browser/LAN fallback for WebviewHost: a plain <iframe> (no Electron <webview>).
+ * Webview-only features (partition isolation, executeScript, self-managed history,
+ * zoom) have no cross-origin iframe equivalent and are intentionally dropped —
+ * the embedded workbench is same-origin and self-contained.
+ */
+const BrowserIframeHost: React.FC<WebviewHostProps> = ({
+  url,
+  className,
+  style,
+  onDidFinishLoad,
+  onDidFailLoad,
+  controlRef,
+}) => {
+  const browserUrl = adaptWorkbenchUrlForBrowser(url) ?? url;
+  const [isLoading, setIsLoading] = useState(true);
+  // Webview-only capabilities (executeScript, partition, history, zoom) have no
+  // cross-origin iframe equivalent. Surface a dev signal if a caller relies on
+  // controlRef in browser mode so the gap isn't discovered silently later.
+  useEffect(() => {
+    if (controlRef) console.warn('[WebviewHost] controlRef/executeScript is unavailable in browser (iframe) mode');
+  }, [controlRef]);
+  return (
+    <div className={className} style={{ position: 'relative', ...style }}>
+      {isLoading && (
+        <div className='absolute inset-0 flex items-center justify-center text-t-secondary z-10 pointer-events-none'>
+          <Loading className='animate-spin' size={20} />
+        </div>
+      )}
+      <iframe
+        src={browserUrl}
+        title='workbench'
+        className='border-0 absolute left-0 top-0 w-full h-full'
+        allow='clipboard-read; clipboard-write'
+        onLoad={() => {
+          setIsLoading(false);
+          onDidFinishLoad?.();
+        }}
+        onError={() => {
+          setIsLoading(false);
+          onDidFailLoad?.(-1, 'iframe_load_error');
+        }}
+      />
+    </div>
+  );
+};
+
+/**
+ * Renders the Electron <webview> on the desktop, and a plain <iframe> in a LAN
+ * browser (where the <webview> tag and custom protocols don't exist). The branch
+ * is a stable per-session value, so the dispatcher itself holds no hooks.
+ */
+const WebviewHost: React.FC<WebviewHostProps> = (props) => {
+  if (!isElectronDesktop()) return <BrowserIframeHost {...props} />;
+  return <ElectronWebviewHost {...props} />;
 };
 
 export default WebviewHost;
