@@ -204,13 +204,6 @@ const Sider: React.FC<SiderProps> = ({ onSessionClick, collapsed = false }) => {
               onConversationSelect={handleConversationSelect}
               onSessionClick={onSessionClick}
             />
-            <SiderAppStoreEntry
-              isMobile={isMobile}
-              isActive={pathname === '/appstore'}
-              collapsed={collapsed}
-              siderTooltipProps={siderTooltipProps}
-              onClick={handleAppStoreClick}
-            />
             {/* Scheduled tasks nav entry - fixed above scroll */}
             <SiderScheduledEntry
               isMobile={isMobile}
@@ -218,6 +211,20 @@ const Sider: React.FC<SiderProps> = ({ onSessionClick, collapsed = false }) => {
               collapsed={collapsed}
               siderTooltipProps={siderTooltipProps}
               onClick={handleScheduledClick}
+            />
+            <SiderAppStoreEntry
+              isMobile={isMobile}
+              isActive={pathname === '/appstore'}
+              collapsed={collapsed}
+              siderTooltipProps={siderTooltipProps}
+              onClick={handleAppStoreClick}
+            />
+            <SiderFilesEntry
+              isMobile={isMobile}
+              isActive={pathname === '/files'}
+              collapsed={collapsed}
+              siderTooltipProps={siderTooltipProps}
+              onClick={handleFilesClick}
             />
             {/* Divider between fixed top nav and scrollable content area */}
             <div
@@ -250,14 +257,6 @@ const Sider: React.FC<SiderProps> = ({ onSessionClick, collapsed = false }) => {
           </div>
         )}
       </div>
-      {/* 工作空间 — above settings */}
-      <SiderFilesEntry
-        isMobile={isMobile}
-        isActive={pathname === '/files'}
-        collapsed={collapsed}
-        siderTooltipProps={siderTooltipProps}
-        onClick={handleFilesClick}
-      />
       {/* Footer */}
       <SiderFooter
         isMobile={isMobile}
