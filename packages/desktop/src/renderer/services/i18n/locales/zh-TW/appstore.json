@@ -14,5 +14,8 @@
   "retry": "重試",
   "comingSoon": "即將推出",
   "downloadFor": "下載（{{os}}）",
-  "otherSystems": "其他系統："
+  "otherSystems": "其他系統：",
+  "openHere": "在本機開啟",
+  "working": "處理中…",
+  "getInstaller": "下載安裝包："
 }

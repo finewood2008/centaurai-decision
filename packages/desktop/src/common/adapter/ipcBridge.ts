@@ -1434,9 +1434,15 @@ export interface IAppStoreListResult {
   apps: IAppStoreApp[];
 }
 
+export type IAppStoreActionResult = { ok: boolean; error?: string };
+
 export const appstore = {
   list: bridge.buildProvider<IAppStoreListResult, void>('appstore.list'),
   setInstalled: bridge.buildProvider<void, { id: string; installed: boolean }>('appstore.set-installed'),
+  /** Managed install: place the app bundle in a default dir under userData (desktop). */
+  install: bridge.buildProvider<IAppStoreActionResult, { id: string }>('appstore.install'),
+  /** Managed launch: open the installed app as a standalone window (desktop). */
+  launch: bridge.buildProvider<IAppStoreActionResult, { id: string }>('appstore.launch'),
 };
 
 // ---------------------------------------------------------------------------

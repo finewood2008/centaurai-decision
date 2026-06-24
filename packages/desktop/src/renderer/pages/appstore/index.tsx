@@ -4,31 +4,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Button, Empty, Spin } from '@arco-design/web-react';
-import { Download, Picture, Shop, Video } from '@icon-park/react';
-import React, { useEffect, useMemo, useState } from 'react';
+import { Button, Empty, Message, Spin } from '@arco-design/web-react';
+import { Download, Play, Picture, Shop, Video } from '@icon-park/react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ipcBridge } from '@/common';
 import type { IAppStoreApp, IAppStoreArtifact } from '@/common/adapter/ipcBridge';
 
-/** Human label for an artifact OS. */
 const OS_LABEL: Record<string, string> = { windows: 'Windows', macos: 'macOS', linux: 'Linux' };
+const osLabel = (os: string): string => OS_LABEL[os] ?? os;
 
-/** Detect the user's OS from the browser (works in desktop Electron and LAN browser). */
-const detectOs = (): string => {
-  if (typeof navigator === 'undefined') return 'unknown';
-  const ua = `${navigator.userAgent} ${navigator.platform}`.toLowerCase();
-  if (ua.includes('win')) return 'windows';
-  if (ua.includes('mac') || ua.includes('iphone') || ua.includes('ipad')) return 'macos';
-  if (ua.includes('linux') || ua.includes('x11') || ua.includes('android')) return 'linux';
-  return 'unknown';
-};
+const isDesktop = (): boolean => typeof window !== 'undefined' && !!(window as { electronAPI?: unknown }).electronAPI;
 
-/** Same-origin download URL served by web-host /api/appstore/downloads/get. */
 const downloadHref = (appId: string, file: string): string =>
   `/api/appstore/downloads/get?appId=${encodeURIComponent(appId)}&file=${encodeURIComponent(file)}`;
 
-/** Trigger a browser attachment download (the proven DownloadClient pattern). */
 const triggerDownload = (appId: string, file: string): void => {
   const a = document.createElement('a');
   a.href = downloadHref(appId, file);
@@ -59,16 +49,19 @@ const toneFor = (id: string): Tone => {
   return TONES[hash % TONES.length];
 };
 
-const osLabel = (os: string): string => OS_LABEL[os] ?? os;
-
 type TFn = (key: string, opts?: Record<string, unknown>) => string;
 
-const AppCard: React.FC<{ app: IAppStoreApp; lang: string; t: TFn; os: string }> = ({ app, lang, t, os }) => {
+const AppCard: React.FC<{
+  app: IAppStoreApp;
+  lang: string;
+  t: TFn;
+  desktop: boolean;
+  busy: boolean;
+  onOpen: () => void;
+}> = ({ app, lang, t, desktop, busy, onOpen }) => {
   const tone = toneFor(app.id);
   const artifacts: IAppStoreArtifact[] = app.artifacts || [];
   const comingSoon = artifacts.length === 0;
-  const primary = artifacts.find((a) => a.os === os) ?? artifacts[0];
-  const others = artifacts.filter((a) => a !== primary);
 
   return (
     <div
@@ -111,52 +104,54 @@ const AppCard: React.FC<{ app: IAppStoreApp; lang: string; t: TFn; os: string }>
         >
           {pickText(app.description, lang)}
         </div>
-        <div
-          className='mt-14px flex items-center justify-between gap-12px pt-12px'
-          style={{ borderTop: '1px solid var(--centaur-line)' }}
-        >
-          <span
-            className='inline-flex items-center gap-5px truncate text-12px'
-            style={{ color: 'var(--centaur-ink-mute)' }}
+
+        {comingSoon ? (
+          <div
+            className='mt-14px flex items-center justify-between gap-12px pt-12px'
+            style={{ borderTop: '1px solid var(--centaur-line)' }}
           >
-            <span className='h-6px w-6px rounded-full' style={{ background: tone.rail }} />
-            {t('appstore.byok')}
-          </span>
-          {comingSoon ? (
+            <span className='inline-flex items-center gap-5px text-12px' style={{ color: 'var(--centaur-ink-mute)' }}>
+              <span className='h-6px w-6px rounded-full' style={{ background: tone.rail }} />
+              {t('appstore.byok')}
+            </span>
             <span
               className='inline-flex items-center rounded-8px px-10px py-3px text-12px font-600'
               style={{ background: 'var(--centaur-bg-warm)', color: 'var(--centaur-ink-mute)' }}
             >
               {t('appstore.comingSoon')}
             </span>
-          ) : (
-            <div className='flex flex-col items-end gap-4px'>
-              <Button
-                type='primary'
-                size='small'
-                icon={<Download />}
-                onClick={() => primary && triggerDownload(app.id, primary.file)}
-              >
-                {t('appstore.downloadFor', { os: osLabel(primary?.os ?? os) })}
+          </div>
+        ) : (
+          <div
+            className='mt-14px flex flex-col gap-10px pt-12px'
+            style={{ borderTop: '1px solid var(--centaur-line)' }}
+          >
+            {desktop && (
+              <Button type='primary' long icon={<Play />} loading={busy} onClick={onOpen}>
+                {busy ? t('appstore.working') : t('appstore.openHere')}
               </Button>
-              {others.length > 0 && (
-                <div className='flex items-center gap-8px text-11px' style={{ color: 'var(--centaur-ink-mute)' }}>
-                  <span>{t('appstore.otherSystems')}</span>
-                  {others.map((a) => (
-                    <a
-                      key={a.os}
-                      className='cursor-pointer'
-                      style={{ color: tone.icon }}
-                      onClick={() => triggerDownload(app.id, a.file)}
-                    >
-                      {osLabel(a.os)}
-                    </a>
-                  ))}
-                </div>
-              )}
+            )}
+            <div
+              className='flex flex-wrap items-center gap-x-10px gap-y-4px text-12px'
+              style={{ color: 'var(--centaur-ink-mute)' }}
+            >
+              <span className='inline-flex items-center gap-4px'>
+                <Download size={13} />
+                {t('appstore.getInstaller')}
+              </span>
+              {artifacts.map((a) => (
+                <a
+                  key={a.os}
+                  className='cursor-pointer font-600'
+                  style={{ color: tone.icon }}
+                  onClick={() => triggerDownload(app.id, a.file)}
+                >
+                  {osLabel(a.os)}
+                </a>
+              ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -165,9 +160,10 @@ const AppCard: React.FC<{ app: IAppStoreApp; lang: string; t: TFn; os: string }>
 const AppStorePage: React.FC = () => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language;
-  const os = useMemo(detectOs, []);
+  const desktop = useMemo(isDesktop, []);
   const [apps, setApps] = useState<IAppStoreApp[]>([]);
   const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState<string | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -183,6 +179,27 @@ const AppStorePage: React.FC = () => {
     return () => {
       alive = false;
     };
+  }, []);
+
+  const handleOpen = useCallback(async (target: IAppStoreApp) => {
+    setBusy(target.id);
+    try {
+      // Always (re)install the bundle into the managed dir — idempotent and cheap,
+      // and avoids relying on a possibly-stale installed flag.
+      const installed = await ipcBridge.appstore.install.invoke({ id: target.id });
+      if (!installed.ok) {
+        Message.error(installed.error || 'install failed');
+        return;
+      }
+      setApps((arr) => arr.map((a) => (a.id === target.id ? { ...a, installed: true } : a)));
+      const launched = await ipcBridge.appstore.launch.invoke({ id: target.id });
+      if (!launched.ok) Message.error(launched.error || 'launch failed');
+    } catch (error) {
+      console.error('[AppStore] open failed', error);
+      Message.error(String(error));
+    } finally {
+      setBusy((b) => (b === target.id ? null : b));
+    }
   }, []);
 
   return (
@@ -218,7 +235,15 @@ const AppStorePage: React.FC = () => {
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 18 }}>
           {apps.map((app) => (
-            <AppCard key={app.id} app={app} lang={lang} t={t} os={os} />
+            <AppCard
+              key={app.id}
+              app={app}
+              lang={lang}
+              t={t}
+              desktop={desktop}
+              busy={busy === app.id}
+              onOpen={() => handleOpen(app)}
+            />
           ))}
         </div>
       )}

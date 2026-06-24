@@ -14,5 +14,8 @@
   "retry": "Retry",
   "comingSoon": "Coming soon",
   "downloadFor": "Download for {{os}}",
-  "otherSystems": "Other systems:"
+  "otherSystems": "Other systems:",
+  "openHere": "Open on this device",
+  "working": "Working…",
+  "getInstaller": "Installer:"
 }
