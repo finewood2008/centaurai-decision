@@ -9,6 +9,7 @@ import { TEAM_MODE_ENABLED } from '@/common/config/constants';
 import PwaPullToRefresh from '@/renderer/components/layout/PwaPullToRefresh';
 import MobileTabBar from '@/renderer/components/layout/MobileTabBar';
 import Titlebar from '@/renderer/components/layout/Titlebar';
+import ToolboxPage from '@/renderer/pages/toolbox/ToolboxPage';
 import { Layout as ArcoLayout } from '@arco-design/web-react';
 import classNames from 'classnames';
 import React, { Suspense, useCallback, useEffect, useRef, useState } from 'react';
@@ -115,6 +116,10 @@ const Layout: React.FC<{
   const navigate = useNavigate();
   useConversationShortcuts({ navigate });
   const location = useLocation();
+  const isToolboxRoute = location.pathname === '/toolbox';
+  const isWorkbenchRoute = location.pathname === '/workbench';
+  const [toolboxKeepAliveMounted, setToolboxKeepAliveMounted] = useState(isToolboxRoute);
+  const [workbenchKeepAliveMounted, setWorkbenchKeepAliveMounted] = useState(isWorkbenchRoute);
   const workspaceAvailable =
     location.pathname.startsWith('/conversation/') || (TEAM_MODE_ENABLED && location.pathname.startsWith('/team/'));
   const collapsedRef = useRef(collapsed);
@@ -235,6 +240,15 @@ const Layout: React.FC<{
   useEffect(() => {
     collapsedRef.current = collapsed;
   }, [collapsed]);
+
+  // Keep the toolbox/workbench mounted once visited so an in-progress task (e.g.
+  // an image generation) keeps running when you switch pages and is still there
+  // on return. The off-route instance is hidden via an explicit display:none in
+  // the render below (a hidden Electron <webview> is throttled by Chromium).
+  useEffect(() => {
+    if (isToolboxRoute) setToolboxKeepAliveMounted(true);
+    if (isWorkbenchRoute) setWorkbenchKeepAliveMounted(true);
+  }, [isToolboxRoute, isWorkbenchRoute]);
 
   const beginSiderResizeDrag = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
@@ -389,8 +403,31 @@ const Layout: React.FC<{
                   : undefined
               }
             >
-              <div className='flex-1 min-h-0 flex flex-col'>
-                <Outlet />
+              <div className='flex-1 min-h-0 flex flex-col relative'>
+                {!isToolboxRoute && !isWorkbenchRoute && (
+                  <div className='absolute inset-0 flex flex-col min-h-0'>
+                    <Outlet />
+                  </div>
+                )}
+                {toolboxKeepAliveMounted && (
+                  // Explicit display:none when off-route — the `hidden` utility
+                  // class loses to `flex` here, so the workbench frame/webview
+                  // was overlaying every other page.
+                  <div
+                    className='absolute inset-0 flex flex-col min-h-0'
+                    style={isToolboxRoute ? undefined : { display: 'none' }}
+                  >
+                    <ToolboxPage mode='toolbox' />
+                  </div>
+                )}
+                {workbenchKeepAliveMounted && (
+                  <div
+                    className='absolute inset-0 flex flex-col min-h-0'
+                    style={isWorkbenchRoute ? undefined : { display: 'none' }}
+                  >
+                    <ToolboxPage mode='workbench' />
+                  </div>
+                )}
               </div>
               {isMobile && <MobileTabBar />}
               {directorySelectionContextHolder}

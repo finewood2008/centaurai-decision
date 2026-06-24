@@ -99,12 +99,22 @@ const isTeamConversation = (conversation: TChatConversation): boolean => {
   return Boolean(extra?.team_id || extra?.teamId);
 };
 
+/**
+ * Internal / ephemeral conversations that should not appear in the main history
+ * sidebar — e.g. the runs spawned by the Video Workbench AI assistant.
+ */
+const isHiddenFromSidebar = (conversation: TChatConversation): boolean => {
+  const extra = conversation.extra as { hidden_from_sidebar?: boolean } | undefined;
+  return Boolean(extra?.hidden_from_sidebar);
+};
+
 export const buildGroupedHistory = (
   conversations: TChatConversation[],
   t: (key: string) => string
 ): GroupedHistoryResult => {
-  // Filter out team-owned conversations; they are only visible via the Teams panel
-  const visibleConversations = conversations.filter((conv) => !isTeamConversation(conv));
+  // Filter out team-owned conversations (Teams panel only) and internal
+  // conversations such as the Video Workbench assistant's runs.
+  const visibleConversations = conversations.filter((conv) => !isTeamConversation(conv) && !isHiddenFromSidebar(conv));
 
   const pinnedConversations = visibleConversations
     .filter((conversation) => isConversationPinned(conversation))

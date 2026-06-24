@@ -225,6 +225,20 @@ let disposeCronResumeListener: (() => void) | null = null;
 let backendStartedOk = false;
 
 const IMAGE_WORKBENCH_PROTOCOL = 'centaur-image-workbench';
+const IMAGE_WORKBENCH_TOKENCLUB_PROXY_PREFIX = '/__tokenclub';
+const TOKENCLUB_API_BASE_URL = 'https://api.tokenclub.pro';
+
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: IMAGE_WORKBENCH_PROTOCOL,
+    privileges: {
+      standard: true,
+      secure: true,
+      supportFetchAPI: true,
+      corsEnabled: true,
+    },
+  },
+]);
 
 function getImageWorkbenchRoot(): string {
   if (app.isPackaged) {
@@ -266,9 +280,14 @@ function getStaticContentType(filePath: string): string {
 }
 
 function registerImageWorkbenchProtocol(): void {
-  protocol.handle(IMAGE_WORKBENCH_PROTOCOL, async (request) => {
+  const handler = async (request: Request): Promise<Response> => {
     const root = getImageWorkbenchRoot();
     const url = new URL(request.url);
+
+    if (url.hostname === 'app' && url.pathname.startsWith(IMAGE_WORKBENCH_TOKENCLUB_PROXY_PREFIX)) {
+      return proxyTokenClubImageWorkbenchRequest(request, url);
+    }
+
     const requestedPath = decodeURIComponent(url.pathname.replace(/^\/+/, '')) || 'index.html';
     const filePath = path.resolve(root, requestedPath);
 
@@ -286,7 +305,79 @@ function registerImageWorkbenchProtocol(): void {
     } catch {
       return new Response('Not Found', { status: 404 });
     }
-  });
+  };
+
+  try {
+    protocol.handle(IMAGE_WORKBENCH_PROTOCOL, handler);
+  } catch (error) {
+    console.warn('[AionUi] Failed to register image workbench protocol on default session:', error);
+  }
+
+  try {
+    session.fromPartition('persist:centaur-image-workbench').protocol.handle(IMAGE_WORKBENCH_PROTOCOL, handler);
+  } catch (error) {
+    console.warn('[AionUi] Failed to register image workbench protocol on workbench session:', error);
+  }
+}
+
+function createCorsHeaders(): Record<string, string> {
+  return {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Authorization, Content-Type, Accept',
+  };
+}
+
+async function proxyTokenClubImageWorkbenchRequest(request: Request, url: URL): Promise<Response> {
+  if (request.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 204,
+      headers: createCorsHeaders(),
+    });
+  }
+
+  const upstreamPath = url.pathname.slice(IMAGE_WORKBENCH_TOKENCLUB_PROXY_PREFIX.length) || '/';
+  const upstreamUrl = `${TOKENCLUB_API_BASE_URL}${upstreamPath}${url.search}`;
+  const headers = new Headers();
+  const authorization = request.headers.get('authorization');
+  const contentType = request.headers.get('content-type');
+  const accept = request.headers.get('accept');
+  if (authorization) headers.set('authorization', authorization);
+  if (contentType) headers.set('content-type', contentType);
+  if (accept) headers.set('accept', accept);
+
+  try {
+    console.info('[AionUi] TokenClub image workbench proxy request:', {
+      method: request.method,
+      path: upstreamPath,
+    });
+    const upstreamResponse = await fetch(upstreamUrl, {
+      method: request.method,
+      headers,
+      body: request.method === 'GET' || request.method === 'HEAD' ? undefined : await request.arrayBuffer(),
+    });
+    console.info('[AionUi] TokenClub image workbench proxy response:', {
+      method: request.method,
+      path: upstreamPath,
+      status: upstreamResponse.status,
+    });
+    const responseHeaders = new Headers(upstreamResponse.headers);
+    for (const [key, value] of Object.entries(createCorsHeaders())) {
+      responseHeaders.set(key, value);
+    }
+    return new Response(upstreamResponse.body, {
+      status: upstreamResponse.status,
+      statusText: upstreamResponse.statusText,
+      headers: responseHeaders,
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('[AionUi] TokenClub image workbench proxy failed:', message);
+    return Response.json(
+      { error: { message: `TokenClub 代理请求失败：${message}` } },
+      { status: 502, headers: createCorsHeaders() }
+    );
+  }
 }
 let backendStartupFailed = false;
 let backendStartupFailureInfo: BackendStartupFailureInfo | null = null;

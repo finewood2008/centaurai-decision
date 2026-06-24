@@ -72,7 +72,7 @@ const getToolDesc = (tool: ToolDef, t: (key: string) => string) => tool.descText
 
 const IMAGE2_WORKBENCH_PROFILE = {
   profileName: 'TokenClub Image2',
-  apiUrl: 'http://8.209.228.147:8080/v1',
+  apiUrl: 'centaur-image-workbench://app/__tokenclub/v1',
   model: 'gpt-image-2',
   apiMode: 'images',
   streamImages: 'false',
@@ -499,6 +499,10 @@ const ToolboxPage: React.FC<ToolboxPageProps> = ({ mode = 'toolbox' }) => {
     reset();
     lastRunRef.current = null;
     setVideoWorkbenchOpen(false);
+    // Stop the spawned opencut dev server so it doesn't keep running in the
+    // background. No-op for a reused/standalone server (only our spawned child
+    // is killed; a reused server leaves `child` null in videostudioBridge).
+    void ipcBridge.videostudio.stop.invoke();
   }, [reset]);
 
   const handleRun = useCallback(
@@ -584,45 +588,42 @@ const ToolboxPage: React.FC<ToolboxPageProps> = ({ mode = 'toolbox' }) => {
         </div>
 
         <div
-          className='centaur-card relative flex w-full overflow-hidden'
+          className='centaur-card relative w-full overflow-hidden'
           style={{ height: '78vh', minHeight: 520, padding: 0, borderRadius: 'var(--centaur-radius-sm)' }}
         >
-          <div className='relative h-full min-w-0 flex-1'>
-            {videoServer.state === 'ready' ? (
-              <WebviewHost
-                url={VIDEO_WORKBENCH_URL}
-                id='centaur-video-workbench'
-                partition='persist:centaur-video-workbench'
-                controlRef={videoControlRef}
-                className='h-full w-full'
-                style={{ height: '100%', minHeight: 520 }}
-              />
-            ) : (
-              <div
-                className='flex h-full w-full flex-col items-center justify-center gap-12px'
-                style={{ minHeight: 520 }}
-              >
-                {videoServer.state === 'starting' ? (
-                  <>
-                    <Spin size={28} />
-                    <div className='text-14px' style={{ color: 'var(--centaur-ink-soft)' }}>
-                      {t('toolbox.videoWorkbench.starting')}
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className='max-w-420px text-center text-14px' style={{ color: 'var(--centaur-ink-soft)' }}>
-                      {t('toolbox.videoWorkbench.startFailed')}
-                    </div>
-                    <Button onClick={startVideoServer}>{t('toolbox.videoWorkbench.retry')}</Button>
-                  </>
-                )}
-              </div>
-            )}
-          </div>
-          <div className='h-full w-340px shrink-0' style={{ borderLeft: '1px solid var(--centaur-line)' }}>
-            <VideoAgentChat control={videoControlRef} />
-          </div>
+          {videoServer.state === 'ready' ? (
+            <WebviewHost
+              url={VIDEO_WORKBENCH_URL}
+              id='centaur-video-workbench'
+              partition='persist:centaur-video-workbench'
+              controlRef={videoControlRef}
+              className='h-full w-full'
+              style={{ height: '100%', minHeight: 520 }}
+            />
+          ) : (
+            <div
+              className='flex h-full w-full flex-col items-center justify-center gap-12px'
+              style={{ minHeight: 520 }}
+            >
+              {videoServer.state === 'starting' ? (
+                <>
+                  <Spin size={28} />
+                  <div className='text-14px' style={{ color: 'var(--centaur-ink-soft)' }}>
+                    {t('toolbox.videoWorkbench.starting')}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className='max-w-420px text-center text-14px' style={{ color: 'var(--centaur-ink-soft)' }}>
+                    {t('toolbox.videoWorkbench.startFailed')}
+                  </div>
+                  <Button onClick={startVideoServer}>{t('toolbox.videoWorkbench.retry')}</Button>
+                </>
+              )}
+            </div>
+          )}
+          {/* Floating, collapsible AI assistant — overlays the editor, does not resize it. */}
+          <VideoAgentChat control={videoControlRef} />
         </div>
       </div>
     );

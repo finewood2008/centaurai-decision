@@ -1,0 +1,1475 @@
+$ electron-vite dev --config packages/desktop/electron.vite.config.ts
+vite v6.4.1 building SSR bundle for development...
+transforming...
+✓ 471 modules transformed.
+rendering chunks...
+[plugin vite:reporter] 
+(!) /home/user/桌面/centaurai-aionui/packages/desktop/src/process/utils/configureChromium.ts is dynamically imported by /home/user/桌面/centaurai-aionui/packages/desktop/src/index.ts but also statically imported by /home/user/桌面/centaurai-aionui/packages/desktop/src/index.ts, /home/user/桌面/centaurai-aionui/packages/desktop/src/process/bridge/applicationBridge.ts, /home/user/桌面/centaurai-aionui/packages/desktop/src/process/index.ts, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /home/user/桌面/centaurai-aionui/packages/desktop/src/process/utils/utils.ts is dynamically imported by /home/user/桌面/centaurai-aionui/packages/desktop/src/index.ts, /home/user/桌面/centaurai-aionui/packages/desktop/src/index.ts but also statically imported by /home/user/桌面/centaurai-aionui/packages/desktop/src/process/bridge/sharedDriveBridge.ts, /home/user/桌面/centaurai-aionui/packages/desktop/src/process/utils/index.ts, /home/user/桌面/centaurai-aionui/packages/desktop/src/process/utils/initStorage.ts, /home/user/桌面/centaurai-aionui/packages/desktop/src/process/utils/webuiConfig.ts, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /home/user/桌面/centaurai-aionui/packages/desktop/src/process/utils/initStorage.ts is dynamically imported by /home/user/桌面/centaurai-aionui/packages/desktop/src/index.ts, /home/user/桌面/centaurai-aionui/packages/desktop/src/index.ts, /home/user/桌面/centaurai-aionui/packages/desktop/src/process/utils/zoom.ts but also statically imported by /home/user/桌面/centaurai-aionui/packages/desktop/src/index.ts, /home/user/桌面/centaurai-aionui/packages/desktop/src/process/bridge/applicationBridge.ts, /home/user/桌面/centaurai-aionui/packages/desktop/src/process/bridge/applicationBridgeCore.ts, /home/user/桌面/centaurai-aionui/packages/desktop/src/process/bridge/notificationBridge.ts, /home/user/桌面/centaurai-aionui/packages/desktop/src/process/bridge/systemSettingsBridge.ts, /home/user/桌面/centaurai-aionui/packages/desktop/src/process/index.ts, /home/user/桌面/centaurai-aionui/packages/desktop/src/process/services/i18n/index.ts, /home/user/桌面/centaurai-aionui/packages/desktop/src/process/utils/closeToTraySetting.ts, /home/user/桌面/centaurai-aionui/packages/desktop/src/process/utils/migrateAssistants.ts, /home/user/桌面/centaurai-aionui/packages/desktop/src/process/utils/runBackendMigrations.ts, /home/user/桌面/centaurai-aionui/packages/desktop/src/process/utils/webuiConfig.ts, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /home/user/桌面/centaurai-aionui/packages/desktop/src/process/services/autoUpdaterService.ts is dynamically imported by /home/user/桌面/centaurai-aionui/packages/desktop/src/index.ts but also statically imported by /home/user/桌面/centaurai-aionui/packages/desktop/src/process/bridge/updateBridge.ts, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /home/user/桌面/centaurai-aionui/packages/desktop/src/process/bridge/updateBridge.ts is dynamically imported by /home/user/桌面/centaurai-aionui/packages/desktop/src/index.ts but also statically imported by /home/user/桌面/centaurai-aionui/packages/desktop/src/process/bridge/index.ts, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /home/user/桌面/centaurai-aionui/packages/desktop/src/process/services/i18n/index.ts is dynamically imported by /home/user/桌面/centaurai-aionui/packages/desktop/src/process/bridge/updateBridge.ts, /home/user/桌面/centaurai-aionui/packages/desktop/src/process/services/autoUpdaterService.ts but also statically imported by /home/user/桌面/centaurai-aionui/packages/desktop/src/index.ts, /home/user/桌面/centaurai-aionui/packages/desktop/src/process/bridge/systemSettingsBridge.ts, /home/user/桌面/centaurai-aionui/packages/desktop/src/process/index.ts, /home/user/桌面/centaurai-aionui/packages/desktop/src/process/pet/petConfirmManager.ts, /home/user/桌面/centaurai-aionui/packages/desktop/src/process/pet/petManager.ts, /home/user/桌面/centaurai-aionui/packages/desktop/src/process/utils/tray.ts, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /home/user/桌面/centaurai-aionui/packages/web-host/src/backend-launcher.ts is dynamically imported by /home/user/桌面/centaurai-aionui/packages/web-host/src/index.ts but also statically imported by /home/user/桌面/centaurai-aionui/packages/web-host/src/index.ts, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /home/user/桌面/centaurai-aionui/packages/desktop/src/process/services/database/drivers/BetterSqlite3Driver.ts is dynamically imported by /home/user/桌面/centaurai-aionui/packages/desktop/src/process/services/database/runLegacyDatabaseMigrations.ts but also statically imported by /home/user/桌面/centaurai-aionui/packages/desktop/src/process/bridge/userManagementBridge.ts, dynamic import will not move module into another chunk.
+
+out/main/chunks/resetPasswordCLI-DaeszqTa.js          2.41 kB │ map:     4.39 kB
+out/main/chunks/ensureAdminUser-CA0jV_Jf.js           3.20 kB │ map:     4.47 kB
+out/main/chunks/static-server-B-QZRn9E.js            23.87 kB │ map:    57.01 kB
+out/main/chunks/petManager-DMNMPVIY.js               27.33 kB │ map:    70.81 kB
+out/main/chunks/runBackendMigrations-AO_N53L4.js     50.22 kB │ map:   113.54 kB
+out/main/chunks/index-DTyfevvC.js                   328.63 kB │ map:   728.71 kB
+out/main/index.js                                 1,918.76 kB │ map: 1,154.75 kB
+✓ built in 1.59s
+
+electron main process built successfully
+
+-----
+
+vite v6.4.1 building SSR bundle for development...
+transforming...
+✓ 6 modules transformed.
+rendering chunks...
+out/preload/petPreload.js         0.50 kB
+out/preload/petHitPreload.js      0.67 kB
+out/preload/petConfirmPreload.js  0.97 kB
+out/preload/index.js              4.62 kB
+✓ built in 14ms
+
+electron preload scripts built successfully
+
+-----
+
+dev server running for the electron renderer process at:
+
+  ➜  Local:   http://127.0.0.1:5173/
+  ➜  UnoCSS Inspector: http://127.0.0.1:5173/__unocss/
+
+starting electron app...
+
+build.buildStorage global
+build.buildStorage system
+[CDP] Chrome DevTools Protocol enabled
+[CDP] Remote debugging port: 9230
+[CDP] DevTools URL: http://127.0.0.1:9230
+[CDP] MCP chrome-devtools connection: --browser-url=http://127.0.0.1:9230
+19:52:35.194 › build.buildStorage agent.config
+19:52:35.195 › build.buildStorage agent.env
+
+DevTools listening on ws://127.0.0.1:9230/devtools/browser/07bd961e-fd0c-4d2f-a66e-ca36e9731be5
+19:52:35.389 › [AionUi:ready] start +0ms
+19:52:35.398 › (electron) 'session.getAllExtensions' is deprecated and will be removed. Please use 'session.extensions.getAllExtensions' instead.
+19:52:35.398 › (electron) 'session.loadExtension' is deprecated and will be removed. Please use 'session.extensions.loadExtension' instead.
+19:52:35.432 › [DevTools] React Developer Tools installed
+19:52:35.433 › [AionUi:init] start +0ms
+19:52:35.433 › [AionUi:init] 1. migrateLegacyData +0ms
+19:52:35.434 › [AionUi:init] 3. storage interceptors +1ms
+19:52:35.434 › [AionUi:init] 4. MCP config initialization skipped +1ms
+19:52:35.434 › [AionUi:init] 5. ensureAssistantDirs +1ms
+19:52:35.434 › [AionUi:init] 5b. legacyBuiltinSkillsCleanup +1ms
+19:52:35.434 › [AionUi:init] 6. legacyDbMigrations skipped +1ms
+19:52:35.434 › [AionUi:init] done +1ms
+19:52:35.434 › [AionUi:process] initStorage +1ms
+19:52:35.435 › [AionUi:ready] initializeProcess +45ms
+19:52:35.441 › [aioncore] starting: /home/user/.local/bin/aioncore --port 51441 --data-dir /home/user/.config/CentaurAI-Dev/aionui --log-level debug --app-version 2.1.14 --log-dir /home/user/.config/CentaurAI-Dev/logs --work-dir /home/user/.config/CentaurAI-Dev/aionui --local
+19:52:35.514 › [aioncore] aioncore::bootstrap::environment: startup: PATH ready path_segments=18 path_len=351
+19:52:35.515 › [aioncore] aioncore::bootstrap::environment: Running in local mode — authentication is disabled
+19:52:35.515 › [aioncore] aioncore::commands::cmd_server: startup: socket bind started address=127.0.0.1:51441 attempt=1
+19:52:35.515 › [aioncore] aioncore::commands::cmd_server: startup: socket bind completed address=127.0.0.1:51441
+19:52:35.515 › [aioncore] AIONCORE_LISTENING {"host":"127.0.0.1","port":51441}
+19:52:35.519 › [aioncore] aionui_extension::startup_materialize: builtin skills up to date; skipping materialize target=/home/user/.config/CentaurAI-Dev/aionui/builtin-skills version="0.1.29"
+19:52:35.519 › [aioncore] aioncore::bootstrap::environment: startup: builtin skills materialized elapsed_ms=0
+19:52:35.519 › [aioncore] aioncore::bootstrap::environment: Initializing database at /home/user/.config/CentaurAI-Dev/aionui/aionui-backend.db
+19:52:35.519 › [aioncore] aionui_db::database: Database initialized at /home/user/.config/CentaurAI-Dev/aionui/aionui-backend.db
+19:52:35.519 › [aioncore] aioncore::bootstrap::environment: startup: database initialized elapsed_ms=3
+19:52:35.525 › [aioncore] aionui_ai_agent::registry: agent   available id=632f31d2 name=CentaurAI backend="-" source=Internal command="-" resolved=<internal>
+19:52:35.526 › [aioncore] aionui_runtime::node_runtime: node runtime probe decided command="claude" probe="path-lookup"
+19:52:35.526 › [aioncore] aionui_ai_agent::registry: agent   available id=2d23ff1c name=Claude Code backend="claude" source=Builtin command="-" resolved=claude-agent-acp
+19:52:35.526 › [aioncore] aionui_runtime::node_runtime: node runtime probe decided command="codex" probe="path-lookup"
+19:52:35.526 › [aioncore] aionui_ai_agent::registry: agent   available id=8e1acf31 name=Codex CLI backend="codex" source=Builtin command="-" resolved=codex-acp
+19:52:35.526 › [aioncore] aionui_runtime::node_runtime: node runtime probe decided command="gemini" probe="path-lookup"
+19:52:35.526 › [aioncore] aionui_ai_agent::registry: agent unavailable id=cc126dd5 name=Gemini CLI backend="gemini" source=Builtin command="gemini" reason=spawn command `gemini` not on $PATH
+19:52:35.526 › [aioncore] aionui_runtime::node_runtime: node runtime probe decided command="auggie" probe="path-lookup"
+19:52:35.526 › [aioncore] aionui_ai_agent::registry: agent unavailable id=eb895030 name=Auggie backend="auggie" source=Builtin command="auggie" reason=spawn command `auggie` not on $PATH
+19:52:35.527 › [aioncore] aionui_runtime::node_runtime: node runtime probe decided command="codebuddy" probe="path-lookup"
+19:52:35.527 › [aioncore] aionui_ai_agent::registry: agent unavailable id=8b20fd41 name=CodeBuddy backend="codebuddy" source=Builtin command="npx" reason=primary binary `codebuddy` not on $PATH
+19:52:35.527 › [aioncore] aionui_runtime::node_runtime: node runtime probe decided command="copilot" probe="path-lookup"
+19:52:35.527 › [aioncore] aionui_ai_agent::registry: agent unavailable id=3cd9d436 name=Copilot backend="copilot" source=Builtin command="copilot" reason=spawn command `copilot` not on $PATH
+19:52:35.527 › [aioncore] aionui_runtime::node_runtime: node runtime probe decided command="cursor" probe="path-lookup"
+19:52:35.527 › [aioncore] aionui_ai_agent::registry: agent unavailable id=a0dfb1ec name=Cursor backend="cursor" source=Builtin command="cursor" reason=spawn command `cursor` not on $PATH
+19:52:35.527 › [aioncore] aionui_runtime::node_runtime: node runtime probe decided command="droid" probe="path-lookup"
+19:52:35.527 › [aioncore] aionui_ai_agent::registry: agent unavailable id=da386544 name=Droid backend="droid" source=Builtin command="droid" reason=spawn command `droid` not on $PATH
+19:52:35.527 › [aioncore] aionui_runtime::node_runtime: node runtime probe decided command="goose" probe="path-lookup"
+19:52:35.527 › [aioncore] aionui_ai_agent::registry: agent unavailable id=600c6601 name=Goose backend="goose" source=Builtin command="goose" reason=spawn command `goose` not on $PATH
+19:52:35.527 › [aioncore] aionui_runtime::node_runtime: node runtime probe decided command="hermes" probe="path-lookup"
+19:52:35.528 › [aioncore] aionui_ai_agent::registry: agent   available id=55f3ed1c name=Hermes backend="hermes" source=Builtin command="hermes" resolved=/home/user/.local/bin/hermes
+19:52:35.528 › [aioncore] aionui_runtime::node_runtime: node runtime probe decided command="kimi" probe="path-lookup"
+19:52:35.528 › [aioncore] aionui_ai_agent::registry: agent unavailable id=e241c49c name=Kimi backend="kimi" source=Builtin command="kimi" reason=spawn command `kimi` not on $PATH
+19:52:35.528 › [aioncore] aionui_runtime::node_runtime: node runtime probe decided command="kiro-cli-chat" probe="path-lookup"
+19:52:35.528 › [aioncore] aionui_ai_agent::registry: agent unavailable id=e044000d name=Kiro backend="kiro" source=Builtin command="kiro-cli-chat" reason=spawn command `kiro-cli-chat` not on $PATH
+19:52:35.528 › [aioncore] aionui_runtime::node_runtime: node runtime probe decided command="opencode" probe="path-lookup"
+19:52:35.528 › [aioncore] aionui_ai_agent::registry: agent unavailable id=53861a53 name=OpenCode backend="opencode" source=Builtin command="opencode" reason=spawn command `opencode` not on $PATH
+19:52:35.528 › [aioncore] aionui_runtime::node_runtime: node runtime probe decided command="qodercli" probe="path-lookup"
+19:52:35.528 › [aioncore] aionui_ai_agent::registry: agent unavailable id=1e4afc51 name=Qoder backend="qoder" source=Builtin command="qodercli" reason=spawn command `qodercli` not on $PATH
+19:52:35.528 › [aioncore] aionui_runtime::node_runtime: node runtime probe decided command="qwen" probe="path-lookup"
+19:52:35.528 › [aioncore] aionui_ai_agent::registry: agent unavailable id=26a946ed name=Qwen backend="qwen" source=Builtin command="qwen" reason=spawn command `qwen` not on $PATH
+19:52:35.528 › [aioncore] aionui_runtime::node_runtime: node runtime probe decided command="snow" probe="path-lookup"
+19:52:35.528 › [aioncore] aionui_ai_agent::registry: agent unavailable id=346b0041 name=Snow backend="snow" source=Builtin command="snow" reason=spawn command `snow` not on $PATH
+19:52:35.528 › [aioncore] aionui_runtime::node_runtime: node runtime probe decided command="vibe-acp" probe="path-lookup"
+19:52:35.528 › [aioncore] aionui_ai_agent::registry: agent unavailable id=65d0f5b2 name=Vibe backend="vibe" source=Builtin command="vibe-acp" reason=spawn command `vibe-acp` not on $PATH
+19:52:35.528 › [aioncore] aionui_runtime::node_runtime: node runtime probe decided command="openclaw" probe="path-lookup"
+19:52:35.528 › [aioncore] aionui_ai_agent::registry: agent   available id=b7e8a9c4 name=OpenClaw backend="openclaw" source=Builtin command="openclaw" resolved=/home/user/.hermes/node/bin/openclaw
+19:52:35.528 › [aioncore] aionui_runtime::node_runtime: node runtime probe decided command="openclaw" probe="path-lookup"
+19:52:35.528 › [aioncore] aionui_ai_agent::registry: agent   available id=f9f61666 name=OpenClaw backend="-" source=Builtin command="openclaw" resolved=/home/user/.hermes/node/bin/openclaw
+19:52:35.528 › [aioncore] aionui_runtime::node_runtime: node runtime probe decided command="nanobot" probe="path-lookup"
+19:52:35.528 › [aioncore] aionui_ai_agent::registry: agent unavailable id=fb1083a5 name=Nanobot backend="-" source=Builtin command="nanobot" reason=spawn command `nanobot` not on $PATH
+19:52:35.528 › [aioncore] aionui_ai_agent::registry: AgentRegistry hydrated total=21 available=6 unavailable=15 unavailable_ids=fb1083a5, a0dfb1ec, 8b20fd41, da386544, 346b0041, 1e4afc51, 26a946ed, e044000d, 53861a53, 3cd9d436, eb895030, e241c49c, … (+3 more)
+19:52:35.529 › [aioncore] aionui_team::guide::server: Guide MCP Server started (axum) http_port=38389
+19:52:35.529 › [aioncore] aionui_app::services: Guide MCP server started port=38389
+19:52:35.529 › [aioncore] aionui_app::router::routes: startup: router assembly started
+19:52:35.529 › [aioncore] aionui_app::router::state: startup: module state build started
+19:52:35.529 › [aioncore] aionui_app::router::state: startup: extension states built elapsed_ms=0
+19:52:35.529 › [aioncore] aionui_extension::registry: initializing extension registry
+19:52:35.529 › [aioncore] aionui_extension::registry: resolved scan paths count=2
+19:52:35.529 › [aioncore] aionui_extension::loader: skipping extension with invalid manifest dir=/home/user/.config/CentaurAI-Dev/extensions/fmkadmapgofadopljbjfkapdkoienihi error=No such file or directory (os error 2)
+19:52:35.529 › [aioncore] aionui_extension::registry_helpers: loaded extension manifests count=0
+19:52:35.529 › [aioncore] aionui_extension::registry_helpers: after engine compatibility filter count=0
+19:52:35.529 › [aioncore] aionui_extension::registry_helpers: after dependency sort count=0
+19:52:35.529 › [aioncore] aionui_extension::registry: extension registry initialized
+19:52:35.529 › [aioncore] aionui_app::router::state: startup: extension registry initialized elapsed_ms=0
+19:52:36.028 › [aioncore] aionui_extension::state: extension states persisted path=/home/user/.config/CentaurAI-Dev/aionui/extension-states.json
+19:52:36.751 › [aioncore] aionui_cron::service: Cron service initialized scheduled=1 orphans=0
+19:52:36.752 › [aioncore] aionui_app::router::state: startup: cron state initialized elapsed_ms=1224
+19:52:36.752 › [aioncore] aionui_app::router::state: startup: channel state built elapsed_ms=1224
+19:52:36.752 › [aioncore] aionui_app::router::state: startup: backend binary path resolved elapsed_ms=1224
+19:52:36.752 › [aioncore] aionui_app::router::state: startup: agent service built elapsed_ms=1224
+19:52:36.752 › [aioncore] aionui_app::router::state: startup: module states bundle started elapsed_ms=1224
+19:52:36.752 › [aioncore] aionui_app::router::state: startup: module state phase started elapsed_ms=1224 phase="system"
+19:52:36.756 › [aioncore] aionui_app::router::state: startup: module state phase completed elapsed_ms=1228 phase="system"
+19:52:36.756 › [aioncore] aionui_app::router::state: startup: module state phase started elapsed_ms=1228 phase="conversation"
+19:52:36.756 › [aioncore] aionui_app::router::state: startup: module state phase completed elapsed_ms=1228 phase="conversation"
+19:52:36.756 › [aioncore] aionui_app::router::state: startup: module state phase started elapsed_ms=1228 phase="remote_agent"
+19:52:36.756 › [aioncore] aionui_app::router::state: startup: module state phase completed elapsed_ms=1228 phase="remote_agent"
+19:52:36.756 › [aioncore] aionui_app::router::state: startup: module state phase started elapsed_ms=1228 phase="agent"
+19:52:36.756 › [aioncore] aionui_app::router::state: startup: module state phase completed elapsed_ms=1228 phase="agent"
+19:52:36.757 › [aioncore] aionui_app::router::state: startup: module state phase started elapsed_ms=1228 phase="connection_test"
+19:52:36.760 › [aioncore] aionui_app::router::state: startup: module state phase completed elapsed_ms=1233 phase="connection_test"
+19:52:36.760 › [aioncore] aionui_app::router::state: startup: module state phase started elapsed_ms=1233 phase="file"
+19:52:36.761 › [aioncore] aionui_app::router::state: startup: module state phase completed elapsed_ms=1233 phase="file"
+19:52:36.761 › [aioncore] aionui_app::router::state: startup: module state phase started elapsed_ms=1233 phase="mcp"
+19:52:36.766 › [aioncore] aionui_app::router::state: startup: module state phase completed elapsed_ms=1238 phase="mcp"
+19:52:36.766 › [aioncore] aionui_app::router::state: startup: module state phase started elapsed_ms=1238 phase="team"
+19:52:36.766 › [aioncore] aionui_app::router::state: startup: module state phase completed elapsed_ms=1238 phase="team"
+19:52:36.766 › [aioncore] aionui_app::router::state: startup: module state phase started elapsed_ms=1238 phase="office"
+19:52:36.774 › [aioncore] aionui_app::router::state: startup: module state phase completed elapsed_ms=1246 phase="office"
+19:52:36.774 › [aioncore] aionui_app::router::state: startup: module state phase started elapsed_ms=1246 phase="shell"
+19:52:36.777 › [aioncore] aionui_app::router::state: startup: module state phase completed elapsed_ms=1249 phase="shell"
+19:52:36.777 › [aioncore] aionui_app::router::state: startup: module state build completed elapsed_ms=1249
+19:52:36.780 › [aioncore] aionui_app::router::routes: startup: module states built elapsed_ms=1253
+19:52:36.781 › [aioncore] aionui_app::router::routes: startup: guide MCP service injected elapsed_ms=1253
+19:52:36.781 › [aioncore] aionui_app::router::routes: startup: channel orchestrator spawned elapsed_ms=1253
+19:52:36.781 › [aioncore] aionui_app::router::routes: startup: channel plugin restore scheduled elapsed_ms=1253
+19:52:36.781 › [aioncore] aionui_app::router::routes: startup: route tree build started elapsed_ms=1253
+19:52:36.781 › [aioncore] aionui_app::router::routes: startup: route tree build with states started
+19:52:36.781 › [aioncore] aionui_channel::orchestrator: ChannelOrchestrator started
+19:52:36.781 › [aioncore] aionui_channel::manager: no enabled plugins to restore
+19:52:36.781 › [aioncore] aionui_app::router::routes: startup: route groups built elapsed_ms=0
+19:52:36.782 › [aioncore] aionui_app::router::routes: startup: route tree build with states completed elapsed_ms=1
+19:52:36.782 › [aioncore] aionui_app::router::routes: startup: router assembly completed elapsed_ms=1254
+19:52:36.782 › [aioncore] aioncore::commands::cmd_server: startup: router ready for bound socket elapsed_ms=1255
+19:52:36.782 › [aioncore] aioncore::commands::cmd_server: Server listening on 127.0.0.1:51441 elapsed_ms=1255
+19:52:36.782 › [aioncore] aionui_ai_agent::idle_scanner: Starting idle agent scanner threshold_secs=300 scan_interval_secs=60
+19:52:36.782 › [aioncore] aioncore::commands::cmd_server: startup: managed runtime background preparation started
+19:52:36.782 › [aioncore] http{method=GET path=/health}: tower_http::trace::on_request: started processing request
+19:52:36.783 › [aioncore] http{method=GET path=/health}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:36.785 › [aioncore] health ready on port 51441 after 1 attempts, elapsed_ms=1270, data-dir: /home/user/.config/CentaurAI-Dev/aionui
+19:52:36.786 › [AionUi] backendManager.start ready (port=51441)
+19:52:36.789 › [httpBridge] PUT /api/settings/client {"assistants":null,"migration.assistantEnabledFixed":null,"migration.coworkDefaultSkillsAdded":null,"migration.builtinDefaultSkillsAdded_v2":null,"migration.promptsI18nAdded":null,"migration.assistantsSplitCustom":null}
+19:52:36.790 › [aioncore] aionui_ai_agent::idle_scanner: Idle scan: no idle agents found active=0
+19:52:36.793 › [aioncore] http{method=GET path=/api/auth/status}: tower_http::trace::on_request: started processing request
+19:52:36.794 › [aioncore] http{method=GET path=/api/auth/status}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:36.794 › [aioncore] http{method=PUT path=/api/settings/client}: tower_http::trace::on_request: started processing request
+19:52:36.794 › [aioncore] http{method=PUT path=/api/settings/client}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:36.795 › [AionUi:ready] initializeZoomFactor +1406ms
+19:52:36.795 › [AionUi:ready] restoreWindowBounds +1406ms
+19:52:36.806 › [httpBridge] GET /api/conversations?limit=5 (no body)
+19:52:36.807 › [httpBridge] GET /api/conversations/active-count (no body)
+19:52:36.808 › [AionUi] Creating main window...
+19:52:36.851 › [AionUi] Main window created (id=1)
+19:52:36.853 › [AionUi] Loading renderer URL: http://127.0.0.1:5173
+19:52:36.856 › [AionUi:ready] createWindow +1466ms
+19:52:36.867 › [httpBridge] GET /api/conversations?limit=5 (no body)
+19:52:36.868 › [httpBridge] GET /api/conversations/active-count (no body)
+19:52:36.869 › [httpBridge] PUT /api/settings/client → 200 OK
+19:52:36.869 › [AionUi] Backend migration step completed: cleanupLegacyClientPreferences (80ms)
+19:52:36.869 › [httpBridge] GET /api/settings/client (no body)
+19:52:36.874 › [aioncore] http{method=GET path=/api/conversations}: tower_http::trace::on_request: started processing request
+19:52:36.874 › [aioncore] http{method=GET path=/api/conversations}: aionui_app::router::trace: response status=200 latency_ms=1
+19:52:36.877 › [httpBridge] GET /api/conversations?limit=5 → 200 OK
+19:52:36.882 › [aioncore] http{method=GET path=/api/conversations/active-count}: tower_http::trace::on_request: started processing request
+19:52:36.882 › [aioncore] http{method=GET path=/api/conversations/active-count}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:36.882 › [aioncore] http{method=GET path=/api/conversations/active-count}: tower_http::trace::on_request: started processing request
+19:52:36.882 › [aioncore] http{method=GET path=/api/conversations/active-count}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:36.882 › [aioncore] http{method=GET path=/api/conversations}: tower_http::trace::on_request: started processing request
+19:52:36.883 › [aioncore] http{method=GET path=/api/settings/client}: tower_http::trace::on_request: started processing request
+19:52:36.883 › [aioncore] http{method=GET path=/api/settings/client}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:36.883 › [aioncore] http{method=GET path=/api/conversations}: aionui_app::router::trace: response status=200 latency_ms=1
+19:52:36.884 › [httpBridge] GET /api/conversations/active-count → 200 OK
+19:52:36.884 › [httpBridge] GET /api/conversations?limit=5 → 200 OK
+19:52:36.886 › [httpBridge] GET /api/conversations/active-count → 200 OK
+19:52:36.886 › [httpBridge] GET /api/settings/client (no body)
+19:52:36.889 › [httpBridge] GET /api/settings/client → 200 OK
+19:52:36.889 › [Migration] legacy MCP migration skipped — no legacy servers found
+19:52:36.889 › [AionUi] Backend migration step completed: migrateLegacyMcpConfigToDb (20ms)
+19:52:36.889 › [httpBridge] GET /api/settings/client (no body)
+19:52:36.890 › [aioncore] http{method=GET path=/api/settings/client}: tower_http::trace::on_request: started processing request
+19:52:36.891 › [aioncore] http{method=GET path=/api/settings/client}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:36.891 › [aioncore] http{method=GET path=/api/settings/client}: tower_http::trace::on_request: started processing request
+19:52:36.891 › [aioncore] http{method=GET path=/api/settings/client}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:36.891 › [httpBridge] GET /api/settings/client → 200 OK
+19:52:36.892 › [httpBridge] GET /api/settings/client (no body)
+19:52:36.893 › [httpBridge] GET /api/settings/client → 200 OK
+19:52:36.893 › [Migration] configStorage migration skipped — all 7 keys already exist in backend
+19:52:36.894 › [AionUi] Backend migration step completed: migrateConfigStorage (5ms)
+19:52:36.894 › [Migration] providers migration skipped — completion flag already set
+19:52:36.894 › [AionUi] Backend migration step completed: migrateProviders (0ms)
+19:52:36.894 › [httpBridge] GET /api/settings/client (no body)
+19:52:36.895 › [httpBridge] GET /api/providers (no body)
+19:52:36.896 › [aioncore] http{method=GET path=/api/settings/client}: tower_http::trace::on_request: started processing request
+19:52:36.896 › [aioncore] http{method=GET path=/api/settings/client}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:36.896 › [aioncore] http{method=GET path=/api/settings/client}: tower_http::trace::on_request: started processing request
+19:52:36.896 › [aioncore] http{method=GET path=/api/providers}: tower_http::trace::on_request: started processing request
+19:52:36.896 › [aioncore] http{method=GET path=/api/settings/client}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:36.897 › [aioncore] http{method=GET path=/api/providers}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:36.897 › [httpBridge] GET /api/settings/client → 200 OK
+19:52:36.898 › [httpBridge] GET /api/settings/client → 200 OK
+19:52:36.899 › [httpBridge] GET /api/providers → 200 OK
+19:52:36.899 › [httpBridge] GET /api/mcp/servers (no body)
+19:52:36.900 › [aioncore] http{method=GET path=/api/mcp/servers}: tower_http::trace::on_request: started processing request
+19:52:36.901 › [aioncore] http{method=GET path=/api/mcp/servers}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:36.909 › [WebUI] Auto-restored from desktop preferences (port=25809, allowRemote=true)
+19:52:36.910 › [CDP] Remote debugging server ready at http://127.0.0.1:9230
+19:52:36.910 › [CDP] MCP chrome-devtools: npx chrome-devtools-mcp@0.16.0 --browser-url=http://127.0.0.1:9230
+19:52:36.911 › [httpBridge] GET /api/mcp/servers → 200 OK
+19:52:36.911 › [Migration] image MCP env resolved via provider-id during bootstrap, provider id: c28b3164, platform: gemini, model: gemini-3.1-flash-image-preview, api key present: yes
+19:52:36.911 › [httpBridge] GET /api/mcp/servers (no body)
+19:52:36.912 › [aioncore] aionui_runtime::node_runtime: node runtime selected source="managed" version=24.11.0 root=/home/user/.config/CentaurAI-Dev/aionui/runtime/node/node-v24.11.0-linux-x64 node=/home/user/.config/CentaurAI-Dev/aionui/runtime/node/node-v24.11.0-linux-x64/bin/node npm=/home/user/.config/CentaurAI-Dev/aionui/runtime/node/node-v24.11.0-linux-x64/bin/npm npx=/home/user/.config/CentaurAI-Dev/aionui/runtime/node/node-v24.11.0-linux-x64/bin/npx
+19:52:36.912 › [aioncore] http{method=GET path=/api/mcp/servers}: tower_http::trace::on_request: started processing request
+19:52:36.913 › [aioncore] http{method=GET path=/api/mcp/servers}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:36.913 › [httpBridge] GET /api/mcp/servers → 200 OK
+19:52:36.989 › [Migration] image MCP bootstrap decision, server id: mcp_019eb1b1-dcaa-7db2-a7f2-319ba22c8285, transport changed: no, json changed: no, will update: no
+19:52:36.990 › [Migration] MCP bootstrap completed, imported 0 missing defaults, updated image server: no, image config source: backend, image enabled: yes
+19:52:36.991 › [AionUi] Backend migration step completed: ensureBootstrapMcpServersInDb (97ms)
+19:52:36.991 › [AionUi] Backend migration step completed: migrateAssistantsToBackend (0ms)
+19:52:36.991 › [AionUi] Backend migration step completed: seedBundledExperts (0ms)
+19:52:36.991 › [AionUi] Backend migration step completed: seedBundledButler (0ms)
+19:52:36.991 › [AionUi] Backend migration step completed: curateExperts (0ms)
+19:52:36.992 › [AionUi] Backend migration step completed: syncBuiltinMcpConfig (0ms)
+19:52:36.992 › [AionUi] runBackendMigrations completed
+19:52:37.048 › [aioncore] aionui_runtime::node_runtime: node runtime selected source="managed" version=24.11.0 root=/home/user/.config/CentaurAI-Dev/aionui/runtime/node/node-v24.11.0-linux-x64 node=/home/user/.config/CentaurAI-Dev/aionui/runtime/node/node-v24.11.0-linux-x64/bin/node npm=/home/user/.config/CentaurAI-Dev/aionui/runtime/node/node-v24.11.0-linux-x64/bin/npm npx=/home/user/.config/CentaurAI-Dev/aionui/runtime/node/node-v24.11.0-linux-x64/bin/npx
+19:52:37.197 › [aioncore] aionui_runtime::node_runtime: node runtime selected source="managed" version=24.11.0 root=/home/user/.config/CentaurAI-Dev/aionui/runtime/node/node-v24.11.0-linux-x64 node=/home/user/.config/CentaurAI-Dev/aionui/runtime/node/node-v24.11.0-linux-x64/bin/node npm=/home/user/.config/CentaurAI-Dev/aionui/runtime/node/node-v24.11.0-linux-x64/bin/npm npx=/home/user/.config/CentaurAI-Dev/aionui/runtime/node/node-v24.11.0-linux-x64/bin/npx
+19:52:37.198 › [aioncore] aioncore::commands::cmd_server: startup: managed runtime background preparation completed prepare_elapsed_ms=415
+19:52:38.974 › [aioncore] http{method=GET path=/api/settings/client}: tower_http::trace::on_request: started processing request
+19:52:38.975 › [aioncore] http{method=GET path=/api/settings/client}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:38.995 › [aioncore] http{method=GET path=/ws}: tower_http::trace::on_request: started processing request
+19:52:38.996 › [aioncore] http{method=GET path=/ws}: aionui_app::router::trace: response status=101 latency_ms=0
+19:52:38.996 › [aioncore] aionui_realtime::manager: client added id=conn-1
+19:52:38.996 › [aioncore] aionui_realtime::handler: websocket connection established conn_id=conn-1
+19:52:39.003 › [AionUi] Window ready-to-show
+19:52:39.003 › [AionUi] Showing main window
+19:52:39.004 › [AionUi] Renderer did-finish-load
+[196470:0624/195239.006237:ERROR:ui/gl/gl_surface_presentation_helper.cc:260] GetVSyncParametersIfAvailable() failed for 1 times!
+[196470:0624/195239.020211:ERROR:ui/gl/gl_surface_presentation_helper.cc:260] GetVSyncParametersIfAvailable() failed for 2 times!
+19:52:39.132 › [aioncore] http{method=GET path=/api/agents}: tower_http::trace::on_request: started processing request
+19:52:39.133 › [aioncore] http{method=GET path=/api/agents}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:39.133 › [aioncore] http{method=GET path=/api/cron/jobs}: tower_http::trace::on_request: started processing request
+19:52:39.133 › [aioncore] http{method=GET path=/api/cron/jobs}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:39.183 › [aioncore] http{method=GET path=/api/cron/jobs}: tower_http::trace::on_request: started processing request
+19:52:39.184 › [aioncore] http{method=GET path=/api/cron/jobs}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:39.187 › [aioncore] http{method=GET path=/api/conversations}: tower_http::trace::on_request: started processing request
+19:52:39.222 › [aioncore] http{method=GET path=/api/conversations}: aionui_app::router::trace: response status=200 latency_ms=34
+19:52:39.252 › [aioncore] http{method=GET path=/api/channel/users}: tower_http::trace::on_request: started processing request
+19:52:39.253 › [aioncore] http{method=GET path=/api/channel/users}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:39.255 › [aioncore] http{method=GET path=/api/settings/client}: tower_http::trace::on_request: started processing request
+19:52:39.255 › [aioncore] http{method=GET path=/api/channel/sessions}: tower_http::trace::on_request: started processing request
+19:52:39.255 › [aioncore] http{method=GET path=/api/settings/client}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:39.256 › [aioncore] http{method=GET path=/api/channel/sessions}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:39.868 › APPIMAGE env is not defined, current application is not an AppImage
+19:52:39.868 › checkForUpdatesAndNotify called, downloadPromise is null
+19:52:40.441 › [aioncore] http{method=GET path=/api/assistants}: tower_http::trace::on_request: started processing request
+19:52:40.441 › [aioncore] http{method=GET path=/api/providers}: tower_http::trace::on_request: started processing request
+19:52:40.441 › [aioncore] http{method=GET path=/api/teams}: tower_http::trace::on_request: started processing request
+19:52:40.442 › [aioncore] http{method=GET path=/api/providers}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:40.443 › [aioncore] http{method=GET path=/api/extensions/acp-adapters}: tower_http::trace::on_request: started processing request
+19:52:40.443 › [aioncore] http{method=GET path=/api/extensions/acp-adapters}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:40.444 › [aioncore] http{method=GET path=/api/teams}: aionui_app::router::trace: response status=200 latency_ms=2
+19:52:40.449 › [aioncore] http{method=GET path=/api/assistants}: aionui_app::router::trace: response status=200 latency_ms=8
+19:52:40.451 › [aioncore] http{method=GET path=/api/assistants}: tower_http::trace::on_request: started processing request
+19:52:40.460 › [aioncore] http{method=GET path=/api/assistants}: aionui_app::router::trace: response status=200 latency_ms=8
+19:52:40.490 › [aioncore] http{method=GET path=/api/agents}: tower_http::trace::on_request: started processing request
+19:52:40.490 › [aioncore] http{method=GET path=/api/agents}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:40.502 › [aioncore] http{method=GET path=/api/conversations/70b14da2}: tower_http::trace::on_request: started processing request
+19:52:40.502 › [aioncore] http{method=GET path=/api/conversations/70b14da2}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:40.506 › [aioncore] http{method=GET path=/api/cron/jobs}: tower_http::trace::on_request: started processing request
+19:52:40.506 › [aioncore] http{method=GET path=/api/cron/jobs}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:40.788 › [aioncore] http{method=GET path=/api/assistants/excel-creator/avatar}: tower_http::trace::on_request: started processing request
+19:52:40.788 › [aioncore] http{method=GET path=/api/assistants/excel-creator/avatar}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:40.788 › [aioncore] http{method=GET path=/api/assistants/ppt-creator/avatar}: tower_http::trace::on_request: started processing request
+19:52:40.789 › [aioncore] http{method=GET path=/api/assistants/star-office-helper/avatar}: tower_http::trace::on_request: started processing request
+19:52:40.789 › [aioncore] http{method=GET path=/api/assistants/pitch-deck-creator/avatar}: tower_http::trace::on_request: started processing request
+19:52:40.789 › [aioncore] http{method=GET path=/api/assistants/word-creator/avatar}: tower_http::trace::on_request: started processing request
+19:52:40.789 › [aioncore] http{method=GET path=/api/assistants/cowork/avatar}: tower_http::trace::on_request: started processing request
+19:52:40.789 › [aioncore] http{method=GET path=/api/assistants/ppt-creator/avatar}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:40.789 › [aioncore] http{method=GET path=/api/assistants/pitch-deck-creator/avatar}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:40.789 › [aioncore] http{method=GET path=/api/assistants/word-creator/avatar}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:40.789 › [aioncore] http{method=GET path=/api/assistants/star-office-helper/avatar}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:40.789 › [aioncore] http{method=GET path=/api/assistants/cowork/avatar}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:40.795 › [aioncore] http{method=GET path=/api/assistants/financial-model-creator/avatar}: tower_http::trace::on_request: started processing request
+19:52:40.796 › [aioncore] http{method=GET path=/api/assistants/financial-model-creator/avatar}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:40.796 › [aioncore] http{method=GET path=/api/assistants/social-job-publisher/avatar}: tower_http::trace::on_request: started processing request
+19:52:40.796 › [aioncore] http{method=GET path=/api/assistants/social-job-publisher/avatar}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:40.823 › [aioncore] http{method=GET path=/api/channel/users}: tower_http::trace::on_request: started processing request
+19:52:40.824 › [aioncore] http{method=GET path=/api/channel/sessions}: tower_http::trace::on_request: started processing request
+19:52:40.824 › [aioncore] http{method=GET path=/api/settings/client}: tower_http::trace::on_request: started processing request
+19:52:40.824 › [aioncore] http{method=GET path=/api/channel/sessions}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:40.824 › [aioncore] http{method=GET path=/api/channel/users}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:40.824 › [aioncore] http{method=GET path=/api/settings/client}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.668 › [aioncore] http{method=GET path=/api/assistants}: tower_http::trace::on_request: started processing request
+19:52:42.668 › [aioncore] http{method=GET path=/api/remote-agents}: tower_http::trace::on_request: started processing request
+19:52:42.669 › [aioncore] http{method=GET path=/api/remote-agents}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.670 › [aioncore] http{method=GET path=/api/conversations}: tower_http::trace::on_request: started processing request
+19:52:42.670 › [aioncore] http{method=GET path=/api/skills/builtin-auto}: tower_http::trace::on_request: started processing request
+19:52:42.670 › [aioncore] http{method=GET path=/api/skills/builtin-auto}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.671 › [aioncore] http{method=GET path=/api/skills}: tower_http::trace::on_request: started processing request
+19:52:42.672 › [aioncore] http{method=GET path=/api/settings/client}: tower_http::trace::on_request: started processing request
+19:52:42.673 › [aioncore] http{method=GET path=/api/skills}: aionui_app::router::trace: response status=200 latency_ms=1
+19:52:42.673 › [aioncore] http{method=GET path=/api/settings/client}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.677 › [aioncore] http{method=PUT path=/api/settings/client}: tower_http::trace::on_request: started processing request
+19:52:42.679 › [aioncore] http{method=GET path=/api/assistants}: aionui_app::router::trace: response status=200 latency_ms=11
+19:52:42.681 › [aioncore] http{method=GET path=/api/assistants}: tower_http::trace::on_request: started processing request
+19:52:42.681 › [aioncore] http{method=PUT path=/api/settings/client}: aionui_app::router::trace: response status=200 latency_ms=4
+19:52:42.688 › [aioncore] http{method=GET path=/api/assistants}: aionui_app::router::trace: response status=200 latency_ms=7
+19:52:42.697 › [aioncore] http{method=GET path=/api/providers}: tower_http::trace::on_request: started processing request
+19:52:42.697 › [aioncore] http{method=GET path=/api/providers}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.702 › [aioncore] http{method=GET path=/api/conversations}: aionui_app::router::trace: response status=200 latency_ms=32
+19:52:42.745 › [aioncore] http{method=GET path=/api/mcp/servers}: tower_http::trace::on_request: started processing request
+19:52:42.746 › [aioncore] http{method=GET path=/api/mcp/servers}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.777 › [aioncore] http{method=GET path=/api/assistants/morph-ppt-3d/avatar}: tower_http::trace::on_request: started processing request
+19:52:42.777 › [aioncore] http{method=GET path=/api/assistants/morph-ppt-3d/avatar}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.777 › [aioncore] http{method=GET path=/api/assistants/morph-ppt/avatar}: tower_http::trace::on_request: started processing request
+19:52:42.777 › [aioncore] http{method=GET path=/api/assistants/morph-ppt/avatar}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.777 › [aioncore] http{method=GET path=/api/assistants/dashboard-creator/avatar}: tower_http::trace::on_request: started processing request
+19:52:42.777 › [aioncore] http{method=GET path=/api/assistants/dashboard-creator/avatar}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.806 › [aioncore] http{method=GET path=/api/channel/users}: tower_http::trace::on_request: started processing request
+19:52:42.807 › [aioncore] http{method=GET path=/api/channel/sessions}: tower_http::trace::on_request: started processing request
+19:52:42.807 › [aioncore] http{method=GET path=/api/settings/client}: tower_http::trace::on_request: started processing request
+19:52:42.807 › [aioncore] http{method=GET path=/api/channel/users}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.807 › [aioncore] http{method=GET path=/api/channel/sessions}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.808 › [aioncore] http{method=GET path=/api/settings/client}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.863 › [aioncore] http{method=GET path=/api/teams}: tower_http::trace::on_request: started processing request
+19:52:42.866 › [aioncore] http{method=GET path=/api/teams}: aionui_app::router::trace: response status=200 latency_ms=2
+19:52:42.908 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.908 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.910 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.910 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.910 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.910 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.911 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.911 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.911 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.911 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.914 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.914 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.915 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.915 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.915 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.915 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.915 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.915 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.915 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.915 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.915 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.915 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.919 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.919 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.919 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.919 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.919 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.920 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.920 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.920 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.920 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.920 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.920 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.920 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.923 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.924 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.924 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.924 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.924 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.924 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.924 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.924 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.924 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.924 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.924 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.925 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.929 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.930 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.930 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.930 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.930 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.930 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.930 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.930 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.930 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.931 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.931 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.931 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.934 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.934 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.935 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.935 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.935 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.935 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.935 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.935 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.935 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.935 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.935 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.935 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.939 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.939 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.939 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.940 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.940 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.940 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.940 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.940 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.940 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.940 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.940 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.940 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.947 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.947 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.947 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.947 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.948 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.948 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.948 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.948 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.948 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.948 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.948 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.949 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.951 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.952 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.952 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.952 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.952 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.952 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.952 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.952 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.952 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.953 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.953 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.953 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.957 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.957 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.957 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.957 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.957 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.958 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.958 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.958 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.958 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.958 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.958 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.958 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.966 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.966 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.966 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.966 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.966 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.967 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.967 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.967 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.967 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.967 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.967 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.967 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.969 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.969 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.969 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.969 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.969 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.969 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.969 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.969 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.969 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.970 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.970 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.970 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.973 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.973 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.973 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.974 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.974 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.974 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.974 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.974 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.974 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.974 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.974 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.974 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.978 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.979 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.979 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.979 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.979 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.979 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.979 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.979 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.979 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.979 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.979 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.980 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.983 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.984 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.984 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.984 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.984 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.984 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.984 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.984 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.984 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.984 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.984 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.985 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.988 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.988 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.988 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.988 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.988 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.988 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.988 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.988 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.989 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.989 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.989 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.989 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.992 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.993 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.993 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.993 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.993 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.993 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.993 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.994 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.994 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.994 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.994 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.994 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.998 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.999 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.999 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.999 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.999 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.999 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.999 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:42.999 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.999 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.999 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.999 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:42.999 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.003 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.004 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.004 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.004 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.004 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.004 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.004 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.004 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.004 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.004 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.004 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.004 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.008 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.009 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.009 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.009 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.010 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.010 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.010 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.010 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.010 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.010 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.010 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.010 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.015 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.016 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.016 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.016 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.016 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.016 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.016 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.016 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.016 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.016 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.016 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.016 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.021 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.021 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.021 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.021 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.022 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.022 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.022 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.022 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.022 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.022 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.022 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.022 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.027 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.027 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.028 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.028 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.028 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.028 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.028 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.028 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.028 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.028 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.028 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.028 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.033 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.033 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.033 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.033 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.033 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.033 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.033 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.033 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.033 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.033 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.033 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.033 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.038 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.038 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.038 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.038 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.038 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.038 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.038 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.038 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.038 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.039 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.039 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.039 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.044 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.045 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.045 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.045 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.045 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.045 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.045 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.045 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.045 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.045 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.046 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.046 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.050 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.050 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.050 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.051 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.051 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.051 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.051 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.051 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.051 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.051 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.051 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.051 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.055 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.055 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.056 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.056 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.056 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.056 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.056 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.056 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.056 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.056 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.056 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.056 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.061 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.061 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.062 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.062 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.062 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.062 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.062 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.062 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.062 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.062 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.062 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.062 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.066 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.067 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.067 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.067 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.067 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.067 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.067 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.067 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.067 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.067 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.067 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.067 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:52:43.071 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:52:43.072 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:06.853 › [sentry] startup log report skipped (SENTRY_DSN not set)
+19:53:06.853 › [sentry] startup log report failed: Error: no DSN
+    at runStartupLogReport (/home/user/桌面/centaurai-aionui/out/main/index.js:1155:11)
+    at Timeout._onTimeout (/home/user/桌面/centaurai-aionui/out/main/index.js:1161:7)
+    at listOnTimeout (node:internal/timers:588:17)
+    at process.processTimers (node:internal/timers:523:7)
+19:53:12.905 › [aioncore] http{method=GET path=/api/teams}: tower_http::trace::on_request: started processing request
+19:53:12.906 › [aioncore] http{method=GET path=/api/teams}: aionui_app::router::trace: response status=200 latency_ms=1
+19:53:12.950 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.951 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.951 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.951 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.957 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.958 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.958 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.958 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.958 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.958 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.958 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.958 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.958 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.958 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.958 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.958 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.963 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.963 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.963 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.963 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.963 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.963 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.964 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.964 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.964 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.964 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.964 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.964 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.970 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.970 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.970 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.970 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.971 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.971 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.971 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.971 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.971 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.971 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.971 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.971 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.976 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.976 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.976 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.976 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.976 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.976 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.976 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.976 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.976 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.976 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.976 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.977 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.981 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.982 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.982 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.982 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.982 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.982 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.982 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.982 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.982 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.982 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.983 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.983 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.988 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.988 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.988 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.988 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.988 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.988 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.989 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.989 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.989 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.989 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.989 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.989 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.994 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.995 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.995 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.995 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.995 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.995 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.995 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:12.995 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.995 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.995 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.995 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:12.995 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.000 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.001 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.001 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.001 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.001 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.001 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.001 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.001 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.001 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.001 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.001 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.001 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.006 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.007 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.007 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.007 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.007 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.007 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.007 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.007 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.007 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.007 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.007 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.007 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.014 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.014 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.014 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.014 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.014 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.014 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.015 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.015 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.015 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.015 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.015 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.015 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.021 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.021 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.021 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.022 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.022 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.022 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.022 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.022 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.022 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.022 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.022 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.022 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.028 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.028 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.028 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.028 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.028 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.028 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.029 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.029 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.029 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.029 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.029 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.029 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.034 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.034 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.035 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.035 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.035 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.035 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.035 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.035 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.035 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.035 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.035 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.035 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.040 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.040 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.040 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.040 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.040 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.040 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.040 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.040 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.040 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.040 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.041 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.041 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.046 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.046 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.046 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.046 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.046 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.047 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.047 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.047 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.047 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.047 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.047 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.047 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.052 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.052 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.052 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.052 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.052 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.053 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.053 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.053 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.053 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.053 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.053 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.053 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.058 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.058 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.058 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.058 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.059 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.059 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.059 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.059 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.059 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.059 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.059 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.059 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.063 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.064 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.064 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.064 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.064 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.064 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.064 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.064 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.064 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.064 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.064 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.064 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.070 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.070 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.070 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.071 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.071 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.071 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.071 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.071 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.071 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.071 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.071 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.071 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.076 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.077 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.077 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.077 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.077 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.077 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.077 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.077 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.077 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.077 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.077 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.077 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.083 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.083 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.084 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.084 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.084 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.084 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.084 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.084 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.084 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.084 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.084 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.084 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.089 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.089 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.089 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.089 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.090 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.090 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.090 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.090 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.090 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.090 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.090 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.090 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.095 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.095 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.095 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.095 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.095 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.095 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.095 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.095 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.095 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.095 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.095 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.095 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.101 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.101 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.101 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.101 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.101 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.102 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.102 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.102 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.102 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.102 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.102 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.102 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.108 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.108 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.108 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.108 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.108 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.108 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.108 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.108 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.108 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.108 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.108 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.109 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.113 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.114 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.114 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.114 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.114 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.114 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.114 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.114 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.114 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.114 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.114 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.114 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.120 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.120 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.120 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.120 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.120 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.120 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.120 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.120 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.120 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.120 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.121 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.121 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.125 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.126 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.126 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.126 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.126 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.126 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.126 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.126 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.126 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.126 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.126 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.126 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.131 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.131 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.132 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.132 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.132 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.132 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.132 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.132 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.132 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.132 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.132 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.132 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.137 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.138 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.138 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.138 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:13.138 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.138 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.138 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:13.138 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:36.783 › [aioncore] aionui_ai_agent::idle_scanner: Idle scan: no idle agents found active=0
+19:53:42.904 › [aioncore] http{method=GET path=/api/teams}: tower_http::trace::on_request: started processing request
+19:53:42.905 › [aioncore] http{method=GET path=/api/teams}: aionui_app::router::trace: response status=200 latency_ms=1
+19:53:42.911 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.911 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.911 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.912 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.912 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.912 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.912 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.912 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.912 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.912 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.915 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.916 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.921 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.922 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.922 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.922 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.922 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.922 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.923 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.923 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.926 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.926 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.927 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.927 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.933 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.933 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.934 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.934 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.934 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.934 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.935 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.936 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.937 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.937 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.939 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.940 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.947 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.947 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.948 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.948 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.948 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.948 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.949 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.949 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.952 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.952 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.953 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.953 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.960 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.961 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.961 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.961 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.961 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.961 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.961 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.961 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.961 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.961 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.961 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.961 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.966 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.966 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.966 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.967 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.967 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.967 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.967 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.967 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.967 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.967 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.967 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.967 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.972 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.972 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.972 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.972 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.972 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.973 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.973 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.973 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.973 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.973 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.973 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.973 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.979 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.980 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.980 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.980 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.980 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.980 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.980 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.980 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.980 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.980 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.980 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.980 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.985 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.986 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.986 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.986 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.986 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.986 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.986 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.987 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.987 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.987 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.987 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.987 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.992 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.993 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.993 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.993 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.994 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.994 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:42.994 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.994 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.994 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.994 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.994 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.994 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:42.999 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.000 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.000 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.000 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.000 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.000 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.000 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.000 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.001 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.001 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.001 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.001 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.005 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.005 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.005 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.006 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.006 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.006 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.006 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.006 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.006 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.006 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.006 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.006 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.012 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.012 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.012 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.012 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.012 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.013 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.013 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.013 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.013 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.013 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.013 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.013 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.018 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.018 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.018 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.019 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.019 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.019 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.019 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.019 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.019 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.019 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.019 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.019 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.026 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.026 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.026 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.026 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.026 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.026 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.026 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.026 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.027 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.027 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.027 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.027 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.032 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.033 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.033 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.033 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.033 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.033 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.033 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.033 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.033 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.033 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.033 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.033 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.039 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.040 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.040 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.040 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.040 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.040 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.040 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.040 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.040 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.040 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.040 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.041 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.047 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.048 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.048 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.048 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.048 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.048 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.048 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.048 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.048 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.048 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.049 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.049 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.054 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.055 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.055 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.055 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.055 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.055 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.055 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.055 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.055 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.056 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.056 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.056 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.060 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.061 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.061 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.061 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.061 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.061 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.061 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.061 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.061 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.061 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.062 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.062 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.067 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.067 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.067 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.067 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.067 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.067 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.067 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.067 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.067 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.068 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.068 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.068 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.073 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.074 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.074 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.074 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.074 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.074 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.074 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.074 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.074 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.074 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.074 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.074 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.080 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.080 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.080 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.080 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.080 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.080 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.080 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.080 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.080 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.081 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.081 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.081 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.085 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.086 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.086 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.086 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.086 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.086 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.086 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.086 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.087 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.087 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.087 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.087 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.092 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.092 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.092 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.093 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.093 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.093 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.093 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.093 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.093 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.093 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.093 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.093 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.098 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.098 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.098 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.098 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.098 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.098 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.098 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.098 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.098 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.098 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.099 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.099 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.104 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.105 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.105 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.105 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.105 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.105 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.105 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.105 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.105 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.106 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.106 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.106 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.110 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.110 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.111 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.111 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.111 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.111 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.111 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.111 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.111 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.111 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.111 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.111 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.116 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.117 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.117 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.117 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.117 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.117 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.117 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.117 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.117 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.117 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.117 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.117 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.122 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.122 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.122 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.122 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.122 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.122 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.122 › [aioncore] http{method=POST path=/api/fs/dir}: tower_http::trace::on_request: started processing request
+19:53:43.122 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.122 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.123 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.123 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
+19:53:43.123 › [aioncore] http{method=POST path=/api/fs/dir}: aionui_app::router::trace: response status=200 latency_ms=0
