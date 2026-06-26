@@ -1046,5 +1046,20 @@
   "webui.nasRootNotSet": "Not set",
   "webui.nasRootSelect": "Choose Folder",
   "webui.nasRootClear": "Clear",
-  "webui.nasRootSaved": "Network drive root saved"
+  "webui.nasRootSaved": "Network drive root saved",
+  "localModels": {
+    "title": "Local Models",
+    "subtitle": "Detect models from the local ollama service and add them to CentaurAI. All downloading and management happens in the Local Model Manager app.",
+    "providerName": "Ollama (Local)",
+    "detecting": "Detecting local ollama…",
+    "detected": "Detected {{count}} local model(s)",
+    "notDetected": "Local ollama not detected. Start it from the Local Model Manager.",
+    "noModels": "Local ollama is running but has no models yet. Open the Model Manager to download one.",
+    "reDetect": "Re-detect",
+    "addToChat": "Add to chat",
+    "added": "Added to your models",
+    "alreadyAdded": "Added",
+    "openManager": "Open Model Manager",
+    "managerLaunchFailed": "Failed to launch the Local Model Manager"
+  }
 }

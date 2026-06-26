@@ -13,6 +13,7 @@ const ExpertsSettings = React.lazy(() => import('@renderer/pages/settings/Expert
 const CapabilitiesSettings = React.lazy(() => import('@renderer/pages/settings/CapabilitiesSettings'));
 const AppearanceSettings = React.lazy(() => import('@renderer/pages/settings/AppearanceSettings'));
 const ModeSettings = React.lazy(() => import('@renderer/pages/settings/ModeSettings'));
+const LocalModelsSettings = React.lazy(() => import('@renderer/pages/settings/LocalModelsSettings'));
 const SystemSettings = React.lazy(() => import('@renderer/pages/settings/SystemSettings'));
 const WebuiSettings = React.lazy(() => import('@renderer/pages/settings/WebuiSettings'));
 const ClientSettings = React.lazy(() => import('@renderer/pages/settings/ClientSettings'));
@@ -157,6 +158,7 @@ const PanelRoute: React.FC<{ layout: React.ReactElement }> = ({ layout }) => {
             element={TEAM_MODE_ENABLED ? withRouteFallback(TeamIndex) : <Navigate to='/guid' replace />}
           />
           <Route path='/settings/model' element={withRouteFallback(ModeSettings)} />
+          <Route path='/settings/local-models' element={withRouteFallback(LocalModelsSettings)} />
           <Route path='/settings/assistants' element={withRouteFallback(AssistantSettings)} />
           <Route path='/settings/experts' element={withRouteFallback(ExpertsSettings)} />
           <Route path='/settings/agent' element={withRouteFallback(AgentSettings)} />

@@ -1009,5 +1009,20 @@
   "webui.nasRootNotSet": "Ayarlanmadı",
   "webui.nasRootSelect": "Klasör Seç",
   "webui.nasRootClear": "Temizle",
-  "webui.nasRootSaved": "Ağ sürücüsü kökü kaydedildi"
+  "webui.nasRootSaved": "Ağ sürücüsü kökü kaydedildi",
+  "localModels": {
+    "title": "Yerel Modeller",
+    "subtitle": "Yerel ollama hizmetindeki modelleri algılayın ve CentaurAI’ye ekleyin. Tüm indirme ve yönetim Yerel Model Yöneticisi uygulamasında yapılır.",
+    "providerName": "Ollama (Yerel)",
+    "detecting": "Yerel ollama algılanıyor…",
+    "detected": "{{count}} yerel model algılandı",
+    "notDetected": "Yerel ollama algılanmadı. Yerel Model Yöneticisi’nden başlatın.",
+    "noModels": "Yerel ollama çalışıyor ancak henüz model yok. İndirmek için Model Yöneticisi’ni açın.",
+    "reDetect": "Yeniden algıla",
+    "addToChat": "Sohbete ekle",
+    "added": "Modellerinize eklendi",
+    "alreadyAdded": "Eklendi",
+    "openManager": "Model Yöneticisini Aç",
+    "managerLaunchFailed": "Yerel Model Yöneticisi başlatılamadı"
+  }
 }

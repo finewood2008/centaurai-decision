@@ -6,6 +6,7 @@ import { useExtensionSettingsTabs } from '@/renderer/hooks/system/useExtensionSe
 import {
   Cat,
   Communication,
+  Components,
   Computer,
   Download,
   Earth,
@@ -30,6 +31,7 @@ import { getSiderTooltipProps } from '@/renderer/utils/ui/siderTooltip';
 export const BUILTIN_TAB_IDS = [
   'agent',
   'model',
+  'local-models',
   'assistants',
   'experts',
   'capabilities',
@@ -90,6 +92,12 @@ const SettingsSider: React.FC<{ collapsed?: boolean; tooltipEnabled?: boolean }>
     // Build builtin items
     const builtinMap: Record<string, SiderItem> = {
       model: { id: 'model', label: t('settings.model'), icon: <LinkCloud />, path: 'model' },
+      'local-models': {
+        id: 'local-models',
+        label: t('settings.localModels.title'),
+        icon: <Components />,
+        path: 'local-models',
+      },
       assistants: {
         id: 'assistants',
         label: t('settings.assistants', { defaultValue: 'Assistants' }),
@@ -148,7 +156,9 @@ const SettingsSider: React.FC<{ collapsed?: boolean; tooltipEnabled?: boolean }>
     // mirror image of 'pet'/'users': it only makes sense for LAN/browser users,
     // so it's hidden on the desktop admin and shown only in browser mode.
     const result: SiderItem[] = BUILTIN_TAB_IDS.filter((id) =>
-      id === 'client' ? !isDesktop : isDesktop || (id !== 'pet' && id !== 'users')
+      // local-models needs the local ollama daemon + ability to launch the
+      // manager app — desktop-only, like pet/users.
+      id === 'client' ? !isDesktop : isDesktop || (id !== 'pet' && id !== 'users' && id !== 'local-models')
     )
       .map((id) => builtinMap[id])
       .filter((item): item is SiderItem => Boolean(item));
@@ -235,7 +245,8 @@ const SettingsSider: React.FC<{ collapsed?: boolean; tooltipEnabled?: boolean }>
       })}
     >
       {menus.map((item, index) => {
-        const isSelected = pathname.includes(item.path);
+        // Prefix with '/settings/' so 'model' doesn't also match '/settings/local-models'.
+        const isSelected = pathname.includes(`/settings/${item.path}`);
         const groupHeaderKey = groupHeaderAt.get(index);
         const groupHeader =
           groupHeaderKey && !collapsed ? (

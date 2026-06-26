@@ -1012,5 +1012,20 @@
   "webui.nasRootNotSet": "Não definido",
   "webui.nasRootSelect": "Escolher pasta",
   "webui.nasRootClear": "Limpar",
-  "webui.nasRootSaved": "Raiz da unidade de rede salva"
+  "webui.nasRootSaved": "Raiz da unidade de rede salva",
+  "localModels": {
+    "title": "Modelos Locais",
+    "subtitle": "Detecte modelos do serviço ollama local e adicione-os ao CentaurAI. Todo o download e gerenciamento acontece no app Gerenciador de Modelos Locais.",
+    "providerName": "Ollama (Local)",
+    "detecting": "Detectando ollama local…",
+    "detected": "{{count}} modelo(s) local(is) detectado(s)",
+    "notDetected": "Ollama local não detectado. Inicie-o pelo Gerenciador de Modelos Locais.",
+    "noModels": "O ollama local está em execução, mas ainda não há modelos. Abra o Gerenciador de Modelos para baixar um.",
+    "reDetect": "Detectar novamente",
+    "addToChat": "Adicionar ao chat",
+    "added": "Adicionado aos seus modelos",
+    "alreadyAdded": "Adicionado",
+    "openManager": "Abrir Gerenciador de Modelos",
+    "managerLaunchFailed": "Falha ao iniciar o Gerenciador de Modelos Locais"
+  }
 }

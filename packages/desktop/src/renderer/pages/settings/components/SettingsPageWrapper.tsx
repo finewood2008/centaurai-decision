@@ -8,6 +8,7 @@ import { useExtensionSettingsTabs } from '@/renderer/hooks/system/useExtensionSe
 import {
   Cat,
   Communication,
+  Components,
   Computer,
   Download,
   Earth,
@@ -39,6 +40,12 @@ type TranslateFn = (key: string, options?: { defaultValue?: string }) => string;
 export function getBuiltinSettingsNavItems(isDesktop: boolean, t: TranslateFn): NavItem[] {
   const builtinMap: Record<string, NavItem> = {
     model: { id: 'model', label: t('settings.model'), icon: <LinkCloud theme='outline' size='16' />, path: 'model' },
+    'local-models': {
+      id: 'local-models',
+      label: t('settings.localModels.title'),
+      icon: <Components theme='outline' size='16' />,
+      path: 'local-models',
+    },
     assistants: {
       id: 'assistants',
       label: t('settings.assistants', { defaultValue: 'Assistants' }),
@@ -98,7 +105,9 @@ export function getBuiltinSettingsNavItems(isDesktop: boolean, t: TranslateFn): 
     about: { id: 'about', label: t('settings.about'), icon: <Info theme='outline' size='16' />, path: 'about' },
   };
 
-  return BUILTIN_TAB_IDS.filter((id) => (id === 'client' ? !isDesktop : isDesktop || (id !== 'pet' && id !== 'users')))
+  return BUILTIN_TAB_IDS.filter((id) =>
+    id === 'client' ? !isDesktop : isDesktop || (id !== 'pet' && id !== 'users' && id !== 'local-models')
+  )
     .map((id) => builtinMap[id])
     .filter((item): item is NavItem => Boolean(item));
 }

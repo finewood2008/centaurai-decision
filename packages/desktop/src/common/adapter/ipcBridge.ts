@@ -1457,6 +1457,27 @@ export const appstore = {
 };
 
 // ---------------------------------------------------------------------------
+// Local Model Manager — the standalone Tauri app (`local-model-manager`) that
+// manages local ollama models. CentaurAI only LAUNCHES it (all model
+// management lives in that app) and CONSUMES its models via an
+// OpenAI-compatible provider pointed at the local ollama daemon. The main
+// process spawns the binary detached.
+// ---------------------------------------------------------------------------
+export type ILocalModelManagerStatus = {
+  running: boolean;
+  pid?: number;
+  error?: string;
+};
+
+export const localModelManager = {
+  /** Spawn the standalone manager app (detached). Idempotent if already running. */
+  start: bridge.buildProvider<ILocalModelManagerStatus, void>('local-model-manager.start'),
+  /** Whether a manager process we spawned is currently alive. */
+  status: bridge.buildProvider<ILocalModelManagerStatus, void>('local-model-manager.status'),
+  statusChanged: bridge.buildEmitter<ILocalModelManagerStatus>('local-model-manager.status-changed'),
+};
+
+// ---------------------------------------------------------------------------
 // LAN discovery (distributed-client model). The desktop client browses for
 // CentaurAI servers advertised on the LAN (see process/discovery/lanDiscovery).
 // Structurally compatible with `DiscoveredServer` in that module.

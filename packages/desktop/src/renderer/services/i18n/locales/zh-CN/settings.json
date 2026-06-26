@@ -1047,5 +1047,20 @@
   "webui.nasRootNotSet": "未设置",
   "webui.nasRootSelect": "选择文件夹",
   "webui.nasRootClear": "清除",
-  "webui.nasRootSaved": "网盘根目录已保存"
+  "webui.nasRootSaved": "网盘根目录已保存",
+  "localModels": {
+    "title": "本地模型",
+    "subtitle": "检测本机 ollama 服务中的模型并加入 CentaurAI 使用。模型的下载与管理都在「本地模型管理器」中进行。",
+    "providerName": "Ollama 本地",
+    "detecting": "正在检测本地 ollama…",
+    "detected": "检测到 {{count}} 个本地模型",
+    "notDetected": "未检测到本地 ollama，请在本地模型管理器中启动。",
+    "noModels": "本地 ollama 已运行，但还没有模型。打开模型管理器下载一个。",
+    "reDetect": "重新检测",
+    "addToChat": "添加到对话",
+    "added": "已加入你的模型",
+    "alreadyAdded": "已添加",
+    "openManager": "打开模型管理器",
+    "managerLaunchFailed": "启动本地模型管理器失败"
+  }
 }

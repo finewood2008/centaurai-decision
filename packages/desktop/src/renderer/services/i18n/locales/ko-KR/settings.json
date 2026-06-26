@@ -1011,5 +1011,20 @@
   "webui.nasRootNotSet": "설정되지 않음",
   "webui.nasRootSelect": "폴더 선택",
   "webui.nasRootClear": "지우기",
-  "webui.nasRootSaved": "네트워크 드라이브 루트가 저장되었습니다"
+  "webui.nasRootSaved": "네트워크 드라이브 루트가 저장되었습니다",
+  "localModels": {
+    "title": "로컬 모델",
+    "subtitle": "로컬 ollama 서비스의 모델을 감지하여 CentaurAI에 추가합니다. 모델 다운로드와 관리는 로컬 모델 관리자에서 이루어집니다.",
+    "providerName": "Ollama (로컬)",
+    "detecting": "로컬 ollama 감지 중…",
+    "detected": "로컬 모델 {{count}}개를 감지했습니다",
+    "notDetected": "로컬 ollama를 찾을 수 없습니다. 로컬 모델 관리자에서 시작하세요.",
+    "noModels": "로컬 ollama가 실행 중이지만 모델이 없습니다. 모델 관리자를 열어 다운로드하세요.",
+    "reDetect": "다시 감지",
+    "addToChat": "채팅에 추가",
+    "added": "모델에 추가됨",
+    "alreadyAdded": "추가됨",
+    "openManager": "모델 관리자 열기",
+    "managerLaunchFailed": "로컬 모델 관리자 실행 실패"
+  }
 }

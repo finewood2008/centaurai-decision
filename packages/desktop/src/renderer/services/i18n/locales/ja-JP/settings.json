@@ -1011,5 +1011,20 @@
   "webui.nasRootNotSet": "未設定",
   "webui.nasRootSelect": "フォルダを選択",
   "webui.nasRootClear": "クリア",
-  "webui.nasRootSaved": "ネットワークドライブのルートを保存しました"
+  "webui.nasRootSaved": "ネットワークドライブのルートを保存しました",
+  "localModels": {
+    "title": "ローカルモデル",
+    "subtitle": "ローカルの ollama サービスのモデルを検出して CentaurAI に追加します。モデルのダウンロードと管理はローカルモデルマネージャーで行います。",
+    "providerName": "Ollama（ローカル）",
+    "detecting": "ローカル ollama を検出中…",
+    "detected": "{{count}} 個のローカルモデルを検出しました",
+    "notDetected": "ローカル ollama が見つかりません。ローカルモデルマネージャーから起動してください。",
+    "noModels": "ローカル ollama は起動していますが、モデルがありません。モデルマネージャーを開いてダウンロードしてください。",
+    "reDetect": "再検出",
+    "addToChat": "チャットに追加",
+    "added": "モデルに追加しました",
+    "alreadyAdded": "追加済み",
+    "openManager": "モデルマネージャーを開く",
+    "managerLaunchFailed": "ローカルモデルマネージャーの起動に失敗しました"
+  }
 }

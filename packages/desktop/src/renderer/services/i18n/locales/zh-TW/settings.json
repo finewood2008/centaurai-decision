@@ -1019,5 +1019,20 @@
   "webui.nasRootNotSet": "未設定",
   "webui.nasRootSelect": "選擇資料夾",
   "webui.nasRootClear": "清除",
-  "webui.nasRootSaved": "網路硬碟根目錄已儲存"
+  "webui.nasRootSaved": "網路硬碟根目錄已儲存",
+  "localModels": {
+    "title": "本機模型",
+    "subtitle": "偵測本機 ollama 服務中的模型並加入 CentaurAI 使用。模型的下載與管理都在「本機模型管理器」中進行。",
+    "providerName": "Ollama 本機",
+    "detecting": "正在偵測本機 ollama…",
+    "detected": "偵測到 {{count}} 個本機模型",
+    "notDetected": "未偵測到本機 ollama，請在本機模型管理器中啟動。",
+    "noModels": "本機 ollama 已執行，但還沒有模型。開啟模型管理器下載一個。",
+    "reDetect": "重新偵測",
+    "addToChat": "加入對話",
+    "added": "已加入你的模型",
+    "alreadyAdded": "已加入",
+    "openManager": "開啟模型管理器",
+    "managerLaunchFailed": "啟動本機模型管理器失敗"
+  }
 }
