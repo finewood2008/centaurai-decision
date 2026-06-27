@@ -77,7 +77,10 @@ const useDebug = () => {
 const UpdateModal = React.lazy(() => import('@/renderer/components/settings/UpdateModal'));
 
 const DEFAULT_SIDER_WIDTH = 260;
-const DESKTOP_COLLAPSED_WIDTH = 0;
+// Desktop collapse keeps a slim icon-only rail (nav/team/workbench icons stay
+// visible & clickable) instead of hiding the sider entirely. Mobile still uses
+// a 0-width off-canvas overlay (see siderStyle / collapsedWidth below).
+const DESKTOP_COLLAPSED_WIDTH = 64;
 const SIDER_DRAG_SNAP_THRESHOLD = Math.round((DEFAULT_SIDER_WIDTH + DESKTOP_COLLAPSED_WIDTH) / 2);
 const SIDER_DRAG_HYSTERESIS = 6;
 const MOBILE_SIDER_WIDTH_RATIO = 0.67;
@@ -325,7 +328,7 @@ const Layout: React.FC<{
 
           <ArcoLayout className={'size-full layout flex-1 min-h-0'}>
             <ArcoLayout.Sider
-              collapsedWidth={isMobile ? 0 : 0}
+              collapsedWidth={isMobile ? 0 : DESKTOP_COLLAPSED_WIDTH}
               collapsed={collapsed}
               width={siderWidth}
               className={classNames('!bg-2 layout-sider', {

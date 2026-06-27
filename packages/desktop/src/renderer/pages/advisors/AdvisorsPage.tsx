@@ -206,7 +206,7 @@ const AdvisorsPage: React.FC = () => {
           </span>
           <div className='h-1px flex-1' style={{ background: 'var(--centaur-line)' }} />
         </div>
-        <div className='grid grid-cols-2 gap-12px md:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-7'>
+        <div className='grid grid-cols-2 gap-14px md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6'>
           {deptAdvisors.map(renderCard)}
         </div>
       </section>
@@ -235,7 +235,7 @@ const AdvisorsPage: React.FC = () => {
               </div>
               <div className='min-w-0'>
                 <div className='centaur-eyebrow'>CENTAUR · ADVISORS</div>
-                <h1 className='m-0 mt-2px text-26px font-900 leading-32px' style={{ color: 'var(--centaur-ink)' }}>
+                <h1 className='centaur-title m-0 mt-2px text-26px leading-32px' style={{ color: 'var(--centaur-ink)' }}>
                   {t('advisors.title')}
                 </h1>
                 <p

@@ -163,7 +163,7 @@
     border-color 0.25s var(--centaur-ease);
 }
 .centaur-liftable:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   box-shadow: var(--centaur-shadow);
-  border-color: var(--centaur-clay) !important;
+  border-color: var(--centaur-line-strong);
 }

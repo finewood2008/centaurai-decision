@@ -240,7 +240,7 @@ const AppStorePage: React.FC = () => {
         </div>
         <div className='min-w-0'>
           <div className='centaur-eyebrow'>CENTAUR · APP STORE</div>
-          <div className='mt-2px text-28px font-900 leading-34px' style={{ color: 'var(--centaur-ink)' }}>
+          <div className='centaur-title mt-2px text-28px leading-34px' style={{ color: 'var(--centaur-ink)' }}>
             {t('appstore.title')}
           </div>
           <div className='mt-6px max-w-720px text-14px leading-21px' style={{ color: 'var(--centaur-ink-soft)' }}>

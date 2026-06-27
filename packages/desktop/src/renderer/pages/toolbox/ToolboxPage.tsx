@@ -71,40 +71,18 @@ type ToolboxPageProps = {
 const getToolTitle = (tool: ToolDef, t: (key: string) => string) => tool.titleText ?? t(tool.titleKey);
 const getToolDesc = (tool: ToolDef, t: (key: string) => string) => tool.descText ?? t(tool.descKey);
 
-/** Warm-domain tone palette (clay / gold / green / deep-clay) per BRAND_GUIDE.md. */
+/**
+ * One calm warm-neutral tone for every tool card — Claude-style restraint.
+ * (Replaced the per-card hash-randomized clay/gold/green "rainbow" so the grid
+ * reads as a cohesive catalog with clay reserved as the single warm accent.)
+ */
 type Tone = { surface: string; icon: string; rail: string; dot: string };
-const TOOL_TONES: Tone[] = [
-  {
-    surface: 'var(--centaur-clay-tint)',
-    icon: 'var(--centaur-clay-deep)',
-    rail: 'var(--centaur-clay)',
-    dot: 'var(--centaur-clay)',
-  },
-  {
-    surface: 'var(--centaur-gold-tint)',
-    icon: 'var(--centaur-gold-deep)',
-    rail: 'var(--centaur-gold)',
-    dot: 'var(--centaur-gold)',
-  },
-  {
-    surface: 'var(--centaur-green-tint)',
-    icon: 'var(--centaur-green)',
-    rail: 'var(--centaur-green)',
-    dot: 'var(--centaur-green)',
-  },
-  {
-    surface: 'var(--centaur-bg-warm)',
-    icon: 'var(--centaur-ink-soft)',
-    rail: 'var(--centaur-clay-deep)',
-    dot: 'var(--centaur-clay-deep)',
-  },
-];
-
-function toneForTool(tool: ToolDef): Tone {
-  let hash = 0;
-  for (const char of tool.id) hash += char.charCodeAt(0);
-  return TOOL_TONES[hash % TOOL_TONES.length];
-}
+const TOOL_TONE: Tone = {
+  surface: 'var(--centaur-bg-warm)',
+  icon: 'var(--centaur-clay-deep)',
+  rail: 'var(--centaur-clay)',
+  dot: 'var(--centaur-clay)',
+};
 
 const ToolCard: React.FC<{
   tool: ToolDef;
@@ -113,7 +91,7 @@ const ToolCard: React.FC<{
   const { t } = useTranslation();
   const fieldLabels = tool.fields.slice(0, 3).map((field) => t(field.labelKey));
   const extraFieldCount = Math.max(0, tool.fields.length - fieldLabels.length);
-  const tone = toneForTool(tool);
+  const tone = TOOL_TONE;
   const executorLabel = tool.requires === 'image-model' ? t('toolbox.imageModel') : t('toolbox.agent');
 
   return (
@@ -545,7 +523,7 @@ const ToolboxPage: React.FC<ToolboxPageProps> = ({ mode = 'toolbox' }) => {
             </div>
             <div className='min-w-0'>
               <div className='centaur-eyebrow'>CENTAUR · IMAGE WORKBENCH</div>
-              <div className='mt-2px text-26px font-900 leading-32px' style={{ color: 'var(--centaur-ink)' }}>
+              <div className='centaur-title mt-2px text-26px leading-32px' style={{ color: 'var(--centaur-ink)' }}>
                 {t('toolbox.imageWorkbench.title')}
               </div>
               <div className='mt-5px max-w-760px text-14px leading-21px' style={{ color: 'var(--centaur-ink-soft)' }}>
@@ -584,7 +562,7 @@ const ToolboxPage: React.FC<ToolboxPageProps> = ({ mode = 'toolbox' }) => {
             </div>
             <div className='min-w-0'>
               <div className='centaur-eyebrow'>CENTAUR · VIDEO WORKBENCH</div>
-              <div className='mt-2px text-26px font-900 leading-32px' style={{ color: 'var(--centaur-ink)' }}>
+              <div className='centaur-title mt-2px text-26px leading-32px' style={{ color: 'var(--centaur-ink)' }}>
                 {t('toolbox.videoWorkbench.title')}
               </div>
               <div className='mt-5px max-w-760px text-14px leading-21px' style={{ color: 'var(--centaur-ink-soft)' }}>
@@ -650,7 +628,7 @@ const ToolboxPage: React.FC<ToolboxPageProps> = ({ mode = 'toolbox' }) => {
                 <div className='centaur-mark h-52px w-52px shrink-0'>{headerIcon}</div>
                 <div className='min-w-0'>
                   <div className='centaur-eyebrow'>{headerEyebrow}</div>
-                  <div className='mt-2px text-26px font-900 leading-32px' style={{ color: 'var(--centaur-ink)' }}>
+                  <div className='centaur-title mt-2px text-26px leading-32px' style={{ color: 'var(--centaur-ink)' }}>
                     {headerTitle}
                   </div>
                   <div
@@ -689,7 +667,7 @@ const ToolboxPage: React.FC<ToolboxPageProps> = ({ mode = 'toolbox' }) => {
                       {stat.icon}
                     </div>
                   </div>
-                  <div className='mt-12px text-28px font-900 leading-32px' style={{ color: 'var(--centaur-ink)' }}>
+                  <div className='centaur-title mt-12px text-28px leading-32px' style={{ color: 'var(--centaur-ink)' }}>
                     {stat.count}
                   </div>
                 </div>
