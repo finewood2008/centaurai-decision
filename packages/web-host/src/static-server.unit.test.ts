@@ -397,4 +397,33 @@ describe('static-server', () => {
     });
     expect(r.status).toBe(400);
   });
+
+  it('self-heals a 0-byte index.html: LAN users still get the real page', async () => {
+    const backend = await startMockBackend((_req, res) => res.end('nope'));
+    stopBackend = backend.close;
+    // A healthy launch seeds the backup, then the file gets truncated to 0 bytes
+    // (the exact failure that blank-screened LAN users).
+    handle = await startStaticServer({ staticDir, backendPort: backend.port, port: 0 });
+    await fetch(`${handle.localUrl}/`); // warm the guard's cache + .bak
+    await fs.writeFile(path.join(staticDir, 'index.html'), '');
+
+    const r = await fetch(`${handle.localUrl}/`);
+    expect(r.status).toBe(200);
+    expect(await r.text()).toContain('<title>root</title>');
+    // The on-disk file was restored, not just the response.
+    expect((await fs.readFile(path.join(staticDir, 'index.html'), 'utf8')).length).toBeGreaterThan(0);
+  });
+
+  it('serves a 503 recovery page when index.html is empty and no backup exists', async () => {
+    const backend = await startMockBackend((_req, res) => res.end('nope'));
+    stopBackend = backend.close;
+    // Empty entry, no .bak anywhere → unrecoverable, must not be a blank 200.
+    await fs.writeFile(path.join(staticDir, 'index.html'), '');
+    handle = await startStaticServer({ staticDir, backendPort: backend.port, port: 0 });
+    const r = await fetch(`${handle.localUrl}/`);
+    expect(r.status).toBe(503);
+    const text = await r.text();
+    expect(text).toContain('正在恢复');
+    expect(text.length).toBeGreaterThan(0);
+  });
 });

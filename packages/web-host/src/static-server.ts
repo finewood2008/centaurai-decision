@@ -40,6 +40,7 @@ import {
 import { handleImageWorkbenchProxy, handleImageWorkbenchStatic } from './image-workbench.js';
 import { handleVideoWorkbenchProxy } from './video-workbench.js';
 import { type AuthGate, createAuthGate } from './webui-auth-gate.js';
+import { createEntryGuard, type EntryGuard } from './entry-html-guard.js';
 
 export type StaticServerOptions = {
   staticDir: string;
@@ -88,6 +89,10 @@ export type StaticServerHandle = {
   networkUrl?: string;
   lanIP?: string;
   stop: () => Promise<void>;
+  /** Read-only health of the SPA entry document (for the remote-access UI). */
+  inspectEntry: EntryGuard['inspect'];
+  /** Force a check + heal of the entry document; returns the resulting health. */
+  repairEntry: EntryGuard['repair'];
 };
 
 const DEFAULT_PORT = 25808;
@@ -586,6 +591,13 @@ export async function startStaticServer(opts: StaticServerOptions): Promise<Stat
   // (the desktop build copies it to out/renderer/centaur-image-workbench).
   const imageWorkbenchDir = opts.imageWorkbenchDir ?? path.join(opts.staticDir, 'centaur-image-workbench');
 
+  // Self-healing guard for the SPA entry document. The WebUI is the only way LAN
+  // users reach the app and it always serves staticDir/index.html; an empty or
+  // truncated index.html (seen intermittently from the build) would otherwise
+  // hand every LAN user a blank 200. The guard serves/restores a known-good copy
+  // and falls back to a friendly recovery page instead of a blank screen.
+  const entryGuard: EntryGuard = await createEntryGuard(opts.staticDir);
+
   // The HTTP server listens only on loopback — user traffic hits the outer
   // net.Server first. We route to this server for everything except WS
   // upgrades, which go straight to the backend via a raw TCP splice.
@@ -745,7 +757,12 @@ export async function startStaticServer(opts: StaticServerOptions): Promise<Stat
         handleImageWorkbenchProxy(req, res, opts.imageKey);
         return;
       }
-      if (req.url.startsWith('/workbench/image/') || req.url === '/workbench/image') {
+      if (req.url === '/workbench/image') {
+        res.writeHead(301, { Location: '/workbench/image/' });
+        res.end();
+        return;
+      }
+      if (req.url.startsWith('/workbench/image/')) {
         await handleImageWorkbenchStatic(req, res, imageWorkbenchDir);
         return;
       }
@@ -772,6 +789,27 @@ export async function startStaticServer(opts: StaticServerOptions): Promise<Stat
         res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
         res.setHeader('Pragma', 'no-cache');
         res.setHeader('Expires', '0');
+      }
+
+      // SPA entry + client-route fallback: serve through the self-healing guard
+      // rather than serve-handler, so an empty/corrupt index.html never reaches
+      // a LAN user as a blank page. The guard restores the file from a backup
+      // when possible and otherwise returns a recovery page (HTTP 503).
+      if (isHtmlEntry && req.method !== 'HEAD') {
+        const { html, healed, recovered } = await entryGuard.getEntryHtml();
+        if (healed) {
+          console.warn('[WebUI] index.html was empty/corrupt — self-healed from backup copy');
+        }
+        if (recovered) {
+          console.error(
+            '[WebUI] index.html missing and no valid backup — serving recovery page. Rebuild the renderer: bun run package'
+          );
+        }
+        res.statusCode = recovered ? 503 : 200;
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        if (recovered) res.setHeader('Retry-After', '10');
+        res.end(html);
+        return;
       }
 
       // static files + SPA fallback
@@ -875,6 +913,8 @@ export async function startStaticServer(opts: StaticServerOptions): Promise<Stat
           http_server.close(() => resolve());
         });
       }),
+    inspectEntry: entryGuard.inspect,
+    repairEntry: entryGuard.repair,
   };
 }
 

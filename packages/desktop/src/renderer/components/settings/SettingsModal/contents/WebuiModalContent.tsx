@@ -82,6 +82,7 @@ const WebuiModalContent: React.FC = () => {
   const [status, setStatus] = useState<IWebUIStatus | null>(null);
   const [loading, setLoading] = useState(false);
   const [startLoading, setStartLoading] = useState(false);
+  const [repairing, setRepairing] = useState(false);
   const port = WEBUI_DEFAULT_PORT;
   const [webuiEnabled, setWebuiEnabled] = useState(false);
   const [allowRemotePreference, setAllowRemotePreference] = useState(false);
@@ -423,6 +424,35 @@ const WebuiModalContent: React.FC = () => {
     Message.success(t('common.copySuccess'));
   };
 
+  // 修复连接 / Repair connection — force a re-check + heal of the WebUI entry
+  // page so LAN users never get stranded on a blank page, then refresh status.
+  const handleRepairConnection = useCallback(async () => {
+    if (!status?.running) {
+      Message.info(t('settings.webui.repairNoServer'));
+      return;
+    }
+    setRepairing(true);
+    try {
+      const health = await webui.repairConnection.invoke();
+      if (!health) {
+        Message.error(t('settings.webui.repairFailed'));
+      } else if (health.status === 'unavailable') {
+        Message.warning(t('settings.webui.repairUnavailable'));
+      } else if (health.status === 'healed') {
+        Message.success(t('settings.webui.repairHealed'));
+      } else {
+        Message.success(t('settings.webui.repairSucceeded'));
+      }
+      // Reflect the freshly-computed health in the panel.
+      setStatus((prev) => (prev ? { ...prev, entryHealth: health } : prev));
+    } catch (error) {
+      console.error('[WebuiModal] repair connection failed:', error);
+      Message.error(t('settings.webui.repairFailed'));
+    } finally {
+      setRepairing(false);
+    }
+  }, [status?.running, t]);
+
   // 打开设置新密码弹窗 / Open set new password modal
   const handleResetPassword = () => {
     form.resetFields();
@@ -685,6 +715,54 @@ const WebuiModalContent: React.FC = () => {
                     <Copy size={16} />
                   </button>
                 </Tooltip>
+              </div>
+            </PreferenceRow>
+          )}
+
+          {/* 连接健康 + 一键修复 / Connection health + one-click repair.
+              entryHealth only exists while the server is running. */}
+          {status?.running && (
+            <PreferenceRow
+              label={t('settings.webui.connectionHealth')}
+              description={<span className='text-t-secondary'>{t('settings.webui.connectionHealthDesc')}</span>}
+            >
+              <div className='flex items-center gap-10px'>
+                {(() => {
+                  const health = status.entryHealth;
+                  const st = health?.status;
+                  const color =
+                    st === 'healthy'
+                      ? 'rgb(var(--success-6))'
+                      : st === 'healed'
+                        ? 'rgb(var(--warning-6))'
+                        : st === 'unavailable'
+                          ? 'rgb(var(--danger-6))'
+                          : 'rgb(var(--primary-6))';
+                  const label =
+                    st === 'healthy'
+                      ? t('settings.webui.connectionHealthy')
+                      : st === 'healed'
+                        ? health && health.healedCount > 0
+                          ? t('settings.webui.connectionHealed', { count: health.healedCount })
+                          : t('settings.webui.connectionHealthy')
+                        : st === 'unavailable'
+                          ? t('settings.webui.connectionUnavailable')
+                          : t('settings.webui.connectionUnknown');
+                  return (
+                    <span className='inline-flex items-center gap-6px text-12px text-t-secondary whitespace-nowrap'>
+                      <span className='inline-block w-8px h-8px rd-50%' style={{ backgroundColor: color }} />
+                      {label}
+                    </span>
+                  );
+                })()}
+                <Button
+                  size='small'
+                  className='rd-100px'
+                  loading={repairing}
+                  onClick={() => void handleRepairConnection()}
+                >
+                  {repairing ? t('settings.webui.repairing') : t('settings.webui.repairConnection')}
+                </Button>
               </div>
             </PreferenceRow>
           )}

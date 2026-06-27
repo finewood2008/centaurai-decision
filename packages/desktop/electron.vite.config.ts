@@ -1,6 +1,6 @@
 import { defineConfig, externalizeDepsPlugin } from 'electron-vite';
 import { execSync } from 'child_process';
-import { readFileSync } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
 import { sentryVitePlugin } from '@sentry/vite-plugin';
 import UnoCSS from 'unocss/vite';
@@ -21,6 +21,38 @@ function buildMcpServersPlugin() {
     name: 'vite-plugin-build-mcp-servers',
     closeBundle() {
       execSync(`node "${resolve('scripts/build-mcp-servers.js')}"`, { stdio: 'inherit' });
+    },
+  };
+}
+
+// Verify the renderer entry document and snapshot a build-consistent backup.
+//
+// The WebUI serves out/renderer/index.html to every LAN/browser user; a 0-byte
+// or truncated index.html (seen intermittently from this build) would hand them
+// a blank page. This gate fails the build loudly so a broken artifact never
+// ships, and writes index.html.bak from the SAME build so the runtime
+// self-healing guard (web-host/entry-html-guard.ts) can restore it with asset
+// hashes that still match what is on disk.
+function verifyRendererEntryPlugin() {
+  const isValidEntryHtml = (html: string): boolean =>
+    html.trim().length >= 20 && /<!doctype html|<html|<head|<body|<title|id=["']root["']/i.test(html);
+  return {
+    name: 'vite-plugin-verify-renderer-entry',
+    closeBundle() {
+      const entryPath = resolve('out/renderer/index.html');
+      let html = '';
+      try {
+        html = readFileSync(entryPath, 'utf-8');
+      } catch (err) {
+        throw new Error(`[verify-renderer] cannot read ${entryPath}: ${(err as Error).message}`);
+      }
+      if (!isValidEntryHtml(html)) {
+        throw new Error(
+          `[verify-renderer] ${entryPath} is empty or not a valid HTML document (${html.length} bytes). ` +
+            `Refusing to ship a build that would blank-screen LAN users.`
+        );
+      }
+      writeFileSync(resolve('out/renderer/index.html.bak'), html, 'utf-8');
     },
   };
 }
@@ -252,6 +284,9 @@ export default defineConfig(({ mode }) => {
         UnoCSS(unoConfig),
         iconParkPlugin(),
         ...(enableSentrySourceMaps ? [sentryVitePlugin(sentryPluginOptions)] : []),
+        // Production only: dev mode serves the renderer from a live Vite server
+        // and never emits out/renderer/index.html.
+        ...(!isDevelopment ? [verifyRendererEntryPlugin()] : []),
       ],
       build: {
         target: 'es2022',

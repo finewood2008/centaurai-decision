@@ -1,5 +1,7 @@
 // Core types for @aionui/web-host (M3 interface contract, locked for M4-M8)
 
+import type { EntryGuard } from './entry-html-guard.js';
+
 /**
  * App metadata injected by host environment (Electron or Node)
  */
@@ -64,4 +66,8 @@ export type WebHostHandle = {
   networkUrl?: string;
   lanIP?: string;
   stop: () => Promise<void>;
+  /** Read-only health of the SPA entry document (for the remote-access UI). */
+  inspectEntry: EntryGuard['inspect'];
+  /** Force a check + heal of the entry document; returns the resulting health. */
+  repairEntry: EntryGuard['repair'];
 };
