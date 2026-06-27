@@ -83,6 +83,30 @@ export function buildModeratorOpeningPrompt(topic: string, panelists: PanelistBr
 }
 
 /**
+ * Decision-edition preset-department phase prompt. Generic over a department's
+ * phase (label + instruction), so all preset departments reuse one builder
+ * (see presetDepartments.ts) — the 流程 lives in data, not in code.
+ */
+export function buildDeptPhasePrompt(params: {
+  topic: string;
+  persona: string;
+  lens?: string;
+  phaseLabel: string;
+  instruction: string;
+  priorContext: string;
+}): string {
+  const { topic, persona, lens, phaseLabel, instruction, priorContext } = params;
+  return [
+    `你是参加这场决策会议的专家「${persona}」，主攻【${lens ?? '综合'}】视角。本环节是【${phaseLabel}】。`,
+    `决策议题：${topic}`,
+    priorContext ? `\n会议进展（已有发言）：\n${priorContext}` : '\n（你是本环节第一位发言的专家）',
+    '',
+    `本环节要求：${instruction}`,
+    '请结合你的视角，言之有物、给出具体可执行的判断；若老板在上面有过插话或约束，必须当作硬性前提。绝不说正确的废话。',
+  ].join('\n');
+}
+
+/**
  * Panelist opening position — from an assigned angle (lens), substantive and concrete.
  */
 export function buildPanelistPositionPrompt(params: {

@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, Loading } from '@icon-park/react';
 import type { MeetingForm, MeetingPhase } from './meetingTypes';
+import { resolveDepartment } from './presetDepartments';
 
 /**
  * One stage in the meeting flow. `key` matches the turn's `phaseLabel` (Chinese,
@@ -16,7 +17,7 @@ const SYNTH = S('综合', 'team.meeting.stage.synthesis', '综合');
 const DECISION = S('__decision__', 'team.meeting.stage.decision', '拍板');
 
 /** The user-facing milestones per discussion format (mirrors runMeeting's phases). */
-const STAGES_BY_FORM: Record<MeetingForm, Stage[]> = {
+const STAGES_BY_FORM: Record<Exclude<MeetingForm, 'department'>, Stage[]> = {
   roundtable: [
     OPENING,
     S('立论', 'team.meeting.stage.position', '立论'),
@@ -42,9 +43,22 @@ const STAGES_BY_FORM: Record<MeetingForm, Stage[]> = {
   ],
 };
 
+/** Resolve the stage list for a form. Decision-edition 'department' meetings build
+ *  their stages from the preset department's phases (data-driven 专有流程). */
+function resolveStages(form: MeetingForm, departmentId?: string): Stage[] {
+  if (form === 'department') {
+    const dept = resolveDepartment(departmentId);
+    if (dept) return [OPENING, ...dept.phases.map((ph) => S(ph.label, ph.label, ph.label)), SYNTH, DECISION];
+    return STAGES_BY_FORM.roundtable;
+  }
+  return STAGES_BY_FORM[form] ?? STAGES_BY_FORM.roundtable;
+}
+
 type Props = {
   phase: MeetingPhase;
   form: MeetingForm;
+  /** Preset department id (when form==='department') — drives the stage list. */
+  departmentId?: string;
   /** Distinct phaseLabels seen in the transcript so far (drives stage progress). */
   reachedLabels: string[];
   turnsCompleted: number;
@@ -55,9 +69,9 @@ type Props = {
  * (开场 → 研讨阶段 → 综合 → 拍板), so the boss can read the room at a glance.
  * Deliberately slim — the transcript below is the hero.
  */
-const MeetingPhaseBar: React.FC<Props> = ({ phase, form, reachedLabels, turnsCompleted }) => {
+const MeetingPhaseBar: React.FC<Props> = ({ phase, form, departmentId, reachedLabels, turnsCompleted }) => {
   const { t } = useTranslation();
-  const stages = STAGES_BY_FORM[form] ?? STAGES_BY_FORM.roundtable;
+  const stages = resolveStages(form, departmentId);
   const reached = new Set(reachedLabels);
 
   let current = 0;

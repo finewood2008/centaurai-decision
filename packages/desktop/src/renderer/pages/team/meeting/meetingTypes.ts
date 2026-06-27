@@ -21,7 +21,8 @@ export type MeetingForm =
   | 'roundtable' // multi-angle debate + rebuttal
   | 'redteam' // one drafts, others red-team, then revise
   | 'tournament' // each agent produces a full plan → judged → synthesized
-  | 'diverge'; // independent divergence → cluster → converge
+  | 'diverge' // independent divergence → cluster → converge
+  | 'department'; // Decision edition: data-driven preset-department flow (phases from presetDepartments.ts)
 
 /** A candidate solution the boss can pick from at the resolution stage. */
 export type MeetingResolutionOption = {
@@ -66,6 +67,8 @@ export type MeetingState = {
   topic: string;
   /** Chosen discussion format for the session. */
   form: MeetingForm;
+  /** Preset department id (Decision edition, when form==='department') — drives the phases. */
+  departmentId?: string;
   /** Synthesized 方案书 (markdown) produced by the synthesizer at the end. */
   plan: string;
   /** Backend team_run id (needed to cancel). */

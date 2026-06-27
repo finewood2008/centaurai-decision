@@ -27,10 +27,12 @@ import {
   removeGuest as storeRemoveGuest,
   type MeetingGuest,
 } from './meetingGuests';
+import { resolveDepartment } from './presetDepartments';
 import {
   PANEL_LENSES,
   buildClusterPrompt,
   buildConvergePrompt,
+  buildDeptPhasePrompt,
   buildDivergePrompt,
   buildDraftPrompt,
   buildExportTask,
@@ -161,6 +163,19 @@ function writeStore(map: StoredMap): void {
 }
 
 /**
+ * Seed a team's fixed workflow (+ optional preset department) into the meeting
+ * store at create time. The Decision edition fixes the 流程 when the 决策会议室 is
+ * created — there is no runtime picker — so hydrate() reads this back into
+ * state.form / state.departmentId and startMeeting falls back to state.form.
+ */
+export function setTeamMeetingForm(team_id: string, form: MeetingForm, departmentId?: string): void {
+  const store = readStore();
+  const prev = store[team_id] ?? {};
+  store[team_id] = departmentId ? { ...prev, form, departmentId } : { ...prev, form };
+  writeStore(store);
+}
+
+/**
  * Hydrate persisted meeting state for a COLD engine (first visit this session, or
  * after an app reload). A run that was live when the app last closed can't be
  * resumed — its renderer loop is gone — so we park it back to idle. Within a
@@ -277,6 +292,7 @@ class MeetingEngine {
       runState: next.runState,
       topic: next.topic,
       form: next.form,
+      departmentId: next.departmentId,
       plan: next.plan,
       options: next.options,
       decidedOptionId: next.decidedOptionId,
@@ -657,10 +673,15 @@ class MeetingEngine {
         this.commit({ turnsCompleted: this.state.turnsCompleted + 1, activeSlotId: null });
       };
 
+      // Decision-edition preset department (drives a data-driven 专有流程 below).
+      const dept = form === 'department' ? resolveDepartment(this.state.departmentId) : undefined;
       // 1) Moderator opens — addressed to the boss, frames the real tension (+ optional 背景资料).
+      //    For a department meeting, prepend the department framing.
+      const baseOpening = buildModeratorOpeningPrompt(topic, briefs);
+      const framedOpening = dept?.framing ? `${dept.framing}\n\n${baseOpening}` : baseOpening;
       const openingPrompt = reference
-        ? `${buildModeratorOpeningPrompt(topic, briefs)}\n\n${reference}\n\n请在开场时简要提示专家们参考上述背景资料。`
-        : buildModeratorOpeningPrompt(topic, briefs);
+        ? `${framedOpening}\n\n${reference}\n\n请在开场时简要提示专家们参考上述背景资料。`
+        : framedOpening;
       await speak(mod, '开场', openingPrompt);
       // 2) Form-specific middle phases. Every form reuses speak / transcriptText /
       //    the moderator recap + PAUSE (boss reads, optionally interjects, clicks
@@ -722,6 +743,26 @@ class MeetingEngine {
           })
         );
         if (!(await pauseAndWait(2, '收敛'))) return;
+      } else if (form === 'department' && dept) {
+        // Decision edition: run the department's preset 专有流程 generically. Each phase
+        // the panel discusses per the phase instruction, then a recap + boss PAUSE. The
+        // final 决议 is the resolution stage (moderator 综合 + options) below.
+        let round = 1;
+        for (const ph of dept.phases) {
+          if (stale()) break;
+          await eachPanelist(ph.label, (p) =>
+            buildDeptPhasePrompt({
+              topic,
+              persona: p.name,
+              lens: lensByPanel.get(p.id),
+              phaseLabel: ph.label,
+              instruction: ph.instruction,
+              priorContext: transcriptText(),
+            })
+          );
+          if (!(await pauseAndWait(round, ph.label))) return;
+          round++;
+        }
       } else {
         // roundtable (default): 立论 →(暂停)→ 交锋 →(暂停)
         await eachPanelist('立论', (p) =>

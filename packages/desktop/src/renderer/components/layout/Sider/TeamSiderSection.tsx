@@ -18,6 +18,7 @@ import { useTeamList } from '@renderer/pages/team/hooks/useTeamList';
 import { useSiderTeamBadges } from '@renderer/pages/team/hooks/useSiderTeamBadges';
 import TeamCreateModal from '@renderer/pages/team/components/TeamCreateModal';
 import { ipcBridge } from '@/common';
+import { IS_DECISION } from '@/common/config/constants';
 import SiderItem from './SiderItem';
 import type { SiderMenuItem } from './SiderItem';
 
@@ -152,7 +153,7 @@ const TeamSiderSection: React.FC<TeamSiderSectionProps> = ({
             onClick={() => setExpanded((v) => !v)}
           >
             <span className='text-14px text-t-tertiary sider-section-title group-hover/label:text-t-primary transition-colors font-[500] leading-none'>
-              {t('team.sider.title')}
+              {t(IS_DECISION ? 'decision.siderTitle' : 'team.sider.title')}
             </span>
             <span className='ml-2px flex items-center justify-center opacity-0 group-hover/label:opacity-100 transition-opacity text-t-tertiary shrink-0'>
               <Right
@@ -163,7 +164,7 @@ const TeamSiderSection: React.FC<TeamSiderSectionProps> = ({
             </span>
             {/* [E2E SYNC] data-testid="team-create-btn" 是 E2E 测试的入口 selector，不得删除或重命名。
                 如需修改，必须同步更新 tests/e2e/cases/teams/team-create.e2e.ts。 */}
-            <Tooltip content={t('team.sider.createTeam')} position='top'>
+            <Tooltip content={t(IS_DECISION ? 'decision.siderCreate' : 'team.sider.createTeam')} position='top'>
               <div
                 data-testid='team-create-btn'
                 className='ml-auto -mr-4px size-20px rd-4px flex items-center justify-center hover:bg-fill-4 transition-all shrink-0 cursor-pointer text-t-secondary hover:text-t-primary'

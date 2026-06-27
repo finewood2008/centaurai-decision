@@ -1,5 +1,5 @@
 {
-  "subtitle": "你的决策作战室 —— 随时召集智囊团，听取多方意见，快速拍板。",
+  "subtitle": "随时召集顾问开决策会议室，听取多方意见、快速拍板。",
   "startMeeting": "发起决策会议",
   "greeting": {
     "morning": "早上好，老板",
@@ -23,8 +23,31 @@
   },
   "advisors": {
     "title": "顾问团",
-    "desc": "随时拉进作战室",
+    "desc": "随时拉进会议室",
     "count": "{{count}} 位待命"
   },
-  "enter": "进入作战室"
+  "enter": "进入会议室",
+  "roomTitle": "决策会议室",
+  "roomSubtitle": "AI 决策圆桌",
+  "emptyTitle": "决策会议室 · 召集顾问开会",
+  "createTitle": "新建决策会议室",
+  "namePlaceholder": "给这场决策起个名字，如「Q3 增长策略」「定价方案评审」…",
+  "siderTitle": "决策会议室",
+  "siderCreate": "新建决策会议室",
+  "renameTitle": "重命名",
+  "renamePlaceholder": "会议室名称",
+  "deleteConfirm": "删除此决策会议室？",
+  "deptLabel": "决策部门",
+  "deptPlaceholder": "选择一个决策部门（决定流程与提示词）",
+  "deptFlow": "专有流程",
+  "deptDecide": "决议",
+  "dept": {
+    "marketing": { "name": "市场部", "hint": "营销策略、品牌、增长、投放" },
+    "product": { "name": "产品部", "hint": "产品方向、需求取舍、路线落地" },
+    "legal": { "name": "法务部", "hint": "法律风险、合规、条款、处置" },
+    "finance": { "name": "财务部", "hint": "数据测算、现金流、财务风险" },
+    "operations": { "name": "运营部", "hint": "流程、执行、效率" },
+    "hr": { "name": "人力部 / HR", "hint": "组织、人才、团队" },
+    "strategy": { "name": "战略部", "hint": "目标、多方案竞标、定案" }
+  }
 }

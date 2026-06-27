@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Button, Form, Input, Message } from '@arco-design/web-react';
+import { Button, Form, Input, Message, Select } from '@arco-design/web-react';
 import type { RefInputType } from '@arco-design/web-react/es/Input';
 import { Check, Close, Crown, Search } from '@icon-park/react';
 import { useTranslation } from 'react-i18next';
@@ -21,6 +21,9 @@ import {
 } from './agentSelectUtils';
 import type { TeamAgentOption } from './agentSelectUtils';
 import { resolveDefaultTeamAgentModel } from './teamCreateModelResolver';
+import { IS_DECISION } from '@/common/config/constants';
+import { PRESET_DEPARTMENTS } from '../meeting/presetDepartments';
+import { setTeamMeetingForm } from '../meeting/useMeetingOrchestrator';
 
 /** Remembered agent panel to pre-fill the next 智囊团. */
 const LAST_PANEL_KEY = 'roundtable-last-panel';
@@ -117,6 +120,8 @@ const TeamCreateModal: React.FC<Props> = ({ visible, onClose, onCreated }) => {
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   // Optional project folder (kept for users who want a fixed workspace per 智囊团).
   const [workspace, setWorkspace] = useState('');
+  // Decision edition: the preset department fixes the 流程 (form='department') + prompts.
+  const [departmentId, setDepartmentId] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [searchExpanded, setSearchExpanded] = useState(false);
@@ -189,6 +194,7 @@ const TeamCreateModal: React.FC<Props> = ({ visible, onClose, onCreated }) => {
     setName('');
     setSelectedKeys([]);
     setWorkspace('');
+    setDepartmentId('');
     setSearch('');
     setSearchExpanded(false);
     onClose();
@@ -281,6 +287,10 @@ const TeamCreateModal: React.FC<Props> = ({ visible, onClose, onCreated }) => {
       // provider+model pin for 直连模型专家.
       extraAgents.map(optionToGuest).forEach((g) => storeAddGuest(team.id, g));
 
+      // Decision edition: fix the 流程 now (by department). hydrate() reads this into
+      // state.form/departmentId; the meeting room has no runtime flow picker.
+      if (IS_DECISION && departmentId) setTeamMeetingForm(team.id, 'department', departmentId);
+
       // Remember this panel for the next 智囊团. Creating only sets up the team — the
       // room opens blank (idle) and the user sets the topic + starts the discussion there.
       try {
@@ -316,7 +326,7 @@ const TeamCreateModal: React.FC<Props> = ({ visible, onClose, onCreated }) => {
         render: () => (
           <div className='flex items-center justify-between border-b border-border-2 bg-dialog-fill-0 px-24px py-18px'>
             <h3 className='m-0 text-16px font-600 text-t-primary'>
-              {t('team.create.title', { defaultValue: '新建智囊团' })}
+              {t(IS_DECISION ? 'decision.createTitle' : 'team.create.title', { defaultValue: '新建智囊团' })}
             </h3>
             <Button
               type='text'
@@ -336,7 +346,7 @@ const TeamCreateModal: React.FC<Props> = ({ visible, onClose, onCreated }) => {
             type='primary'
             onClick={handleCreate}
             loading={loading}
-            disabled={!name.trim() || selectedKeys.length === 0}
+            disabled={!name.trim() || selectedKeys.length === 0 || (IS_DECISION && !departmentId)}
             className='min-w-80px'
             style={{ borderRadius: 8 }}
           >
@@ -347,6 +357,47 @@ const TeamCreateModal: React.FC<Props> = ({ visible, onClose, onCreated }) => {
     >
       <div className='px-24px py-20px' style={{ maxHeight: 'min(72vh, 640px)', overflowY: 'auto' }}>
         <Form layout='vertical'>
+          {/* Decision edition: pick a preset department — fixes the 流程 (phases) + prompts. */}
+          {IS_DECISION && (
+            <FormItem
+              label={
+                <span className='text-12px font-500 text-t-secondary'>
+                  {t('decision.deptLabel', { defaultValue: '决策部门' })}
+                  <span className='ml-4px text-danger-6'>*</span>
+                </span>
+              }
+            >
+              <Select
+                placeholder={t('decision.deptPlaceholder', { defaultValue: '选择一个决策部门（决定流程与提示词）' })}
+                value={departmentId || undefined}
+                onChange={(v) => {
+                  const id = v as string;
+                  setDepartmentId(id);
+                  const dept = PRESET_DEPARTMENTS.find((d) => d.id === id);
+                  if (dept && !name.trim()) setName(t(dept.nameKey, { defaultValue: dept.id }));
+                }}
+                data-testid='team-create-department-picker'
+              >
+                {PRESET_DEPARTMENTS.map((d) => (
+                  <Select.Option key={d.id} value={d.id}>
+                    {t(d.nameKey, { defaultValue: d.id })}
+                  </Select.Option>
+                ))}
+              </Select>
+              {(() => {
+                const dept = PRESET_DEPARTMENTS.find((d) => d.id === departmentId);
+                if (!dept) return null;
+                const flow = [...dept.phases.map((p) => p.label), t('decision.deptDecide', { defaultValue: '决议' })].join(' → ');
+                return (
+                  <div className='mt-6px text-11px text-t-tertiary leading-relaxed'>
+                    {t(dept.hintKey, { defaultValue: '' })}
+                    <br />
+                    {t('decision.deptFlow', { defaultValue: '专有流程' })}：{flow}
+                  </div>
+                );
+              })()}
+            </FormItem>
+          )}
           {/* 智囊团 name (a team — the discussion topic is set later in the room). */}
           <FormItem
             label={
@@ -358,7 +409,7 @@ const TeamCreateModal: React.FC<Props> = ({ visible, onClose, onCreated }) => {
           >
             <Input
               ref={nameInputRef}
-              placeholder={t('team.create.namePlaceholder', {
+              placeholder={t(IS_DECISION ? 'decision.namePlaceholder' : 'team.create.namePlaceholder', {
                 defaultValue: '给你的智囊团起个名字，如「增长策略组」「产品方向智囊团」…',
               })}
               value={name}

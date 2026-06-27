@@ -15,6 +15,7 @@ import MeetingResolutionCard from './MeetingResolutionCard';
 import MeetingGuestPanel from './MeetingGuestPanel';
 import { stripResolutionMarkers } from './meetingPrompts';
 import { useMeetingOrchestrator } from './useMeetingOrchestrator';
+import { IS_DECISION } from '@/common/config/constants';
 
 type Props = {
   team: TTeam;
@@ -114,10 +115,10 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
         </span>
         <div className='flex flex-col min-w-0'>
           <span className='centaur-title centaur-title-sm leading-tight'>
-            {t('team.meeting.boardTitle', { defaultValue: '智囊团' })}
+            {t(IS_DECISION ? 'decision.roomTitle' : 'team.meeting.boardTitle', { defaultValue: '智囊团' })}
           </span>
           <span className='text-11px text-[color:var(--bg-6)] leading-tight'>
-            {t('team.meeting.boardSubtitle', { defaultValue: 'AI 圆桌会议' })}
+            {t(IS_DECISION ? 'decision.roomSubtitle' : 'team.meeting.boardSubtitle', { defaultValue: 'AI 圆桌会议' })}
           </span>
         </div>
         <div className='flex-1' />
@@ -180,7 +181,7 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
               <VideoConference theme='outline' size='30' fill='var(--primary)' />
             </span>
             <span className='centaur-title centaur-title-lg'>
-              {t('team.meeting.emptyTitle', { defaultValue: '智囊团 · 召集 AI 专家开会' })}
+              {t(IS_DECISION ? 'decision.emptyTitle' : 'team.meeting.emptyTitle', { defaultValue: '智囊团 · 召集 AI 专家开会' })}
             </span>
             <span className='text-14px leading-relaxed max-w-420px text-[color:var(--text-secondary)]'>
               {t('team.meeting.emptyHint', {
@@ -339,6 +340,7 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
         <MeetingPhaseBar
           phase={state.phase}
           form={state.form}
+          departmentId={state.departmentId}
           reachedLabels={reachedLabels}
           turnsCompleted={state.turnsCompleted}
         />
