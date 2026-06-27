@@ -46,11 +46,11 @@ function startStubBackend(): Promise<StubBackend> {
 }
 
 /** Send a raw WS upgrade and resolve with whatever the server writes back. */
-function rawWsProbe(port: number, cookie?: string): Promise<string> {
+function rawWsProbe(port: number, cookie?: string, path = '/ws'): Promise<string> {
   return new Promise((resolve, reject) => {
     const socket = net.connect(port, '127.0.0.1', () => {
       const lines = [
-        'GET /ws HTTP/1.1',
+        `GET ${path} HTTP/1.1`,
         'Host: 127.0.0.1',
         'Upgrade: websocket',
         'Connection: Upgrade',
@@ -123,8 +123,22 @@ describe('static-server auth gate (allowRemote)', () => {
       .map((c) => c.split(';')[0] ?? '')
       .find((c) => c.startsWith(`${GATE_COOKIE_NAME}=`));
     expect(gateCookie).toBeTruthy();
+    expect(login.headers.get('x-webui-gate-token')).toBeTruthy();
 
     const authed = await fetch(`${base}/api/assistants`, { headers: { cookie: gateCookie! } });
+    expect(authed.status).toBe(200);
+  });
+
+  it('authorizes native clients with the gate token header', async () => {
+    const login = await fetch(`${base}/login`, {
+      method: 'POST',
+      body: '{}',
+      headers: { 'content-type': 'application/json' },
+    });
+    const token = login.headers.get('x-webui-gate-token');
+    expect(token).toBeTruthy();
+
+    const authed = await fetch(`${base}/api/assistants`, { headers: { 'x-webui-gate-token': token! } });
     expect(authed.status).toBe(200);
   });
 
@@ -135,6 +149,18 @@ describe('static-server auth gate (allowRemote)', () => {
 
   it('rejects an unauthenticated /ws upgrade at the proxy', async () => {
     expect(await rawWsProbe(handle.port)).toContain('401');
+  });
+
+  it('authorizes /ws upgrades with a gate query token for native clients', async () => {
+    const login = await fetch(`${base}/login`, {
+      method: 'POST',
+      body: '{}',
+      headers: { 'content-type': 'application/json' },
+    });
+    const token = login.headers.get('x-webui-gate-token');
+    expect(token).toBeTruthy();
+
+    expect(await rawWsProbe(handle.port, undefined, `/ws?gate=${encodeURIComponent(token!)}`)).not.toContain('401');
   });
 });
 

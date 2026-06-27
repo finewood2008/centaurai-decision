@@ -154,7 +154,12 @@ function proxyLoginWithGate(req: IncomingMessage, res: ServerResponse, gate: Aut
     if (status >= 200 && status < 300) {
       const existing = headers['set-cookie'];
       const list = Array.isArray(existing) ? existing : existing ? [existing] : [];
+      const gateToken = gate.mintToken();
       headers['set-cookie'] = [...list, gate.mintCookie()];
+      headers['x-webui-gate-token'] = gateToken;
+      headers['access-control-expose-headers'] = appendCsvHeader(headers['access-control-expose-headers'], [
+        'X-WebUI-Gate-Token',
+      ]);
     }
     res.writeHead(status, headers);
     proxyRes.pipe(res);
@@ -168,6 +173,28 @@ function proxyLoginWithGate(req: IncomingMessage, res: ServerResponse, gate: Aut
     }
   });
   req.pipe(proxy);
+}
+
+function appendCsvHeader(value: string | string[] | number | undefined, additions: string[]): string {
+  const existing = Array.isArray(value) ? value.join(',') : value === undefined ? '' : String(value);
+  const parts = new Set(
+    existing
+      .split(',')
+      .map((part) => part.trim())
+      .filter(Boolean)
+  );
+  for (const addition of additions) parts.add(addition);
+  return [...parts].join(', ');
+}
+
+function requestGateToken(req: IncomingMessage): string | undefined {
+  const header = req.headers['x-webui-gate-token'];
+  if (Array.isArray(header)) return header[0];
+  return header;
+}
+
+function isGateAuthorized(gate: AuthGate, req: IncomingMessage): boolean {
+  return gate.isAuthorized(req.headers.cookie) || gate.isAuthorizedToken(requestGateToken(req));
 }
 
 /**
@@ -221,7 +248,7 @@ function enforceGate(req: IncomingMessage, res: ServerResponse, gate: AuthGate, 
   if (path.startsWith('/api/downloads/')) return false;
 
   const isApi = path === '/api' || path.startsWith('/api/');
-  if (isApi && !gate.isAuthorized(req.headers.cookie)) {
+  if (isApi && !isGateAuthorized(gate, req)) {
     res.writeHead(401, { 'content-type': 'application/json' });
     res.end(JSON.stringify({ success: false, error: 'UNAUTHENTICATED' }));
     return true;
@@ -245,6 +272,22 @@ function rawHeader(head: Buffer, name: string): string | undefined {
     if (line.slice(0, colon).trim().toLowerCase() === lower) return line.slice(colon + 1).trim();
   }
   return undefined;
+}
+
+function rawGateToken(head: Buffer): string | undefined {
+  const fromHeader = rawHeader(head, 'x-webui-gate-token');
+  if (fromHeader) return fromHeader;
+
+  const newlineIdx = head.indexOf(0x0a);
+  if (newlineIdx < 0) return undefined;
+  const firstLine = head.slice(0, newlineIdx).toString('ascii');
+  const match = /^GET\s+([^\s]+)\s+HTTP\/1\.[01]\r?$/.exec(firstLine);
+  if (!match) return undefined;
+  try {
+    return new URL(match[1] ?? '/', 'http://127.0.0.1').searchParams.get('gate') ?? undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 /**
@@ -565,7 +608,7 @@ export async function startStaticServer(opts: StaticServerOptions): Promise<Stat
 
       // /workbench/* (browser image/video workbench) lives outside /api/, so the
       // gate above skips it — gate it explicitly when LAN-exposed.
-      if (requireAuth && req.url.startsWith('/workbench/') && !gate.isAuthorized(req.headers.cookie)) {
+      if (requireAuth && req.url.startsWith('/workbench/') && !isGateAuthorized(gate, req)) {
         res.writeHead(401, { 'content-type': 'application/json' });
         res.end(JSON.stringify({ success: false, error: 'UNAUTHENTICATED' }));
         return;
@@ -783,7 +826,7 @@ export async function startStaticServer(opts: StaticServerOptions): Promise<Stat
       if (decision === true && requireAuth) {
         const headEnd = peeked.indexOf('\r\n\r\n');
         if (headEnd < 0 && peeked.length < PEEK_LIMIT_BYTES) return;
-        if (!gate.isAuthorized(rawHeader(peeked, 'cookie'))) {
+        if (!gate.isAuthorized(rawHeader(peeked, 'cookie')) && !gate.isAuthorizedToken(rawGateToken(peeked))) {
           cleanup();
           client.end('HTTP/1.1 401 Unauthorized\r\nConnection: close\r\nContent-Length: 0\r\n\r\n');
           return;

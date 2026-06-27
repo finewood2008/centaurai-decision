@@ -99,7 +99,7 @@ class FakeWebSocket {
   }
 }
 
-function setupBrowserGlobals() {
+function setupBrowserGlobals(overrides: Record<string, unknown> = {}) {
   const location: BrowserLocation = {
     protocol: 'http:',
     hostname: '127.0.0.1',
@@ -112,19 +112,20 @@ function setupBrowserGlobals() {
     location,
     setTimeout: setTimeout as unknown as Window['setTimeout'],
     clearTimeout: clearTimeout as unknown as Window['clearTimeout'],
+    ...overrides,
   });
   vi.stubGlobal('WebSocket', FakeWebSocket as unknown as typeof WebSocket);
 
   return location;
 }
 
-async function loadBrowserAdapter() {
+async function loadBrowserAdapter(overrides: Record<string, unknown> = {}) {
   vi.resetModules();
   FakeWebSocket.instances = [];
   platformMock.adapter.mockClear();
   platformMock.provider.mockClear();
 
-  const location = setupBrowserGlobals();
+  const location = setupBrowserGlobals(overrides);
 
   await import('@/common/adapter/browser');
 
@@ -240,5 +241,21 @@ describe('browser WebSocket realtime error handling', () => {
 
     expect(location.hash).toBe('');
     expect(FakeWebSocket.instances).toHaveLength(2);
+  });
+
+  it('uses WebSocket transport in distributed client mode even with electronAPI present', async () => {
+    const electronEmit = vi.fn();
+    const { adapter, socket } = await loadBrowserAdapter({
+      electronAPI: { emit: electronEmit, on: vi.fn() },
+      __clientMode: true,
+      __backendHost: '192.168.1.25',
+      __backendPort: 25808,
+    });
+
+    adapter.emit('conversation.send-message', { id: 'c1' });
+
+    expect(FakeWebSocket.instances).toHaveLength(1);
+    expect(socket.sentMessages[0]).toContain('conversation.send-message');
+    expect(electronEmit).not.toHaveBeenCalled();
   });
 });

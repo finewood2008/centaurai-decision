@@ -30,10 +30,14 @@ const DEFAULT_TTL_SEC = 7 * 24 * 60 * 60;
 const nowSec = (): number => Math.floor(Date.now() / 1000);
 
 export type AuthGate = {
+  /** Build the raw bearer token used by the cookie or native-client header. */
+  mintToken: (ttlSec?: number) => string;
   /** Build a `Set-Cookie` value authorizing the bearer for `ttlSec` seconds. */
   mintCookie: (ttlSec?: number) => string;
   /** Build a `Set-Cookie` value that immediately clears the gate cookie. */
   clearCookie: () => string;
+  /** True if a raw bearer token is valid and unexpired. */
+  isAuthorizedToken: (token: string | undefined | null) => boolean;
   /** True if the raw `Cookie` header carries a valid, unexpired gate token. */
   isAuthorized: (cookieHeader: string | undefined) => boolean;
 };
@@ -67,18 +71,20 @@ export function createAuthGate(opts?: { secret?: Buffer; secure?: boolean }): Au
   };
 
   return {
-    mintCookie(ttlSec = DEFAULT_TTL_SEC): string {
+    mintToken(ttlSec = DEFAULT_TTL_SEC): string {
       const payload = Buffer.from(JSON.stringify({ exp: nowSec() + ttlSec })).toString('base64url');
-      const token = `${payload}.${sign(payload)}`;
-      return `${GATE_COOKIE_NAME}=${token}; ${cookieAttrs(ttlSec)}`;
+      return `${payload}.${sign(payload)}`;
+    },
+
+    mintCookie(ttlSec = DEFAULT_TTL_SEC): string {
+      return `${GATE_COOKIE_NAME}=${this.mintToken(ttlSec)}; ${cookieAttrs(ttlSec)}`;
     },
 
     clearCookie(): string {
       return `${GATE_COOKIE_NAME}=; ${cookieAttrs(0)}`;
     },
 
-    isAuthorized(cookieHeader): boolean {
-      const token = parseCookie(cookieHeader, GATE_COOKIE_NAME);
+    isAuthorizedToken(token): boolean {
       if (!token) return false;
       const dot = token.indexOf('.');
       if (dot <= 0) return false;
@@ -96,6 +102,10 @@ export function createAuthGate(opts?: { secret?: Buffer; secure?: boolean }): Au
       } catch {
         return false;
       }
+    },
+
+    isAuthorized(cookieHeader): boolean {
+      return this.isAuthorizedToken(parseCookie(cookieHeader, GATE_COOKIE_NAME));
     },
   };
 }

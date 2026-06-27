@@ -12,6 +12,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   getBaseUrl,
+  getWsUrl,
   httpGet,
   httpPost,
   httpPut,
@@ -72,6 +73,35 @@ describe('httpBridge', () => {
 
       expect(result).toBe('');
     });
+
+    it('uses remote WebUI host and port in distributed client mode', () => {
+      vi.stubGlobal('window', {
+        __clientMode: true,
+        __backendHost: '192.168.1.25',
+        __backendPort: 25808,
+      });
+      vi.stubGlobal('document', {});
+
+      const result = getBaseUrl();
+
+      expect(result).toBe('http://192.168.1.25:25808');
+    });
+
+    it('includes the gate token in remote client WebSocket URLs', () => {
+      vi.stubGlobal('window', {
+        __clientMode: true,
+        __backendHost: '192.168.1.25',
+        __backendPort: 25808,
+        localStorage: {
+          getItem: vi.fn(() => 'gate.token'),
+          setItem: vi.fn(),
+          removeItem: vi.fn(),
+        },
+      });
+      vi.stubGlobal('document', {});
+
+      expect(getWsUrl()).toBe('ws://192.168.1.25:25808/ws?gate=gate.token');
+    });
   });
 
   describe('httpGet', () => {
@@ -100,6 +130,7 @@ describe('httpBridge', () => {
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(fetchSpy.mock.calls[0][0]).toContain('/api/foo');
       expect(fetchSpy.mock.calls[0][1]?.method).toBe('GET');
+      expect(fetchSpy.mock.calls[0][1]?.credentials).toBe('include');
       expect(fetchSpy.mock.calls[0][1]?.body).toBeUndefined();
     });
   });
@@ -352,6 +383,7 @@ describe('httpBridge', () => {
       expect(fetchSpy).toHaveBeenCalledWith(expect.stringContaining('/api/test'), {
         method: 'GET',
         headers: {},
+        credentials: 'include',
         body: undefined,
       });
     });
@@ -370,6 +402,32 @@ describe('httpBridge', () => {
 
       expect(fetchSpy.mock.calls[0][1]?.body).toBe('{"key":"value"}');
       expect(fetchSpy.mock.calls[0][1]?.headers).toEqual({ 'Content-Type': 'application/json' });
+    });
+
+    it('sends the gate token header in distributed client mode', async () => {
+      const fetchSpy = vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ data: { ok: true } }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        })
+      );
+      vi.stubGlobal('window', {
+        __clientMode: true,
+        __backendHost: '192.168.1.25',
+        __backendPort: 25808,
+        localStorage: {
+          getItem: vi.fn(() => 'gate-token'),
+          setItem: vi.fn(),
+          removeItem: vi.fn(),
+        },
+      });
+      vi.stubGlobal('document', {});
+      vi.stubGlobal('fetch', fetchSpy);
+      vi.spyOn(console, 'debug').mockImplementation(() => {});
+
+      await httpRequest<{ ok: boolean }>('GET', '/api/test');
+
+      expect(fetchSpy.mock.calls[0][1]?.headers).toMatchObject({ 'X-WebUI-Gate-Token': 'gate-token' });
     });
   });
 

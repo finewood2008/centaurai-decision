@@ -1,5 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { ADMIN_FRONTEND_USER_ID, setCurrentFrontendUserId } from '@/common/utils/frontendUserScope';
+import { getBaseUrl, isRemoteClientBridgeMode, setWebuiGateToken } from '@/common/adapter/httpBridge';
 // M6: CSRF removed with legacy webserver — stub functions for compatibility, re-implement in M7
 const withCsrfToken = <T extends Record<string, unknown>>(data: T): T => data;
 const hasValidCsrfToken = (): boolean => true;
@@ -48,7 +49,11 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 const AUTH_USER_ENDPOINT = '/api/auth/user';
 
-const isDesktopRuntime = typeof window !== 'undefined' && Boolean(window.electronAPI);
+const isDesktopRuntime = typeof window !== 'undefined' && Boolean(window.electronAPI) && !isRemoteClientBridgeMode();
+
+function authUrl(path: string): string {
+  return `${getBaseUrl()}${path}`;
+}
 
 // Clear expired auth cache including cookies and localStorage
 // 清除过期的认证缓存，包括 Cookie 和 localStorage
@@ -57,6 +62,7 @@ function clearAuthCache(): void {
 
   try {
     // Clear CSRF cookie
+    setWebuiGateToken(null);
     clearCookie(CSRF_COOKIE_NAME);
     clearCookie(CSRF_COOKIE_NAME, '/');
 
@@ -76,7 +82,7 @@ function clearAuthCache(): void {
 
 async function fetchCurrentUser(signal?: AbortSignal): Promise<AuthUser | null> {
   try {
-    const response = await fetch(AUTH_USER_ENDPOINT, {
+    const response = await fetch(authUrl(AUTH_USER_ENDPOINT), {
       method: 'GET',
       credentials: 'include',
       signal,
@@ -162,7 +168,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
 
       // P1 安全修复：登录请求需要 CSRF Token / P1 Security fix: Login needs CSRF token
       // Backend route is /login; web-host's static-server explicitly proxies it.
-      const response = await fetch('/login', {
+      const response = await fetch(authUrl('/login'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -213,6 +219,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
         };
       }
 
+      setWebuiGateToken(response.headers.get('x-webui-gate-token'));
       setUser(data.user);
       setCurrentFrontendUserId(data.user.id);
       setStatus('authenticated');
@@ -262,7 +269,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
     }
 
     try {
-      await fetch('/logout', {
+      await fetch(authUrl('/logout'), {
         method: 'POST',
         // Logout also needs CSRF token / 登出同样需要 CSRF Token
         headers: {
@@ -278,6 +285,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
       setCurrentFrontendUserId(null);
       setStatus('unauthenticated');
       // Clear cache on logout for security
+      setWebuiGateToken(null);
       clearAuthCache();
     }
   }, []);

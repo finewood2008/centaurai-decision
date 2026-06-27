@@ -6,6 +6,7 @@
 
 import { bridge, logger } from '@office-ai/platform';
 import { WEBUI_DEFAULT_PORT } from '@/common/config/constants';
+import { getWsUrl, isRemoteClientBridgeMode, setWebuiGateToken } from '@/common/adapter/httpBridge';
 import type { ElectronBridgeAPI } from '@/common/types/platform/electron';
 
 interface CustomWindow extends Window {
@@ -52,7 +53,7 @@ const win = window as CustomWindow;
 /**
  * 适配electron的API到浏览器中,建立renderer和main的通信桥梁, 与preload.ts中的注入对应
  * */
-if (win.electronAPI) {
+if (win.electronAPI && !isRemoteClientBridgeMode()) {
   // Electron 环境 - 使用 IPC 通信
   bridge.adapter({
     emit(name, data) {
@@ -76,7 +77,11 @@ if (win.electronAPI) {
   // Path must be `/ws` — web-host's static-server only proxies WebSocket upgrades under /ws.
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
   const defaultHost = `${window.location.hostname}:${WEBUI_DEFAULT_PORT}`;
-  const socketUrl = `${protocol}//${window.location.host || defaultHost}/ws`;
+  const socketUrl = () => {
+    if (isRemoteClientBridgeMode()) return getWsUrl();
+    const base = `${protocol}//${window.location.host || defaultHost}/ws`;
+    return base;
+  };
 
   type QueuedMessage = { name: string; data: unknown };
 
@@ -122,7 +127,7 @@ if (win.electronAPI) {
     }
 
     try {
-      socket = new WebSocket(socketUrl);
+      socket = new WebSocket(socketUrl());
     } catch (error) {
       scheduleReconnect();
       return;
@@ -165,6 +170,7 @@ if (win.electronAPI) {
         if (isRealtimeAuthTerminalError(payload)) {
           console.warn('[WebSocket] Authentication expired, stopping reconnection');
           shouldReconnect = false;
+          setWebuiGateToken(null);
 
           // 清除所有待执行的重连定时器
           // Clear any pending reconnection timer

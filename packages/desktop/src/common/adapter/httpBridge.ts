@@ -23,6 +23,9 @@ declare global {
   }
 }
 
+const LOCAL_BACKEND_HOSTS = new Set(['127.0.0.1', 'localhost', '::1']);
+const WEBUI_GATE_TOKEN_STORAGE_KEY = 'centaurai.webuiGateToken';
+
 /**
  * Resolve the backend port, honoring both renderer and main-process contexts.
  *
@@ -60,6 +63,36 @@ function getBackendHost(): string {
 }
 
 /**
+ * Distributed native client mode connects to the admin machine's WebUI port,
+ * not to a local aioncore backend port. Once the client has selected a remote
+ * host, route all HTTP/WS bridge traffic through that WebUI reverse proxy.
+ */
+export function isRemoteClientBridgeMode(): boolean {
+  if (typeof window === 'undefined') return false;
+  const win = window as Window & { __clientMode?: boolean; __backendHost?: string; __backendPort?: number };
+  return win.__clientMode === true && Boolean(win.__backendPort) && !LOCAL_BACKEND_HOSTS.has(win.__backendHost || '');
+}
+
+export function setWebuiGateToken(token: string | null | undefined): void {
+  if (typeof window === 'undefined') return;
+  try {
+    if (token) window.localStorage.setItem(WEBUI_GATE_TOKEN_STORAGE_KEY, token);
+    else window.localStorage.removeItem(WEBUI_GATE_TOKEN_STORAGE_KEY);
+  } catch {
+    /* ignore unavailable storage */
+  }
+}
+
+function getWebuiGateToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    return window.localStorage.getItem(WEBUI_GATE_TOKEN_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+/**
  * WebUI (browser) mode: no Electron preload, so `window.__backendPort` is not
  * injected. Use same-origin URLs; web-host's static-server handles the reverse
  * proxy / WS upgrade to the backend.
@@ -77,12 +110,14 @@ export function getBaseUrl(): string {
   return `http://${getBackendHost()}:${getBackendPort()}`;
 }
 
-function getWsUrl(): string {
+export function getWsUrl(): string {
   if (isWebUiBrowserMode()) {
     const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     return `${proto}//${window.location.host}/ws`;
   }
-  return `ws://${getBackendHost()}:${getBackendPort()}/ws`;
+  const token = isRemoteClientBridgeMode() ? getWebuiGateToken() : null;
+  const query = token ? `?gate=${encodeURIComponent(token)}` : '';
+  return `ws://${getBackendHost()}:${getBackendPort()}/ws${query}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -201,6 +236,8 @@ export async function httpRequest<T>(
   if (body !== undefined) {
     headers['Content-Type'] = 'application/json';
   }
+  const gateToken = isRemoteClientBridgeMode() ? getWebuiGateToken() : null;
+  if (gateToken) headers['X-WebUI-Gate-Token'] = gateToken;
 
   console.debug(
     `[httpBridge] ${method} ${path}`,
@@ -210,6 +247,7 @@ export async function httpRequest<T>(
   const response = await fetch(url, {
     method,
     headers,
+    credentials: 'include',
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
 
