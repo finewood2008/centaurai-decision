@@ -1,6 +1,6 @@
 {
   "name": "centaurai-aistation",
-  "version": "2.1.14",
+  "version": "2.5.0",
   "description": "CentaurAI AIStation — a free, cross-platform AI cowork workstation with built-in & multi-agent support, office assistants, expert advisors, and a LAN distributed client. Based on AionUi (Apache-2.0).",
   "keywords": [],
   "license": "Apache-2.0",

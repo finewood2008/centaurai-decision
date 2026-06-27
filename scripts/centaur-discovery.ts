@@ -30,7 +30,7 @@ const mode = process.argv[2];
 if (mode === 'advertise') {
   const name = arg('name', `CentaurAI · ${os.hostname()}`)!;
   const port = Number(arg('port', '25808'));
-  const handle = advertiseServer({ name, port, info: { ver: '2.1.14', os: process.platform, host: os.hostname() } });
+  const handle = advertiseServer({ name, port, info: { ver: '2.5.0', os: process.platform, host: os.hostname() } });
   console.log(`📡 Advertising "${name}" on _centaurai._tcp port ${port}. Ctrl+C to stop.`);
   const shutdown = () => void handle.stop().then(() => process.exit(0));
   process.on('SIGINT', shutdown);
