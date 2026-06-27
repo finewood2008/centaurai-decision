@@ -314,10 +314,17 @@ const forceBuild = args.includes('--force');
 // Optional electron-builder config override (e.g. the lightweight client variant).
 // Usage: --builder-config packages/desktop/electron-builder.client.yml
 const builderConfigIdx = args.indexOf('--builder-config');
+// When no explicit --builder-config is given, pick the config from AIONUI_EDITION
+// so the downstream decision/team repos' inherited release pipeline produces the
+// right installer just by setting the AIONUI_EDITION repo variable (unset ⇒ full).
+const editionBuilderConfig =
+  process.env.AIONUI_EDITION === 'decision'
+    ? 'packages/desktop/electron-builder.decision.yml'
+    : process.env.AIONUI_EDITION === 'team'
+      ? 'packages/desktop/electron-builder.team.yml'
+      : 'packages/desktop/electron-builder.yml';
 const builderConfig =
-  builderConfigIdx >= 0 && args[builderConfigIdx + 1]
-    ? args[builderConfigIdx + 1]
-    : 'packages/desktop/electron-builder.yml';
+  builderConfigIdx >= 0 && args[builderConfigIdx + 1] ? args[builderConfigIdx + 1] : editionBuilderConfig;
 
 const builderArgs = args
   .filter((arg, i) => {
