@@ -677,8 +677,8 @@ const ElectronWebviewHost: React.FC<WebviewHostProps> = ({
  * caller can fall back to the raw URL.
  *
  * Image workbench: `centaur-image-workbench://app/index.html?...` →
- * `<origin>/workbench/image/index.html?...`, with the in-app `apiUrl` repointed
- * at the same-origin key-injecting proxy (so no key travels through the browser).
+ * `<origin>/workbench/image/index.html?...`. Provider configuration stays inside
+ * the workbench; users bring their own API endpoint and key.
  *
  * Video workbench: `http://localhost:3000/workbench/video/...` (the host opencut,
  * run with basePath) → `<origin>/workbench/video/...`, served same-origin by the
@@ -689,8 +689,8 @@ export function adaptWorkbenchUrlForBrowser(rawUrl: string): string | null {
     const origin = window.location.origin;
     const qIndex = rawUrl.indexOf('?');
     const params = new URLSearchParams(qIndex >= 0 ? rawUrl.slice(qIndex + 1) : '');
-    params.set('apiUrl', `${origin}/workbench/image/__proxy/v1`);
-    return `${origin}/workbench/image/index.html?${params.toString()}`;
+    const query = params.toString();
+    return `${origin}/workbench/image/index.html${query ? `?${query}` : ''}`;
   }
   if (rawUrl.startsWith('http://localhost:3000/workbench/video')) {
     const u = new URL(rawUrl);

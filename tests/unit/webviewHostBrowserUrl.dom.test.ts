@@ -13,24 +13,20 @@ import { adaptWorkbenchUrlForBrowser } from '@renderer/components/media/WebviewH
 const ORIGIN = 'http://server.lan:8080';
 
 describe('adaptWorkbenchUrlForBrowser — image workbench', () => {
-  it('maps the custom-protocol URL to the same-origin HTTP route, repointing apiUrl at the proxy', () => {
+  it('maps the custom-protocol URL to the same-origin HTTP route without injecting provider config', () => {
     const desktopUrl = new URL('centaur-image-workbench://app/index.html');
-    desktopUrl.searchParams.set('profileName', 'TokenClub Image2');
-    desktopUrl.searchParams.set('apiUrl', 'centaur-image-workbench://app/__tokenclub/v1');
-    desktopUrl.searchParams.set('model', 'gpt-image-2');
-    desktopUrl.searchParams.set('apiMode', 'images');
+    desktopUrl.searchParams.set('disableServiceWorker', 'true');
 
     const out = adaptWorkbenchUrlForBrowser(desktopUrl.toString());
     expect(out).not.toBeNull();
     const u = new URL(out!);
     expect(u.origin).toBe(ORIGIN);
     expect(u.pathname).toBe('/workbench/image/index.html');
-    // apiUrl repointed at the same-origin key-injecting proxy (no key in the URL).
-    expect(u.searchParams.get('apiUrl')).toBe(`${ORIGIN}/workbench/image/__proxy/v1`);
-    expect(u.searchParams.get('apiUrl')).not.toContain('centaur-image-workbench://');
-    expect(u.searchParams.get('model')).toBe('gpt-image-2');
-    expect(u.searchParams.get('apiMode')).toBe('images');
-    expect(u.searchParams.get('profileName')).toBe('TokenClub Image2');
+    expect(u.searchParams.get('disableServiceWorker')).toBe('true');
+    expect(u.searchParams.get('apiUrl')).toBeNull();
+    expect(u.searchParams.get('model')).toBeNull();
+    expect(u.searchParams.get('apiMode')).toBeNull();
+    expect(u.searchParams.get('profileName')).toBeNull();
     expect(u.searchParams.get('apiKey')).toBeNull();
   });
 });

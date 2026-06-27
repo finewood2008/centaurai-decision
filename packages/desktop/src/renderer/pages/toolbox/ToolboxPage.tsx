@@ -71,23 +71,6 @@ type ToolboxPageProps = {
 const getToolTitle = (tool: ToolDef, t: (key: string) => string) => tool.titleText ?? t(tool.titleKey);
 const getToolDesc = (tool: ToolDef, t: (key: string) => string) => tool.descText ?? t(tool.descKey);
 
-const IMAGE2_WORKBENCH_PROFILE = {
-  profileName: 'TokenClub Image2',
-  apiUrl: 'centaur-image-workbench://app/__tokenclub/v1',
-  model: 'gpt-image-2',
-  apiMode: 'images',
-  streamImages: 'false',
-  streamPartialImages: '0',
-  disableServiceWorker: 'true',
-} as const;
-
-const addImage2WorkbenchProfile = (url: URL): URL => {
-  for (const [key, value] of Object.entries(IMAGE2_WORKBENCH_PROFILE)) {
-    url.searchParams.set(key, value);
-  }
-  return url;
-};
-
 /** Warm-domain tone palette (clay / gold / green / deep-clay) per BRAND_GUIDE.md. */
 type Tone = { surface: string; icon: string; rail: string; dot: string };
 const TOOL_TONES: Tone[] = [
@@ -343,7 +326,8 @@ const ToolboxPage: React.FC<ToolboxPageProps> = ({ mode = 'toolbox' }) => {
   // does not depend on the renderer dev-server port.
   const workbenchUrl = useMemo(() => {
     const url = new URL('centaur-image-workbench://app/index.html');
-    return addImage2WorkbenchProfile(url).toString();
+    url.searchParams.set('disableServiceWorker', 'true');
+    return url.toString();
   }, []);
 
   const keyword = query.trim().toLowerCase();
