@@ -35,8 +35,7 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
   const [pickerOpen, setPickerOpen] = useState(false);
   const [form, setForm] = useState<MeetingForm>(state.form || 'roundtable');
 
-  const wrapperClass =
-    'shrink-0 px-20px pt-12px pb-16px border-t border-solid border-[color:var(--border-light)] [&>*]:max-w-760px [&>*]:mx-auto';
+  const wrapperClass = 'shrink-0 px-24px pt-12px pb-16px border-t border-solid border-[color:var(--border-light)]';
 
   if (state.phase === 'idle') {
     return (

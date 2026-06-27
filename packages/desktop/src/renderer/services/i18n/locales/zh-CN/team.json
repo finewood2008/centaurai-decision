@@ -147,6 +147,19 @@
     "turn": {
       "failed": "未发言"
     },
-    "boardSubtitle": "AI 圆桌会议"
+    "boardSubtitle": "AI 圆桌会议",
+    "stage": {
+      "opening": "开场",
+      "position": "立论",
+      "debate": "交锋",
+      "synthesis": "综合",
+      "decision": "拍板",
+      "draft": "起草",
+      "redteam": "红队",
+      "revise": "修订",
+      "proposal": "提案",
+      "diverge": "发散",
+      "converge": "收敛"
+    }
   }
 }

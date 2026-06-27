@@ -147,6 +147,19 @@
     "turn": {
       "failed": "No response"
     },
-    "boardSubtitle": "AI Roundtable"
+    "boardSubtitle": "AI Roundtable",
+    "stage": {
+      "opening": "Opening",
+      "position": "Positions",
+      "debate": "Debate",
+      "synthesis": "Synthesis",
+      "decision": "Decision",
+      "draft": "Draft",
+      "redteam": "Red Team",
+      "revise": "Revise",
+      "proposal": "Proposals",
+      "diverge": "Diverge",
+      "converge": "Converge"
+    }
   }
 }

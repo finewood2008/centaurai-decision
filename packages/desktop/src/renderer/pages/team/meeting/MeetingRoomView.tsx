@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button, Message, Popover, Spin } from '@arco-design/web-react';
@@ -98,6 +98,9 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
     });
   }, [transcript.length, streamLen]);
 
+  // Distinct phaseLabels seen so far — drives the stage tracker's progress.
+  const reachedLabels = useMemo(() => [...new Set(transcript.map((tn) => tn.phaseLabel))], [transcript]);
+
   const isIdle = state.phase === 'idle';
   const atResolution = state.phase === 'resolution' || state.phase === 'decided';
   const showPlan = atResolution && state.plan.trim().length > 0;
@@ -158,11 +161,18 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
         guests={guests}
         compact={!isIdle}
       />
-      {!isIdle && <MeetingPhaseBar phase={state.phase} turnsCompleted={state.turnsCompleted} />}
+      {!isIdle && (
+        <MeetingPhaseBar
+          phase={state.phase}
+          form={state.form}
+          reachedLabels={reachedLabels}
+          turnsCompleted={state.turnsCompleted}
+        />
+      )}
 
       {!isIdle && state.topic && (
-        <div className='shrink-0 px-20px py-10px border-b border-solid border-[color:var(--border-light)]'>
-          <div className='max-w-760px mx-auto flex items-baseline gap-6px'>
+        <div className='shrink-0 px-24px py-10px border-b border-solid border-[color:var(--border-light)]'>
+          <div className='flex items-baseline gap-6px'>
             <span className='shrink-0 text-12px font-semibold text-[color:var(--primary)]'>
               {t('team.meeting.topicLabel', { defaultValue: '议题：' })}
             </span>
@@ -200,7 +210,7 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
             </div>
           </div>
         ) : (
-          <div className='flex flex-col gap-16px py-20px px-20px max-w-760px mx-auto'>
+          <div className='flex flex-col gap-16px py-20px px-24px'>
             {transcript.map((turn) =>
               turn.text.trim() || turn.status === 'speaking' ? (
                 <div
