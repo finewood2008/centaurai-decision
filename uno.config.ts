@@ -179,6 +179,12 @@ export default defineConfig({
   // 基础配置
   shortcuts: {
     'flex-center': 'flex items-center justify-center',
+    // Claude-style active nav state: warm clay tint + clay text (one calm accent,
+    // replacing the heavy Arco fill-3 gray block). Pair with a left rail where wanted.
+    'nav-active': 'bg-[var(--color-primary-light-1)] text-[color:var(--primary)]',
+    // The single warm primary affordance in a calm UI — a clay-tinted pill.
+    'clay-pill':
+      'inline-flex items-center justify-center gap-6px rounded-full bg-[var(--color-primary-light-1)] text-[color:var(--primary)] transition-colors',
   },
   theme: {
     colors: {

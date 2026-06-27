@@ -3,6 +3,19 @@
 :root {
   --app-min-width: 360px;
   --titlebar-height: 36px;
+
+  /* ── Geometry & motion (theme-independent, app-wide) ──
+     Promoted out of the `.centaur-brand` scope so EVERY surface — not just the
+     two brand pages — can share one soft, consistent radius/shadow/easing scale.
+     Claude-style: generous corners, hairline borders, barely-there warm shadow,
+     calm easing. */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 18px;
+  --shadow-sm: 0 8px 24px -16px rgba(44, 30, 20, 0.3);
+  --shadow-md: 0 18px 50px -28px rgba(44, 30, 20, 0.35);
+  --ease-brand: cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 .app-shell {

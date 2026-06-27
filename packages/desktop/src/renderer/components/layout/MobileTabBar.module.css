@@ -40,7 +40,7 @@
 }
 
 .tabActive {
-  color: var(--brand, var(--primary, #4e5969));
+  color: var(--brand, var(--primary, #c0755a));
 }
 
 .label {

@@ -60,6 +60,64 @@
   font-family: 'Noto Serif SC', 'Songti SC', serif;
 }
 
+/* ── Serif display titles (app-wide, theme-following) ──
+   Claude's editorial feel: page & section headings set in the brand serif
+   (--app-font-serif, falls back to Noto Serif SC), tight leading, slight
+   optical tracking. Body copy stays in the humanist sans. These are GLOBAL
+   helpers (not nested under .centaur-brand), usable on any page. */
+.centaur-title {
+  font-family: var(--app-font-serif), 'Noto Serif SC', 'Songti SC', serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  color: var(--text-primary);
+}
+.centaur-title-xl {
+  font-size: 28px;
+}
+.centaur-title-lg {
+  font-size: 22px;
+}
+.centaur-title-md {
+  font-size: 18px;
+}
+.centaur-title-sm {
+  font-size: 15px;
+  letter-spacing: 0;
+}
+
+/* ── Quiet "document" surface — soft warm card for editorial content
+   (transcripts, plan/方案书). Calmer than .centaur-card: hairline border,
+   barely-there shadow, generous radius. ── */
+.centaur-surface {
+  background-color: var(--bg-1);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg, 16px);
+}
+
+/* ── Quiet chip — pill with hairline border, used for meta/labels/picks ── */
+.centaur-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 9999px;
+  border: 1px solid var(--border-base);
+  background-color: var(--bg-1);
+  color: var(--text-secondary);
+  transition:
+    border-color 0.2s var(--centaur-ease, ease),
+    background-color 0.2s var(--centaur-ease, ease),
+    color 0.2s var(--centaur-ease, ease);
+}
+.centaur-chip:hover {
+  border-color: var(--primary);
+}
+.centaur-chip-active {
+  border-color: var(--primary);
+  background-color: var(--color-primary-light-1);
+  color: rgb(var(--primary-7));
+}
+
 /* ── Brand card ── */
 .centaur-card {
   background-color: var(--centaur-card);

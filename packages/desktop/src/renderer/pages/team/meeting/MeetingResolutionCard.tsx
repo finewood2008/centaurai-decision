@@ -20,10 +20,12 @@ const MeetingResolutionCard: React.FC<Props> = ({ options, decidedOptionId, onDe
   if (options.length === 0) return null;
 
   return (
-    <div data-testid='meeting-resolution' className='flex flex-col gap-12px px-16px py-16px'>
-      <div className='flex items-center gap-6px text-15px font-semibold text-[color:var(--color-text-1)]'>
-        <Trophy theme='outline' size='18' fill='var(--color-primary-6)' />
-        {t('team.meeting.resolution.title', { defaultValue: '候选方案 — 请老板拍板' })}
+    <div data-testid='meeting-resolution' className='flex flex-col gap-14px px-2px py-8px'>
+      <div className='flex items-center gap-8px'>
+        <Trophy theme='outline' size='18' fill='var(--accent-gold-deep)' />
+        <span className='centaur-title centaur-title-md'>
+          {t('team.meeting.resolution.title', { defaultValue: '候选方案 — 请老板拍板' })}
+        </span>
       </div>
       <div className='flex gap-16px overflow-x-auto pb-8px items-stretch [scrollbar-width:thin]'>
         {options.map((opt) => {
@@ -33,23 +35,21 @@ const MeetingResolutionCard: React.FC<Props> = ({ options, decidedOptionId, onDe
             <div
               key={opt.id}
               data-testid={`meeting-option-${opt.id}`}
-              className={`flex flex-col gap-12px p-18px rd-14px border-2 border-solid shrink-0 w-340px ${styles.card} ${decided ? styles.selected : ''} ${dimmed ? styles.dimmed : ''} ${
+              className={`flex flex-col gap-14px p-20px rd-16px border border-solid shrink-0 w-340px ${styles.card} ${decided ? styles.selected : ''} ${dimmed ? styles.dimmed : ''} ${
                 decided
                   ? 'bg-[color:var(--color-primary-light-1)]'
-                  : 'border-[color:var(--border-base)] bg-[var(--color-bg-2)]'
+                  : 'border-[color:var(--border-light)] bg-[var(--bg-1)]'
               }`}
             >
               <div className='flex items-center gap-8px shrink-0'>
-                {decided && <CheckOne theme='filled' size='20' fill='var(--color-primary-6)' className='shrink-0' />}
-                <span className='text-17px font-semibold text-[color:var(--color-text-1)] leading-snug'>
-                  {opt.title}
-                </span>
+                {decided && <CheckOne theme='filled' size='20' fill='var(--primary)' className='shrink-0' />}
+                <span className='centaur-title centaur-title-md leading-snug'>{opt.title}</span>
               </div>
-              <div className='flex-1 min-h-0 max-h-300px overflow-y-auto text-14px text-[color:var(--color-text-2)] whitespace-pre-wrap leading-relaxed [scrollbar-width:thin]'>
+              <div className='flex-1 min-h-0 max-h-300px overflow-y-auto text-14px text-[color:var(--text-secondary)] whitespace-pre-wrap leading-[1.7] [scrollbar-width:thin]'>
                 {opt.body}
               </div>
               {decided ? (
-                <div className='shrink-0 flex items-center justify-center gap-4px h-36px rd-8px text-14px font-medium text-[color:var(--color-primary-6)] bg-[color:var(--color-primary-light-2)]'>
+                <div className='shrink-0 flex items-center justify-center gap-4px h-38px rd-full text-14px font-medium text-[color:var(--primary)] bg-[color:var(--color-primary-light-2)]'>
                   <CheckOne theme='filled' size='16' fill='currentColor' />
                   {t('team.meeting.resolution.picked', { defaultValue: '已拍板' })}
                 </div>
@@ -57,6 +57,7 @@ const MeetingResolutionCard: React.FC<Props> = ({ options, decidedOptionId, onDe
                 <Button
                   type='primary'
                   size='large'
+                  shape='round'
                   long
                   onClick={() => onDecide(opt.id)}
                   data-testid={`meeting-decide-${opt.id}`}

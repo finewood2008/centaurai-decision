@@ -265,8 +265,8 @@ const SettingsSider: React.FC<{ collapsed?: boolean; tooltipEnabled?: boolean }>
                   'settings-sider__item h-34px rd-8px flex items-center gap-8px group cursor-pointer relative overflow-hidden shrink-0 conversation-item [&.conversation-item+&.conversation-item]:mt-2px transition-colors',
                   collapsed ? 'w-full justify-center px-0' : 'justify-start px-10px',
                   {
-                    'hover:bg-fill-3': !isSelected,
-                    '!bg-fill-3': isSelected,
+                    'hover:bg-fill-2': !isSelected,
+                    'nav-active shadow-[inset_3px_0_0_0_var(--primary)]': isSelected,
                   }
                 )}
                 onClick={() => {
@@ -290,14 +290,22 @@ const SettingsSider: React.FC<{ collapsed?: boolean; tooltipEnabled?: boolean }>
                       {
                         theme: 'outline',
                         size: '16',
-                        strokeWidth: 3,
-                        className: 'block leading-none text-t-secondary',
+                        strokeWidth: 2,
+                        className: classNames(
+                          'block leading-none',
+                          isSelected ? 'text-[color:var(--primary)]' : 'text-t-secondary'
+                        ),
                       }
                     )
                   )}
                 </span>
                 <FlexFullContainer className='h-24px collapsed-hidden'>
-                  <div className='settings-sider__item-label text-nowrap overflow-hidden inline-block w-full text-14px font-[500] lh-24px whitespace-nowrap text-t-primary'>
+                  <div
+                    className={classNames(
+                      'settings-sider__item-label text-nowrap overflow-hidden inline-block w-full text-14px font-[500] lh-24px whitespace-nowrap',
+                      isSelected ? 'text-[color:var(--primary)]' : 'text-t-primary'
+                    )}
+                  >
                     {item.label}
                   </div>
                 </FlexFullContainer>

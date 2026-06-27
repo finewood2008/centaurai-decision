@@ -128,7 +128,7 @@ const TeamSiderSection: React.FC<TeamSiderSectionProps> = ({
                       className='inline-flex items-center justify-center'
                       style={{ lineHeight: 0 }}
                     >
-                      <StackedAgentAvatars agents={team.agents} size={18} max={3} />
+                      <StackedAgentAvatars agents={team.agents} size={22} max={3} />
                     </span>
                     {(teamBadgeCounts.get(team.id) ?? 0) > 0 && (
                       <span
@@ -208,7 +208,7 @@ const TeamSiderSection: React.FC<TeamSiderSectionProps> = ({
               return (
                 <div key={team.id} className='relative group'>
                   <SiderItem
-                    icon={<StackedAgentAvatars agents={team.agents} size={16} max={3} />}
+                    icon={<StackedAgentAvatars agents={team.agents} size={20} max={3} />}
                     name={team.name}
                     selected={pathname.startsWith(`/team/${team.id}`)}
                     pinned={isPinned}
@@ -235,7 +235,7 @@ const TeamSiderSection: React.FC<TeamSiderSectionProps> = ({
                               window.location.hash = '#/';
                             }
                           },
-                          style: { borderRadius: '12px' },
+                          style: { borderRadius: 'var(--radius-lg)' },
                           alignCenter: true,
                           getPopupContainer: () => document.body,
                         });
@@ -277,7 +277,7 @@ const TeamSiderSection: React.FC<TeamSiderSectionProps> = ({
         cancelText={t('team.sider.renameCancel')}
         confirmLoading={renameLoading}
         okButtonProps={{ disabled: !renameName.trim() }}
-        style={{ borderRadius: '12px' }}
+        style={{ borderRadius: 'var(--radius-lg)' }}
         alignCenter
         getPopupContainer={() => document.body}
       >

@@ -120,7 +120,9 @@
     },
     "extraExpert": {
       "title": "加入更多专家（国产模型 / OpenClaw / Hermes 等）",
-      "titleShort": "加入更多专家"
+      "titleShort": "加入更多专家",
+      "groupBackends": "其它后端",
+      "groupModels": "直连模型"
     },
     "history": {
       "untitled": "未命名议题"
@@ -144,6 +146,7 @@
     },
     "turn": {
       "failed": "未发言"
-    }
+    },
+    "boardSubtitle": "AI 圆桌会议"
   }
 }

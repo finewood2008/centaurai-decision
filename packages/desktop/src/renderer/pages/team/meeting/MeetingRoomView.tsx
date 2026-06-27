@@ -81,11 +81,19 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
   const showResolution = state.options.length > 0 && atResolution;
 
   return (
-    <div className='flex flex-col h-full bg-[var(--color-bg-1)]'>
-      <div className='shrink-0 flex items-center gap-8px px-16px h-40px border-b border-solid border-[color:var(--border-base)] bg-[var(--color-bg-2)]'>
-        <span className='text-13px font-semibold text-[color:var(--color-text-1)]'>
-          {t('team.meeting.boardTitle', { defaultValue: '智囊团' })}
+    <div className='centaur-brand flex flex-col h-full bg-[var(--bg-base)]'>
+      <div className='shrink-0 flex items-center gap-10px px-20px h-52px border-b border-solid border-[color:var(--border-light)]'>
+        <span className='centaur-mark w-26px h-26px shrink-0' aria-hidden='true'>
+          <VideoConference theme='outline' size='14' fill='var(--primary)' />
         </span>
+        <div className='flex flex-col min-w-0'>
+          <span className='centaur-title centaur-title-sm leading-tight'>
+            {t('team.meeting.boardTitle', { defaultValue: '智囊团' })}
+          </span>
+          <span className='text-11px text-[color:var(--bg-6)] leading-tight'>
+            {t('team.meeting.boardSubtitle', { defaultValue: 'AI 圆桌会议' })}
+          </span>
+        </div>
         <div className='flex-1' />
         <Popover
           trigger='click'
@@ -100,7 +108,8 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
           }
         >
           <Button
-            size='mini'
+            size='small'
+            shape='round'
             icon={<PeoplePlus theme='outline' size='13' fill='currentColor' />}
             data-testid='meeting-guest-btn'
           >
@@ -109,7 +118,8 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
           </Button>
         </Popover>
         <Button
-          size='mini'
+          size='small'
+          shape='round'
           type='outline'
           icon={<Plus theme='outline' size='13' fill='currentColor' />}
           onClick={orchestrator.reset}
@@ -128,63 +138,78 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
       {!isIdle && <MeetingPhaseBar phase={state.phase} turnsCompleted={state.turnsCompleted} />}
 
       {!isIdle && state.topic && (
-        <div className='shrink-0 px-16px py-8px text-13px text-[color:var(--color-text-2)] bg-[color:var(--color-fill-1)] border-b border-solid border-[color:var(--border-base)]'>
-          <span className='text-[color:var(--color-text-3)] mr-4px'>
-            {t('team.meeting.topicLabel', { defaultValue: '议题：' })}
-          </span>
-          {state.topic}
+        <div className='shrink-0 px-20px py-10px border-b border-solid border-[color:var(--border-light)]'>
+          <div className='max-w-760px mx-auto flex items-baseline gap-6px'>
+            <span className='shrink-0 text-12px font-semibold text-[color:var(--primary)]'>
+              {t('team.meeting.topicLabel', { defaultValue: '议题：' })}
+            </span>
+            <span className='text-14px text-[color:var(--text-primary)] leading-relaxed'>{state.topic}</span>
+          </div>
         </div>
       )}
 
       <div ref={scrollRef} onScroll={handleScroll} className='flex-1 min-h-0 overflow-y-auto'>
         {isIdle && transcript.length === 0 ? (
-          <div className='flex flex-col items-center justify-center h-full text-[color:var(--color-text-3)] gap-12px px-24px text-center'>
-            <VideoConference theme='outline' size='40' fill='currentColor' />
-            <span className='text-14px text-[color:var(--color-text-2)]'>
+          <div className='flex flex-col items-center justify-center min-h-full text-[color:var(--bg-6)] gap-16px px-24px py-32px text-center'>
+            <span className='centaur-mark w-64px h-64px' aria-hidden='true'>
+              <VideoConference theme='outline' size='30' fill='var(--primary)' />
+            </span>
+            <span className='centaur-title centaur-title-lg'>
               {t('team.meeting.emptyTitle', { defaultValue: '智囊团 · 召集 AI 专家开会' })}
             </span>
-            <span className='text-12px max-w-380px'>
+            <span className='text-14px leading-relaxed max-w-420px text-[color:var(--text-secondary)]'>
               {t('team.meeting.emptyHint', {
                 defaultValue:
                   '让不同模型的 AI 专家围绕你的议题结构化研讨、互相博弈，最后合成一份比单个 AI 更高质量的《方案书》。',
               })}
             </span>
-            <div className='flex items-center gap-8px text-12px text-[color:var(--color-text-3)] mt-2px'>
-              <span>{t('team.meeting.step1', { defaultValue: '① 在下方输入主题' })}</span>
-              <span className='text-[color:var(--color-text-4)]'>›</span>
-              <span>{t('team.meeting.step3', { defaultValue: '② 开始讨论' })}</span>
+            <div className='flex items-center gap-10px text-12px text-[color:var(--bg-6)] mt-2px'>
+              <span className='centaur-chip px-10px py-3px'>
+                {t('team.meeting.step1', { defaultValue: '① 在下方输入主题' })}
+              </span>
+              <span className='text-[color:var(--bg-5)]'>›</span>
+              <span className='centaur-chip px-10px py-3px'>
+                {t('team.meeting.step3', { defaultValue: '② 开始讨论' })}
+              </span>
             </div>
-            <MeetingGuestPanel guests={guests} onAdd={orchestrator.addGuest} onRemove={orchestrator.removeGuest} />
+            <div className='w-full max-w-520px mt-8px'>
+              <MeetingGuestPanel guests={guests} onAdd={orchestrator.addGuest} onRemove={orchestrator.removeGuest} />
+            </div>
           </div>
         ) : (
-          <div className='flex flex-col gap-8px py-16px px-16px'>
+          <div className='flex flex-col gap-16px py-20px px-20px max-w-760px mx-auto'>
             {transcript.map((turn) =>
               turn.text.trim() || turn.status === 'speaking' ? (
                 <div
                   key={turn.id}
                   data-testid={`meeting-turn-${turn.participantId}`}
-                  className={`mx-4px my-4px rd-12px border border-solid overflow-hidden ${
+                  className={`rd-16px border border-solid overflow-hidden transition-colors ${
                     turn.isModerator
-                      ? 'border-[color:var(--color-primary-6)] bg-[color:var(--color-primary-light-1)]'
-                      : 'border-[color:var(--border-base)] bg-[var(--color-bg-2)]'
+                      ? 'border-[color:var(--color-primary-light-3)] bg-[color:var(--color-primary-light-1)]'
+                      : 'border-[color:var(--border-light)] bg-[var(--bg-1)]'
                   }`}
                 >
-                  <div className='flex items-center gap-6px px-12px h-32px border-b border-solid border-[color:var(--border-base)]'>
-                    <span className='shrink-0 px-6px h-16px flex items-center rd-8px text-10px leading-none bg-[var(--fill-2)] text-[color:var(--color-text-3)]'>
+                  <div className='flex items-center gap-8px px-18px h-40px'>
+                    {turn.isModerator && (
+                      <span className='shrink-0 w-6px h-6px rd-full bg-[var(--primary)]' aria-hidden='true' />
+                    )}
+                    <span className='text-14px font-semibold text-[color:var(--text-primary)] truncate'>
+                      {turn.name}
+                    </span>
+                    <span className='shrink-0 px-7px h-18px flex items-center rd-full text-11px leading-none bg-[var(--bg-2)] text-[color:var(--bg-6)]'>
                       {turn.isModerator
                         ? t('team.meeting.role.moderator', { defaultValue: '主持人' })
                         : turn.phaseLabel}
                     </span>
-                    <span className='text-13px font-medium text-[color:var(--color-text-1)] truncate'>{turn.name}</span>
-                    {turn.status === 'speaking' && <Spin loading size={12} className='ml-auto' />}
+                    {turn.status === 'speaking' && <Spin loading size={13} className='ml-auto' />}
                     {turn.status === 'error' && (
-                      <span className='ml-auto text-11px text-[color:var(--color-danger-6)]'>
+                      <span className='ml-auto text-11px text-[color:var(--danger)]'>
                         {t('team.meeting.turn.failed', { defaultValue: '未发言' })}
                       </span>
                     )}
                   </div>
                   {turn.text.trim() && (
-                    <div className='px-14px py-10px text-13px leading-relaxed'>
+                    <div className='px-18px pb-14px pt-2px text-14px leading-[1.75]'>
                       <MarkdownView>{stripResolutionMarkers(turn.text)}</MarkdownView>
                     </div>
                   )}
@@ -192,18 +217,17 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
               ) : null
             )}
             {showPlan && (
-              <div
-                data-testid='meeting-plan'
-                className='mx-4px my-8px rd-14px border border-solid border-[color:var(--color-primary-6)] bg-[var(--color-bg-2)] overflow-hidden'
-              >
-                <div className='flex items-center gap-6px px-16px h-44px border-b border-solid border-[color:var(--border-base)] bg-[color:var(--color-primary-light-1)]'>
-                  <Notes theme='outline' size='18' fill='var(--color-primary-6)' />
-                  <span className='text-15px font-semibold text-[color:var(--color-text-1)]'>
+              <div data-testid='meeting-plan' className='centaur-surface my-8px overflow-hidden'>
+                <div className='centaur-rail h-3px w-full' aria-hidden='true' />
+                <div className='flex items-center gap-8px px-20px h-52px border-b border-solid border-[color:var(--border-light)]'>
+                  <Notes theme='outline' size='18' fill='var(--primary)' />
+                  <span className='centaur-title centaur-title-md'>
                     {t('team.meeting.planTitle', { defaultValue: '本场方案书' })}
                   </span>
-                  <div className='ml-auto flex items-center gap-6px'>
+                  <div className='ml-auto flex items-center gap-8px'>
                     <Button
-                      size='mini'
+                      size='small'
+                      shape='round'
                       icon={<Copy theme='outline' size='13' fill='currentColor' />}
                       onClick={async () => {
                         try {
@@ -218,7 +242,8 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
                       {t('team.meeting.export.copy', { defaultValue: '复制' })}
                     </Button>
                     <Button
-                      size='mini'
+                      size='small'
+                      shape='round'
                       type='primary'
                       icon={<Download theme='outline' size='13' fill='currentColor' />}
                       onClick={() => {
@@ -236,8 +261,8 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
                   </div>
                 </div>
                 {state.archivedPath && (
-                  <div className='flex items-center gap-6px px-16px py-6px text-12px text-[color:var(--color-text-3)] bg-[color:var(--color-fill-1)] border-b border-solid border-[color:var(--border-base)]'>
-                    <Notes theme='outline' size='13' fill='currentColor' />
+                  <div className='flex items-center gap-6px px-20px py-8px text-12px text-[color:var(--bg-6)] bg-[color:var(--accent-green-tint)] border-b border-solid border-[color:var(--border-light)]'>
+                    <Notes theme='outline' size='13' fill='var(--success)' />
                     <span className='truncate'>
                       {t('team.meeting.export.archivedToWorkspace', {
                         defaultValue: '已存入临时空间，并同步到内容中心',
@@ -254,7 +279,7 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
                     </Button>
                   </div>
                 )}
-                <div className='px-18px py-14px text-14px leading-relaxed'>
+                <div className='px-22px py-18px text-14px leading-[1.75]'>
                   <MarkdownView>{state.plan}</MarkdownView>
                 </div>
               </div>

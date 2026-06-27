@@ -3,19 +3,19 @@
   0%,
   100% {
     box-shadow:
-      0 0 0 2px var(--color-primary-6),
-      0 0 10px 2px color-mix(in srgb, var(--color-primary-6) 40%, transparent);
+      0 0 0 2px var(--primary),
+      0 0 10px 2px color-mix(in srgb, var(--primary) 32%, transparent);
   }
   50% {
     box-shadow:
-      0 0 0 2px var(--color-primary-6),
-      0 0 22px 6px color-mix(in srgb, var(--color-primary-6) 70%, transparent);
+      0 0 0 2px var(--primary),
+      0 0 20px 5px color-mix(in srgb, var(--primary) 55%, transparent);
   }
 }
 
 .selected {
-  border-color: var(--color-primary-6) !important;
-  animation: meeting-option-glow 1.6s ease-in-out infinite;
+  border-color: var(--primary) !important;
+  animation: meeting-option-glow 1.8s ease-in-out infinite;
 }
 
 /* Subtle lift on hover for selectable cards. */
@@ -27,7 +27,7 @@
 }
 .card:hover:not(.selected):not(.dimmed) {
   transform: translateY(-2px);
-  border-color: color-mix(in srgb, var(--color-primary-6) 50%, var(--border-base));
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--border-base));
 }
 .dimmed {
   opacity: 0.4;

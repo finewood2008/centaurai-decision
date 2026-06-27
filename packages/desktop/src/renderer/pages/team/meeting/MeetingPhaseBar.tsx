@@ -16,12 +16,12 @@ const MeetingPhaseBar: React.FC<Props> = ({ phase, turnsCompleted }) => {
     if (phase === 'running') {
       return (
         <>
-          <Loading theme='outline' size='13' fill='var(--color-primary-6)' className='animate-spin' />
-          <span className='text-[color:var(--color-primary-6)]'>
+          <Loading theme='outline' size='14' fill='var(--primary)' className='animate-spin' />
+          <span className='font-medium text-[color:var(--primary)]'>
             {t('team.meeting.status.running', { defaultValue: '会议进行中' })}
           </span>
           {turnsCompleted > 0 && (
-            <span className='text-[color:var(--color-text-3)]'>
+            <span className='text-[color:var(--bg-6)]'>
               {t('team.meeting.status.turns', {
                 count: turnsCompleted,
                 defaultValue: `已完成 ${turnsCompleted} 段发言`,
@@ -34,8 +34,8 @@ const MeetingPhaseBar: React.FC<Props> = ({ phase, turnsCompleted }) => {
     if (phase === 'resolution') {
       return (
         <>
-          <Trophy theme='outline' size='13' fill='var(--color-warning-6)' />
-          <span className='text-[color:var(--color-text-2)]'>
+          <Trophy theme='outline' size='14' fill='var(--accent-gold-deep)' />
+          <span className='font-medium text-[color:var(--text-secondary)]'>
             {t('team.meeting.status.resolution', { defaultValue: '讨论结束，请拍板' })}
           </span>
         </>
@@ -43,8 +43,8 @@ const MeetingPhaseBar: React.FC<Props> = ({ phase, turnsCompleted }) => {
     }
     return (
       <>
-        <CheckOne theme='filled' size='13' fill='var(--color-success-6)' />
-        <span className='text-[color:var(--color-text-2)]'>
+        <CheckOne theme='filled' size='14' fill='var(--success)' />
+        <span className='font-medium text-[color:var(--text-secondary)]'>
           {t('team.meeting.status.decided', { defaultValue: '已拍板' })}
         </span>
       </>
@@ -54,7 +54,7 @@ const MeetingPhaseBar: React.FC<Props> = ({ phase, turnsCompleted }) => {
   return (
     <div
       data-testid='meeting-phase-bar'
-      className='shrink-0 flex items-center gap-6px px-16px h-36px border-b border-solid border-[color:var(--border-base)] text-12px'
+      className='shrink-0 flex items-center gap-6px px-20px h-40px border-b border-solid border-[color:var(--border-light)] text-13px'
     >
       {content}
     </div>

@@ -86,7 +86,7 @@ const ScheduledTasksPage: React.FC = () => {
           <div className='flex w-full items-start justify-between gap-12px sm:gap-16px max-[520px]:flex-wrap'>
             <h1
               className={classNames(
-                'm-0 min-w-0 flex-1 font-bold text-t-primary',
+                'centaur-title m-0 min-w-0 flex-1',
                 isMobile ? 'text-24px leading-[1.2]' : 'text-28px leading-[1.15]'
               )}
             >

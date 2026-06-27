@@ -36,12 +36,12 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
   const [form, setForm] = useState<MeetingForm>(state.form || 'roundtable');
 
   const wrapperClass =
-    'shrink-0 px-12px pt-10px pb-12px border-t border-solid border-[color:var(--border-base)] bg-[var(--color-bg-1)]';
+    'shrink-0 px-20px pt-12px pb-16px border-t border-solid border-[color:var(--border-light)] [&>*]:max-w-760px [&>*]:mx-auto';
 
   if (state.phase === 'idle') {
     return (
       <div data-testid='meeting-control-idle' className={wrapperClass}>
-        <div className='flex items-center gap-12px mb-8px'>
+        <div className='flex items-center gap-12px mb-10px'>
           <Checkbox
             checked={useKnowledgeBase}
             onChange={setUseKnowledgeBase}
@@ -52,7 +52,8 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
             {t('team.meeting.searchKnowledgeBase', { defaultValue: '检索知识库' })}
           </Checkbox>
           <Button
-            size='mini'
+            size='small'
+            shape='round'
             icon={<FolderClose theme='outline' size='13' fill='currentColor' />}
             disabled={!canStart}
             onClick={() => setPickerOpen(true)}
@@ -65,7 +66,7 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
               {attachments.map((p) => (
                 <span
                   key={p}
-                  className='shrink-0 flex items-center gap-2px pl-8px pr-4px h-22px rd-11px text-11px bg-[var(--fill-2)] text-[color:var(--color-text-2)]'
+                  className='shrink-0 flex items-center gap-2px pl-8px pr-4px h-22px rd-full text-11px bg-[var(--bg-2)] text-[color:var(--text-secondary)]'
                   title={p}
                 >
                   <span className='max-w-120px truncate'>{baseName(p)}</span>
@@ -81,10 +82,10 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
             </div>
           )}
         </div>
-        <div className='flex items-center gap-8px mb-8px flex-wrap'>
+        <div className='flex items-center gap-10px mb-10px flex-wrap'>
           <Radio.Group
             type='button'
-            size='mini'
+            size='small'
             value={form}
             onChange={(v) => setForm(v as MeetingForm)}
             disabled={!canStart}
@@ -96,11 +97,11 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
               </Radio>
             ))}
           </Radio.Group>
-          <span className='text-11px text-[color:var(--color-text-3)] truncate'>
+          <span className='text-12px text-[color:var(--bg-6)] truncate'>
             {MEETING_FORMS.find((f) => f.id === form)?.hint}
           </span>
         </div>
-        <div className='flex items-end gap-8px'>
+        <div className='flex items-end gap-10px'>
           <Input.TextArea
             value={topic}
             onChange={onTopicChange}
@@ -113,6 +114,7 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
           />
           <Button
             type='primary'
+            shape='round'
             icon={<RightOne theme='filled' size='14' fill='currentColor' />}
             disabled={!canStart || !topic.trim()}
             onClick={() => {
@@ -126,7 +128,7 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
           </Button>
         </div>
         {!canStart && (
-          <div className='mt-6px text-12px text-[color:var(--color-text-3)]'>
+          <div className='mt-8px text-12px text-[color:var(--bg-6)]'>
             {t('team.meeting.needAgents', { defaultValue: '需要 1 位主持人（队长）和至少 1 位专家才能开会。' })}
           </div>
         )}
@@ -165,17 +167,17 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
     <div data-testid='meeting-control-active' className={wrapperClass}>
       <div className='flex items-center gap-6px mb-8px'>
         {isResolution ? (
-          <span className='text-12px text-[color:var(--color-text-3)]'>
+          <span className='text-12px text-[color:var(--bg-6)]'>
             {t('team.meeting.pickHint', { defaultValue: '请在上方选择一个方案拍板' })}
           </span>
         ) : awaiting ? (
-          <span className='text-12px text-[color:var(--color-primary-6)] font-medium'>
+          <span className='text-12px text-[color:var(--primary)] font-medium'>
             {t('team.meeting.pausedHint', {
               defaultValue: '⏸ 主持人等你看完 — 可在下方补充想法，准备好后点「继续讨论」',
             })}
           </span>
         ) : (
-          <span className='text-12px text-[color:var(--color-text-3)]'>
+          <span className='text-12px text-[color:var(--bg-6)]'>
             {t('team.meeting.runningHint', { defaultValue: '主持人正在带领专家讨论…可随时举手插话' })}
           </span>
         )}

@@ -34,12 +34,12 @@ const MeetingOutputsSider: React.FC<{ teamId: string }> = ({ teamId }) => {
   if (outputs.length === 0) return null;
 
   return (
-    <div className='shrink-0 border-b border-solid border-[color:var(--border-base)] max-h-240px flex flex-col'>
+    <div className='shrink-0 border-b border-solid border-[color:var(--border-light)] max-h-240px flex flex-col'>
       <div
-        className='shrink-0 flex items-center gap-6px px-12px h-32px cursor-pointer select-none'
+        className='shrink-0 flex items-center gap-6px px-12px h-36px cursor-pointer select-none'
         onClick={() => setExpanded((v) => !v)}
       >
-        <Notes theme='outline' size='14' fill='var(--color-primary-6)' />
+        <Notes theme='outline' size='14' fill='var(--primary)' />
         <span className='text-13px font-semibold text-t-primary'>
           {t('team.meeting.outputs.section', { defaultValue: '会议产出' })}
         </span>

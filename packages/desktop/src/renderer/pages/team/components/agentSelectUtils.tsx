@@ -97,19 +97,36 @@ export const AgentOptionLabel: React.FC<{ agent: TeamAgentOption }> = ({ agent }
       : undefined;
   const isEmoji = Boolean(agent.icon && !avatarImage && !directIcon);
   return (
-    <div className='flex items-center gap-8px'>
+    <div className='flex items-center gap-8px min-w-0'>
       {avatarImage ? (
-        <img src={avatarImage} alt={displayName} style={{ width: 16, height: 16, objectFit: 'contain' }} />
+        <img
+          src={avatarImage}
+          alt={displayName}
+          style={{ width: 16, height: 16, objectFit: 'contain' }}
+          className='shrink-0'
+        />
       ) : isEmoji ? (
-        <span style={{ fontSize: 14, lineHeight: '16px' }}>{agent.icon}</span>
+        <span style={{ fontSize: 14, lineHeight: '16px' }} className='shrink-0'>
+          {agent.icon}
+        </span>
       ) : directIcon ? (
-        <img src={directIcon} alt={displayName} style={{ width: 16, height: 16, objectFit: 'contain' }} />
+        <img
+          src={directIcon}
+          alt={displayName}
+          style={{ width: 16, height: 16, objectFit: 'contain' }}
+          className='shrink-0'
+        />
       ) : logo ? (
-        <img src={logo} alt={displayName} style={{ width: 16, height: 16, objectFit: 'contain' }} />
+        <img
+          src={logo}
+          alt={displayName}
+          style={{ width: 16, height: 16, objectFit: 'contain' }}
+          className='shrink-0'
+        />
       ) : (
-        <Robot size='16' />
+        <Robot size='16' className='shrink-0' />
       )}
-      <span>{displayName}</span>
+      <span className='truncate'>{displayName}</span>
     </div>
   );
 };

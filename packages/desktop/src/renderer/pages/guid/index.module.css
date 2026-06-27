@@ -1203,7 +1203,7 @@
   bottom: 0;
   height: 2px;
   border-radius: 2px;
-  background: #ef760d;
+  background: var(--primary);
 }
 .agentSegmentName {
   white-space: nowrap;
@@ -1288,13 +1288,14 @@
   padding: 3px;
   box-sizing: border-box;
   background-image:
-    linear-gradient(var(--bg-base, #fff), var(--bg-base, #fff)), linear-gradient(135deg, #ef760d, #0e62c6);
+    linear-gradient(var(--bg-base, #fff), var(--bg-base, #fff)),
+    linear-gradient(135deg, var(--primary), var(--accent-gold));
   background-origin: border-box;
   background-clip: content-box, border-box;
   border: 2px solid transparent;
 }
 :global([data-theme='dark']) .capabilityAvatar {
-  background-image: linear-gradient(#262626, #262626), linear-gradient(135deg, #ef760d, #0e62c6);
+  background-image: linear-gradient(#262626, #262626), linear-gradient(135deg, var(--primary), var(--accent-gold));
 }
 .capabilityAvatar img {
   width: 100%;
@@ -1396,7 +1397,7 @@
     transform 0.16s ease;
 }
 .capabilityPrompt:hover {
-  border-color: color-mix(in srgb, #ef760d 45%, transparent);
+  border-color: color-mix(in srgb, var(--primary) 45%, transparent);
   background: var(--bg-base, #fff);
   transform: translateX(2px);
 }
@@ -1513,7 +1514,7 @@
 .assistantRailToggle:hover,
 .assistantRailCollapsedButton:hover {
   background: var(--color-fill-2);
-  border-color: color-mix(in srgb, #ef760d 34%, var(--color-border-2));
+  border-color: color-mix(in srgb, var(--primary) 34%, var(--color-border-2));
   color: var(--text-primary);
 }
 .assistantRailList {
@@ -1561,19 +1562,19 @@
 }
 .assistantRailItem:hover {
   transform: translateX(-2px);
-  border-color: color-mix(in srgb, #ef760d 55%, transparent);
-  box-shadow: 0 6px 16px rgba(239, 118, 13, 0.1);
+  border-color: color-mix(in srgb, var(--primary) 55%, transparent);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--primary) 10%, transparent);
   background: color-mix(in srgb, var(--bg-base, #fff) 82%, transparent);
   color: var(--text-primary);
   z-index: 1;
 }
 :global([data-theme='dark']) .assistantRailItem:hover {
   background: #2a2a2a;
-  box-shadow: 0 6px 16px rgba(239, 118, 13, 0.18);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--primary) 18%, transparent);
 }
 .assistantRailItemSelected {
-  border-color: color-mix(in srgb, #ef760d 62%, transparent);
-  background: color-mix(in srgb, #ef760d 12%, var(--bg-base, #fff));
+  border-color: color-mix(in srgb, var(--primary) 62%, transparent);
+  background: color-mix(in srgb, var(--primary) 12%, var(--bg-base, #fff));
 }
 .assistantRailItem:hover .assistantRailAvatar {
   transform: scale(1.1);
@@ -1657,7 +1658,7 @@
 }
 .assistantRailAdd:hover {
   transform: translateX(-2px);
-  border-color: #ef760d;
+  border-color: var(--primary);
   background: color-mix(in srgb, var(--color-fill-2) 82%, transparent);
   color: var(--text-primary);
 }
@@ -1882,20 +1883,13 @@
 }
 
 .heroGreeting {
-  font-size: 28px;
+  font-family: var(--app-font-serif), 'Noto Serif SC', 'Songti SC', serif;
+  font-size: 30px;
   font-weight: 600;
   color: var(--color-text-1);
   text-align: center;
   margin: 8px 0 4px;
   letter-spacing: -0.01em;
-  background: linear-gradient(
-    90deg,
-    var(--color-text-1) 0%,
-    color-mix(in srgb, rgb(var(--primary-6)) 60%, var(--color-text-1)) 100%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
   animation: heroFadeUp 0.5s cubic-bezier(0.32, 0.72, 0.32, 1) both;
 }
 

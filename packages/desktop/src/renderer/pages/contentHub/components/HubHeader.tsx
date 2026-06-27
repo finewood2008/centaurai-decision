@@ -18,11 +18,11 @@ const HubHeader: React.FC<HubHeaderProps> = ({ count, search, onSearchChange }) 
   const navigate = useNavigate();
 
   return (
-    <div className='flex items-center gap-12px px-20px py-14px border-b border-[var(--color-border-2)] shrink-0'>
+    <div className='flex items-center gap-12px px-20px py-14px border-b border-solid border-[color:var(--border-light)] shrink-0'>
       <button onClick={() => navigate(-1)} className='p-4px cursor-pointer text-t-secondary hover:text-t-primary'>
         <ArrowLeft size='18' />
       </button>
-      <span className='text-16px font-semibold'>{t('contentHub.title')}</span>
+      <span className='centaur-title centaur-title-md'>{t('contentHub.title')}</span>
       <span className='text-12px text-t-secondary'>({count})</span>
       <div className='flex-1' />
       <Input

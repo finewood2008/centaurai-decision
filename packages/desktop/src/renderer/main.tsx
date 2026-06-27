@@ -240,13 +240,35 @@ const AppProviders: React.FC<PropsWithChildren> = ({ children }) =>
     )
   );
 
+/**
+ * Drive Arco's runtime primary off the ACTIVE theme's `--primary` token so stock
+ * Arco components (buttons, switches, active tabs, focus rings) match the brand:
+ * clay in 暖米/素白, gold in 墨夜. Previously hardcoded to slate `#4E5969`, which
+ * left every primary control off-brand gray on a warm clay theme.
+ */
+function useThemePrimary(): string {
+  const [primary, setPrimary] = useState('#c0755a');
+  useEffect(() => {
+    const read = () => {
+      const v = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim();
+      if (v) setPrimary(v);
+    };
+    read();
+    const obs = new MutationObserver(read);
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => obs.disconnect();
+  }, []);
+  return primary;
+}
+
 const Config: React.FC<PropsWithChildren> = ({ children }) => {
   const {
     i18n: { language },
   } = useTranslation();
   const arcoLocale = arcoLocales[language] ?? enUS;
+  const primaryColor = useThemePrimary();
 
-  return React.createElement(ConfigProvider, { theme: { primaryColor: '#4E5969' }, locale: arcoLocale }, children);
+  return React.createElement(ConfigProvider, { theme: { primaryColor }, locale: arcoLocale }, children);
 };
 
 const Main = () => {

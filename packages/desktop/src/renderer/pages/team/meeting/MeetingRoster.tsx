@@ -22,15 +22,34 @@ function modelLabel(a: TeamAgent): string {
   return a.agent_type;
 }
 
+/** Soft clay ring used to mark whoever is currently speaking. */
+const activeRing = 'shadow-[0_0_0_3px_color-mix(in_srgb,var(--primary)_18%,transparent)]';
+
+/** Small "发言中" pill anchored above an active full-size seat. */
+const SpeakingPill: React.FC = () => {
+  const { t } = useTranslation();
+  return (
+    <span className='absolute -top-9px left-1/2 -translate-x-1/2 flex items-center gap-3px px-7px h-18px rd-full bg-[var(--primary)] text-white text-10px leading-none whitespace-nowrap shadow-[var(--shadow-sm)]'>
+      <Loading theme='outline' size='10' fill='currentColor' className='animate-spin' />
+      {t('team.meeting.speaking', { defaultValue: '发言中' })}
+    </span>
+  );
+};
+
 const Seat: React.FC<{ agent: TeamAgent; isLeader: boolean; active: boolean }> = ({ agent, isLeader, active }) => {
   const { t } = useTranslation();
+  const role = isLeader
+    ? t('team.meeting.role.moderator', { defaultValue: '主持人' })
+    : t('team.meeting.role.panelist', { defaultValue: '专家' });
   return (
     <div
       data-testid={`meeting-seat-${agent.slot_id}`}
-      className={`relative shrink-0 flex flex-col items-center gap-4px px-12px py-8px rd-10px border border-solid transition-all ${
+      className={`relative shrink-0 flex flex-col items-center gap-6px px-14px py-10px rd-14px border border-solid transition-all ${
         active
-          ? 'border-[color:var(--color-primary-6)] bg-[color:var(--color-primary-light-1)] shadow-[0_0_0_3px_color-mix(in_srgb,var(--color-primary-6)_20%,transparent)]'
-          : 'border-[color:var(--border-base)] bg-[var(--color-bg-2)]'
+          ? `border-[color:var(--primary)] bg-[color:var(--color-primary-light-1)] ${activeRing}`
+          : isLeader
+            ? 'border-[color:var(--color-primary-light-3)] bg-[var(--bg-1)]'
+            : 'border-[color:var(--border-light)] bg-[var(--bg-1)]'
       }`}
     >
       <TeamAgentIdentity
@@ -39,28 +58,18 @@ const Seat: React.FC<{ agent: TeamAgent; isLeader: boolean; active: boolean }> =
         icon={agent.icon}
         conversation_id={agent.conversation_id}
         isLeader={isLeader}
-        className='flex-col !gap-4px'
-        logoClassName='w-32px h-32px object-contain rounded-6px'
-        avatarClassName='w-32px h-32px rounded-6px flex items-center justify-center text-16px leading-none bg-fill-2 shrink-0'
-        nameClassName='text-12px text-[color:var(--color-text-2)] max-w-96px text-center !flex-none'
+        className='flex-col !gap-5px'
+        logoClassName='w-36px h-36px object-contain rounded-10px'
+        avatarClassName='w-36px h-36px rounded-10px flex items-center justify-center text-16px leading-none bg-[var(--bg-2)] shrink-0'
+        nameClassName='text-13px font-medium text-[color:var(--text-primary)] max-w-104px text-center !flex-none'
       />
-      <span className='text-10px text-[color:var(--color-text-3)] leading-none'>
-        {isLeader
-          ? t('team.meeting.role.moderator', { defaultValue: '主持人' })
-          : t('team.meeting.role.panelist', { defaultValue: '专家' })}
-      </span>
       <span
-        className='max-w-96px truncate px-5px h-14px flex items-center rd-7px text-9px leading-none bg-[var(--fill-2)] text-[color:var(--color-text-3)]'
+        className='max-w-104px truncate text-11px text-[color:var(--bg-6)] leading-none'
         title={agent.model || agent.agent_type}
       >
-        {modelLabel(agent)}
+        {role} · {modelLabel(agent)}
       </span>
-      {active && (
-        <span className='absolute -top-7px left-1/2 -translate-x-1/2 flex items-center gap-2px px-6px h-16px rd-8px bg-[color:var(--color-primary-6)] text-white text-10px leading-none whitespace-nowrap'>
-          <Loading theme='outline' size='10' fill='currentColor' className='animate-spin' />
-          {t('team.meeting.speaking', { defaultValue: '发言中' })}
-        </span>
-      )}
+      {active && <SpeakingPill />}
     </div>
   );
 };
@@ -75,10 +84,10 @@ const CompactSeat: React.FC<{ agent: TeamAgent; isLeader: boolean; active: boole
     <div
       data-testid={`meeting-seat-${agent.slot_id}`}
       title={`${agent.agent_name} · ${modelLabel(agent)}`}
-      className={`relative shrink-0 h-30px max-w-180px flex items-center gap-6px px-8px rd-15px border border-solid transition-all ${
+      className={`relative shrink-0 h-32px max-w-180px flex items-center gap-7px px-10px rd-full border border-solid transition-all ${
         active
-          ? 'border-[color:var(--color-primary-6)] bg-[color:var(--color-primary-light-1)] shadow-[0_0_0_2px_color-mix(in_srgb,var(--color-primary-6)_16%,transparent)]'
-          : 'border-transparent bg-[var(--color-bg-2)]'
+          ? `border-[color:var(--primary)] bg-[color:var(--color-primary-light-1)] ${activeRing}`
+          : 'border-[color:var(--border-light)] bg-[var(--bg-1)]'
       }`}
     >
       <TeamAgentIdentity
@@ -87,19 +96,19 @@ const CompactSeat: React.FC<{ agent: TeamAgent; isLeader: boolean; active: boole
         icon={agent.icon}
         conversation_id={agent.conversation_id}
         isLeader={isLeader}
-        className='min-w-0 !gap-5px'
-        logoClassName='w-18px h-18px object-contain rounded-4px'
-        avatarClassName='w-18px h-18px rounded-4px flex items-center justify-center text-11px leading-none bg-fill-2 shrink-0'
-        nameClassName='text-12px text-[color:var(--color-text-2)] max-w-82px'
+        className='min-w-0 !gap-6px'
+        logoClassName='w-20px h-20px object-contain rounded-6px'
+        avatarClassName='w-20px h-20px rounded-6px flex items-center justify-center text-11px leading-none bg-[var(--bg-2)] shrink-0'
+        nameClassName='text-12px font-medium text-[color:var(--text-secondary)] max-w-86px'
         crownClassName='hidden'
       />
-      <span className='shrink-0 text-10px text-[color:var(--color-text-3)] leading-none'>
+      <span className='shrink-0 text-10px text-[color:var(--bg-6)] leading-none'>
         {isLeader
           ? t('team.meeting.role.moderator', { defaultValue: '主持' })
           : t('team.meeting.role.panelist', { defaultValue: '专家' })}
       </span>
       {active && (
-        <span className='shrink-0 flex items-center gap-2px text-10px text-[color:var(--color-primary-6)] leading-none'>
+        <span className='shrink-0 flex items-center gap-2px text-10px text-[color:var(--primary)] leading-none'>
           <Loading theme='outline' size='10' fill='currentColor' className='animate-spin' />
           {t('team.meeting.speaking', { defaultValue: '发言中' })}
         </span>
@@ -114,10 +123,10 @@ const ExtraSeat: React.FC<{ guest: MeetingGuest; active: boolean }> = ({ guest, 
   return (
     <div
       data-testid={`meeting-guest-seat-${guest.id}`}
-      className={`relative shrink-0 flex flex-col items-center gap-4px px-12px py-8px rd-10px border border-solid transition-all ${
+      className={`relative shrink-0 flex flex-col items-center gap-6px px-14px py-10px rd-14px border border-solid transition-all ${
         active
-          ? 'border-[color:var(--color-primary-6)] bg-[color:var(--color-primary-light-1)] shadow-[0_0_0_3px_color-mix(in_srgb,var(--color-primary-6)_20%,transparent)]'
-          : 'border-[color:var(--border-base)] bg-[var(--color-bg-2)]'
+          ? `border-[color:var(--primary)] bg-[color:var(--color-primary-light-1)] ${activeRing}`
+          : 'border-[color:var(--border-light)] bg-[var(--bg-1)]'
       }`}
     >
       <TeamAgentIdentity
@@ -126,26 +135,18 @@ const ExtraSeat: React.FC<{ guest: MeetingGuest; active: boolean }> = ({ guest, 
         icon={guest.icon}
         conversation_id={''}
         isLeader={false}
-        className='flex-col !gap-4px'
-        logoClassName='w-32px h-32px object-contain rounded-6px'
-        avatarClassName='w-32px h-32px rounded-6px flex items-center justify-center text-16px leading-none bg-fill-2 shrink-0'
-        nameClassName='text-12px text-[color:var(--color-text-2)] max-w-96px text-center !flex-none'
+        className='flex-col !gap-5px'
+        logoClassName='w-36px h-36px object-contain rounded-10px'
+        avatarClassName='w-36px h-36px rounded-10px flex items-center justify-center text-16px leading-none bg-[var(--bg-2)] shrink-0'
+        nameClassName='text-13px font-medium text-[color:var(--text-primary)] max-w-104px text-center !flex-none'
       />
-      <span className='text-10px text-[color:var(--color-text-3)] leading-none'>
-        {t('team.meeting.role.panelist', { defaultValue: '专家' })}
-      </span>
       <span
-        className='max-w-96px truncate px-5px h-14px flex items-center rd-7px text-9px leading-none bg-[var(--fill-2)] text-[color:var(--color-text-3)]'
+        className='max-w-104px truncate text-11px text-[color:var(--bg-6)] leading-none'
         title={guest.model_name || guest.agent_type}
       >
-        {guest.model_name || guest.agent_type}
+        {t('team.meeting.role.panelist', { defaultValue: '专家' })} · {guest.model_name || guest.agent_type}
       </span>
-      {active && (
-        <span className='absolute -top-7px left-1/2 -translate-x-1/2 flex items-center gap-2px px-6px h-16px rd-8px bg-[color:var(--color-primary-6)] text-white text-10px leading-none whitespace-nowrap'>
-          <Loading theme='outline' size='10' fill='currentColor' className='animate-spin' />
-          {t('team.meeting.speaking', { defaultValue: '发言中' })}
-        </span>
-      )}
+      {active && <SpeakingPill />}
     </div>
   );
 };
@@ -156,10 +157,10 @@ const CompactExtraSeat: React.FC<{ guest: MeetingGuest; active: boolean }> = ({ 
     <div
       data-testid={`meeting-guest-seat-${guest.id}`}
       title={`${guest.agent_name} · ${guest.model_name || guest.agent_type}`}
-      className={`relative shrink-0 h-30px max-w-180px flex items-center gap-6px px-8px rd-15px border border-solid transition-all ${
+      className={`relative shrink-0 h-32px max-w-180px flex items-center gap-7px px-10px rd-full border border-solid transition-all ${
         active
-          ? 'border-[color:var(--color-primary-6)] bg-[color:var(--color-primary-light-1)] shadow-[0_0_0_2px_color-mix(in_srgb,var(--color-primary-6)_16%,transparent)]'
-          : 'border-transparent bg-[var(--color-bg-2)]'
+          ? `border-[color:var(--primary)] bg-[color:var(--color-primary-light-1)] ${activeRing}`
+          : 'border-[color:var(--border-light)] bg-[var(--bg-1)]'
       }`}
     >
       <TeamAgentIdentity
@@ -168,16 +169,16 @@ const CompactExtraSeat: React.FC<{ guest: MeetingGuest; active: boolean }> = ({ 
         icon={guest.icon}
         conversation_id={''}
         isLeader={false}
-        className='min-w-0 !gap-5px'
-        logoClassName='w-18px h-18px object-contain rounded-4px'
-        avatarClassName='w-18px h-18px rounded-4px flex items-center justify-center text-11px leading-none bg-fill-2 shrink-0'
-        nameClassName='text-12px text-[color:var(--color-text-2)] max-w-82px'
+        className='min-w-0 !gap-6px'
+        logoClassName='w-20px h-20px object-contain rounded-6px'
+        avatarClassName='w-20px h-20px rounded-6px flex items-center justify-center text-11px leading-none bg-[var(--bg-2)] shrink-0'
+        nameClassName='text-12px font-medium text-[color:var(--text-secondary)] max-w-86px'
       />
-      <span className='shrink-0 text-10px text-[color:var(--color-text-3)] leading-none'>
+      <span className='shrink-0 text-10px text-[color:var(--bg-6)] leading-none'>
         {t('team.meeting.role.panelist', { defaultValue: '专家' })}
       </span>
       {active && (
-        <span className='shrink-0 flex items-center gap-2px text-10px text-[color:var(--color-primary-6)] leading-none'>
+        <span className='shrink-0 flex items-center gap-2px text-10px text-[color:var(--primary)] leading-none'>
           <Loading theme='outline' size='10' fill='currentColor' className='animate-spin' />
           {t('team.meeting.speaking', { defaultValue: '发言中' })}
         </span>
@@ -193,11 +194,11 @@ const MeetingRoster: React.FC<Props> = ({ moderator, panelists, activeSlotId, gu
       <div
         data-testid='meeting-roster'
         data-compact='true'
-        className='shrink-0 flex items-center gap-8px px-16px py-6px min-h-44px border-b border-solid border-[color:var(--border-base)] bg-[color:var(--color-fill-1)] overflow-x-auto [scrollbar-width:none]'
+        className='shrink-0 flex items-center gap-8px px-20px py-8px min-h-46px border-b border-solid border-[color:var(--border-light)] overflow-x-auto [scrollbar-width:none]'
       >
         {moderator && <CompactSeat agent={moderator} isLeader active={moderator.slot_id === activeSlotId} />}
         {moderator && (panelists.length > 0 || guests.length > 0) && (
-          <span className='shrink-0 w-1px h-20px bg-[color:var(--border-base)]' />
+          <span className='shrink-0 w-1px h-22px bg-[color:var(--border-base)]' />
         )}
         {panelists.map((p) => (
           <CompactSeat key={p.slot_id} agent={p} isLeader={false} active={p.slot_id === activeSlotId} />
@@ -212,11 +213,11 @@ const MeetingRoster: React.FC<Props> = ({ moderator, panelists, activeSlotId, gu
   return (
     <div
       data-testid='meeting-roster'
-      className='shrink-0 flex items-center gap-12px px-16px py-12px border-b border-solid border-[color:var(--border-base)] overflow-x-auto [scrollbar-width:none]'
+      className='shrink-0 flex items-center gap-12px px-20px py-14px border-b border-solid border-[color:var(--border-light)] overflow-x-auto [scrollbar-width:none]'
     >
       {moderator && <Seat agent={moderator} isLeader active={moderator.slot_id === activeSlotId} />}
       {moderator && (panelists.length > 0 || guests.length > 0) && (
-        <span className='shrink-0 w-1px h-40px bg-[color:var(--border-base)]' />
+        <span className='shrink-0 w-1px h-44px bg-[color:var(--border-base)]' />
       )}
       {panelists.map((p) => (
         <Seat key={p.slot_id} agent={p} isLeader={false} active={p.slot_id === activeSlotId} />
