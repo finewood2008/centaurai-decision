@@ -1,4 +1,5 @@
 import type { TChatConversation } from '@/common/config/storage';
+import { getBaseUrl, getWebuiGateHeaders, isRemoteClientBridgeMode } from '@/common/adapter/httpBridge';
 import type { IChannelUser } from '@/common/types/channel/channel';
 
 export const ADMIN_FRONTEND_USER_ID = 'system_default_user';
@@ -58,7 +59,11 @@ export function isAdminFrontendUser(userId = getCurrentFrontendUserId()): boolea
 }
 
 export function isDesktopFrontendRuntime(): boolean {
-  return typeof window !== 'undefined' && Boolean((window as Window & { electronAPI?: unknown }).electronAPI);
+  return (
+    typeof window !== 'undefined' &&
+    Boolean((window as Window & { electronAPI?: unknown }).electronAPI) &&
+    !isRemoteClientBridgeMode()
+  );
 }
 
 export async function resolveCurrentFrontendUserId(): Promise<string> {
@@ -72,9 +77,10 @@ export async function resolveCurrentFrontendUserId(): Promise<string> {
   }
 
   try {
-    const response = await fetch('/api/auth/user', {
+    const response = await fetch(`${getBaseUrl()}/api/auth/user`, {
       method: 'GET',
       credentials: 'include',
+      headers: getWebuiGateHeaders(),
     });
     if (response.ok) {
       const data = (await response.json()) as {

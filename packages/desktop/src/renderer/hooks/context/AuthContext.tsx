@@ -1,6 +1,11 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { ADMIN_FRONTEND_USER_ID, setCurrentFrontendUserId } from '@/common/utils/frontendUserScope';
-import { getBaseUrl, isRemoteClientBridgeMode, setWebuiGateToken } from '@/common/adapter/httpBridge';
+import {
+  getBaseUrl,
+  getWebuiGateHeaders,
+  isRemoteClientBridgeMode,
+  setWebuiGateToken,
+} from '@/common/adapter/httpBridge';
 // M6: CSRF removed with legacy webserver — stub functions for compatibility, re-implement in M7
 const withCsrfToken = <T extends Record<string, unknown>>(data: T): T => data;
 const hasValidCsrfToken = (): boolean => true;
@@ -85,6 +90,7 @@ async function fetchCurrentUser(signal?: AbortSignal): Promise<AuthUser | null> 
     const response = await fetch(authUrl(AUTH_USER_ENDPOINT), {
       method: 'GET',
       credentials: 'include',
+      headers: getWebuiGateHeaders(),
       signal,
     });
 
@@ -182,8 +188,9 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
         message?: string;
         user?: AuthUser;
       };
+      setWebuiGateToken(response.headers.get('x-webui-gate-token'));
 
-      if (!response.ok || !data.success || !data.user) {
+      if (!response.ok || !data.success) {
         let code: LoginErrorCode = 'unknown';
         let message = data?.message ?? 'Login failed';
         let shouldClearCache = false;
@@ -219,9 +226,17 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
         };
       }
 
-      setWebuiGateToken(response.headers.get('x-webui-gate-token'));
-      setUser(data.user);
-      setCurrentFrontendUserId(data.user.id);
+      const loginUser = data.user ?? (await fetchCurrentUser());
+      if (!loginUser) {
+        return {
+          success: false,
+          message: 'Login succeeded, but user information could not be loaded.',
+          code: 'serverError',
+        };
+      }
+
+      setUser(loginUser);
+      setCurrentFrontendUserId(loginUser.id);
       setStatus('authenticated');
       setReady(true);
 

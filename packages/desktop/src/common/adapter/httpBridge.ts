@@ -92,6 +92,11 @@ function getWebuiGateToken(): string | null {
   }
 }
 
+export function getWebuiGateHeaders(): Record<string, string> {
+  const gateToken = isRemoteClientBridgeMode() ? getWebuiGateToken() : null;
+  return gateToken ? { 'X-WebUI-Gate-Token': gateToken } : {};
+}
+
 /**
  * WebUI (browser) mode: no Electron preload, so `window.__backendPort` is not
  * injected. Use same-origin URLs; web-host's static-server handles the reverse
@@ -236,8 +241,7 @@ export async function httpRequest<T>(
   if (body !== undefined) {
     headers['Content-Type'] = 'application/json';
   }
-  const gateToken = isRemoteClientBridgeMode() ? getWebuiGateToken() : null;
-  if (gateToken) headers['X-WebUI-Gate-Token'] = gateToken;
+  Object.assign(headers, getWebuiGateHeaders());
 
   console.debug(
     `[httpBridge] ${method} ${path}`,
