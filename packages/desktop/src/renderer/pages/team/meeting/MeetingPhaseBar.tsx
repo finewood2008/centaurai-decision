@@ -71,7 +71,8 @@ const MeetingPhaseBar: React.FC<Props> = ({ phase, form, reachedLabels, turnsCom
   return (
     <div
       data-testid='meeting-phase-bar'
-      className='shrink-0 flex items-center gap-1px px-20px h-46px border-b border-solid border-[color:var(--border-light)] overflow-x-auto [scrollbar-width:none]'
+      className='shrink-0 flex items-center gap-1px px-20px h-44px border-t border-solid border-[color:var(--border-light)] overflow-x-auto [scrollbar-width:none]'
+      style={{ background: 'color-mix(in srgb, var(--bg-1) 78%, transparent)', backdropFilter: 'blur(6px)' }}
     >
       {stages.map((s, i) => {
         const done = decided || i < current;

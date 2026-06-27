@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button, Message, Popover, Spin } from '@arco-design/web-react';
-import { Copy, Download, Notes, PeoplePlus, Plus, VideoConference } from '@icon-park/react';
+import { Copy, Download, Notes, PeoplePlus, Plus, RightOne, VideoConference } from '@icon-park/react';
 import type { TTeam } from '@/common/types/team/teamTypes';
 import MarkdownView from '@/renderer/components/Markdown';
 import { emitter } from '@/renderer/utils/emitter';
@@ -161,14 +161,6 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
         guests={guests}
         compact={!isIdle}
       />
-      {!isIdle && (
-        <MeetingPhaseBar
-          phase={state.phase}
-          form={state.form}
-          reachedLabels={reachedLabels}
-          turnsCompleted={state.turnsCompleted}
-        />
-      )}
 
       {!isIdle && state.topic && (
         <div className='shrink-0 px-24px py-10px border-b border-solid border-[color:var(--border-light)]'>
@@ -323,10 +315,34 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
                 onDecide={orchestrator.decide}
               />
             )}
+            {/* Between-round CTA lives INSIDE the conversation, right under the
+                moderator's recap, so the boss continues from where they're reading. */}
+            {state.awaitingContinue && state.phase === 'running' && (
+              <div className='flex justify-center py-6px'>
+                <Button
+                  type='primary'
+                  shape='round'
+                  size='large'
+                  icon={<RightOne theme='filled' size='15' fill='currentColor' />}
+                  onClick={orchestrator.continueMeeting}
+                  data-testid='meeting-continue'
+                >
+                  {t('team.meeting.continue', { defaultValue: '继续讨论 →' })}
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </div>
 
+      {!isIdle && (
+        <MeetingPhaseBar
+          phase={state.phase}
+          form={state.form}
+          reachedLabels={reachedLabels}
+          turnsCompleted={state.turnsCompleted}
+        />
+      )}
       <MeetingControlBar orchestrator={orchestrator} topic={topicDraft} onTopicChange={setTopicDraft} />
     </div>
   );

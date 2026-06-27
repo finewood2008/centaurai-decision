@@ -28,7 +28,7 @@ type Props = {
  */
 const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange }) => {
   const { t } = useTranslation();
-  const { state, canStart, startMeeting, interject, continueMeeting, cancel, reset } = orchestrator;
+  const { state, canStart, startMeeting, interject, cancel, reset } = orchestrator;
   const [interjection, setInterjection] = useState('');
   const [useKnowledgeBase, setUseKnowledgeBase] = useState(false);
   const [attachments, setAttachments] = useState<string[]>([]);
@@ -194,18 +194,6 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
             : t('team.meeting.cancel', { defaultValue: '取消会议' })}
         </Button>
       </div>
-      {awaiting && (
-        <Button
-          type='primary'
-          long
-          className='mb-8px'
-          icon={<RightOne theme='filled' size='14' fill='currentColor' />}
-          onClick={continueMeeting}
-          data-testid='meeting-continue'
-        >
-          {t('team.meeting.continue', { defaultValue: '继续讨论 →' })}
-        </Button>
-      )}
       {!isResolution && (
         <SendBox
           value={interjection}
