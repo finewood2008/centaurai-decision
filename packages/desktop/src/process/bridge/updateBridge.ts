@@ -54,18 +54,29 @@ interface AutoUpdateCheckParams {
   includePrerelease?: boolean;
 }
 
-const DEFAULT_REPO = 'iOfficeAI/AionUi';
-const DEFAULT_USER_AGENT = 'AionUi';
+const DEFAULT_REPO = 'finewood2008/centaurai-station';
+const DEFAULT_USER_AGENT = 'CentaurAI';
 const ALLOWED_ASSET_EXTS = new Set(['.exe', '.msi', '.dmg', '.zip', '.deb', '.rpm']);
-const CDN_HOST = 'static.aionui.com';
-const CDN_BASE_URL = `https://${CDN_HOST}/releases`;
+const RELEASE_CDN_BASE_URL = (
+  process.env.CENTAURAI_RELEASE_CDN_BASE ||
+  process.env.AIONUI_RELEASE_CDN_BASE ||
+  ''
+).replace(/\/+$/, '');
+const RELEASE_CDN_HOST = (() => {
+  if (!RELEASE_CDN_BASE_URL) return '';
+  try {
+    return new URL(RELEASE_CDN_BASE_URL).hostname;
+  } catch {
+    return '';
+  }
+})();
 const ALLOWED_DOWNLOAD_HOSTS = new Set<string>([
-  CDN_HOST,
   'github.com',
   'objects.githubusercontent.com',
   'github-releases.githubusercontent.com',
   'release-assets.githubusercontent.com',
 ]);
+if (RELEASE_CDN_HOST) ALLOWED_DOWNLOAD_HOSTS.add(RELEASE_CDN_HOST);
 const MAX_REDIRECTS = 8;
 
 const isAllowedAssetName = (name: string) => {
@@ -87,16 +98,19 @@ const normalizeTagToSemver = (tag: string): string | null => {
  * matching electron-builder's artifactName output, so no name conversion is needed.
  */
 const rewriteAssetUrlToCDN = (assetName: string, version: string): string => {
-  return `${CDN_BASE_URL}/${version}/${assetName}`;
+  return `${RELEASE_CDN_BASE_URL}/${version}/${assetName}`;
 };
 
-const mapAsset = (asset: GitHubReleaseApiAsset, version: string): GitHubReleaseAsset => ({
-  name: asset.name,
-  url: rewriteAssetUrlToCDN(asset.name, version),
-  fallbackUrl: asset.browser_download_url,
-  size: asset.size,
-  contentType: asset.content_type,
-});
+const mapAsset = (asset: GitHubReleaseApiAsset, version: string): GitHubReleaseAsset => {
+  const cdnUrl = RELEASE_CDN_BASE_URL ? rewriteAssetUrlToCDN(asset.name, version) : '';
+  return {
+    name: asset.name,
+    url: cdnUrl || asset.browser_download_url,
+    fallbackUrl: cdnUrl ? asset.browser_download_url : undefined,
+    size: asset.size,
+    contentType: asset.content_type,
+  };
+};
 
 type RuntimePlatformInfo = {
   platform: NodeJS.Platform;

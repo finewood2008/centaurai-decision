@@ -301,6 +301,69 @@ function proxyAssistantsFiltered(req: IncomingMessage, res: ServerResponse, back
   req.pipe(proxy);
 }
 
+function stripProviderSecrets(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(stripProviderSecrets);
+  if (!value || typeof value !== 'object') return value;
+
+  const input = value as Record<string, unknown>;
+  const output: Record<string, unknown> = {};
+  for (const [key, child] of Object.entries(input)) {
+    if (key === 'api_key' || key === 'apiKey') {
+      const hasKey = typeof child === 'string' && child.trim().length > 0;
+      output[key] = '';
+      output[key === 'api_key' ? 'has_api_key' : 'hasApiKey'] = hasKey;
+      continue;
+    }
+    output[key] = stripProviderSecrets(child);
+  }
+  return output;
+}
+
+/**
+ * Proxy provider reads for WebUI/browser clients without exposing stored API
+ * keys. Desktop renderers bypass WebHost and still talk to the backend directly.
+ */
+function proxyProvidersSanitized(req: IncomingMessage, res: ServerResponse, backendPort: number): void {
+  const options: http.RequestOptions = {
+    hostname: '127.0.0.1',
+    port: backendPort,
+    path: req.url,
+    method: req.method,
+    headers: { ...req.headers, host: `127.0.0.1:${backendPort}`, 'accept-encoding': 'identity' },
+  };
+  const proxy = http.request(options, (proxyRes) => {
+    const chunks: Buffer[] = [];
+    proxyRes.on('data', (c: Buffer) => chunks.push(c));
+    proxyRes.on('end', () => {
+      const status = proxyRes.statusCode ?? 502;
+      const headers = { ...proxyRes.headers };
+      delete headers['content-length'];
+      delete headers['content-encoding'];
+      delete headers['transfer-encoding'];
+
+      let body = Buffer.concat(chunks);
+      if (status >= 200 && status < 300) {
+        try {
+          body = Buffer.from(JSON.stringify(stripProviderSecrets(JSON.parse(body.toString('utf-8')))), 'utf-8');
+        } catch {
+          // Non-JSON or unexpected shape — pass the original bytes through.
+        }
+      }
+      res.writeHead(status, { ...headers, 'content-length': Buffer.byteLength(body) });
+      res.end(body);
+    });
+  });
+  proxy.on('error', () => {
+    if (!res.headersSent) {
+      res.writeHead(502, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ error: 'BACKEND_UNREACHABLE' }));
+    } else {
+      res.destroy();
+    }
+  });
+  req.pipe(proxy);
+}
+
 async function readJsonBody(req: IncomingMessage): Promise<Record<string, unknown>> {
   const chunks: Buffer[] = [];
   let size = 0;
@@ -514,14 +577,16 @@ export async function startStaticServer(opts: StaticServerOptions): Promise<Stat
         return;
       }
 
-      // Provider config is admin/desktop-owned. WebUI browser clients may READ
-      // providers (the direct-connect "直连模型" flow reads provider.api_key to
-      // build its create payload) but must NOT mutate them — "read-only" is
-      // otherwise enforced only by hiding buttons in the renderer. Reject writes;
-      // let GET fall through to the generic proxy. Desktop bypasses this server.
-      // NOTE: GET still returns provider api_key to authenticated LAN clients —
-      // closing that leak needs a separate decision (it would break direct-connect
-      // unless the backend resolves keys server-side). Tracked as finding A1.
+      // Provider config is admin/desktop-owned. WebUI browser clients may read
+      // provider metadata, but stored API keys must not leave the server. Desktop
+      // bypasses this server and still receives full provider rows from backend.
+      if (
+        req.method === 'GET' &&
+        (req.url === '/api/providers' || req.url.startsWith('/api/providers?') || req.url.startsWith('/api/providers/'))
+      ) {
+        proxyProvidersSanitized(req, res, opts.backendPort);
+        return;
+      }
       if (
         req.method !== 'GET' &&
         (req.url === '/api/providers' || req.url.startsWith('/api/providers?') || req.url.startsWith('/api/providers/'))

@@ -88,6 +88,86 @@ describe('static-server', () => {
     expect(json.path).toBe('/api/anything');
   });
 
+  it('GET /api/providers strips API keys before returning provider metadata to WebUI clients', async () => {
+    const backend = await startMockBackend((req, res) => {
+      if (req.url === '/api/providers' && req.method === 'GET') {
+        res.writeHead(200, { 'content-type': 'application/json' });
+        res.end(
+          JSON.stringify({
+            data: [
+              {
+                id: 'p1',
+                name: 'Provider 1',
+                api_key: 'sk-secret',
+                nested: { apiKey: 'camel-secret' },
+              },
+              {
+                id: 'p2',
+                name: 'Provider 2',
+                api_key: '',
+              },
+            ],
+          })
+        );
+        return;
+      }
+      res.writeHead(404).end();
+    });
+    stopBackend = backend.close;
+    handle = await startStaticServer({ staticDir, backendPort: backend.port, port: 0 });
+
+    const r = await fetch(`${handle.localUrl}/api/providers`);
+    expect(r.status).toBe(200);
+    const json = (await r.json()) as {
+      data: Array<{ api_key: string; has_api_key?: boolean; nested?: { apiKey: string; hasApiKey?: boolean } }>;
+    };
+    expect(json.data[0].api_key).toBe('');
+    expect(json.data[0].has_api_key).toBe(true);
+    expect(json.data[0].nested?.apiKey).toBe('');
+    expect(json.data[0].nested?.hasApiKey).toBe(true);
+    expect(json.data[1].api_key).toBe('');
+    expect(json.data[1].has_api_key).toBe(false);
+    expect(JSON.stringify(json)).not.toContain('sk-secret');
+    expect(JSON.stringify(json)).not.toContain('camel-secret');
+  });
+
+  it('GET /api/providers/:id strips API keys before returning single provider metadata', async () => {
+    const backend = await startMockBackend((req, res) => {
+      if (req.url === '/api/providers/p1' && req.method === 'GET') {
+        res.writeHead(200, { 'content-type': 'application/json' });
+        res.end(JSON.stringify({ id: 'p1', name: 'Provider 1', api_key: 'sk-single-secret' }));
+        return;
+      }
+      res.writeHead(404).end();
+    });
+    stopBackend = backend.close;
+    handle = await startStaticServer({ staticDir, backendPort: backend.port, port: 0 });
+
+    const r = await fetch(`${handle.localUrl}/api/providers/p1`);
+    expect(r.status).toBe(200);
+    const json = (await r.json()) as { api_key: string; has_api_key?: boolean };
+    expect(json.api_key).toBe('');
+    expect(json.has_api_key).toBe(true);
+    expect(JSON.stringify(json)).not.toContain('sk-single-secret');
+  });
+
+  it('rejects WebUI provider writes as read-only', async () => {
+    const backend = await startMockBackend((_req, res) => {
+      res.writeHead(500).end('should not reach backend');
+    });
+    stopBackend = backend.close;
+    handle = await startStaticServer({ staticDir, backendPort: backend.port, port: 0 });
+
+    const r = await fetch(`${handle.localUrl}/api/providers/p1`, {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name: 'changed' }),
+    });
+    expect(r.status).toBe(403);
+    const json = (await r.json()) as { error: string };
+    expect(json.error).toBe('READ_ONLY');
+  });
+
   it('/login reverse-proxies to backend (no local handler)', async () => {
     const backend = await startMockBackend((req, res) => {
       if (req.url === '/login' && req.method === 'POST') {

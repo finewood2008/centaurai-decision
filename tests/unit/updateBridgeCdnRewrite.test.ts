@@ -69,31 +69,32 @@ vi.mock('electron-log', () => ({
 
 const makeGitHubReleaseResponse = () => [
   {
-    tag_name: 'v1.9.22',
-    name: 'v1.9.22',
+    tag_name: 'v2.5.1',
+    name: 'v2.5.1',
     body: 'release notes',
-    html_url: 'https://github.com/iOfficeAI/AionUi/releases/tag/v1.9.22',
+    html_url: 'https://github.com/finewood2008/centaurai-station/releases/tag/v2.5.1',
     published_at: '2026-04-29T00:00:00Z',
     prerelease: false,
     draft: false,
     assets: [
       {
-        name: 'AionUi-1.9.22-mac-arm64.dmg',
+        name: 'CentaurAI-2.5.1-mac-arm64.dmg',
         browser_download_url:
-          'https://github.com/iOfficeAI/AionUi/releases/download/v1.9.22/AionUi-1.9.22-mac-arm64.dmg',
+          'https://github.com/finewood2008/centaurai-station/releases/download/v2.5.1/CentaurAI-2.5.1-mac-arm64.dmg',
         size: 123,
         content_type: 'application/x-apple-diskimage',
       },
       {
-        name: 'AionUi-1.9.22-win-x64.exe',
-        browser_download_url: 'https://github.com/iOfficeAI/AionUi/releases/download/v1.9.22/AionUi-1.9.22-win-x64.exe',
+        name: 'CentaurAI-2.5.1-win-x64.exe',
+        browser_download_url:
+          'https://github.com/finewood2008/centaurai-station/releases/download/v2.5.1/CentaurAI-2.5.1-win-x64.exe',
         size: 456,
         content_type: 'application/vnd.microsoft.portable-executable',
       },
       {
-        name: 'AionUi-1.9.22-linux-amd64.deb',
+        name: 'CentaurAI-2.5.1-linux-amd64.deb',
         browser_download_url:
-          'https://github.com/iOfficeAI/AionUi/releases/download/v1.9.22/AionUi-1.9.22-linux-amd64.deb',
+          'https://github.com/finewood2008/centaurai-station/releases/download/v2.5.1/CentaurAI-2.5.1-linux-amd64.deb',
         size: 789,
       },
     ],
@@ -113,12 +114,12 @@ const getCheckHandler = async () => {
   return lastCall[0];
 };
 
-describe('updateBridge CDN URL rewriting', () => {
+describe('updateBridge release URLs', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('rewrites asset.url to the CDN path and keeps GitHub URL in fallbackUrl', async () => {
+  it('uses GitHub release assets by default and does not rewrite to the legacy AionUi CDN', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => makeGitHubReleaseResponse(),
@@ -127,27 +128,32 @@ describe('updateBridge CDN URL rewriting', () => {
 
     try {
       const handler = await getCheckHandler();
-      const result = await handler({ repo: 'iOfficeAI/AionUi' });
+      const result = await handler({});
 
       expect(result.success).toBe(true);
+      expect(fetchMock).toHaveBeenCalledWith(
+        'https://api.github.com/repos/finewood2008/centaurai-station/releases',
+        expect.any(Object)
+      );
       const assets = result.data?.latest?.assets ?? [];
       expect(assets.length).toBe(3);
 
-      const macAsset = assets.find((a: { name: string }) => a.name === 'AionUi-1.9.22-mac-arm64.dmg');
+      const macAsset = assets.find((a: { name: string }) => a.name === 'CentaurAI-2.5.1-mac-arm64.dmg');
       expect(macAsset).toBeDefined();
-      expect(macAsset?.url).toBe('https://static.aionui.com/releases/1.9.22/AionUi-1.9.22-mac-arm64.dmg');
-      expect(macAsset?.fallbackUrl).toBe(
-        'https://github.com/iOfficeAI/AionUi/releases/download/v1.9.22/AionUi-1.9.22-mac-arm64.dmg'
+      expect(macAsset?.url).toBe(
+        'https://github.com/finewood2008/centaurai-station/releases/download/v2.5.1/CentaurAI-2.5.1-mac-arm64.dmg'
       );
+      expect(macAsset?.fallbackUrl).toBeUndefined();
 
-      const linuxAsset = assets.find((a: { name: string }) => a.name === 'AionUi-1.9.22-linux-amd64.deb');
-      expect(linuxAsset?.url).toBe('https://static.aionui.com/releases/1.9.22/AionUi-1.9.22-linux-amd64.deb');
+      const linuxAsset = assets.find((a: { name: string }) => a.name === 'CentaurAI-2.5.1-linux-amd64.deb');
+      expect(linuxAsset?.url).not.toContain('static.aionui.com');
     } finally {
       vi.unstubAllGlobals();
     }
   });
 
-  it('uses the normalized version (no v prefix) in the CDN path', async () => {
+  it('rewrites through a configured release CDN and keeps GitHub as fallback', async () => {
+    vi.stubEnv('CENTAURAI_RELEASE_CDN_BASE', 'https://static.centaurloop.com/releases');
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => makeGitHubReleaseResponse(),
@@ -156,18 +162,22 @@ describe('updateBridge CDN URL rewriting', () => {
 
     try {
       const handler = await getCheckHandler();
-      const result = await handler({ repo: 'iOfficeAI/AionUi' });
+      const result = await handler({ repo: 'finewood2008/centaurai-station' });
       const asset = result.data?.latest?.assets?.[0];
-      expect(asset?.url).toMatch(/^https:\/\/static\.aionui\.com\/releases\/1\.9\.22\//);
-      expect(asset?.url).not.toMatch(/\/v1\.9\.22\//);
+      expect(asset?.url).toBe('https://static.centaurloop.com/releases/2.5.1/CentaurAI-2.5.1-mac-arm64.dmg');
+      expect(asset?.fallbackUrl).toBe(
+        'https://github.com/finewood2008/centaurai-station/releases/download/v2.5.1/CentaurAI-2.5.1-mac-arm64.dmg'
+      );
     } finally {
+      vi.unstubAllEnvs();
       vi.unstubAllGlobals();
     }
   });
 });
 
 describe('updateBridge allowlist includes CDN host', () => {
-  it('accepts static.aionui.com URLs for download', async () => {
+  it('accepts configured release CDN URLs for download', async () => {
+    vi.stubEnv('CENTAURAI_RELEASE_CDN_BASE', 'https://static.centaurloop.com/releases');
     vi.resetModules();
     vi.clearAllMocks();
 
@@ -194,13 +204,14 @@ describe('updateBridge allowlist includes CDN host', () => {
       const handler = lastCall[0];
 
       const result = await handler({
-        url: 'https://static.aionui.com/releases/1.9.22/AionUi-1.9.22-mac-arm64.dmg',
-        file_name: 'AionUi-1.9.22-mac-arm64.dmg',
+        url: 'https://static.centaurloop.com/releases/2.5.1/CentaurAI-2.5.1-mac-arm64.dmg',
+        file_name: 'CentaurAI-2.5.1-mac-arm64.dmg',
       });
 
       expect(result.success).toBe(true);
       expect(result.data?.downloadId).toBeTruthy();
     } finally {
+      vi.unstubAllEnvs();
       vi.unstubAllGlobals();
     }
   });
