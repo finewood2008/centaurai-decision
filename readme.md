@@ -8,8 +8,9 @@ A cross-platform AI cowork workstation developed by CentaurAI — built-in agent
 
 [![License](https://img.shields.io/badge/license-Proprietary%20%2B%20Apache--2.0%20components-32CD32?style=flat-square)](#-license--attribution)
 ![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-6C757D?style=flat-square)
+![Version](https://img.shields.io/badge/latest-v2.5.0-8B5CF6?style=flat-square)
 
-简体中文 · [Official Site](https://www.centaurloop.com)
+简体中文 · [Official Site](https://www.centaurloop.com) · [Latest Release](https://github.com/finewood2008/centaurai-station/releases/tag/v2.5.0)
 
 </div>
 
@@ -17,6 +18,9 @@ A cross-platform AI cowork workstation developed by CentaurAI — built-in agent
 > **基于开源项目 AionUi 的二次开发版本。** CentaurAI AIStation is a modified derivative of
 > [AionUi](https://github.com/iOfficeAI/AionUi) (Copyright AionUi, Apache-2.0). See
 > [License & Attribution](#-license--attribution) and [`NOTICE`](NOTICE).
+
+> [!IMPORTANT]
+> 当前标准版本为 **CentaurAI 2.5.0**。`main`、`v2.5.0` Release 均指向已验证的 2.5 代码线。
 
 ---
 
@@ -28,6 +32,8 @@ A cross-platform AI cowork workstation developed by CentaurAI — built-in agent
 - **专家团队(Experts)** — 200+ 各领域专业专家(营销 / 工程 / 设计 / 财务 / 安全…),按部门筛选,每位专家预设了**主代理 + 内置技能**。
 - **管理员统一管理模型** — 管理员在桌面端集中配置模型 / API 接口,所有用户自动调用;WebUI 远程用户为只读。
 - **局域网分发式客户端** — 把轻量客户端分发到每台电脑,开机**自动发现局域网内的服务器**(mDNS),登录即用;原生客户端让**语音输入**等能力可直接使用。
+- **半人马 AI 图形工作台** — 内置独立图像生成与编辑工作台,支持参考图、蒙版、批量和历史管理;API 地址与 Key 完全由用户自行配置,不会默认注入 TokenClub 或任何预置 Key。
+- **本地模型管理** — 检测本机 Ollama 等本地模型能力,可在设置中集中管理并加入对话配置。
 - **品牌主题** — 三套核心主题:暖米(默认)/ 素白 / 墨夜,遵循 centaurloop.com 设计语言。
 - **随处访问** — WebUI(浏览器/手机)+ Telegram / 飞书 / 钉钉 / 微信 等渠道。
 - **定时任务、文件管理、预览面板、图像生成** 等。
@@ -95,8 +101,8 @@ node scripts/check-i18n.js   # i18n 校验(改动 i18n 后需先 bun run i18n:ty
 
 ```bash
 # 打 tag 并推送即可触发全平台构建 + 发布到 Releases(草稿)
-git tag v2.1.14
-git push origin v2.1.14
+git tag v2.5.0
+git push origin v2.5.0
 # 构建完成后到 GitHub → Releases,检查草稿并点击 "Publish"
 ```
 
