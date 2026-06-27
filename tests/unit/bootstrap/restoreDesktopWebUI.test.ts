@@ -70,6 +70,22 @@ describe('restoreDesktopWebUIFromPreferences', () => {
     expect(startWebHostMock.mock.calls[0][0]).toMatchObject({ allowRemote: true, port: 25808 });
   });
 
+  it('notifies the caller with the restored handle so LAN discovery can be advertised', async () => {
+    httpRequestMock.mockResolvedValueOnce(ENABLED_REMOTE);
+    const onRestored = vi.fn();
+
+    await restoreDesktopWebUIFromPreferences({ onRestored });
+
+    expect(onRestored).toHaveBeenCalledTimes(1);
+    expect(onRestored).toHaveBeenCalledWith(
+      expect.objectContaining({
+        allowRemote: true,
+        networkUrl: 'http://192.168.1.2:25808',
+        lanIP: '192.168.1.2',
+      })
+    );
+  });
+
   it('retries instead of disabling when the backend is not yet reachable (the restart regression)', async () => {
     // Backend still starting: first two reads throw (ERR_CONNECTION_REFUSED),
     // third succeeds with the persisted "enabled + allowRemote" preference.

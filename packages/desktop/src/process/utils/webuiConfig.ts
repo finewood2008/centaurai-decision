@@ -432,7 +432,9 @@ export function getDesktopWebUIStatus(): {
   };
 }
 
-export const restoreDesktopWebUIFromPreferences = async (): Promise<void> => {
+export const restoreDesktopWebUIFromPreferences = async (opts?: {
+  onRestored?: (handle: DesktopWebUIHandle) => void | Promise<void>;
+}): Promise<void> => {
   const prefs = await readWebUIDesktopPreferencesWithRetry();
   if (prefs === null) {
     // Backend never answered within the deadline. Leave the persisted
@@ -448,6 +450,7 @@ export const restoreDesktopWebUIFromPreferences = async (): Promise<void> => {
 
   try {
     const handle = await startDesktopWebUI({ port: preferredPort, allowRemote });
+    await opts?.onRestored?.(handle);
     console.log(
       `[WebUI] Auto-restored from desktop preferences (port=${handle.port}, allowRemote=${handle.allowRemote})`
     );

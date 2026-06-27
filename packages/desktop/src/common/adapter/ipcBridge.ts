@@ -1378,6 +1378,7 @@ export const webui = {
   statusChanged: bridge.buildEmitter<{
     running: boolean;
     port?: number;
+    allowRemote?: boolean;
     localUrl?: string;
     networkUrl?: string;
     lanIP?: string;

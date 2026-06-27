@@ -38,6 +38,44 @@ async function stopAdvertising(): Promise<void> {
   }
 }
 
+export async function announceDesktopWebUIStarted(handle: {
+  port: number;
+  allowRemote: boolean;
+  localUrl: string;
+  networkUrl?: string;
+  lanIP?: string;
+  initialPassword?: string;
+}): Promise<void> {
+  ipcBridge.webui.statusChanged.emit({
+    running: true,
+    port: handle.port,
+    allowRemote: handle.allowRemote,
+    localUrl: handle.localUrl,
+    networkUrl: handle.networkUrl,
+    lanIP: handle.lanIP,
+    initialPassword: handle.initialPassword,
+  });
+
+  await stopAdvertising();
+  if (!handle.allowRemote) return;
+
+  try {
+    advertiseHandle = advertiseServer({
+      name: `CentaurAI · ${os.hostname()}`,
+      port: handle.port,
+      // share='1' tells distributed clients this server hosts the LAN shared library.
+      info: {
+        ver: process.env.npm_package_version || '',
+        os: process.platform,
+        lanIP: handle.lanIP || '',
+        share: '1',
+      },
+    });
+  } catch {
+    // Non-fatal: discovery is a convenience; manual connect still works.
+  }
+}
+
 function getBackendPort(): number | undefined {
   return (globalThis as typeof globalThis & { __backendPort?: number }).__backendPort;
 }
@@ -103,31 +141,7 @@ export function initWebuiBridge(): void {
       port: params?.port,
       allowRemote: params?.allowRemote,
     });
-    ipcBridge.webui.statusChanged.emit({
-      running: true,
-      port: handle.port,
-      localUrl: handle.localUrl,
-      networkUrl: handle.networkUrl,
-      lanIP: handle.lanIP,
-      initialPassword: handle.initialPassword,
-    });
-    // Advertise this server on the LAN so distributed clients auto-discover it.
-    await stopAdvertising();
-    try {
-      advertiseHandle = advertiseServer({
-        name: `CentaurAI · ${os.hostname()}`,
-        port: handle.port,
-        // share='1' tells distributed clients this server hosts the LAN shared library.
-        info: {
-          ver: process.env.npm_package_version || '',
-          os: process.platform,
-          lanIP: handle.lanIP || '',
-          share: '1',
-        },
-      });
-    } catch {
-      // Non-fatal: discovery is a convenience; manual connect still works.
-    }
+    await announceDesktopWebUIStarted(handle);
     return handle;
   });
 

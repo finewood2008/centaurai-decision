@@ -185,10 +185,10 @@ const WebuiModalContent: React.FC = () => {
           ...(prev || { adminUsername: 'admin' }),
           running: true,
           port: data.port ?? prev?.port ?? WEBUI_DEFAULT_PORT,
-          allowRemote: prev?.allowRemote ?? false,
+          allowRemote: data.allowRemote ?? prev?.allowRemote ?? false,
           localUrl: data.localUrl ?? `http://localhost:${data.port ?? WEBUI_DEFAULT_PORT}`,
           networkUrl: data.networkUrl,
-          lanIP: prev?.lanIP,
+          lanIP: data.lanIP ?? prev?.lanIP,
           initialPassword: prev?.initialPassword,
         }));
         if (data.networkUrl) {

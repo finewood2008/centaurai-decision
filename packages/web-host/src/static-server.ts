@@ -175,6 +175,7 @@ function proxyLoginWithGate(req: IncomingMessage, res: ServerResponse, gate: Aut
  * response was fully handled (the caller must then stop processing the request).
  *
  * Reachable without a session: `POST /login` (mints a session on success),
+ * `GET /api/auth/status` (lets the app decide whether to show login/setup),
  * `GET /api/auth/csrf-token` (needed before logging in) and `/api/downloads/*`
  * (public client installers). Everything else under `/api/*` requires a valid
  * session; `/logout` additionally clears it. Static assets are never gated, so
@@ -215,6 +216,7 @@ function enforceGate(req: IncomingMessage, res: ServerResponse, gate: AuthGate, 
     return true;
   }
   // Bootstrap endpoints reachable before a session exists.
+  if (req.method === 'GET' && path === '/api/auth/status') return false;
   if (req.method === 'GET' && path === '/api/auth/csrf-token') return false;
   if (path.startsWith('/api/downloads/')) return false;
 

@@ -212,6 +212,28 @@ describe('static-server', () => {
     expect(json.user.username).toBe('from-backend');
   });
 
+  it('LAN auth gate allows /api/auth/status before login', async () => {
+    const backend = await startMockBackend((req, res) => {
+      if (req.url === '/api/auth/status' && req.method === 'GET') {
+        res.writeHead(200, { 'content-type': 'application/json' });
+        res.end(JSON.stringify({ needs_setup: false }));
+        return;
+      }
+      res.writeHead(500).end('should not reach fallback');
+    });
+    stopBackend = backend.close;
+    handle = await startStaticServer({
+      staticDir,
+      backendPort: backend.port,
+      port: 0,
+      allowRemote: true,
+    });
+
+    const r = await fetch(`${handle.localUrl}/api/auth/status`);
+    expect(r.status).toBe(200);
+    expect(await r.json()).toEqual({ needs_setup: false });
+  });
+
   it('/logout reverse-proxies to backend (no local handler)', async () => {
     const backend = await startMockBackend((req, res) => {
       if (req.url === '/logout' && req.method === 'POST') {

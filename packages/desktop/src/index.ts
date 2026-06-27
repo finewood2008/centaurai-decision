@@ -33,6 +33,7 @@ import { resolveBinaryPath } from '@process/backend';
 import './process/bridge/feedbackBridge';
 import { wasLaunchedAtLogin } from '@process/bridge/applicationBridge';
 import { onLanguageChanged } from './process/bridge/systemSettingsBridge';
+import { announceDesktopWebUIStarted } from './process/bridge/webuiBridge';
 import { setInitialLanguage } from '@process/services/i18n';
 import { setupApplicationMenu } from './process/utils/appMenu';
 import { startWebHost } from '@aionui/web-host';
@@ -1021,7 +1022,7 @@ const handleAppReady = async (): Promise<void> => {
 
     if (!isE2ETestMode) {
       // 窗口创建后异步恢复 WebUI，不阻塞 UI / Restore WebUI async after window creation, non-blocking
-      restoreDesktopWebUIFromPreferences().catch((error) => {
+      restoreDesktopWebUIFromPreferences({ onRestored: announceDesktopWebUIStarted }).catch((error) => {
         console.error('[WebUI] Failed to auto-restore:', error);
       });
     }
