@@ -6,6 +6,8 @@ import { Copy, Download, Notes, PeoplePlus, Plus, VideoConference } from '@icon-
 import type { TTeam } from '@/common/types/team/teamTypes';
 import MarkdownView from '@/renderer/components/Markdown';
 import { emitter } from '@/renderer/utils/emitter';
+import { getAgentLogo } from '@renderer/utils/model/agentLogo';
+import { resolveBackendAssetUrl } from '@renderer/utils/platform';
 import MeetingRoster from './MeetingRoster';
 import MeetingPhaseBar from './MeetingPhaseBar';
 import MeetingControlBar from './MeetingControlBar';
@@ -16,6 +18,27 @@ import { useMeetingOrchestrator } from './useMeetingOrchestrator';
 
 type Props = {
   team: TTeam;
+};
+
+/**
+ * Small speaker avatar for a transcript turn — makes a multi-model debate easy
+ * to scan. Resolves an explicit icon (asset/url), emoji, or backend logo, with a
+ * monogram fallback. (MeetingTurn already carries icon + agent_type.)
+ */
+const TurnAvatar: React.FC<{ icon?: string; agentType: string; name: string }> = ({ icon, agentType, name }) => {
+  const direct =
+    icon && (/^(?:[a-z][a-z\d+.-]*:|\/)/i.test(icon) || /\.(svg|png|jpe?g|gif|webp)$/i.test(icon))
+      ? (resolveBackendAssetUrl(icon) ?? icon)
+      : undefined;
+  const isEmoji = Boolean(icon && !direct);
+  const logo = getAgentLogo(agentType);
+  const imgCls = 'w-22px h-22px rounded-6px object-contain shrink-0';
+  const boxCls =
+    'w-22px h-22px rounded-6px flex items-center justify-center text-12px leading-none bg-[var(--bg-2)] text-[color:var(--text-secondary)] shrink-0';
+  if (direct) return <img src={direct} alt='' className={imgCls} />;
+  if (isEmoji) return <span className={`${boxCls} text-13px`}>{icon}</span>;
+  if (logo) return <img src={logo} alt='' className={imgCls} />;
+  return <span className={boxCls}>{name.charAt(0).toUpperCase()}</span>;
 };
 
 /**
@@ -189,11 +212,9 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
                       : 'border-[color:var(--border-light)] bg-[var(--bg-1)]'
                   }`}
                 >
-                  <div className='flex items-center gap-8px px-18px h-40px'>
-                    {turn.isModerator && (
-                      <span className='shrink-0 w-6px h-6px rd-full bg-[var(--primary)]' aria-hidden='true' />
-                    )}
-                    <span className='text-14px font-semibold text-[color:var(--text-primary)] truncate'>
+                  <div className='flex items-center gap-8px px-16px h-44px'>
+                    <TurnAvatar icon={turn.icon} agentType={turn.agent_type} name={turn.name} />
+                    <span className='text-14px font-semibold text-[color:var(--text-primary)] truncate max-w-220px'>
                       {turn.name}
                     </span>
                     <span className='shrink-0 px-7px h-18px flex items-center rd-full text-11px leading-none bg-[var(--bg-2)] text-[color:var(--bg-6)]'>
@@ -201,9 +222,10 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
                         ? t('team.meeting.role.moderator', { defaultValue: '主持人' })
                         : turn.phaseLabel}
                     </span>
-                    {turn.status === 'speaking' && <Spin loading size={13} className='ml-auto' />}
+                    <div className='flex-1' />
+                    {turn.status === 'speaking' && <Spin loading size={13} className='shrink-0' />}
                     {turn.status === 'error' && (
-                      <span className='ml-auto text-11px text-[color:var(--danger)]'>
+                      <span className='shrink-0 text-11px text-[color:var(--danger)]'>
                         {t('team.meeting.turn.failed', { defaultValue: '未发言' })}
                       </span>
                     )}
