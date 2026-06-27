@@ -80,6 +80,7 @@ export async function startWebHost(opts: WebHostOptions): Promise<WebHostHandle>
       imageWorkbenchDir: opts.imageWorkbenchDir,
       imageKey: opts.imageKey,
       videoUpstreamUrl: opts.videoUpstreamUrl,
+      blockTeamRoutes: opts.blockTeamRoutes,
     });
   } catch (err) {
     // If static-server fails, clean up backend

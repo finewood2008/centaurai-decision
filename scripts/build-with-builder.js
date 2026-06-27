@@ -44,6 +44,11 @@ function walkFiles(dir, acc = []) {
 function computeSourceHash() {
   const hash = crypto.createHash('md5');
   const rootDir = path.resolve(__dirname, '..');
+  // Edition is baked into the renderer/main bundles via a Vite `define`, but the
+  // source files are byte-identical across editions — so the edition must be part
+  // of the cache key, else switching AIONUI_EDITION would silently reuse the wrong
+  // (previous edition's) bundle on an incremental build.
+  hash.update('edition:' + (process.env.AIONUI_EDITION === 'decision' ? 'decision' : process.env.AIONUI_EDITION === 'team' ? 'team' : 'full') + '\n');
   const filesToHash = [
     'package.json',
     'package-lock.json',

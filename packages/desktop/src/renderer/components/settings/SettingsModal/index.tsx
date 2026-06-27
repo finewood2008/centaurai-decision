@@ -9,6 +9,7 @@ import AionScrollArea from '@/renderer/components/base/AionScrollArea';
 import { iconColors } from '@/renderer/styles/colors';
 import { isElectronDesktop, resolveExtensionAssetUrl } from '@/renderer/utils/platform';
 import { type IExtensionSettingsTab } from '@/common/adapter/ipcBridge';
+import { MULTI_USER_ENABLED } from '@/common/config/constants';
 import { useExtI18n } from '@/renderer/hooks/system/useExtI18n';
 import { useExtensionSettingsTabs } from '@/renderer/hooks/system/useExtensionSettingsTabs';
 import { Tabs } from '@arco-design/web-react';
@@ -203,7 +204,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ visible, onCancel, defaul
       },
     ];
 
-    if (isDesktop) {
+    // WebUI server + multi-user management — full + Team. Decision is single-user
+    // and loopback-only, so these tabs are omitted entirely.
+    if (isDesktop && MULTI_USER_ENABLED) {
       builtinItems.push({
         key: 'webui',
         label: t('settings.webui'),

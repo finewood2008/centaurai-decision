@@ -88,6 +88,38 @@ describe('static-server', () => {
     expect(json.path).toBe('/api/anything');
   });
 
+  it('blockTeamRoutes: 403s /api/teams* (Team edition removes 智囊团 at the API level)', async () => {
+    const backend = await startMockBackend((_req, res) => {
+      res.writeHead(200, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ ok: true }));
+    });
+    stopBackend = backend.close;
+    handle = await startStaticServer({ staticDir, backendPort: backend.port, port: 0, blockTeamRoutes: true });
+
+    const create = await fetch(`${handle.localUrl}/api/teams`, { method: 'POST' });
+    expect(create.status).toBe(403);
+    expect(((await create.json()) as { error: string }).error).toBe('EDITION_DISABLED');
+
+    const session = await fetch(`${handle.localUrl}/api/teams/abc/session`, { method: 'POST' });
+    expect(session.status).toBe(403);
+
+    // Non-team API routes still proxy through normally.
+    const other = await fetch(`${handle.localUrl}/api/anything`);
+    expect(other.status).toBe(200);
+  });
+
+  it('without blockTeamRoutes, /api/teams proxies to the backend (Decision edition keeps 智囊团)', async () => {
+    const backend = await startMockBackend((req, res) => {
+      res.writeHead(200, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ path: req.url }));
+    });
+    stopBackend = backend.close;
+    handle = await startStaticServer({ staticDir, backendPort: backend.port, port: 0 });
+    const r = await fetch(`${handle.localUrl}/api/teams`, { method: 'POST' });
+    expect(r.status).toBe(200);
+    expect(((await r.json()) as { path: string }).path).toBe('/api/teams');
+  });
+
   it('GET /api/providers strips API keys before returning provider metadata to WebUI clients', async () => {
     const backend = await startMockBackend((req, res) => {
       if (req.url === '/api/providers' && req.method === 'GET') {
@@ -192,6 +224,19 @@ describe('static-server', () => {
     expect(r.headers.get('set-cookie')).toMatch(/aionui-session=backend-token/);
     const json = (await r.json()) as { proxied: boolean };
     expect(json.proxied).toBe(true);
+  });
+
+  it('GET /login serves the SPA instead of the backend login endpoint', async () => {
+    const backend = await startMockBackend((_req, res) => {
+      res.writeHead(405, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: 'METHOD_NOT_ALLOWED' }));
+    });
+    stopBackend = backend.close;
+    handle = await startStaticServer({ staticDir, backendPort: backend.port, port: 0, allowRemote: true });
+
+    const r = await fetch(`${handle.localUrl}/login`);
+    expect(r.status).toBe(200);
+    expect(await r.text()).toContain('<title>root</title>');
   });
 
   it('/api/auth/user reverse-proxies to backend (no local handler)', async () => {

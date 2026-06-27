@@ -19,6 +19,7 @@ import {
 import SiderFooter from './SiderFooter';
 import CronJobSiderSection from './CronJobSiderSection';
 import TeamSiderSection from './TeamSiderSection';
+import { TEAM_MODE_ENABLED, WORKBENCH_ENABLED } from '@/common/config/constants';
 import siderStyles from './Sider.module.css';
 
 const WorkspaceGroupedHistory = React.lazy(() => import('@renderer/pages/conversation/GroupedHistory'));
@@ -226,19 +227,25 @@ const Sider: React.FC<SiderProps> = ({ onSessionClick, collapsed = false }) => {
                   {...workspaceHistoryProps}
                   afterPinnedContent={
                     <>
-                      <WorkbenchSiderSection
-                        isMobile={isMobile}
-                        collapsed={collapsed}
-                        pathname={pathname}
-                        siderTooltipProps={siderTooltipProps}
-                        onSessionClick={onSessionClick}
-                      />
-                      <TeamSiderSection
-                        collapsed={collapsed}
-                        pathname={pathname}
-                        siderTooltipProps={siderTooltipProps}
-                        onSessionClick={onSessionClick}
-                      />
+                      {/* Workbench (office assistants + image studio) — full + Team; removed in Decision. */}
+                      {WORKBENCH_ENABLED && (
+                        <WorkbenchSiderSection
+                          isMobile={isMobile}
+                          collapsed={collapsed}
+                          pathname={pathname}
+                          siderTooltipProps={siderTooltipProps}
+                          onSessionClick={onSessionClick}
+                        />
+                      )}
+                      {/* 智囊团 (multi-agent decision room) — Decision edition core; removed in Team. */}
+                      {TEAM_MODE_ENABLED && (
+                        <TeamSiderSection
+                          collapsed={collapsed}
+                          pathname={pathname}
+                          siderTooltipProps={siderTooltipProps}
+                          onSessionClick={onSessionClick}
+                        />
+                      )}
                       {!collapsed && (
                         <CronJobSiderSection jobs={cronJobs} pathname={pathname} onNavigate={handleCronNavigate} />
                       )}

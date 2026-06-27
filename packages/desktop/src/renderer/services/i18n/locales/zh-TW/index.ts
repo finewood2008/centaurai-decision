@@ -18,6 +18,7 @@ import starOffice from './starOffice.json';
 import guid from './guid.json';
 import agent from './agent.json';
 import team from './team.json';
+import decision from './decision.json';
 import pet from './pet.json';
 import toolbox from './toolbox.json';
 import advisors from './advisors.json';
@@ -44,6 +45,7 @@ export default {
   guid,
   agent,
   team,
+  decision,
   pet,
   toolbox,
   advisors,

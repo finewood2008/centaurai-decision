@@ -1,6 +1,7 @@
 import FlexFullContainer from '@/renderer/components/layout/FlexFullContainer';
 import { isElectronDesktop, resolveExtensionAssetUrl } from '@/renderer/utils/platform';
 import { type IExtensionSettingsTab } from '@/common/adapter/ipcBridge';
+import { IS_DECISION } from '@/common/config/constants';
 import { useExtI18n } from '@/renderer/hooks/system/useExtI18n';
 import { useExtensionSettingsTabs } from '@/renderer/hooks/system/useExtensionSettingsTabs';
 import {
@@ -155,11 +156,14 @@ const SettingsSider: React.FC<{ collapsed?: boolean; tooltipEnabled?: boolean }>
     // Start with ordered builtin IDs. 'client' (local-client downloads) is the
     // mirror image of 'pet'/'users': it only makes sense for LAN/browser users,
     // so it's hidden on the desktop admin and shown only in browser mode.
-    const result: SiderItem[] = BUILTIN_TAB_IDS.filter((id) =>
+    const result: SiderItem[] = BUILTIN_TAB_IDS.filter((id) => {
+      // Decision edition is single-user & loopback-only: drop the multi-user /
+      // WebUI server / client-download tabs entirely.
+      if (IS_DECISION && (id === 'users' || id === 'webui' || id === 'client')) return false;
       // local-models needs the local ollama daemon + ability to launch the
       // manager app — desktop-only, like pet/users.
-      id === 'client' ? !isDesktop : isDesktop || (id !== 'pet' && id !== 'users' && id !== 'local-models')
-    )
+      return id === 'client' ? !isDesktop : isDesktop || (id !== 'pet' && id !== 'users' && id !== 'local-models');
+    })
       .map((id) => builtinMap[id])
       .filter((item): item is SiderItem => Boolean(item));
 

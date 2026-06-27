@@ -19,6 +19,7 @@ import { initNasDriveBridge } from './nasDriveBridge';
 import { initVideostudioBridge } from './videostudioBridge';
 import { initAppstoreBridge } from './appstoreBridge';
 import { initLocalModelManagerBridge } from './localModelManagerBridge';
+import { MULTI_USER_ENABLED } from '@/common/config/constants';
 
 export type BridgeDependencies = Record<string, never>;
 
@@ -32,7 +33,9 @@ export function initAllBridges(_deps: BridgeDependencies = {}): void {
   initWebuiBridge();
   initThemeBridge();
   initImageGenBridge();
-  initUserManagementBridge();
+  // Multi-user CRUD IPC — full + Team. Never registering it on the Decision box
+  // makes it structurally impossible to create a second account (single-user).
+  if (MULTI_USER_ENABLED) initUserManagementBridge();
   initSharedDriveBridge();
   initNasDriveBridge();
   initVideostudioBridge();

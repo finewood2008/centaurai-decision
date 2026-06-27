@@ -1,0 +1,30 @@
+{
+  "subtitle": "你的決策作戰室 —— 隨時召集智囊團，聽取多方意見，快速拍板。",
+  "startMeeting": "發起決策會議",
+  "greeting": {
+    "morning": "早安，老闆",
+    "afternoon": "午安，老闆",
+    "evening": "晚安，老闆",
+    "night": "夜深了，老闆"
+  },
+  "ongoing": {
+    "title": "進行中的決策",
+    "empty": "還沒有進行中的決策。點擊「發起決策會議」開一場。"
+  },
+  "intel": {
+    "title": "最新情報",
+    "tag": "團隊版回傳",
+    "empty": "等待團隊版接入 —— 區域網路回傳將在後續階段開通。"
+  },
+  "archive": {
+    "title": "決策檔案",
+    "desc": "歷史決議與方案書",
+    "count": "已歸檔 {{count}} 場"
+  },
+  "advisors": {
+    "title": "顧問團",
+    "desc": "隨時拉進作戰室",
+    "count": "{{count}} 位待命"
+  },
+  "enter": "進入作戰室"
+}

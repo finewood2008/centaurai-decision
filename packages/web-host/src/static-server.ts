@@ -79,6 +79,14 @@ export type StaticServerOptions = {
    * http://localhost:3000. Omit to use the default / env override.
    */
   videoUpstreamUrl?: string;
+  /**
+   * When true, return 403 for the aioncore team/meeting API (`/api/teams*`).
+   * Set by the Team edition: 智囊团 (decision meetings) is removed from the Team
+   * product, but the bundled backend still exposes the route — this blocks LAN
+   * employees from running a meeting by calling the API directly. The boss's
+   * Decision box talks to the backend over IPC, not through this proxy.
+   */
+  blockTeamRoutes?: boolean;
 };
 
 export type StaticServerHandle = {
@@ -614,6 +622,16 @@ export async function startStaticServer(opts: StaticServerOptions): Promise<Stat
         return;
       }
 
+      // Team edition: 智囊团 (decision meetings) is a Decision-only feature. Its UI
+      // is removed from the Team renderer, but the bundled aioncore still serves
+      // /api/teams* — block it here so LAN employees can't run a meeting by calling
+      // the API directly. (Decision uses IPC, not this proxy, so it's unaffected.)
+      if (opts.blockTeamRoutes && (req.url === '/api/teams' || req.url.startsWith('/api/teams/') || req.url.startsWith('/api/teams?'))) {
+        res.writeHead(403, { 'content-type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: 'EDITION_DISABLED' }));
+        return;
+      }
+
       // Hide desktop/admin-only assistants (the 管家) from WebUI browser clients.
       // Always applied in WebUI mode — the butler is desktop-only regardless of
       // LAN exposure. Desktop talks to the backend directly, bypassing this.
@@ -758,14 +776,19 @@ export async function startStaticServer(opts: StaticServerOptions): Promise<Stat
       }
 
       // /api/* — reverse proxy to backend (includes /api/auth/*).
-      // /login and /logout are aionui-auth's top-level auth endpoints: proxy them too
-      // so WebUI browser clients reach the backend without a path-rewrite.
-      if (req.url.startsWith('/api/') || req.url.startsWith('/api?') || req.url === '/login' || req.url === '/logout') {
+      // POST /login and POST /logout are aionui-auth's top-level auth endpoints.
+      // Browser GETs for /login and /logout are SPA routes and must fall through
+      // to index.html; otherwise LAN users can land on a backend 405 page.
+      const requestPath = (req.url.split('?')[0] || '/').split('#')[0];
+      if (
+        req.url.startsWith('/api/') ||
+        req.url.startsWith('/api?') ||
+        (req.method === 'POST' && (requestPath === '/login' || requestPath === '/logout'))
+      ) {
         forwardToBackend(req, res, opts.backendPort);
         return;
       }
 
-      const requestPath = (req.url.split('?')[0] || '/').split('#')[0];
       const isHtmlEntry =
         requestPath === '/' || requestPath === '/index.html' || !requestPath.split('/').pop()?.includes('.');
       if (isHtmlEntry || requestPath === '/sw.js') {

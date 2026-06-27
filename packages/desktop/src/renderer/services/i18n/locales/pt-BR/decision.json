@@ -1,0 +1,30 @@
+{
+  "subtitle": "Sua sala de guerra de decisões — convoque o conselho consultivo a qualquer momento, ouça todos os ângulos e tome a decisão.",
+  "startMeeting": "Iniciar reunião de decisão",
+  "greeting": {
+    "morning": "Bom dia, Chefe",
+    "afternoon": "Boa tarde, Chefe",
+    "evening": "Boa noite, Chefe",
+    "night": "Trabalhando até tarde, Chefe"
+  },
+  "ongoing": {
+    "title": "Decisões em andamento",
+    "empty": "Nenhuma decisão em andamento ainda. Clique em “Iniciar reunião de decisão” para abrir uma."
+  },
+  "intel": {
+    "title": "Inteligência recente",
+    "tag": "repassada pela edição Equipe",
+    "empty": "Aguardando a conexão da edição Equipe — o repasse via LAN chega em uma fase posterior."
+  },
+  "archive": {
+    "title": "Arquivo de decisões",
+    "desc": "Resoluções e briefings anteriores",
+    "count": "{{count}} registradas"
+  },
+  "advisors": {
+    "title": "Conselho consultivo",
+    "desc": "Convoque para a sala a qualquer momento",
+    "count": "{{count}} de prontidão"
+  },
+  "enter": "Entrar na sala de guerra"
+}

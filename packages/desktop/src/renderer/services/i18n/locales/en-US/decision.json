@@ -1,0 +1,30 @@
+{
+  "subtitle": "Your decision war-room — convene the advisory council anytime, hear every angle, and make the call.",
+  "startMeeting": "Start a decision meeting",
+  "greeting": {
+    "morning": "Good morning, Chief",
+    "afternoon": "Good afternoon, Chief",
+    "evening": "Good evening, Chief",
+    "night": "Working late, Chief"
+  },
+  "ongoing": {
+    "title": "Decisions in progress",
+    "empty": "No decisions in progress yet. Hit “Start a decision meeting” to open one."
+  },
+  "intel": {
+    "title": "Latest intelligence",
+    "tag": "relayed by Team edition",
+    "empty": "Waiting for the Team edition to connect — LAN relay arrives in a later phase."
+  },
+  "archive": {
+    "title": "Decision archive",
+    "desc": "Past resolutions & decision briefs",
+    "count": "{{count}} on record"
+  },
+  "advisors": {
+    "title": "Advisory council",
+    "desc": "Pull into the war-room anytime",
+    "count": "{{count}} on call"
+  },
+  "enter": "Enter war-room"
+}

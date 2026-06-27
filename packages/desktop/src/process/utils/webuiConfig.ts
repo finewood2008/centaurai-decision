@@ -12,6 +12,7 @@ import { getSystemDir } from './initStorage';
 import { httpRequest } from '@/common/adapter/httpBridge';
 import { startWebHost, type WebHostHandle } from '@aionui/web-host';
 import { getDataPath } from './utils';
+import { IS_TEAM, MULTI_USER_ENABLED } from '@/common/config/constants';
 
 const WEBUI_CONFIG_FILE = 'webui.config.json';
 
@@ -322,7 +323,9 @@ export async function startDesktopWebUI(opts: { port?: number; allowRemote?: boo
     await stopDesktopWebUI();
   }
 
-  const allowRemote = opts.allowRemote === true;
+  // Decision edition is single-user and loopback-only: never expose the WebUI to
+  // the LAN, regardless of stored config. full + Team run as multi-user LAN servers.
+  const allowRemote = MULTI_USER_ENABLED && opts.allowRemote === true;
   const preferredPort = parsePortValue(opts.port) ?? DEFAULT_WEBUI_PORT;
   const sysDir = getSystemDir();
 
@@ -348,6 +351,10 @@ export async function startDesktopWebUI(opts: { port?: number; allowRemote?: boo
     staticDir: path.join(__dirname, '../renderer'),
     port: preferredPort,
     allowRemote,
+    // Team server only: 403 the aioncore team/meeting API at the WebUI proxy so LAN
+    // employees can't run 智囊团 (decision meetings) by hitting /api/teams* directly,
+    // even though the bundled backend still exposes it. No-op on full + Decision (both keep 智囊团).
+    blockTeamRoutes: IS_TEAM,
     // Native client installers bundled with the server, served at /api/downloads/*.
     installerDir: resolveInstallerDir(),
     // Enterprise LAN shared library, served at /api/shared-drive/*.

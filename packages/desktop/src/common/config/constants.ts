@@ -58,7 +58,44 @@ export const WEBUI_DEFAULT_PORT = (() => {
   return 25809;
 })();
 
-export const TEAM_MODE_ENABLED = true;
+// ===== Edition (build-time product variant) =====
+//
+// This core repo ships the FULL app. Two carved-down editions are produced by
+// setting AIONUI_EDITION at build time; each is distributed from its own downstream
+// repo that tracks this core (merges upstream/main for updates):
+//   - 'full'     (DEFAULT): every feature on, multi-user — today's behavior. What
+//                the core repo, `bun dev`, and a plain build produce. Inert flag.
+//   - 'decision' (决策版): single-user; core is 智囊团 (the multi-agent decision
+//                room) reframed as a 决策作战室. No workbench, no multi-user WebUI.
+//   - 'team'     (团队版): 智囊团 removed; core is office assistants + advisors +
+//                workbench, with the multi-user WebUI / LAN server.
+//
+// `__EDITION__` is injected by electron.vite.config.ts `define` (BOTH the main and
+// renderer blocks), sourced from the AIONUI_EDITION env at BUILD time — one
+// build-time source of truth across processes. The `typeof` fallback only fires in
+// non-bundled contexts (e.g. tsx scripts). Unset / unknown ⇒ 'full'.
+export type Edition = 'full' | 'decision' | 'team';
+
+declare const __EDITION__: string | undefined;
+
+function normalizeEdition(value: string | undefined): Edition {
+  return value === 'decision' || value === 'team' ? value : 'full';
+}
+
+const ENV_EDITION: Edition = normalizeEdition(typeof process !== 'undefined' ? process.env.AIONUI_EDITION : undefined);
+
+export const EDITION: Edition = typeof __EDITION__ !== 'undefined' ? normalizeEdition(__EDITION__) : ENV_EDITION;
+export const IS_DECISION = EDITION === 'decision';
+export const IS_TEAM = EDITION === 'team';
+
+// Capability flags — derived so feature gates never special-case all three editions.
+// 'full' enables everything; each edition subtracts.
+/** 智囊团 (multi-agent decision room): present in full + decision; removed in team. */
+export const TEAM_MODE_ENABLED = EDITION !== 'team';
+/** Workbench (office assistants + image studio): present in full + team; removed in decision. */
+export const WORKBENCH_ENABLED = EDITION !== 'decision';
+/** Multi-user WebUI / LAN server: present in full + team; decision is single-user, loopback-only. */
+export const MULTI_USER_ENABLED = EDITION !== 'decision';
 
 // ===== AI Provider 相关常量 =====
 

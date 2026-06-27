@@ -4,7 +4,7 @@ import { Button, Result } from '@arco-design/web-react';
 import { useTranslation } from 'react-i18next';
 import AppLoader from '@renderer/components/layout/AppLoader';
 import { useAuth } from '@renderer/hooks/context/AuthContext';
-import { TEAM_MODE_ENABLED } from '@/common/config/constants';
+import { TEAM_MODE_ENABLED, IS_DECISION, WORKBENCH_ENABLED, MULTI_USER_ENABLED } from '@/common/config/constants';
 const Conversation = React.lazy(() => import('@renderer/pages/conversation'));
 const Guid = React.lazy(() => import('@renderer/pages/guid'));
 const AgentSettings = React.lazy(() => import('@renderer/pages/settings/AgentSettings'));
@@ -29,6 +29,10 @@ const AppStorePage = React.lazy(() => import('@renderer/pages/appstore'));
 const WorkbenchPage = React.lazy(() => import('@renderer/pages/workbench'));
 const AdvisorsPage = React.lazy(() => import('@renderer/pages/advisors/AdvisorsPage'));
 const ContentHubPage = React.lazy(() => import('@renderer/pages/contentHub'));
+const DecisionHome = React.lazy(() => import('@renderer/pages/decision/DecisionHome'));
+
+// Edition-aware landing: Decision opens on the 决策作战室 home; Team on the guide page.
+const HOME_PATH = IS_DECISION ? '/decision' : '/guid';
 
 function isDynamicImportFetchError(error: Error): boolean {
   return /Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module/i.test(
@@ -147,11 +151,13 @@ const PanelRoute: React.FC<{ layout: React.ReactElement }> = ({ layout }) => {
       <Routes>
         <Route
           path='/login'
-          element={status === 'authenticated' ? <Navigate to='/guid' replace /> : withRouteFallback(LoginPage)}
+          element={status === 'authenticated' ? <Navigate to={HOME_PATH} replace /> : withRouteFallback(LoginPage)}
         />
         <Route element={<ProtectedLayout layout={layout} />}>
-          <Route index element={<Navigate to='/guid' replace />} />
+          <Route index element={<Navigate to={HOME_PATH} replace />} />
           <Route path='/guid' element={withRouteFallback(Guid)} />
+          {/* Decision edition landing (决策作战室 home). Team edition redirects to the guide. */}
+          <Route path='/decision' element={IS_DECISION ? withRouteFallback(DecisionHome) : <Navigate to='/guid' replace />} />
           <Route path='/conversation/:id' element={withRouteFallback(Conversation)} />
           <Route
             path='/team/:id'
@@ -168,9 +174,10 @@ const PanelRoute: React.FC<{ layout: React.ReactElement }> = ({ layout }) => {
           <Route path='/settings/tools' element={<Navigate to='/settings/capabilities?tab=tools' replace />} />
           <Route path='/settings/appearance' element={withRouteFallback(AppearanceSettings)} />
           <Route path='/settings/display' element={<Navigate to='/settings/appearance' replace />} />
-          <Route path='/settings/webui' element={withRouteFallback(WebuiSettings)} />
-          <Route path='/settings/client' element={withRouteFallback(ClientSettings)} />
-          <Route path='/settings/users' element={withRouteFallback(UsersSettings)} />
+          {/* Multi-user / LAN-server settings — full + Team; Decision is single-user, loopback-only. */}
+          <Route path='/settings/webui' element={MULTI_USER_ENABLED ? withRouteFallback(WebuiSettings) : <Navigate to='/settings/model' replace />} />
+          <Route path='/settings/client' element={MULTI_USER_ENABLED ? withRouteFallback(ClientSettings) : <Navigate to='/settings/model' replace />} />
+          <Route path='/settings/users' element={MULTI_USER_ENABLED ? withRouteFallback(UsersSettings) : <Navigate to='/settings/model' replace />} />
           <Route path='/settings/pet' element={withRouteFallback(PetSettings)} />
           <Route path='/settings/system' element={withRouteFallback(SystemSettings)} />
           <Route path='/settings/about' element={withRouteFallback(SystemSettings)} />
@@ -179,14 +186,15 @@ const PanelRoute: React.FC<{ layout: React.ReactElement }> = ({ layout }) => {
           <Route path='/settings' element={<Navigate to='/settings/model' replace />} />
           <Route path='/test/components' element={withRouteFallback(ComponentsShowcase)} />
           <Route path='/appstore' element={<Navigate to='/settings/appstore' replace />} />
-          <Route path='/workbench' element={withRouteFallback(WorkbenchPage)} />
+          {/* Workbench (office assistants + image studio) — full + Team; removed in Decision. */}
+          <Route path='/workbench' element={WORKBENCH_ENABLED ? withRouteFallback(WorkbenchPage) : <Navigate to='/guid' replace />} />
           <Route path='/toolbox' element={<Navigate to='/workbench' replace />} />
           <Route path='/advisors' element={withRouteFallback(AdvisorsPage)} />
           <Route path='/files' element={withRouteFallback(ContentHubPage)} />
           <Route path='/scheduled' element={withRouteFallback(ScheduledTasksPage)} />
           <Route path='/scheduled/:job_id' element={withRouteFallback(TaskDetailPage)} />
         </Route>
-        <Route path='*' element={<Navigate to={status === 'authenticated' ? '/guid' : '/login'} replace />} />
+        <Route path='*' element={<Navigate to={status === 'authenticated' ? HOME_PATH : '/login'} replace />} />
       </Routes>
     </HashRouter>
   );

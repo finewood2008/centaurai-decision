@@ -146,6 +146,9 @@ export default defineConfig(({ mode }) => {
         'process.env.NODE_ENV': JSON.stringify(mode),
         'process.env.env': JSON.stringify(process.env.env),
         'process.env.SENTRY_DSN': JSON.stringify(process.env.SENTRY_DSN ?? ''),
+        // Build-time product edition (full | decision | team), baked per installer.
+        // See common/config/constants.ts. Unset ⇒ 'full' (the unsplit app).
+        __EDITION__: JSON.stringify(process.env.AIONUI_EDITION === 'decision' ? 'decision' : process.env.AIONUI_EDITION === 'team' ? 'team' : 'full'),
       },
     },
 
@@ -317,6 +320,10 @@ export default defineConfig(({ mode }) => {
         // can show it without importing packages/desktop/package.json, which is
         // a workspace-internal placeholder frozen at "0.0.0".
         __APP_VERSION__: JSON.stringify(rootPackageJson.version),
+        // Build-time product edition (full | decision | team), baked per installer.
+        // Both define blocks read the SAME AIONUI_EDITION env → single build-time
+        // source of truth across main + renderer. Unset ⇒ 'full' (the unsplit app).
+        __EDITION__: JSON.stringify(process.env.AIONUI_EDITION === 'decision' ? 'decision' : process.env.AIONUI_EDITION === 'team' ? 'team' : 'full'),
         global: 'globalThis',
       },
       optimizeDeps: {

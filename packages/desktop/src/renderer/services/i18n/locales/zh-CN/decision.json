@@ -1,0 +1,30 @@
+{
+  "subtitle": "你的决策作战室 —— 随时召集智囊团，听取多方意见，快速拍板。",
+  "startMeeting": "发起决策会议",
+  "greeting": {
+    "morning": "早上好，老板",
+    "afternoon": "下午好，老板",
+    "evening": "晚上好，老板",
+    "night": "夜深了，老板"
+  },
+  "ongoing": {
+    "title": "进行中的决策",
+    "empty": "还没有进行中的决策。点击「发起决策会议」开一场。"
+  },
+  "intel": {
+    "title": "最新情报",
+    "tag": "团队版回传",
+    "empty": "等待团队版接入 —— 局域网回传将在后续阶段开通。"
+  },
+  "archive": {
+    "title": "决策档案",
+    "desc": "历史决议与方案书",
+    "count": "已归档 {{count}} 场"
+  },
+  "advisors": {
+    "title": "顾问团",
+    "desc": "随时拉进作战室",
+    "count": "{{count}} 位待命"
+  },
+  "enter": "进入作战室"
+}

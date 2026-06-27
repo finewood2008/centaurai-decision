@@ -47,6 +47,13 @@ export type WebHostOptions = {
   imageKey?: string;
   /** Host opencut origin reverse-proxied at /workbench/video/* (default localhost:3000). */
   videoUpstreamUrl?: string;
+  /**
+   * When true, the WebUI proxy returns 403 for the aioncore team/meeting API
+   * (`/api/teams*`). Set by the Team edition so LAN employees can't run 智囊团
+   * (decision meetings) by hitting the backend directly. The feature's UI is
+   * already removed from the Team renderer; this closes the API-level hole.
+   */
+  blockTeamRoutes?: boolean;
   dataDir?: string;
   logDir?: string;
   dirs?: BackendSystemDirs;
