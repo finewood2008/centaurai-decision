@@ -11,7 +11,14 @@ import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';
 import { useSettingsViewMode } from '../settingsViewContext';
 import { isElectronDesktop, openExternalUrl } from '@/renderer/utils/platform';
+import { IS_DECISION, IS_TEAM } from '@/common/config/constants';
 import FeedbackReportModal from './FeedbackReportModal';
+
+// Per-edition identity + update source. Each edition installs from — and auto-updates
+// against — its OWN downstream repo (see electron-builder.{decision,team}.yml publish).
+const EDITION_LABEL = IS_DECISION ? '决策版' : IS_TEAM ? '团队版' : '';
+const EDITION_REPO = IS_DECISION ? 'finewood2008/centaurai-decision' : IS_TEAM ? 'finewood2008/centaurai-team' : 'finewood2008/centaurai-station';
+const EDITION_REPO_URL = `https://github.com/${EDITION_REPO}`;
 
 // __APP_VERSION__ is injected by electron.vite.config.ts `define:` from the
 // repo-root package.json. The previous `import packageJson from
@@ -59,12 +66,12 @@ const AboutModalContent: React.FC = () => {
   const linkItems: LinkItem[] = [
     {
       title: t('settings.helpDocumentation'),
-      url: 'https://github.com/iOfficeAI/CentaurAI/wiki',
+      url: `${EDITION_REPO_URL}/wiki`,
       icon: <Right theme='outline' size='16' />,
     },
     {
       title: t('settings.updateLog'),
-      url: 'https://github.com/iOfficeAI/CentaurAI/releases',
+      url: `${EDITION_REPO_URL}/releases`,
       icon: <Right theme='outline' size='16' />,
     },
     {
@@ -102,21 +109,27 @@ const AboutModalContent: React.FC = () => {
             <Typography.Text className='text-14px text-t-secondary mb-12px text-center'>
               {t('settings.appDescription')}
             </Typography.Text>
-            <div className='flex items-center justify-center gap-8px mb-16px'>
+            <div className='flex items-center justify-center gap-8px mb-8px'>
               <span className='px-10px py-4px rd-6px text-13px bg-fill-2 text-t-primary font-500'>
                 v{__APP_VERSION__}
               </span>
+              {EDITION_LABEL && (
+                <span className='px-10px py-4px rd-6px text-13px bg-[var(--color-primary-light-1)] text-[color:var(--primary)] font-600'>
+                  {EDITION_LABEL}
+                </span>
+              )}
               <div
                 className='text-t-primary cursor-pointer hover:text-t-secondary transition-colors p-4px'
-                onClick={() =>
-                  openLink('https://github.com/iOfficeAI/CentaurAI').catch((error) =>
-                    console.error('Failed to open link:', error)
-                  )
-                }
+                onClick={() => openLink(EDITION_REPO_URL).catch((error) => console.error('Failed to open link:', error))}
               >
                 <Github theme='outline' size='20' />
               </div>
             </div>
+            {EDITION_LABEL && (
+              <Typography.Text className='text-12px text-t-tertiary text-center mb-16px'>
+                {EDITION_LABEL}的更新来自仓库 {EDITION_REPO}
+              </Typography.Text>
+            )}
 
             {/* Check Update Section */}
             {isElectron && (
