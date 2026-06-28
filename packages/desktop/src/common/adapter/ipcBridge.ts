@@ -1375,6 +1375,30 @@ export interface IWebUIStatus {
   entryHealth?: IWebUIEntryHealth | null;
 }
 
+/** Live network reachability for the remote-access panel (from "repair connection"). */
+export interface IWebUIConnectivity {
+  running: boolean;
+  allowRemote: boolean;
+  /** '0.0.0.0' = reachable on the LAN, '127.0.0.1' = loopback only. */
+  boundHost: string;
+  port: number;
+  lanIP: string | null;
+  /** All plausible LAN IPs (best first) in case the auto-picked one is wrong. */
+  lanIPCandidates: string[];
+  /** URL to give LAN clients; null when not LAN-exposed or no LAN IP found. */
+  accessUrl: string | null;
+  /** Whether web-host can reach the aioncore backend right now. */
+  backendReachable: boolean;
+  /** A local TUN proxy/VPN that may hijack LAN clients' traffic to this server. */
+  proxy: { detected: boolean; interfaces: string[] };
+}
+
+/** Result of "repair connection": entry-HTML self-heal + connectivity diagnostics. */
+export interface IWebUIRepairResult {
+  entryHealth: IWebUIEntryHealth | null;
+  connectivity: IWebUIConnectivity;
+}
+
 export interface IWebUIStartResult {
   port: number;
   allowRemote: boolean;
@@ -1388,9 +1412,9 @@ export const webui = {
   getStatus: bridge.buildProvider<IWebUIStatus, void>('webui.get-status'),
   start: bridge.buildProvider<IWebUIStartResult, { port?: number; allowRemote?: boolean }>('webui.start'),
   stop: bridge.buildProvider<void, void>('webui.stop'),
-  // "Repair connection": force a check + heal of the WebUI entry page. Returns
-  // the resulting health, or null when no WebUI server is running.
-  repairConnection: bridge.buildProvider<IWebUIEntryHealth | null, void>('webui.repair-connection'),
+  // "Repair connection": force a check + heal of the WebUI entry page AND gather
+  // connectivity diagnostics (LAN URL, backend reachability, proxy interference).
+  repairConnection: bridge.buildProvider<IWebUIRepairResult, void>('webui.repair-connection'),
   statusChanged: bridge.buildEmitter<{
     running: boolean;
     port?: number;
