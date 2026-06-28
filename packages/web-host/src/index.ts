@@ -3,6 +3,8 @@ import type { WebHostOptions, WebHostHandle } from './types.js';
 export type { AppMetadata, BackendBinaryResolver, WebHostOptions, WebHostHandle } from './types.js';
 export { startStaticServer, stopStaticServer } from './static-server.js';
 export type { StaticServerOptions, StaticServerHandle } from './static-server.js';
+export type { EntryGuard, EntryHealth, EntryHealthStatus } from './entry-html-guard.js';
+export { createEntryGuard, isValidEntryHtml } from './entry-html-guard.js';
 export type { SharedFile, SharedCategory, SharedAddInput } from './shared-drive.js';
 export { sharedList, sharedCategories, sharedRemove, sharedBlobInfo, sharedAddFromPath } from './shared-drive.js';
 export type { NasEntry, NasListing, NasFileInfo, NasTrashEntry, NasWalkFile, NasIndexProgress } from './nas-drive.js';
@@ -96,6 +98,8 @@ export async function startWebHost(opts: WebHostOptions): Promise<WebHostHandle>
     localUrl: staticHandle.localUrl,
     networkUrl: staticHandle.networkUrl,
     lanIP: staticHandle.lanIP,
+    inspectEntry: staticHandle.inspectEntry,
+    repairEntry: staticHandle.repairEntry,
     async stop() {
       await staticHandle.stop();
       await backendHandle.stop();
