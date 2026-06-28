@@ -304,11 +304,22 @@ class MeetingEngine {
     if (!this.warmup) {
       this.warmup = ipcBridge.team.ensureSession
         .invoke({ team_id: this.team.id })
-        // A freshly created team's first GET can race agent provisioning, leaving
-        // empty conversation_ids (→ canStart stays false → auto-start never fires).
-        // Refetch the team once the session is warm so canStart flips true.
-        .then(() => {
-          void globalMutate(`team/${this.team.id}`);
+        // A freshly created team provisions agent conversations ASYNCHRONOUSLY — and
+        // teammate conversation_ids often land AFTER ensureSession resolves. A single
+        // refetch can therefore miss them, so a selected teammate stays invisible in
+        // the roster (moderator/panelists require a conversation_id) and the boss thinks
+        // their pick was lost. Poll the team until every agent has a conversation_id,
+        // pushing each fresh snapshot into the SWR cache so the roster fills in.
+        .then(async () => {
+          for (let i = 0; i < 8; i++) {
+            const fresh: TTeam | null = await ipcBridge.team.get.invoke({ id: this.team.id }).catch((): null => null);
+            if (fresh) {
+              await globalMutate(`team/${this.team.id}`, fresh, false);
+              const agents = fresh.agents ?? [];
+              if (agents.length > 0 && agents.every((a) => a.conversation_id)) break;
+            }
+            await new Promise((r) => setTimeout(r, 1000));
+          }
         })
         .catch(() => {
           this.warmup = null;
