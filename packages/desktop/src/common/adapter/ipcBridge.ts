@@ -1351,6 +1351,17 @@ export const task = {
 // operations route to backend /api/webui/* under local-mode.
 // ---------------------------------------------------------------------------
 
+/** Health of the WebUI's SPA entry document, shown in the remote-access panel. */
+export interface IWebUIEntryHealth {
+  status: 'healthy' | 'healed' | 'unavailable';
+  /** Times the page was auto-restored from backup since the server started. */
+  healedCount: number;
+  /** A known-good copy exists to heal from. */
+  hasBackup: boolean;
+  /** The live page file is valid right now. */
+  liveOk: boolean;
+}
+
 export interface IWebUIStatus {
   running: boolean;
   port: number;
@@ -1360,6 +1371,8 @@ export interface IWebUIStatus {
   lanIP?: string;
   adminUsername: string;
   initialPassword?: string;
+  /** Present only while the server is running; null when health is unknown. */
+  entryHealth?: IWebUIEntryHealth | null;
 }
 
 export interface IWebUIStartResult {
@@ -1375,6 +1388,9 @@ export const webui = {
   getStatus: bridge.buildProvider<IWebUIStatus, void>('webui.get-status'),
   start: bridge.buildProvider<IWebUIStartResult, { port?: number; allowRemote?: boolean }>('webui.start'),
   stop: bridge.buildProvider<void, void>('webui.stop'),
+  // "Repair connection": force a check + heal of the WebUI entry page. Returns
+  // the resulting health, or null when no WebUI server is running.
+  repairConnection: bridge.buildProvider<IWebUIEntryHealth | null, void>('webui.repair-connection'),
   statusChanged: bridge.buildEmitter<{
     running: boolean;
     port?: number;

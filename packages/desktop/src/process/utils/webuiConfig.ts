@@ -10,7 +10,7 @@ import * as path from 'path';
 import { networkInterfaces } from 'os';
 import { getSystemDir } from './initStorage';
 import { httpRequest } from '@/common/adapter/httpBridge';
-import { startWebHost, type WebHostHandle } from '@aionui/web-host';
+import { startWebHost, type WebHostHandle, type EntryHealth } from '@aionui/web-host';
 import { getDataPath } from './utils';
 import { IS_TEAM, MULTI_USER_ENABLED } from '@/common/config/constants';
 
@@ -437,6 +437,36 @@ export function getDesktopWebUIStatus(): {
     lanIP: currentHandle.lanIP,
     initialPassword: currentInitialPassword,
   };
+}
+
+/**
+ * Read-only health of the running WebUI's SPA entry document (out/renderer/
+ * index.html), surfaced in the remote-access settings panel so the admin can
+ * see whether LAN access is serving a real page, was auto-healed, or needs a
+ * rebuild. Returns null when no WebUI is running.
+ */
+export async function getDesktopWebUIEntryHealth(): Promise<EntryHealth | null> {
+  if (!currentHandle) return null;
+  try {
+    return await currentHandle.inspectEntry();
+  } catch (error) {
+    console.error('[WebUI] entry-health inspect failed:', error);
+    return null;
+  }
+}
+
+/**
+ * User-triggered "repair connection": force a check + heal of the entry
+ * document and return the resulting health. Returns null when no WebUI runs.
+ */
+export async function repairDesktopWebUIEntry(): Promise<EntryHealth | null> {
+  if (!currentHandle) return null;
+  try {
+    return await currentHandle.repairEntry();
+  } catch (error) {
+    console.error('[WebUI] entry repair failed:', error);
+    return null;
+  }
 }
 
 export const restoreDesktopWebUIFromPreferences = async (opts?: {

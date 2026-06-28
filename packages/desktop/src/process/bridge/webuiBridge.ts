@@ -20,6 +20,8 @@ import {
   startDesktopWebUI,
   stopDesktopWebUI,
   getDesktopWebUIStatus,
+  getDesktopWebUIEntryHealth,
+  repairDesktopWebUIEntry,
   setDesktopWebUIInitialPassword,
 } from '@process/utils/webuiConfig';
 import { advertiseServer, discoverServersOnce, type AdvertiseHandle } from '@process/discovery/lanDiscovery';
@@ -132,7 +134,14 @@ export function initWebuiBridge(): void {
   ipcBridge.webui.getStatus.provider(async () => {
     const snapshot = getDesktopWebUIStatus();
     const adminUsername = await fetchAdminUsername();
-    return { ...snapshot, adminUsername };
+    // Entry-page health only exists while the server runs; null otherwise.
+    const entryHealth = snapshot.running ? await getDesktopWebUIEntryHealth() : null;
+    return { ...snapshot, adminUsername, entryHealth };
+  });
+
+  // "Repair connection": force a re-check + heal of the WebUI entry page.
+  ipcBridge.webui.repairConnection.provider(async () => {
+    return repairDesktopWebUIEntry();
   });
 
   ipcBridge.webui.start.provider(async (params) => {
