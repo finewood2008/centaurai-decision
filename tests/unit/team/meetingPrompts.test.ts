@@ -86,7 +86,7 @@ describe('per-form prompt builders', () => {
   const topic = '要不要进军海外市场';
 
   it('exposes all four discussion formats for the picker', () => {
-    expect(MEETING_FORMS.map((f) => f.id)).toEqual(['roundtable', 'redteam', 'tournament', 'diverge']);
+    expect(MEETING_FORMS.map((f) => f.id)).toEqual(['roundtable', 'redteam', 'tournament', 'diverge', 'deepdive']);
     for (const f of MEETING_FORMS) {
       expect(f.label.length).toBeGreaterThan(0);
       expect(f.hint.length).toBeGreaterThan(0);

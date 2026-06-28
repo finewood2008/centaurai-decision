@@ -45,8 +45,8 @@ describe('MeetingRoster', () => {
 
     const roster = screen.getByTestId('meeting-roster');
     expect(roster).not.toHaveAttribute('data-compact');
-    expect(screen.getByText('主持人')).toBeInTheDocument();
-    expect(screen.getAllByText('aionrs').length).toBeGreaterThan(0);
+    expect(screen.getByText(/主持人/)).toBeInTheDocument();
+    expect(screen.getAllByText(/aionrs/).length).toBeGreaterThan(0);
   });
 
   it('uses a compact participant strip after a meeting starts', () => {
