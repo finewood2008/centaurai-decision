@@ -91,14 +91,15 @@ export function buildModeratorOpeningPrompt(topic: string, panelists: PanelistBr
 export function buildModeratorPositionPrompt(topic: string, panelists: PanelistBrief[], framing?: string): string {
   return [
     framing ? framing : '',
-    '你是这场决策会议的主持人，但你同时也是一位重要的决策参谋——本环节请你和专家们同时发声。',
+    '你是这场决策会议的主持人，也是整场会议的核心。请你先开场（面向【老板】，用主持人的口吻）。',
     `决策议题：${topic}`,
-    `同场专家及其主攻视角：${lensRoster(panelists)}`,
+    `与会专家及其主攻视角：${lensRoster(panelists)}`,
     '',
-    '请完成（务实有力、不说套话）：',
+    '请完成开场（务实有力、可稍长、不说套话）：',
     '1）一两句点破这个决策【真正的核心张力】（难在哪），并拆出 2-3 个必须辩清的关键问题；',
-    '2）给出你自己的【初步判断 / 推荐方向】，要具体、可落地，敢于亮明立场。',
-    '只输出你的发言本身。',
+    '2）给出你自己的【初步判断 / 倾向】，敢于亮明立场（你是核心，不要和稀泥）；',
+    '3）告诉老板：接下来各位专家会【各自独立给出立场】，再进入交锋，最后由你综合、请老板拍板；如有特别约束（预算/时间/风险偏好/红线）随时插话。',
+    '只输出开场词本身。',
   ]
     .filter(Boolean)
     .join('\n');

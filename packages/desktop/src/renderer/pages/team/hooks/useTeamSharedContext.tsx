@@ -70,10 +70,10 @@ type ProviderProps = {
  * are untouched.
  */
 export const TeamSharedContextRoot: React.FC<ProviderProps> = ({ team, children }) => {
-  const [enabled, setEnabledState] = useState<boolean>(() => readStore()[team.id] ?? false);
+  const [enabled, setEnabledState] = useState<boolean>(() => readStore()[team.id] ?? true);
 
   useEffect(() => {
-    setEnabledState(readStore()[team.id] ?? false);
+    setEnabledState(readStore()[team.id] ?? true);
   }, [team.id]);
 
   const setEnabled = useCallback(

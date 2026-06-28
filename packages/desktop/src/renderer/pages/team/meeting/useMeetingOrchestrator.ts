@@ -693,22 +693,20 @@ class MeetingEngine {
         }
       };
 
-      // ① 并行立场 — EVERY participant (moderator + all panelists) answers the topic
-      //    SIMULTANEOUSLY, rendered side-by-side. The moderator both frames the core
-      //    tension and gives its own substantive take; the panelist ask varies by form.
       const refNote = reference ? `\n\n${reference}\n\n请充分参考上述背景资料。` : '';
+      // The moderator (the meeting's core role) opens FIRST: frames the tension, gives
+      // its own take, and sets the agenda — then hands off to the panel.
+      await speak(mod, '开场', buildModeratorPositionPrompt(topic, briefs, dept?.framing) + refNote);
+      // ① 并行立场 — the PANEL answers SIMULTANEOUSLY (only this first round is parallel,
+      //    for speed); rendered as a horizontal collapsed strip. Step ② onward is one-by-one.
       const panelOpening = (p: Participant): string => {
         const lens = lensByPanel.get(p.id);
         if (form === 'tournament') return buildProposalPrompt({ topic, persona: p.name, lens, reference }) + refNote;
         if (form === 'diverge') return buildDivergePrompt({ topic, persona: p.name, lens }) + refNote;
         return buildPanelistPositionPrompt({ topic, persona: p.name, lens, priorContext: '' }) + refNote;
       };
-      const openers: Array<{ p: Participant; prompt: string }> = [
-        { p: mod, prompt: buildModeratorPositionPrompt(topic, briefs, dept?.framing) + refNote },
-        ...panel.map((p) => ({ p, prompt: panelOpening(p) })),
-      ];
-      // Fire every turn up-front (all columns appear at once), then stream concurrently.
-      await Promise.all(openers.map(({ p, prompt }) => speak(p, '并行立场', prompt, true)));
+      // Fire every panelist turn up-front (all appear at once), then stream concurrently.
+      await Promise.all(panel.map((p) => speak(p, '并行立场', panelOpening(p), true)));
       if (!(await pauseAndWait(1, '并行立场'))) return;
 
       // ② 交锋讨论 — form-specific (the parallel positions above are the shared input).
