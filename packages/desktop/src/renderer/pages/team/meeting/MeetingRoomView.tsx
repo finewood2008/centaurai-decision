@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button, Message, Popover, Spin } from '@arco-design/web-react';
-import { Copy, Down, Download, Notes, PeoplePlus, Plus, RightOne, VideoConference } from '@icon-park/react';
+import { Copy, Download, Notes, PeoplePlus, Plus, RightOne, VideoConference } from '@icon-park/react';
 import type { TTeam } from '@/common/types/team/teamTypes';
 import MarkdownView from '@/renderer/components/Markdown';
 import { emitter } from '@/renderer/utils/emitter';
@@ -44,63 +44,61 @@ const TurnAvatar: React.FC<{ icon?: string; agentType: string; name: string }> =
 };
 
 /**
- * Step-① 并行立场 presentation: a horizontal strip of COLLAPSED chips (one per agent,
- * all speaking at once) — the user clicks a chip to expand and read that agent's take.
- * Only the first round is parallel; later rounds render one-by-one as full cards.
+ * Step-① 并行立场 presentation: the 顾问墙 — every agent answers at once, filling the
+ * view as a dense grid of LIVE-streaming cards (each glowing while speaking), so the
+ * boss feels surrounded by a wall of AI thinking for them simultaneously. Only this
+ * first round is parallel; later rounds render one-by-one as full cards.
  */
-const ParallelTurnStrip: React.FC<{ turns: MeetingTurn[] }> = ({ turns }) => {
+const ParallelTurnWall: React.FC<{ turns: MeetingTurn[] }> = ({ turns }) => {
   const { t } = useTranslation();
-  const [open, setOpen] = useState<Record<string, boolean>>({});
+  const speaking = turns.filter((tn) => tn.status === 'speaking').length;
+  // Denser columns as the council grows, so the wall stays full and immersive.
+  const cols =
+    turns.length <= 2
+      ? 'sm:grid-cols-2'
+      : turns.length <= 6
+        ? 'sm:grid-cols-2 lg:grid-cols-3'
+        : 'sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4';
   return (
-    <div className='flex flex-col gap-8px'>
-      <div className='flex items-center gap-7px text-12px text-[color:var(--bg-6)]'>
-        <span className='shrink-0 px-7px h-18px flex items-center rd-full bg-[var(--bg-2)]'>并行立场</span>
-        <span>{t('team.meeting.parallelHint', { defaultValue: '专家们同时发言，点开任意一位查看' })}</span>
+    <div className='flex flex-col gap-10px'>
+      <div className='flex items-center gap-7px text-12px font-medium text-[color:var(--primary)]'>
+        <span className={`w-7px h-7px rd-full bg-[var(--primary)] ${speaking > 0 ? 'animate-pulse' : ''}`} aria-hidden='true' />
+        <span>
+          {turns.length} {t('team.meeting.parallelWall', { defaultValue: '位 AI 顾问同时发言中，群策群力' })}
+        </span>
       </div>
-      <div className='flex flex-wrap gap-8px'>
+      <div className={`grid grid-cols-1 ${cols} gap-12px`}>
         {turns.map((turn) => {
-          const isOpen = !!open[turn.id];
+          const isSpeaking = turn.status === 'speaking';
           return (
-            <button
+            <div
               key={turn.id}
-              type='button'
               data-testid={`meeting-turn-${turn.participantId}`}
-              onClick={() => setOpen((p) => ({ ...p, [turn.id]: !p[turn.id] }))}
-              className={`flex items-center gap-7px pl-7px pr-10px h-36px rd-12px border border-solid cursor-pointer transition-colors ${
-                isOpen
-                  ? 'border-[color:var(--color-primary-light-3)] bg-[color:var(--color-primary-light-1)]'
-                  : 'border-[color:var(--border-light)] bg-[var(--bg-1)] hover:bg-[var(--bg-2)]'
+              className={`flex flex-col rd-14px border border-solid overflow-hidden transition-shadow bg-[var(--bg-1)] ${
+                isSpeaking ? 'border-[color:var(--color-primary-light-3)]' : 'border-[color:var(--border-light)]'
               }`}
+              style={isSpeaking ? { boxShadow: '0 0 0 2px var(--color-primary-light-2), 0 6px 24px -6px var(--color-primary-light-3)' } : undefined}
             >
-              <TurnAvatar icon={turn.icon} agentType={turn.agent_type} name={turn.name} />
-              <span className='text-13px font-medium text-[color:var(--text-primary)] max-w-160px truncate'>{turn.name}</span>
-              {turn.status === 'speaking' ? (
-                <Spin loading size={12} className='shrink-0' />
-              ) : turn.status === 'error' ? (
-                <span className='shrink-0 text-11px text-[color:var(--danger)]'>{t('team.meeting.turn.failed', { defaultValue: '未发言' })}</span>
-              ) : (
-                <Down theme='outline' size={13} className={`shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-              )}
-            </button>
+              <div className='flex items-center gap-8px px-12px h-40px shrink-0 border-b border-solid border-[color:var(--border-light)]'>
+                <TurnAvatar icon={turn.icon} agentType={turn.agent_type} name={turn.name} />
+                <span className='text-13px font-semibold text-[color:var(--text-primary)] truncate flex-1'>{turn.name}</span>
+                {isSpeaking ? (
+                  <Spin loading size={12} className='shrink-0' />
+                ) : turn.status === 'error' ? (
+                  <span className='shrink-0 text-11px text-[color:var(--danger)]'>{t('team.meeting.turn.failed', { defaultValue: '未发言' })}</span>
+                ) : null}
+              </div>
+              <div className='px-14px py-11px text-13px leading-[1.7] overflow-y-auto max-h-300px min-h-110px [scrollbar-width:thin]'>
+                {turn.text.trim() ? (
+                  <MarkdownView>{stripResolutionMarkers(turn.text)}</MarkdownView>
+                ) : (
+                  <span className='text-[color:var(--bg-6)]'>{t('team.meeting.thinking', { defaultValue: '思考中…' })}</span>
+                )}
+              </div>
+            </div>
           );
         })}
       </div>
-      {turns
-        .filter((tn) => open[tn.id] && tn.text.trim())
-        .map((turn) => (
-          <div key={turn.id} className='rd-12px border border-solid border-[color:var(--border-light)] bg-[var(--bg-1)] overflow-hidden'>
-            <div className='flex items-center gap-8px px-14px h-38px border-b border-solid border-[color:var(--border-light)]'>
-              <TurnAvatar icon={turn.icon} agentType={turn.agent_type} name={turn.name} />
-              <span className='text-13px font-semibold text-[color:var(--text-primary)]'>{turn.name}</span>
-              <span className='shrink-0 px-7px h-18px flex items-center rd-full text-11px leading-none bg-[var(--bg-2)] text-[color:var(--bg-6)]'>
-                {turn.phaseLabel}
-              </span>
-            </div>
-            <div className='px-16px py-12px text-14px leading-[1.75]'>
-              <MarkdownView>{stripResolutionMarkers(turn.text)}</MarkdownView>
-            </div>
-          </div>
-        ))}
     </div>
   );
 };
@@ -312,7 +310,7 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
           <div className='flex flex-col gap-16px py-20px px-24px'>
             {turnGroups.map((group, gi) =>
               group[0].parallel ? (
-                <ParallelTurnStrip key={`pg-${gi}`} turns={group} />
+                <ParallelTurnWall key={`pg-${gi}`} turns={group} />
               ) : (
                 renderTurnCard(group[0])
               )
