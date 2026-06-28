@@ -354,6 +354,7 @@
   "webui.repairNoServer": "請先啟用 WebUI 再修復。",
   "webui.repairFailed": "修復失敗，請重試。",
   "webui.diagAccessUrl": "區域網路存取位址",
+  "webui.diagTailscaleUrl": "Tailscale 存取位址（任何地方）",
   "webui.diagBackendOk": "後端服務正常",
   "webui.diagBackendDown": "後端服務無法連線，遠端存取無法運作。",
   "webui.diagLoopbackOnly": "未開啟區域網路存取，目前僅本機可存取。",

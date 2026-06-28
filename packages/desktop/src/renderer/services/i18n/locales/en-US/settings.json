@@ -357,6 +357,7 @@
   "webui.repairNoServer": "Enable WebUI first, then repair.",
   "webui.repairFailed": "Repair failed. Please try again.",
   "webui.diagAccessUrl": "LAN access URL",
+  "webui.diagTailscaleUrl": "Tailscale URL (from anywhere)",
   "webui.diagBackendOk": "Backend service reachable",
   "webui.diagBackendDown": "Backend service unreachable — remote access can't work.",
   "webui.diagLoopbackOnly": "LAN access is off — only this machine can connect.",

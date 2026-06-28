@@ -12,7 +12,7 @@ import { getSystemDir } from './initStorage';
 import { httpRequest } from '@/common/adapter/httpBridge';
 import { startWebHost, type WebHostHandle, type EntryHealth } from '@aionui/web-host';
 import { getDataPath } from './utils';
-import { IS_TEAM, MULTI_USER_ENABLED } from '@/common/config/constants';
+import { IS_TEAM, REMOTE_ACCESS_ENABLED } from '@/common/config/constants';
 
 const WEBUI_CONFIG_FILE = 'webui.config.json';
 
@@ -360,12 +360,39 @@ export const getLanIPCandidates = (): string[] => {
 
 const getLanIP = (): string | null => getLanIPCandidates()[0] ?? null;
 
+/** Tailscale assigns each node an address in 100.64.0.0/10 (CGNAT). */
+const isTailscaleAddr = (addr: string): boolean => {
+  const m = /^100\.(\d+)\./.exec(addr);
+  return !!(m && Number(m[1]) >= 64 && Number(m[1]) <= 127);
+};
+
+/** Clash/mihomo TUN mode hijacks traffic via the 198.18.0.0/15 benchmark range. */
+const isClashTunAddr = (addr: string): boolean => /^198\.1[89]\./.test(addr);
+
 /**
- * Detect a TUN-mode proxy / VPN on THIS host (Clash/mihomo `utun` on 198.18.x,
- * Tailscale 100.64/10, WireGuard, …). When present, LAN clients that ALSO run a
- * proxy commonly have their requests to this server hijacked into the tunnel
- * unless they bypass the LAN — the #1 cause of "the LAN address won't open" in
- * proxy-heavy setups. Surfaced as an advisory in the remote-access panel.
+ * This host's Tailscale node IP (100.64/10), if it is on the tailnet. When the
+ * WebUI is bound to 0.0.0.0 this address is reachable from ANY tailnet device —
+ * "from anywhere" — so we surface it as the PRIMARY remote-access URL.
+ */
+const getTailscaleIP = (): string | null => {
+  const nets = networkInterfaces();
+  for (const name of Object.keys(nets)) {
+    const netInfo = nets[name];
+    if (!netInfo) continue;
+    for (const net of netInfo) {
+      const isIPv4 = net.family === 'IPv4' || (net.family as unknown) === 4;
+      if (isIPv4 && !net.internal && isTailscaleAddr(net.address)) return net.address;
+    }
+  }
+  return null;
+};
+
+/**
+ * Detect a TUN proxy that HIJACKS LAN traffic (Clash/mihomo on 198.18.x). When
+ * present, LAN clients that also run such a proxy have requests to this server
+ * swallowed by the tunnel unless they bypass the LAN — the #1 cause of "the LAN
+ * address won't open". Tailscale (100.64/10) is deliberately NOT flagged: it does
+ * not hijack the LAN and is in fact our preferred remote path.
  */
 const detectProxyInterference = (): { detected: boolean; interfaces: string[] } => {
   const nets = networkInterfaces();
@@ -373,11 +400,10 @@ const detectProxyInterference = (): { detected: boolean; interfaces: string[] } 
   for (const name of Object.keys(nets)) {
     const netInfo = nets[name];
     if (!netInfo) continue;
-    const tunnelName = /^(utun|tun|wg|ppp|ipsec)/i.test(name);
     for (const net of netInfo) {
       const isIPv4 = net.family === 'IPv4' || (net.family as unknown) === 4;
       if (!isIPv4 || net.internal) continue;
-      if (tunnelName || isProxyOrCgnatAddr(net.address)) hits.push(`${name} (${net.address})`);
+      if (isClashTunAddr(net.address)) hits.push(`${name} (${net.address})`);
     }
   }
   return { detected: hits.length > 0, interfaces: hits };
@@ -405,9 +431,11 @@ export async function startDesktopWebUI(opts: { port?: number; allowRemote?: boo
     await stopDesktopWebUI();
   }
 
-  // Decision edition is single-user and loopback-only: never expose the WebUI to
-  // the LAN, regardless of stored config. full + Team run as multi-user LAN servers.
-  const allowRemote = MULTI_USER_ENABLED && opts.allowRemote === true;
+  // Remote access is available in all editions (decision included — single-user but
+  // the owner reaches their own AI over the LAN and/or Tailscale). Binding 0.0.0.0
+  // exposes it on the LAN AND on the Tailscale 100.x interface; the auth gate is on
+  // whenever allowRemote is true (static-server `requireAuth = allowRemote`).
+  const allowRemote = REMOTE_ACCESS_ENABLED && opts.allowRemote === true;
   const preferredPort = parsePortValue(opts.port) ?? DEFAULT_WEBUI_PORT;
   const sysDir = getSystemDir();
 
@@ -552,6 +580,10 @@ export type RemoteAccessConnectivity = {
   lanIPCandidates: string[];
   /** URL to hand to LAN clients (null when not LAN-exposed or no LAN IP). */
   accessUrl: string | null;
+  /** Tailscale node — reachable "from anywhere" on the tailnet; preferred. */
+  tailscale: { detected: boolean; ip: string | null; accessUrl: string | null };
+  /** The URL to recommend FIRST: Tailscale if present (works anywhere), else LAN. */
+  primaryAccessUrl: string | null;
   /** Whether web-host can currently reach the aioncore backend. */
   backendReachable: boolean;
   proxy: { detected: boolean; interfaces: string[] };
@@ -585,6 +617,12 @@ export async function getRemoteAccessConnectivity(): Promise<RemoteAccessConnect
   const port = currentHandle?.port ?? DEFAULT_WEBUI_PORT;
   const boundHost = allowRemote ? '0.0.0.0' : '127.0.0.1';
   const accessUrl = allowRemote && lanIP ? `http://${lanIP}:${port}` : null;
+  const tsIP = getTailscaleIP();
+  // Bound to 0.0.0.0 → the Tailscale interface is served too, so the 100.x node IP
+  // is reachable from any tailnet device.
+  const tsAccessUrl = allowRemote && tsIP ? `http://${tsIP}:${port}` : null;
+  // Priority: Tailscale first (works from anywhere), then LAN (on-LAN only).
+  const primaryAccessUrl = tsAccessUrl ?? accessUrl;
   const backendPort = (globalThis as typeof globalThis & { __backendPort?: number }).__backendPort;
   const backendReachable = typeof backendPort === 'number' ? await probeBackendReachable(backendPort) : false;
   return {
@@ -595,6 +633,8 @@ export async function getRemoteAccessConnectivity(): Promise<RemoteAccessConnect
     lanIP,
     lanIPCandidates: candidates,
     accessUrl,
+    tailscale: { detected: tsIP !== null, ip: tsIP, accessUrl: tsAccessUrl },
+    primaryAccessUrl,
     backendReachable,
     proxy: detectProxyInterference(),
   };

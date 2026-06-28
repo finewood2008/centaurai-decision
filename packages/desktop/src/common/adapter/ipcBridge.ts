@@ -1387,6 +1387,10 @@ export interface IWebUIConnectivity {
   lanIPCandidates: string[];
   /** URL to give LAN clients; null when not LAN-exposed or no LAN IP found. */
   accessUrl: string | null;
+  /** Tailscale node (reachable from anywhere on the tailnet); preferred path. */
+  tailscale: { detected: boolean; ip: string | null; accessUrl: string | null };
+  /** URL to recommend FIRST: Tailscale if present, else LAN. */
+  primaryAccessUrl: string | null;
   /** Whether web-host can reach the aioncore backend right now. */
   backendReachable: boolean;
   /** A local TUN proxy/VPN that may hijack LAN clients' traffic to this server. */
