@@ -123,7 +123,10 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
             disabled={!canStart || !topic.trim()}
             onClick={() => {
               // Decision: omit form → startMeeting falls back to the team-fixed workflow (state.form).
-              startMeeting(topic, IS_DECISION ? { useKnowledgeBase, attachments } : { useKnowledgeBase, attachments, form });
+              startMeeting(
+                topic,
+                IS_DECISION ? { useKnowledgeBase, attachments } : { useKnowledgeBase, attachments, form }
+              );
               onTopicChange('');
               setAttachments([]);
             }}

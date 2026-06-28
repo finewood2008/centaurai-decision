@@ -39,13 +39,13 @@
 
 ## 2. 术语
 
-| 术语 | 含义 |
-| --- | --- |
-| **A2A** | Agent-to-Agent，本文档指决策侧 agent 与团队侧 agent 之间的跨机器对话。本期采用**轻量自定义信封**，非 Google A2A 标准协议。 |
-| **情报官 agent** | 决策侧专职 agent，代表老板发起 query、接收 report、落地到 intel 板块。 |
-| **对外联络 agent** | 团队侧专职 agent，对内向本团队 agents/工作台聚合信息，对外应答 query、主动推 report。 |
-| **A2A 信道** | 团队服务器上一个专用的、经设备配对鉴权的 WebSocket（区别于员工浏览器走的密码 cookie 信道）。 |
-| **信封（envelope）** | A2A 报文的统一外层结构（id/ts/from/sig/type/payload），见 §6.3。 |
+| 术语                 | 含义                                                                                                                       |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| **A2A**              | Agent-to-Agent，本文档指决策侧 agent 与团队侧 agent 之间的跨机器对话。本期采用**轻量自定义信封**，非 Google A2A 标准协议。 |
+| **情报官 agent**     | 决策侧专职 agent，代表老板发起 query、接收 report、落地到 intel 板块。                                                     |
+| **对外联络 agent**   | 团队侧专职 agent，对内向本团队 agents/工作台聚合信息，对外应答 query、主动推 report。                                      |
+| **A2A 信道**         | 团队服务器上一个专用的、经设备配对鉴权的 WebSocket（区别于员工浏览器走的密码 cookie 信道）。                               |
+| **信封（envelope）** | A2A 报文的统一外层结构（id/ts/from/sig/type/payload），见 §6.3。                                                           |
 
 ---
 
@@ -53,19 +53,19 @@
 
 与产品方讨论后确认（2026-06）：
 
-| # | 决策点 | 选定方案 | 理由 |
-| --- | --- | --- | --- |
-| D1 | **连接拓扑** | **团队做服务器，决策拨出，单条双向 WS** | 决策机保持回环、不开放任何 LAN 端口，最安全；复用现有 Remote Agent 拨出连接机制 |
-| D2 | **汇报形态** | **实时对话 + 定时日报 都要** | 覆盖「老板随时问」与「团队主动 / 自动汇报」两类场景 |
-| D3 | **协议规格** | **轻量自定义信封** | 贴合现有 Ed25519 / Remote Agent 机制，落地最快；后续可平滑升级为标准 A2A |
+| #   | 决策点       | 选定方案                                | 理由                                                                            |
+| --- | ------------ | --------------------------------------- | ------------------------------------------------------------------------------- |
+| D1  | **连接拓扑** | **团队做服务器，决策拨出，单条双向 WS** | 决策机保持回环、不开放任何 LAN 端口，最安全；复用现有 Remote Agent 拨出连接机制 |
+| D2  | **汇报形态** | **实时对话 + 定时日报 都要**            | 覆盖「老板随时问」与「团队主动 / 自动汇报」两类场景                             |
+| D3  | **协议规格** | **轻量自定义信封**                      | 贴合现有 Ed25519 / Remote Agent 机制，落地最快；后续可平滑升级为标准 A2A        |
 
 推荐默认（路上可再敲定，见 §9）：
 
-| # | 待定项 | 推荐默认 |
-| --- | --- | --- |
-| D4 | 报告持久化 | 先 `localStorage`，P3 视需要升 SQLite |
-| D5 | 配对审批 | 团队服务器端**人工批准一次**新设备接入 |
-| D6 | 代码归属 | 放 `centaurai-station` 核心，用 `IS_DECISION`/`IS_TEAM` 门控 |
+| #   | 待定项     | 推荐默认                                                     |
+| --- | ---------- | ------------------------------------------------------------ |
+| D4  | 报告持久化 | 先 `localStorage`，P3 视需要升 SQLite                        |
+| D5  | 配对审批   | 团队服务器端**人工批准一次**新设备接入                       |
+| D6  | 代码归属   | 放 `centaurai-station` 核心，用 `IS_DECISION`/`IS_TEAM` 门控 |
 
 ---
 
@@ -73,16 +73,16 @@
 
 ### 4.1 可复用基建
 
-| 基建 | 位置 | 复用方式 |
-| --- | --- | --- |
-| **mDNS 局域网发现** `_centaurai._tcp`，`advertiseServer()` / `discoverServers()` | `packages/desktop/src/process/discovery/lanDiscovery.ts` | 决策机自动发现团队服务器，免手填 IP |
-| **团队版 LAN 服务器**，绑 `0.0.0.0:25808`（dev 25809），反向代理到 aioncore | `packages/web-host/src/static-server.ts`、`packages/desktop/src/process/utils/webuiConfig.ts` | 团队天然是「对外服务的一方」；A2A 端点挂在这个服务器上 |
-| **WebUI 鉴权门**（HMAC cookie `webui_gate`，密码登录） | `packages/web-host/src/webui-auth-gate.ts` | A2A 信道复用「服务器有鉴权门」的模式，但换用设备 token + 签名（非密码 cookie） |
-| **Remote Agent 协议**：WS + Ed25519 签名 + 配对 + 设备 token + 指数退避重连 + 心跳 | `OpenClawGatewayConnection`、`remoteAgentBridge.ts`、`RemoteAgentCore`/`RemoteAgentManager`、`remoteAgentTypes.ts`，DB `remote_agents` 表 | **配对 / 签名 / 持久连接 / 重连的轮子已造好**，直接改造为 A2A 客户端 |
-| **Cron 定时任务**（能让 agent 定时产「日报 / 巡检 / 汇总」） | `packages/desktop/src/renderer/pages/cron/`，`/api/cron/jobs`（`ipcBridge.ts` cron 段），`ICronJob` | 「定时自动日报」直接挂 cron 触发对外联络 agent |
-| **共享盘 / NAS API**（list/upload/download/preview） | `static-server.ts` 的 `/api/shared-drive/*`、`/api/nas/*` | 大附件落共享盘，信封只带引用 |
-| **决策版 intel 板块**（UI 占位 + i18n 已就位，目前 `<Empty>`） | `packages/desktop/src/renderer/pages/decision/DecisionHome.tsx`（intel 段）、`locales/*/decision.json` 的 `intel.*` | 替换 `<Empty>` 为真实收件箱 |
-| **edition 标志** | `packages/desktop/src/common/config/constants.ts` | `IS_DECISION`/`IS_TEAM` 门控两侧代码 |
+| 基建                                                                               | 位置                                                                                                                                      | 复用方式                                                                       |
+| ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| **mDNS 局域网发现** `_centaurai._tcp`，`advertiseServer()` / `discoverServers()`   | `packages/desktop/src/process/discovery/lanDiscovery.ts`                                                                                  | 决策机自动发现团队服务器，免手填 IP                                            |
+| **团队版 LAN 服务器**，绑 `0.0.0.0:25808`（dev 25809），反向代理到 aioncore        | `packages/web-host/src/static-server.ts`、`packages/desktop/src/process/utils/webuiConfig.ts`                                             | 团队天然是「对外服务的一方」；A2A 端点挂在这个服务器上                         |
+| **WebUI 鉴权门**（HMAC cookie `webui_gate`，密码登录）                             | `packages/web-host/src/webui-auth-gate.ts`                                                                                                | A2A 信道复用「服务器有鉴权门」的模式，但换用设备 token + 签名（非密码 cookie） |
+| **Remote Agent 协议**：WS + Ed25519 签名 + 配对 + 设备 token + 指数退避重连 + 心跳 | `OpenClawGatewayConnection`、`remoteAgentBridge.ts`、`RemoteAgentCore`/`RemoteAgentManager`、`remoteAgentTypes.ts`，DB `remote_agents` 表 | **配对 / 签名 / 持久连接 / 重连的轮子已造好**，直接改造为 A2A 客户端           |
+| **Cron 定时任务**（能让 agent 定时产「日报 / 巡检 / 汇总」）                       | `packages/desktop/src/renderer/pages/cron/`，`/api/cron/jobs`（`ipcBridge.ts` cron 段），`ICronJob`                                       | 「定时自动日报」直接挂 cron 触发对外联络 agent                                 |
+| **共享盘 / NAS API**（list/upload/download/preview）                               | `static-server.ts` 的 `/api/shared-drive/*`、`/api/nas/*`                                                                                 | 大附件落共享盘，信封只带引用                                                   |
+| **决策版 intel 板块**（UI 占位 + i18n 已就位，目前 `<Empty>`）                     | `packages/desktop/src/renderer/pages/decision/DecisionHome.tsx`（intel 段）、`locales/*/decision.json` 的 `intel.*`                       | 替换 `<Empty>` 为真实收件箱                                                    |
+| **edition 标志**                                                                   | `packages/desktop/src/common/config/constants.ts`                                                                                         | `IS_DECISION`/`IS_TEAM` 门控两侧代码                                           |
 
 ### 4.2 缺口（本期要补）
 
@@ -116,6 +116,7 @@
 ### 5.1 关键架构判断：纯 TS 层实现，不碰 aioncore
 
 整条 A2A 链路落在 Electron / TS 层：
+
 - **团队侧**：`web-host` 增加 A2A WebSocket 路由；主进程持有 A2A server 逻辑，桥接到本地回环 aioncore。
 - **决策侧**：主进程持有 A2A client 连接（改造 `OpenClawGatewayConnection`），桥接到本地回环 aioncore。
 - 「对外联络 agent」「情报官 agent」都是**普通的 aioncore 会话**，由 TS 层用现有 `conversation.sendMessage` 等驱动。
@@ -132,6 +133,7 @@
 扩展 TXT 增加：`a2a=1`（声明支持 A2A）、`a2aPort`（若与 webui 不同端口）。决策机用 `discoverServers()` 列出候选团队服务器。
 
 **配对（一次性，参考 Remote Agent 握手 F-RAGENT-06/07）**：
+
 1. 决策机生成 Ed25519 密钥对（`deviceId` = 公钥指纹），向团队服务器发起 `pair.request`（带公钥、设备名）。
 2. 团队服务器（D5：人工批准）弹出「新设备请求接入：CentaurAI 决策版 · {hostname}」，管理员点「批准」。
 3. 团队签发设备 token（写入团队侧 DB），回传决策机持久化。
@@ -142,10 +144,12 @@
 ### 6.2 A2A 信道
 
 **端点**：团队 `web-host` 新增 `/a2a/ws`（或在现有 `/ws` 上按鉴权类型分流）。该端点：
+
 - 不接受 `webui_gate` 密码 cookie；只接受配对设备的签名鉴权。
 - 升级为 WebSocket 后，承载双向信封流。
 
 **连接**：决策机改造 `OpenClawGatewayConnection` → `A2AClientConnection`，拨向 `wss://{teamIp}:25808/a2a/ws`：
+
 - 复用其指数退避重连（1s→30s，最多 10 次）、心跳 tick 监控、`closed` flag 互锁。
 - 连接建立后双向通信：决策可发 query，团队可在同一 socket 反向推 report。
 
@@ -156,26 +160,26 @@
 ```ts
 // 拟放 packages/desktop/src/common/types/a2a/a2aTypes.ts（待实现）
 type A2AEnvelope = {
-  id: string;            // UUID，用于 ack / 关联
-  ts: number;            // 发送时间戳
+  id: string; // UUID，用于 ack / 关联
+  ts: number; // 发送时间戳
   from: { edition: 'decision' | 'team'; deviceId: string };
-  sig: string;           // Ed25519 签名（覆盖 id|ts|from|type|payload 摘要）
+  sig: string; // Ed25519 签名（覆盖 id|ts|from|type|payload 摘要）
   type: 'query' | 'report' | 'ack' | 'error';
   payload: A2AQuery | A2AReport | A2AAck | A2AError;
 };
 
 type A2AQuery = {
-  topic: string;                  // 老板的问题，如「销售部本周进展」
-  scope?: string;                 // 可选：限定部门 / 项目 / 时间范围
-  replyTo: string;                // 期望应答关联到哪个 query id
+  topic: string; // 老板的问题，如「销售部本周进展」
+  scope?: string; // 可选：限定部门 / 项目 / 时间范围
+  replyTo: string; // 期望应答关联到哪个 query id
 };
 
 type A2AReport = {
-  inReplyTo?: string;             // 若为应答，关联的 query id；为空则是主动推送
+  inReplyTo?: string; // 若为应答，关联的 query id；为空则是主动推送
   title: string;
-  summary: string;                // 一句话摘要，用于 intel 列表
-  body: string;                   // 完整正文（markdown）
-  period?: { from: number; to: number };  // 日报覆盖时段
+  summary: string; // 一句话摘要，用于 intel 列表
+  body: string; // 完整正文（markdown）
+  period?: { from: number; to: number }; // 日报覆盖时段
   attachments?: SharedDriveRef[]; // 大附件引用（不内联字节）
 };
 
@@ -235,6 +239,7 @@ type A2AError = { ofId?: string; code: string; message: string };
 每期独立可验证，建议顺序交付。
 
 ### P0 — 地基：发现 + 配对 + 双向信道 [待实现]
+
 - 扩展 mDNS TXT（`a2a=1`）；决策机发现团队服务器。
 - 团队 `web-host` 加 `/a2a/ws`；决策机 `A2AClientConnection` 拨出。
 - Ed25519 配对 + 人工批准 + 设备 token 持久化。
@@ -243,17 +248,20 @@ type A2AError = { ofId?: string; code: string; message: string };
 - **交付**：两机能配对并维持一条经鉴权的持久双向 WS，互通 ack。
 
 ### P1 — 单向：团队定时日报 → 决策 intel [待实现]
+
 - 团队侧对外联络 agent（最小版：单 agent 产报告）。
 - cron 触发 → 产日报 → `report` 上推。
 - 决策 intel 收件箱：列表 + 详情，替换 `<Empty>`。
 - **交付**：第一条可见价值链 —— 老板能在「最新情报」看到团队自动日报。
 
 ### P2 — 反向：决策实时提问 → 团队聚合应答 [待实现]
+
 - 决策情报官：发起 `query`、等 `report`、落 intel。
 - 团队联络 agent 升级：按 query 聚合本团队（接入会议室编排能力）。
 - **交付**：真·实时 A2A 对话（老板问，团队答）。
 
 ### P3 — 完善 [待实现]
+
 - 团队侧「发起汇报」按钮（员工手动推）。
 - 共享盘大附件全链路。
 - 决策侧未读红点 / 通知；report 持久化按需升 SQLite。
@@ -264,26 +272,26 @@ type A2AError = { ofId?: string; code: string; message: string };
 
 ## 8. 安全考量
 
-| # | 风险 | 缓解 |
-| --- | --- | --- |
-| S1 | 老板机暴露 | 决策机仅拨出、不开 LAN 端口（D1） |
-| S2 | A2A 信道被滥用为完整 API 通道 | 信道授权仅限 A2A 信封类型白名单，团队侧严格校验 type（§6.2） |
-| S3 | 伪造设备接入 | Ed25519 配对 + 人工批准（D5）+ 每次连接挑战签名 |
-| S4 | 局域网窃听 | 优先 `wss://`；`allowInsecure` 仅显式开启（沿用 Remote Agent 策略） |
-| S5 | 大附件打爆信道 | 25MB payload 上限 + 强制走共享盘引用 |
-| S6 | query 注入 / 越权聚合 | 联络 agent 的聚合范围受 `scope` 与团队侧权限约束 |
+| #   | 风险                          | 缓解                                                                |
+| --- | ----------------------------- | ------------------------------------------------------------------- |
+| S1  | 老板机暴露                    | 决策机仅拨出、不开 LAN 端口（D1）                                   |
+| S2  | A2A 信道被滥用为完整 API 通道 | 信道授权仅限 A2A 信封类型白名单，团队侧严格校验 type（§6.2）        |
+| S3  | 伪造设备接入                  | Ed25519 配对 + 人工批准（D5）+ 每次连接挑战签名                     |
+| S4  | 局域网窃听                    | 优先 `wss://`；`allowInsecure` 仅显式开启（沿用 Remote Agent 策略） |
+| S5  | 大附件打爆信道                | 25MB payload 上限 + 强制走共享盘引用                                |
+| S6  | query 注入 / 越权聚合         | 联络 agent 的聚合范围受 `scope` 与团队侧权限约束                    |
 
 ---
 
 ## 9. 待定问题（Open Questions）
 
-| # | 问题 | 现状倾向 |
-| --- | --- | --- |
-| Q1 | 报告持久化用 localStorage 还是 SQLite | 先 localStorage，P3 升级（D4） |
-| Q2 | 配对是人工批准还是共享密钥自动信任 | 人工批准一次（D5） |
-| Q3 | 是否后续升级为标准 Google A2A 协议（`.well-known/agent` + agent card + JSON-RPC tasks）以与外部生态互通 | 本期不做；信封设计预留升级空间 |
-| Q4 | 拓扑是否需支持 1 决策 ↔ N 团队服务器 | 设计已兼容（决策持多条 client 连接），P3 配对管理 UI 落地 |
-| Q5 | 聚合是否复用会议室编排（多 agent）还是单 agent | P1 单 agent，P2 接入编排 |
+| #   | 问题                                                                                                    | 现状倾向                                                  |
+| --- | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| Q1  | 报告持久化用 localStorage 还是 SQLite                                                                   | 先 localStorage，P3 升级（D4）                            |
+| Q2  | 配对是人工批准还是共享密钥自动信任                                                                      | 人工批准一次（D5）                                        |
+| Q3  | 是否后续升级为标准 Google A2A 协议（`.well-known/agent` + agent card + JSON-RPC tasks）以与外部生态互通 | 本期不做；信封设计预留升级空间                            |
+| Q4  | 拓扑是否需支持 1 决策 ↔ N 团队服务器                                                                    | 设计已兼容（决策持多条 client 连接），P3 配对管理 UI 落地 |
+| Q5  | 聚合是否复用会议室编排（多 agent）还是单 agent                                                          | P1 单 agent，P2 接入编排                                  |
 
 ---
 
@@ -292,6 +300,7 @@ type A2AError = { ofId?: string; code: string; message: string };
 > 以下为预计改动 / 新增点，实施时以实际代码为准。
 
 **复用 / 改造**
+
 - `packages/desktop/src/process/discovery/lanDiscovery.ts` —— mDNS TXT 扩展
 - `packages/web-host/src/static-server.ts` —— 新增 `/a2a/ws` 路由
 - `packages/web-host/src/webui-auth-gate.ts` —— 参考鉴权门模式
@@ -305,6 +314,7 @@ type A2AError = { ofId?: string; code: string; message: string };
 - `packages/desktop/src/common/config/constants.ts` —— edition 门控
 
 **新增**
+
 - `packages/desktop/src/common/types/a2a/a2aTypes.ts` —— 信封 / 报文类型
 - A2A server（团队侧）/ A2A client（决策侧）模块（位置实施时定）
 - 对外联络 agent / 情报官 agent 的驱动逻辑

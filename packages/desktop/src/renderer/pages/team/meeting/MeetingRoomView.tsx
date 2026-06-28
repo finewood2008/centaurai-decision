@@ -62,7 +62,10 @@ const ParallelTurnWall: React.FC<{ turns: MeetingTurn[] }> = ({ turns }) => {
   return (
     <div className='flex flex-col gap-10px'>
       <div className='flex items-center gap-7px text-12px font-medium text-[color:var(--primary)]'>
-        <span className={`w-7px h-7px rd-full bg-[var(--primary)] ${speaking > 0 ? 'animate-pulse' : ''}`} aria-hidden='true' />
+        <span
+          className={`w-7px h-7px rd-full bg-[var(--primary)] ${speaking > 0 ? 'animate-pulse' : ''}`}
+          aria-hidden='true'
+        />
         <span>
           {turns.length} {t('team.meeting.parallelWall', { defaultValue: '位 AI 顾问同时发言中，群策群力' })}
         </span>
@@ -77,22 +80,34 @@ const ParallelTurnWall: React.FC<{ turns: MeetingTurn[] }> = ({ turns }) => {
               className={`flex flex-col rd-14px border border-solid overflow-hidden transition-shadow bg-[var(--bg-1)] ${
                 isSpeaking ? 'border-[color:var(--color-primary-light-3)]' : 'border-[color:var(--border-light)]'
               }`}
-              style={isSpeaking ? { boxShadow: '0 0 0 2px var(--color-primary-light-2), 0 6px 24px -6px var(--color-primary-light-3)' } : undefined}
+              style={
+                isSpeaking
+                  ? {
+                      boxShadow: '0 0 0 2px var(--color-primary-light-2), 0 6px 24px -6px var(--color-primary-light-3)',
+                    }
+                  : undefined
+              }
             >
               <div className='flex items-center gap-8px px-12px h-40px shrink-0 border-b border-solid border-[color:var(--border-light)]'>
                 <TurnAvatar icon={turn.icon} agentType={turn.agent_type} name={turn.name} />
-                <span className='text-13px font-semibold text-[color:var(--text-primary)] truncate flex-1'>{turn.name}</span>
+                <span className='text-13px font-semibold text-[color:var(--text-primary)] truncate flex-1'>
+                  {turn.name}
+                </span>
                 {isSpeaking ? (
                   <Spin loading size={12} className='shrink-0' />
                 ) : turn.status === 'error' ? (
-                  <span className='shrink-0 text-11px text-[color:var(--danger)]'>{t('team.meeting.turn.failed', { defaultValue: '未发言' })}</span>
+                  <span className='shrink-0 text-11px text-[color:var(--danger)]'>
+                    {t('team.meeting.turn.failed', { defaultValue: '未发言' })}
+                  </span>
                 ) : null}
               </div>
               <div className='px-14px py-11px text-13px leading-[1.7] overflow-y-auto max-h-300px min-h-110px [scrollbar-width:thin]'>
                 {turn.text.trim() ? (
                   <MarkdownView>{stripResolutionMarkers(turn.text)}</MarkdownView>
                 ) : (
-                  <span className='text-[color:var(--bg-6)]'>{t('team.meeting.thinking', { defaultValue: '思考中…' })}</span>
+                  <span className='text-[color:var(--bg-6)]'>
+                    {t('team.meeting.thinking', { defaultValue: '思考中…' })}
+                  </span>
                 )}
               </div>
             </div>
@@ -194,14 +209,18 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
       >
         <div className='flex items-center gap-8px px-16px h-44px'>
           <TurnAvatar icon={turn.icon} agentType={turn.agent_type} name={turn.name} />
-          <span className='text-14px font-semibold text-[color:var(--text-primary)] truncate max-w-220px'>{turn.name}</span>
+          <span className='text-14px font-semibold text-[color:var(--text-primary)] truncate max-w-220px'>
+            {turn.name}
+          </span>
           <span className='shrink-0 px-7px h-18px flex items-center rd-full text-11px leading-none bg-[var(--bg-2)] text-[color:var(--bg-6)]'>
             {turn.isModerator ? t('team.meeting.role.moderator', { defaultValue: '主持人' }) : turn.phaseLabel}
           </span>
           <div className='flex-1' />
           {turn.status === 'speaking' && <Spin loading size={13} className='shrink-0' />}
           {turn.status === 'error' && (
-            <span className='shrink-0 text-11px text-[color:var(--danger)]'>{t('team.meeting.turn.failed', { defaultValue: '未发言' })}</span>
+            <span className='shrink-0 text-11px text-[color:var(--danger)]'>
+              {t('team.meeting.turn.failed', { defaultValue: '未发言' })}
+            </span>
           )}
         </div>
         {turn.text.trim() && (
@@ -291,7 +310,9 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
               <VideoConference theme='outline' size='30' fill='var(--primary)' />
             </span>
             <span className='centaur-title centaur-title-lg'>
-              {t(IS_DECISION ? 'decision.emptyTitle' : 'team.meeting.emptyTitle', { defaultValue: '智囊团 · 召集 AI 专家开会' })}
+              {t(IS_DECISION ? 'decision.emptyTitle' : 'team.meeting.emptyTitle', {
+                defaultValue: '智囊团 · 召集 AI 专家开会',
+              })}
             </span>
             <span className='text-14px leading-relaxed max-w-420px text-[color:var(--text-secondary)]'>
               {t('team.meeting.emptyHint', {
@@ -315,11 +336,7 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
         ) : (
           <div className='flex flex-col gap-16px py-20px px-24px'>
             {turnGroups.map((group, gi) =>
-              group[0].parallel ? (
-                <ParallelTurnWall key={`pg-${gi}`} turns={group} />
-              ) : (
-                renderTurnCard(group[0])
-              )
+              group[0].parallel ? <ParallelTurnWall key={`pg-${gi}`} turns={group} /> : renderTurnCard(group[0])
             )}
             {showPlan && (
               <div data-testid='meeting-plan' className='centaur-surface my-8px overflow-hidden'>

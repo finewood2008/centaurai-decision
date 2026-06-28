@@ -43,7 +43,10 @@ const DecisionHome: React.FC = () => {
 
   const greeting = t(`decision.greeting.${greetingSlot()}`);
 
-  const advisorCount = useMemo(() => assistants.filter((a) => a.id.startsWith('agency-') && a.enabled !== false).length, [assistants]);
+  const advisorCount = useMemo(
+    () => assistants.filter((a) => a.id.startsWith('agency-') && a.enabled !== false).length,
+    [assistants]
+  );
 
   const sortedTeams = useMemo(() => [...teams].sort((a, b) => (b.updated_at ?? 0) - (a.updated_at ?? 0)), [teams]);
   const ongoing = sortedTeams.slice(0, 6);
@@ -113,7 +116,11 @@ const DecisionHome: React.FC = () => {
           </div>
           <div className={styles.statValue}>{t('decision.archive.count', { count: teams.length })}</div>
         </div>
-        <Button className={styles.stat} type='text' onClick={() => Promise.resolve(navigate('/advisors')).catch(console.error)}>
+        <Button
+          className={styles.stat}
+          type='text'
+          onClick={() => Promise.resolve(navigate('/advisors')).catch(console.error)}
+        >
           <Peoples className={styles.statIcon} theme='outline' />
           <div className={styles.statText}>
             <div className={styles.statTitle}>{t('decision.advisors.title')}</div>

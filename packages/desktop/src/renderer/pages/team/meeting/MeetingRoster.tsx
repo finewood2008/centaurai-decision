@@ -64,7 +64,10 @@ const Seat: React.FC<{ agent: TeamAgent; isLeader: boolean; active: boolean }> =
         nameClassName='text-13px font-medium text-[color:var(--text-primary)] max-w-104px text-center !flex-none'
       />
       {agent.conversation_id ? (
-        <span className='max-w-104px truncate text-11px text-[color:var(--bg-6)] leading-none' title={agent.model || agent.agent_type}>
+        <span
+          className='max-w-104px truncate text-11px text-[color:var(--bg-6)] leading-none'
+          title={agent.model || agent.agent_type}
+        >
           {role} · {modelLabel(agent)}
         </span>
       ) : (
@@ -108,7 +111,9 @@ const CompactSeat: React.FC<{ agent: TeamAgent; isLeader: boolean; active: boole
       />
       {agent.conversation_id ? (
         <span className='shrink-0 text-10px text-[color:var(--bg-6)] leading-none'>
-          {isLeader ? t('team.meeting.role.moderator', { defaultValue: '主持' }) : t('team.meeting.role.panelist', { defaultValue: '专家' })}
+          {isLeader
+            ? t('team.meeting.role.moderator', { defaultValue: '主持' })
+            : t('team.meeting.role.panelist', { defaultValue: '专家' })}
         </span>
       ) : (
         <span className='shrink-0 flex items-center gap-2px text-10px text-[color:var(--bg-6)] leading-none'>
