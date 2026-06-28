@@ -10,7 +10,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { createEntryGuard, isValidEntryHtml, RECOVERY_HTML } from './entry-html-guard.js';
 
-const GOOD = '<!doctype html><html><head><title>CentaurAI</title></head><body><div id="root"></div><script src="/assets/index-abc.js"></script></body></html>';
+const GOOD =
+  '<!doctype html><html><head><title>CentaurAI</title></head><body><div id="root"></div><script src="/assets/index-abc.js"></script></body></html>';
 
 describe('isValidEntryHtml', () => {
   it('accepts a real entry document', () => {

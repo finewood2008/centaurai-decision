@@ -365,7 +365,11 @@ const TeamCreateModal: React.FC<Props> = ({ visible, onClose, onCreated }) => {
           {IS_DECISION && (
             <>
               <FormItem
-                label={<span className='text-12px font-500 text-t-secondary'>{t('decision.methodLabel', { defaultValue: '讨论方式' })}</span>}
+                label={
+                  <span className='text-12px font-500 text-t-secondary'>
+                    {t('decision.methodLabel', { defaultValue: '讨论方式' })}
+                  </span>
+                }
               >
                 <Radio.Group
                   type='button'
@@ -379,13 +383,21 @@ const TeamCreateModal: React.FC<Props> = ({ visible, onClose, onCreated }) => {
                     </Radio>
                   ))}
                 </Radio.Group>
-                <div className='mt-6px text-11px text-t-tertiary'>{MEETING_FORMS.find((f) => f.id === method)?.hint}</div>
+                <div className='mt-6px text-11px text-t-tertiary'>
+                  {MEETING_FORMS.find((f) => f.id === method)?.hint}
+                </div>
               </FormItem>
               <FormItem
-                label={<span className='text-12px font-500 text-t-secondary'>{t('decision.templateLabel', { defaultValue: '预设模板（可选）' })}</span>}
+                label={
+                  <span className='text-12px font-500 text-t-secondary'>
+                    {t('decision.templateLabel', { defaultValue: '预设模板（可选）' })}
+                  </span>
+                }
               >
                 <Select
-                  placeholder={t('decision.templatePlaceholder', { defaultValue: '可选：套用一个部门模板（自动设好讨论方式与领域提示词）' })}
+                  placeholder={t('decision.templatePlaceholder', {
+                    defaultValue: '可选：套用一个部门模板（自动设好讨论方式与领域提示词）',
+                  })}
                   allowClear
                   value={departmentId || undefined}
                   onChange={(v) => {
@@ -408,7 +420,9 @@ const TeamCreateModal: React.FC<Props> = ({ visible, onClose, onCreated }) => {
                 {(() => {
                   const dept = PRESET_DEPARTMENTS.find((d) => d.id === departmentId);
                   if (!dept) return null;
-                  return <div className='mt-6px text-11px text-t-tertiary'>{t(dept.hintKey, { defaultValue: '' })}</div>;
+                  return (
+                    <div className='mt-6px text-11px text-t-tertiary'>{t(dept.hintKey, { defaultValue: '' })}</div>
+                  );
                 })()}
               </FormItem>
             </>

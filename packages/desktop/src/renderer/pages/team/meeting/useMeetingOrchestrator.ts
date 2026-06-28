@@ -742,15 +742,29 @@ class MeetingEngine {
           await speak(mod, '聚类', buildClusterPrompt({ topic, ideasContext: transcriptText() }));
         }
         await eachPanelist('收敛', (p) =>
-          buildConvergePrompt({ topic, persona: p.name, lens: lensByPanel.get(p.id), clustersContext: transcriptText() })
+          buildConvergePrompt({
+            topic,
+            persona: p.name,
+            lens: lensByPanel.get(p.id),
+            clustersContext: transcriptText(),
+          })
         );
         if (!(await pauseAndWait(2, '收敛'))) return;
       } else if (form === 'deepdive') {
         for (let round = 2; round <= 3; round++) {
           if (stale()) break;
-          await speak(mod, '追问', buildDeepDiveProbePrompt({ topic, round: round - 1, priorContext: transcriptText() }));
+          await speak(
+            mod,
+            '追问',
+            buildDeepDiveProbePrompt({ topic, round: round - 1, priorContext: transcriptText() })
+          );
           await eachPanelist('深答', (p) =>
-            buildDeepDiveAnswerPrompt({ topic, persona: p.name, lens: lensByPanel.get(p.id), probeContext: transcriptText() })
+            buildDeepDiveAnswerPrompt({
+              topic,
+              persona: p.name,
+              lens: lensByPanel.get(p.id),
+              probeContext: transcriptText(),
+            })
           );
           if (!(await pauseAndWait(round, '追问'))) return;
         }

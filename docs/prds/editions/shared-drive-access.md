@@ -39,11 +39,11 @@
 
 与产品方讨论后确认（2026-06）：
 
-| # | 决策点 | 选定方案 | 理由 |
-| --- | --- | --- | --- |
-| N1 | NAS/共享盘方案 vs WS 实时方案的定位 | **NAS 做 v1 主数据层；WS 实时层后续可选** | 服务端几乎零改动、最快落地；两者共用 mDNS + token 底子 |
-| N2 | 决策版访问团队盘的鉴权 | **专用服务账号 token（可吊销）** | 独立于员工账号，可单独吊销；复用现有 `webui_gate` token 机制 |
-| N3 | 本期范围 | **仅「两端看到同一共享盘」，不做汇报功能** | 先打通数据共享，汇报留到下一步 |
+| #   | 决策点                              | 选定方案                                   | 理由                                                         |
+| --- | ----------------------------------- | ------------------------------------------ | ------------------------------------------------------------ |
+| N1  | NAS/共享盘方案 vs WS 实时方案的定位 | **NAS 做 v1 主数据层；WS 实时层后续可选**  | 服务端几乎零改动、最快落地；两者共用 mDNS + token 底子       |
+| N2  | 决策版访问团队盘的鉴权              | **专用服务账号 token（可吊销）**           | 独立于员工账号，可单独吊销；复用现有 `webui_gate` token 机制 |
+| N3  | 本期范围                            | **仅「两端看到同一共享盘」，不做汇报功能** | 先打通数据共享，汇报留到下一步                               |
 
 ---
 
@@ -51,13 +51,13 @@
 
 ### 3.1 团队版已是共享盘服务器，且已对局域网可达
 
-| 能力 | 位置 | 说明 |
-| --- | --- | --- |
-| **共享库 `/api/shared-drive/*`** | `packages/web-host/src/shared-drive.ts`，路由 `static-server.ts` | 带分类/清单的托管库，存 `~/.aionui[-dev]/sharedDrive/`（manifest.json + blobs/）。端点：list / categories / upload / download / preview / remove |
-| **网盘 `/api/nas/*`** | `packages/web-host/src/nas-drive.ts`，路由 `static-server.ts` | 1:1 真实目录树，根目录可配（`AIONUI_NAS_ROOT` 或设置 `webui.desktop.nasRootDir`，「指向企业共享磁盘」）。端点：list / download / preview / upload / mkdir / move / remove + 回收站 |
-| **两套都是"本地处理"且经 0.0.0.0 暴露** | `static-server.ts` 路由分流 | 团队版绑 `0.0.0.0:25808` 时，这些端点**已对局域网可达**（不是反代 aioncore，是 web-host 直接处理） |
-| **鉴权门支持请求头 token** | `packages/web-host/src/webui-auth-gate.ts` | 对外 `/api/*` 走鉴权门，除 `webui_gate` cookie 外**还认 `x-webui-gate-token` 请求头** —— 程序化跨机访问的关键，绕开跨域 cookie |
-| **内容中心 UI** | `packages/desktop/src/renderer/pages/contentHub/`（路由 `/files`） | 4 个 Tab：我的产物 / 共享库 / 网盘 / 知识库。当前**无 edition 门控**，决策/团队都可见 |
+| 能力                                    | 位置                                                               | 说明                                                                                                                                                                               |
+| --------------------------------------- | ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **共享库 `/api/shared-drive/*`**        | `packages/web-host/src/shared-drive.ts`，路由 `static-server.ts`   | 带分类/清单的托管库，存 `~/.aionui[-dev]/sharedDrive/`（manifest.json + blobs/）。端点：list / categories / upload / download / preview / remove                                   |
+| **网盘 `/api/nas/*`**                   | `packages/web-host/src/nas-drive.ts`，路由 `static-server.ts`      | 1:1 真实目录树，根目录可配（`AIONUI_NAS_ROOT` 或设置 `webui.desktop.nasRootDir`，「指向企业共享磁盘」）。端点：list / download / preview / upload / mkdir / move / remove + 回收站 |
+| **两套都是"本地处理"且经 0.0.0.0 暴露** | `static-server.ts` 路由分流                                        | 团队版绑 `0.0.0.0:25808` 时，这些端点**已对局域网可达**（不是反代 aioncore，是 web-host 直接处理）                                                                                 |
+| **鉴权门支持请求头 token**              | `packages/web-host/src/webui-auth-gate.ts`                         | 对外 `/api/*` 走鉴权门，除 `webui_gate` cookie 外**还认 `x-webui-gate-token` 请求头** —— 程序化跨机访问的关键，绕开跨域 cookie                                                     |
+| **内容中心 UI**                         | `packages/desktop/src/renderer/pages/contentHub/`（路由 `/files`） | 4 个 Tab：我的产物 / 共享库 / 网盘 / 知识库。当前**无 edition 门控**，决策/团队都可见                                                                                              |
 
 **结论**：团队版当共享盘服务器 ≈ **已具备**。另一台机器现在就能 `GET http://团队IP:25808/api/shared-drive/list`，前提是带有效凭证。
 
@@ -119,6 +119,7 @@
 ### 6.3 远程共享盘客户端
 
 把决策侧服务泛化为支持远程模式：
+
 - `SharedDriveService`（主，对应 N3 的"共享盘"）：增加 `baseUrl + authHeader` 模式，请求路由到团队
   `/api/shared-drive/list|download|preview|categories`（写入 `upload` 视需要）。
 - `NasService`（可选，同机制）：远程 `/api/nas/*`。
@@ -147,16 +148,19 @@
 ## 7. 分期实施计划
 
 ### P0 — 发现 + 服务账号 + 连接 [待实现]
+
 - 团队侧：创建/管理专用服务账号，签发可吊销凭证。
 - 决策侧：mDNS 发现团队服务器；填凭证 → 换 token → 持久化；连通性自检（`/api/shared-drive/categories`）。
 - **交付**：决策机能经鉴权连上团队服务器的共享盘 API。
 
 ### P1 — 决策版浏览团队共享盘 [待实现]
+
 - 决策侧 `SharedDriveService` 远程模式；`/files` 加「团队共享盘」源。
 - 浏览分类 / 文件列表、下载、预览。
 - **交付**：两台机器看到**同一个共享盘**（本期主目标达成）。
 
 ### P2 — 增强（按需，可选） [待实现]
+
 - 网盘 `/api/nas/*` 远程浏览（同机制）。
 - 决策侧上传/写回。
 - token scope 最小权限（drive-only）。
@@ -167,30 +171,31 @@
 
 ## 8. 安全考量
 
-| # | 风险 | 缓解 |
-| --- | --- | --- |
-| S1 | 服务账号 token 授予完整 `/api/*`（越权） | v1 小团队信任可接受并标注；P2 增加 token scope（drive-only）作最小权限 |
-| S2 | 凭证泄露 | 专用账号可单独吊销（N2）；token 走 `x-webui-gate-token` 头，不落浏览器 cookie |
-| S3 | 局域网窃听 | LAN HTTP 现状；优先 HTTPS/可信网络；标注风险 |
-| S4 | 路径穿越 | 沿用现有 `resolveWithinRoot` / `isRealContained` 服务端校验（已有） |
-| S5 | 决策机暴露 | 决策机仅拨出、不开 LAN 端口 |
+| #   | 风险                                     | 缓解                                                                          |
+| --- | ---------------------------------------- | ----------------------------------------------------------------------------- |
+| S1  | 服务账号 token 授予完整 `/api/*`（越权） | v1 小团队信任可接受并标注；P2 增加 token scope（drive-only）作最小权限        |
+| S2  | 凭证泄露                                 | 专用账号可单独吊销（N2）；token 走 `x-webui-gate-token` 头，不落浏览器 cookie |
+| S3  | 局域网窃听                               | LAN HTTP 现状；优先 HTTPS/可信网络；标注风险                                  |
+| S4  | 路径穿越                                 | 沿用现有 `resolveWithinRoot` / `isRealContained` 服务端校验（已有）           |
+| S5  | 决策机暴露                               | 决策机仅拨出、不开 LAN 端口                                                   |
 
 ---
 
 ## 9. 待定问题（Open Questions）
 
-| # | 问题 | 现状倾向 |
-| --- | --- | --- |
-| Q1 | 本期共享"哪个盘"：共享库(shared-drive) / 网盘(NAS) / 两者 | N3 指向"共享盘"，以**共享库**为主；NAS 同机制可顺带（P2） |
-| Q2 | 服务账号是复用 users 表的专用用户，还是新建 token 概念 | 倾向复用 users 表专用账号（最省，吊销=禁用该账号） |
-| Q3 | token scope 最小权限何时做 | P2；v1 信任环境先全权并标注 |
-| Q4 | 决策侧是否允许写入团队盘 | 本期以读为主，写按需（P2） |
+| #   | 问题                                                      | 现状倾向                                                  |
+| --- | --------------------------------------------------------- | --------------------------------------------------------- |
+| Q1  | 本期共享"哪个盘"：共享库(shared-drive) / 网盘(NAS) / 两者 | N3 指向"共享盘"，以**共享库**为主；NAS 同机制可顺带（P2） |
+| Q2  | 服务账号是复用 users 表的专用用户，还是新建 token 概念    | 倾向复用 users 表专用账号（最省，吊销=禁用该账号）        |
+| Q3  | token scope 最小权限何时做                                | P2；v1 信任环境先全权并标注                               |
+| Q4  | 决策侧是否允许写入团队盘                                  | 本期以读为主，写按需（P2）                                |
 
 ---
 
 ## 10. 涉及的关键文件
 
 **复用 / 改造**
+
 - `packages/desktop/src/process/discovery/lanDiscovery.ts` —— mDNS 发现团队服务器
 - `packages/web-host/src/shared-drive.ts` / `nas-drive.ts` —— 服务端端点（已就绪，本期基本不改）
 - `packages/web-host/src/webui-auth-gate.ts` —— `x-webui-gate-token` 鉴权（已支持）
@@ -202,6 +207,7 @@
 - `locales/*/contentHub.json`、`settings.json` —— 「团队共享盘」文案
 
 **新增**
+
 - 决策侧远程共享盘连接配置（目标 + 服务账号 token 持久化）
 - 决策侧 `/files` 「团队共享盘」源 UI + 首次连接引导
 
@@ -218,4 +224,7 @@
 - [ ] 全程不改 aioncore；服务端除签发服务账号外无新端点。
 - [ ] 代码以 `IS_DECISION`/`IS_TEAM` 门控，full 版可单机自测。
 - [ ] 越权风险（S1）在文档/设置中标注；token scope 列为 P2。
+
+```
+
 ```

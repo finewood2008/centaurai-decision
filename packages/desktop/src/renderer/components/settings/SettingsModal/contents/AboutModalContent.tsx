@@ -17,7 +17,11 @@ import FeedbackReportModal from './FeedbackReportModal';
 // Per-edition identity + update source. Each edition installs from — and auto-updates
 // against — its OWN downstream repo (see electron-builder.{decision,team}.yml publish).
 const EDITION_LABEL = IS_DECISION ? '决策版' : IS_TEAM ? '团队版' : '';
-const EDITION_REPO = IS_DECISION ? 'finewood2008/centaurai-decision' : IS_TEAM ? 'finewood2008/centaurai-team' : 'finewood2008/centaurai-station';
+const EDITION_REPO = IS_DECISION
+  ? 'finewood2008/centaurai-decision'
+  : IS_TEAM
+    ? 'finewood2008/centaurai-team'
+    : 'finewood2008/centaurai-station';
 const EDITION_REPO_URL = `https://github.com/${EDITION_REPO}`;
 
 // __APP_VERSION__ is injected by electron.vite.config.ts `define:` from the
@@ -120,7 +124,9 @@ const AboutModalContent: React.FC = () => {
               )}
               <div
                 className='text-t-primary cursor-pointer hover:text-t-secondary transition-colors p-4px'
-                onClick={() => openLink(EDITION_REPO_URL).catch((error) => console.error('Failed to open link:', error))}
+                onClick={() =>
+                  openLink(EDITION_REPO_URL).catch((error) => console.error('Failed to open link:', error))
+                }
               >
                 <Github theme='outline' size='20' />
               </div>

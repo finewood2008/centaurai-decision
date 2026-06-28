@@ -121,7 +121,12 @@ export function buildDeepDiveProbePrompt(params: { topic: string; round: number;
 }
 
 /** Deep-dive — a panelist answers the moderator's probing questions from their angle. */
-export function buildDeepDiveAnswerPrompt(params: { topic: string; persona: string; lens?: string; probeContext: string }): string {
+export function buildDeepDiveAnswerPrompt(params: {
+  topic: string;
+  persona: string;
+  lens?: string;
+  probeContext: string;
+}): string {
   const { topic, persona, lens, probeContext } = params;
   return [
     `你是专家「${persona}」（主攻【${lens ?? '综合'}】）。主持人提出了一轮追问，请从你的视角【正面、深入】地回应——不回避、不打太极。`,

@@ -638,7 +638,10 @@ export async function startStaticServer(opts: StaticServerOptions): Promise<Stat
       // is removed from the Team renderer, but the bundled aioncore still serves
       // /api/teams* — block it here so LAN employees can't run a meeting by calling
       // the API directly. (Decision uses IPC, not this proxy, so it's unaffected.)
-      if (opts.blockTeamRoutes && (req.url === '/api/teams' || req.url.startsWith('/api/teams/') || req.url.startsWith('/api/teams?'))) {
+      if (
+        opts.blockTeamRoutes &&
+        (req.url === '/api/teams' || req.url.startsWith('/api/teams/') || req.url.startsWith('/api/teams?'))
+      ) {
         res.writeHead(403, { 'content-type': 'application/json' });
         res.end(JSON.stringify({ success: false, error: 'EDITION_DISABLED' }));
         return;

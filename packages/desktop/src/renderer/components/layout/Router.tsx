@@ -4,7 +4,15 @@ import { Button, Result } from '@arco-design/web-react';
 import { useTranslation } from 'react-i18next';
 import AppLoader from '@renderer/components/layout/AppLoader';
 import { useAuth } from '@renderer/hooks/context/AuthContext';
-import { TEAM_MODE_ENABLED, IS_DECISION, IS_TEAM, WORKBENCH_ENABLED, MULTI_USER_ENABLED, REMOTE_ACCESS_ENABLED, OFFICE_ASSISTANTS_ENABLED } from '@/common/config/constants';
+import {
+  TEAM_MODE_ENABLED,
+  IS_DECISION,
+  IS_TEAM,
+  WORKBENCH_ENABLED,
+  MULTI_USER_ENABLED,
+  REMOTE_ACCESS_ENABLED,
+  OFFICE_ASSISTANTS_ENABLED,
+} from '@/common/config/constants';
 const Conversation = React.lazy(() => import('@renderer/pages/conversation'));
 const Guid = React.lazy(() => import('@renderer/pages/guid'));
 const AgentSettings = React.lazy(() => import('@renderer/pages/settings/AgentSettings'));
@@ -157,7 +165,10 @@ const PanelRoute: React.FC<{ layout: React.ReactElement }> = ({ layout }) => {
           <Route index element={<Navigate to={HOME_PATH} replace />} />
           <Route path='/guid' element={withRouteFallback(Guid)} />
           {/* Decision edition landing (决策作战室 home). Team edition redirects to the guide. */}
-          <Route path='/decision' element={IS_DECISION ? withRouteFallback(DecisionHome) : <Navigate to='/guid' replace />} />
+          <Route
+            path='/decision'
+            element={IS_DECISION ? withRouteFallback(DecisionHome) : <Navigate to='/guid' replace />}
+          />
           <Route path='/conversation/:id' element={withRouteFallback(Conversation)} />
           <Route
             path='/team/:id'
@@ -166,7 +177,16 @@ const PanelRoute: React.FC<{ layout: React.ReactElement }> = ({ layout }) => {
           <Route path='/settings/model' element={withRouteFallback(ModeSettings)} />
           <Route path='/settings/local-models' element={withRouteFallback(LocalModelsSettings)} />
           {/* 办公助理 (office assistants) — full + Team; removed in Decision (experts/专家 stay). */}
-          <Route path='/settings/assistants' element={OFFICE_ASSISTANTS_ENABLED ? withRouteFallback(AssistantSettings) : <Navigate to='/settings/experts' replace />} />
+          <Route
+            path='/settings/assistants'
+            element={
+              OFFICE_ASSISTANTS_ENABLED ? (
+                withRouteFallback(AssistantSettings)
+              ) : (
+                <Navigate to='/settings/experts' replace />
+              )
+            }
+          />
           <Route path='/settings/experts' element={withRouteFallback(ExpertsSettings)} />
           <Route path='/settings/agent' element={withRouteFallback(AgentSettings)} />
           <Route path='/settings/capabilities' element={withRouteFallback(CapabilitiesSettings)} />
@@ -176,12 +196,28 @@ const PanelRoute: React.FC<{ layout: React.ReactElement }> = ({ layout }) => {
           <Route path='/settings/appearance' element={withRouteFallback(AppearanceSettings)} />
           <Route path='/settings/display' element={<Navigate to='/settings/appearance' replace />} />
           {/* Remote access (WebUI LAN server + native client) — all editions, incl. Decision (LAN + Tailscale). */}
-          <Route path='/settings/webui' element={REMOTE_ACCESS_ENABLED ? withRouteFallback(WebuiSettings) : <Navigate to='/settings/model' replace />} />
-          <Route path='/settings/client' element={REMOTE_ACCESS_ENABLED ? withRouteFallback(ClientSettings) : <Navigate to='/settings/model' replace />} />
+          <Route
+            path='/settings/webui'
+            element={
+              REMOTE_ACCESS_ENABLED ? withRouteFallback(WebuiSettings) : <Navigate to='/settings/model' replace />
+            }
+          />
+          <Route
+            path='/settings/client'
+            element={
+              REMOTE_ACCESS_ENABLED ? withRouteFallback(ClientSettings) : <Navigate to='/settings/model' replace />
+            }
+          />
           {/* Multiple user accounts — full + Team only; Decision stays single-user. */}
-          <Route path='/settings/users' element={MULTI_USER_ENABLED ? withRouteFallback(UsersSettings) : <Navigate to='/settings/model' replace />} />
+          <Route
+            path='/settings/users'
+            element={MULTI_USER_ENABLED ? withRouteFallback(UsersSettings) : <Navigate to='/settings/model' replace />}
+          />
           {/* Desktop pet (宠物) — hidden in the Team edition. */}
-          <Route path='/settings/pet' element={IS_TEAM ? <Navigate to='/settings/model' replace /> : withRouteFallback(PetSettings)} />
+          <Route
+            path='/settings/pet'
+            element={IS_TEAM ? <Navigate to='/settings/model' replace /> : withRouteFallback(PetSettings)}
+          />
           <Route path='/settings/system' element={withRouteFallback(SystemSettings)} />
           <Route path='/settings/about' element={withRouteFallback(SystemSettings)} />
           <Route path='/settings/ext/:tabId' element={withRouteFallback(ExtensionSettingsPage)} />
@@ -190,7 +226,10 @@ const PanelRoute: React.FC<{ layout: React.ReactElement }> = ({ layout }) => {
           <Route path='/test/components' element={withRouteFallback(ComponentsShowcase)} />
           <Route path='/appstore' element={<Navigate to='/settings/appstore' replace />} />
           {/* Workbench (office assistants + image studio) — full + Team; removed in Decision. */}
-          <Route path='/workbench' element={WORKBENCH_ENABLED ? withRouteFallback(WorkbenchPage) : <Navigate to='/guid' replace />} />
+          <Route
+            path='/workbench'
+            element={WORKBENCH_ENABLED ? withRouteFallback(WorkbenchPage) : <Navigate to='/guid' replace />}
+          />
           <Route path='/toolbox' element={<Navigate to='/workbench' replace />} />
           <Route path='/advisors' element={withRouteFallback(AdvisorsPage)} />
           <Route path='/files' element={withRouteFallback(ContentHubPage)} />
