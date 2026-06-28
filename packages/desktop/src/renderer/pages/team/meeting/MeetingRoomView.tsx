@@ -113,7 +113,13 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const orchestrator = useMeetingOrchestrator(team);
-  const { state, moderator, panelists, guests } = orchestrator;
+  const { state, guests } = orchestrator;
+  // Show ALL selected team members in the roster immediately — even before their
+  // conversation provisions (rendered as 连接中) — so a freshly created team never
+  // looks like the selection was lost. canStart / who actually speaks still use the
+  // orchestrator's conversation-gated lists (so a meeting only runs warmed agents).
+  const rosterModerator = useMemo(() => team.agents.find((a) => a.role === 'leader') ?? null, [team.agents]);
+  const rosterPanelists = useMemo(() => team.agents.filter((a) => a.role === 'teammate'), [team.agents]);
   const transcript = state.transcript;
   const [topicDraft, setTopicDraft] = useState('');
 
@@ -260,8 +266,8 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
         </Button>
       </div>
       <MeetingRoster
-        moderator={moderator}
-        panelists={panelists}
+        moderator={rosterModerator}
+        panelists={rosterPanelists}
         activeSlotId={state.activeSlotId}
         guests={guests}
         compact={!isIdle}

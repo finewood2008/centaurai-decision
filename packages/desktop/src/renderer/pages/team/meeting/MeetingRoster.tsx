@@ -63,12 +63,16 @@ const Seat: React.FC<{ agent: TeamAgent; isLeader: boolean; active: boolean }> =
         avatarClassName='w-36px h-36px rounded-10px flex items-center justify-center text-16px leading-none bg-[var(--bg-2)] shrink-0'
         nameClassName='text-13px font-medium text-[color:var(--text-primary)] max-w-104px text-center !flex-none'
       />
-      <span
-        className='max-w-104px truncate text-11px text-[color:var(--bg-6)] leading-none'
-        title={agent.model || agent.agent_type}
-      >
-        {role} · {modelLabel(agent)}
-      </span>
+      {agent.conversation_id ? (
+        <span className='max-w-104px truncate text-11px text-[color:var(--bg-6)] leading-none' title={agent.model || agent.agent_type}>
+          {role} · {modelLabel(agent)}
+        </span>
+      ) : (
+        <span className='flex items-center gap-3px text-11px text-[color:var(--bg-6)] leading-none'>
+          <Loading theme='outline' size='10' fill='currentColor' className='animate-spin' />
+          {t('team.meeting.connecting', { defaultValue: '连接中…' })}
+        </span>
+      )}
       {active && <SpeakingPill />}
     </div>
   );
@@ -102,11 +106,16 @@ const CompactSeat: React.FC<{ agent: TeamAgent; isLeader: boolean; active: boole
         nameClassName='text-12px font-medium text-[color:var(--text-secondary)] max-w-86px'
         crownClassName='hidden'
       />
-      <span className='shrink-0 text-10px text-[color:var(--bg-6)] leading-none'>
-        {isLeader
-          ? t('team.meeting.role.moderator', { defaultValue: '主持' })
-          : t('team.meeting.role.panelist', { defaultValue: '专家' })}
-      </span>
+      {agent.conversation_id ? (
+        <span className='shrink-0 text-10px text-[color:var(--bg-6)] leading-none'>
+          {isLeader ? t('team.meeting.role.moderator', { defaultValue: '主持' }) : t('team.meeting.role.panelist', { defaultValue: '专家' })}
+        </span>
+      ) : (
+        <span className='shrink-0 flex items-center gap-2px text-10px text-[color:var(--bg-6)] leading-none'>
+          <Loading theme='outline' size='10' fill='currentColor' className='animate-spin' />
+          {t('team.meeting.connecting', { defaultValue: '连接中' })}
+        </span>
+      )}
       {active && (
         <span className='shrink-0 flex items-center gap-2px text-10px text-[color:var(--primary)] leading-none'>
           <Loading theme='outline' size='10' fill='currentColor' className='animate-spin' />
