@@ -22,6 +22,9 @@ CentaurAI AIStation 从单一应用拆分为三个编译期版本，由 `AIONUI_
 
 ## 文档索引
 
-| 文档 | 主题 | 状态 |
-| --- | --- | --- |
-| [inter-edition-a2a.md](inter-edition-a2a.md) | 决策版 ↔ 团队版 跨机器 A2A 通讯（日常汇报 / 实时提问） | 📋 计划中（下个版本） |
+决策版 ↔ 团队版 跨机器协作分两个平面，共用 mDNS 发现 + token 鉴权底子：
+
+| 文档 | 平面 | 主题 | 状态 |
+| --- | --- | --- | --- |
+| [shared-drive-access.md](shared-drive-access.md) | **数据平面 v1** | 决策版访问团队版共享盘（两端看到同一份数据；本期不做汇报） | 📋 计划中（下个版本，先做） |
+| [inter-edition-a2a.md](inter-edition-a2a.md) | **控制平面（后续可选）** | 跨机器 A2A 实时通讯（日常汇报 / 实时提问 / 双向推送） | 📋 计划中（后续） |
