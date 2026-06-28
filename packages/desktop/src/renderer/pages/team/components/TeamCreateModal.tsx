@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Button, Form, Input, Message, Select } from '@arco-design/web-react';
+import { Button, Form, Input, Message, Radio, Select } from '@arco-design/web-react';
 import type { RefInputType } from '@arco-design/web-react/es/Input';
 import { Check, Close, Crown, Search } from '@icon-park/react';
 import { useTranslation } from 'react-i18next';
@@ -24,6 +24,8 @@ import { resolveDefaultTeamAgentModel } from './teamCreateModelResolver';
 import { IS_DECISION } from '@/common/config/constants';
 import { PRESET_DEPARTMENTS } from '../meeting/presetDepartments';
 import { setTeamMeetingForm } from '../meeting/useMeetingOrchestrator';
+import { MEETING_FORMS } from '../meeting/meetingPrompts';
+import type { MeetingForm } from '../meeting/meetingTypes';
 
 /** Remembered agent panel to pre-fill the next 智囊团. */
 const LAST_PANEL_KEY = 'roundtable-last-panel';
@@ -120,7 +122,8 @@ const TeamCreateModal: React.FC<Props> = ({ visible, onClose, onCreated }) => {
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   // Optional project folder (kept for users who want a fixed workspace per 智囊团).
   const [workspace, setWorkspace] = useState('');
-  // Decision edition: the preset department fixes the 流程 (form='department') + prompts.
+  // Decision edition: discussion method (manual) + optional department template.
+  const [method, setMethod] = useState<MeetingForm>('roundtable');
   const [departmentId, setDepartmentId] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
@@ -194,6 +197,7 @@ const TeamCreateModal: React.FC<Props> = ({ visible, onClose, onCreated }) => {
     setName('');
     setSelectedKeys([]);
     setWorkspace('');
+    setMethod('roundtable');
     setDepartmentId('');
     setSearch('');
     setSearchExpanded(false);
@@ -287,9 +291,9 @@ const TeamCreateModal: React.FC<Props> = ({ visible, onClose, onCreated }) => {
       // provider+model pin for 直连模型专家.
       extraAgents.map(optionToGuest).forEach((g) => storeAddGuest(team.id, g));
 
-      // Decision edition: fix the 流程 now (by department). hydrate() reads this into
-      // state.form/departmentId; the meeting room has no runtime flow picker.
-      if (IS_DECISION && departmentId) setTeamMeetingForm(team.id, 'department', departmentId);
+      // Decision edition: fix the discussion method (+ optional department template) now;
+      // hydrate() reads it into state.form/departmentId — the room has no runtime picker.
+      if (IS_DECISION) setTeamMeetingForm(team.id, method, departmentId || undefined);
 
       // Remember this panel for the next 智囊团. Creating only sets up the team — the
       // room opens blank (idle) and the user sets the topic + starts the discussion there.
@@ -346,7 +350,7 @@ const TeamCreateModal: React.FC<Props> = ({ visible, onClose, onCreated }) => {
             type='primary'
             onClick={handleCreate}
             loading={loading}
-            disabled={!name.trim() || selectedKeys.length === 0 || (IS_DECISION && !departmentId)}
+            disabled={!name.trim() || selectedKeys.length === 0}
             className='min-w-80px'
             style={{ borderRadius: 8 }}
           >
@@ -357,46 +361,57 @@ const TeamCreateModal: React.FC<Props> = ({ visible, onClose, onCreated }) => {
     >
       <div className='px-24px py-20px' style={{ maxHeight: 'min(72vh, 640px)', overflowY: 'auto' }}>
         <Form layout='vertical'>
-          {/* Decision edition: pick a preset department — fixes the 流程 (phases) + prompts. */}
+          {/* Decision edition: manually pick a discussion method; optionally start from a department template. */}
           {IS_DECISION && (
-            <FormItem
-              label={
-                <span className='text-12px font-500 text-t-secondary'>
-                  {t('decision.deptLabel', { defaultValue: '决策部门' })}
-                  <span className='ml-4px text-danger-6'>*</span>
-                </span>
-              }
-            >
-              <Select
-                placeholder={t('decision.deptPlaceholder', { defaultValue: '选择一个决策部门（决定流程与提示词）' })}
-                value={departmentId || undefined}
-                onChange={(v) => {
-                  const id = v as string;
-                  setDepartmentId(id);
-                  const dept = PRESET_DEPARTMENTS.find((d) => d.id === id);
-                  if (dept && !name.trim()) setName(t(dept.nameKey, { defaultValue: dept.id }));
-                }}
-                data-testid='team-create-department-picker'
+            <>
+              <FormItem
+                label={<span className='text-12px font-500 text-t-secondary'>{t('decision.methodLabel', { defaultValue: '讨论方式' })}</span>}
               >
-                {PRESET_DEPARTMENTS.map((d) => (
-                  <Select.Option key={d.id} value={d.id}>
-                    {t(d.nameKey, { defaultValue: d.id })}
-                  </Select.Option>
-                ))}
-              </Select>
-              {(() => {
-                const dept = PRESET_DEPARTMENTS.find((d) => d.id === departmentId);
-                if (!dept) return null;
-                const flow = [...dept.phases.map((p) => p.label), t('decision.deptDecide', { defaultValue: '决议' })].join(' → ');
-                return (
-                  <div className='mt-6px text-11px text-t-tertiary leading-relaxed'>
-                    {t(dept.hintKey, { defaultValue: '' })}
-                    <br />
-                    {t('decision.deptFlow', { defaultValue: '专有流程' })}：{flow}
-                  </div>
-                );
-              })()}
-            </FormItem>
+                <Radio.Group
+                  type='button'
+                  value={method}
+                  onChange={(v) => setMethod(v as MeetingForm)}
+                  data-testid='team-create-method-picker'
+                >
+                  {MEETING_FORMS.map((f) => (
+                    <Radio key={f.id} value={f.id}>
+                      {f.label}
+                    </Radio>
+                  ))}
+                </Radio.Group>
+                <div className='mt-6px text-11px text-t-tertiary'>{MEETING_FORMS.find((f) => f.id === method)?.hint}</div>
+              </FormItem>
+              <FormItem
+                label={<span className='text-12px font-500 text-t-secondary'>{t('decision.templateLabel', { defaultValue: '预设模板（可选）' })}</span>}
+              >
+                <Select
+                  placeholder={t('decision.templatePlaceholder', { defaultValue: '可选：套用一个部门模板（自动设好讨论方式与领域提示词）' })}
+                  allowClear
+                  value={departmentId || undefined}
+                  onChange={(v) => {
+                    const id = (v as string) || '';
+                    setDepartmentId(id);
+                    const dept = PRESET_DEPARTMENTS.find((d) => d.id === id);
+                    if (dept) {
+                      setMethod(dept.form);
+                      if (!name.trim()) setName(t(dept.nameKey, { defaultValue: dept.id }));
+                    }
+                  }}
+                  data-testid='team-create-department-picker'
+                >
+                  {PRESET_DEPARTMENTS.map((d) => (
+                    <Select.Option key={d.id} value={d.id}>
+                      {t(d.nameKey, { defaultValue: d.id })}
+                    </Select.Option>
+                  ))}
+                </Select>
+                {(() => {
+                  const dept = PRESET_DEPARTMENTS.find((d) => d.id === departmentId);
+                  if (!dept) return null;
+                  return <div className='mt-6px text-11px text-t-tertiary'>{t(dept.hintKey, { defaultValue: '' })}</div>;
+                })()}
+              </FormItem>
+            </>
           )}
           {/* 智囊团 name (a team — the discussion topic is set later in the room). */}
           <FormItem

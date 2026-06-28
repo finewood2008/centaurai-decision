@@ -2,63 +2,33 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, Loading } from '@icon-park/react';
 import type { MeetingForm, MeetingPhase } from './meetingTypes';
-import { resolveDepartment } from './presetDepartments';
 
 /**
  * One stage in the meeting flow. `key` matches the turn's `phaseLabel` (Chinese,
  * assigned by the orchestrator) so we can detect which stages have been reached;
- * the display label is i18n'd. `__decision__` is virtual (driven by phase, not a turn).
+ * the display label is i18n'd (missing keys fall back to the Chinese default).
+ * `__decision__` is virtual (driven by phase, not a turn).
  */
 type Stage = { key: string; i18nKey: string; zh: string };
 const S = (key: string, i18nKey: string, zh: string): Stage => ({ key, i18nKey, zh });
 
-const OPENING = S('开场', 'team.meeting.stage.opening', '开场');
+// Universal backbone: every form is ① 并行立场 → ② 交锋讨论(form-specific) → ③ 综合 → 拍板.
+const PARALLEL = S('并行立场', 'team.meeting.stage.parallel', '并行立场');
 const SYNTH = S('综合', 'team.meeting.stage.synthesis', '综合');
 const DECISION = S('__decision__', 'team.meeting.stage.decision', '拍板');
 
 /** The user-facing milestones per discussion format (mirrors runMeeting's phases). */
-const STAGES_BY_FORM: Record<Exclude<MeetingForm, 'department'>, Stage[]> = {
-  roundtable: [
-    OPENING,
-    S('立论', 'team.meeting.stage.position', '立论'),
-    S('交锋', 'team.meeting.stage.debate', '交锋'),
-    SYNTH,
-    DECISION,
-  ],
-  redteam: [
-    OPENING,
-    S('起草', 'team.meeting.stage.draft', '起草'),
-    S('红队', 'team.meeting.stage.redteam', '红队'),
-    S('修订', 'team.meeting.stage.revise', '修订'),
-    SYNTH,
-    DECISION,
-  ],
-  tournament: [OPENING, S('提案', 'team.meeting.stage.proposal', '提案'), SYNTH, DECISION],
-  diverge: [
-    OPENING,
-    S('发散', 'team.meeting.stage.diverge', '发散'),
-    S('收敛', 'team.meeting.stage.converge', '收敛'),
-    SYNTH,
-    DECISION,
-  ],
+const STAGES_BY_FORM: Record<MeetingForm, Stage[]> = {
+  roundtable: [PARALLEL, S('交锋', 'team.meeting.stage.debate', '交锋'), SYNTH, DECISION],
+  redteam: [PARALLEL, S('红队猛攻', 'team.meeting.stage.redteamAttack', '红队猛攻'), SYNTH, DECISION],
+  tournament: [PARALLEL, S('互评', 'team.meeting.stage.crossreview', '互评'), SYNTH, DECISION],
+  diverge: [PARALLEL, S('收敛', 'team.meeting.stage.converge', '收敛'), SYNTH, DECISION],
+  deepdive: [PARALLEL, S('追问', 'team.meeting.stage.probe', '追问'), SYNTH, DECISION],
 };
-
-/** Resolve the stage list for a form. Decision-edition 'department' meetings build
- *  their stages from the preset department's phases (data-driven 专有流程). */
-function resolveStages(form: MeetingForm, departmentId?: string): Stage[] {
-  if (form === 'department') {
-    const dept = resolveDepartment(departmentId);
-    if (dept) return [OPENING, ...dept.phases.map((ph) => S(ph.label, ph.label, ph.label)), SYNTH, DECISION];
-    return STAGES_BY_FORM.roundtable;
-  }
-  return STAGES_BY_FORM[form] ?? STAGES_BY_FORM.roundtable;
-}
 
 type Props = {
   phase: MeetingPhase;
   form: MeetingForm;
-  /** Preset department id (when form==='department') — drives the stage list. */
-  departmentId?: string;
   /** Distinct phaseLabels seen in the transcript so far (drives stage progress). */
   reachedLabels: string[];
   turnsCompleted: number;
@@ -66,12 +36,12 @@ type Props = {
 
 /**
  * Compact one-row stage tracker: shows where the meeting IS and what's NEXT
- * (开场 → 研讨阶段 → 综合 → 拍板), so the boss can read the room at a glance.
+ * (并行立场 → 交锋 → 综合 → 拍板), so the boss can read the room at a glance.
  * Deliberately slim — the transcript below is the hero.
  */
-const MeetingPhaseBar: React.FC<Props> = ({ phase, form, departmentId, reachedLabels, turnsCompleted }) => {
+const MeetingPhaseBar: React.FC<Props> = ({ phase, form, reachedLabels, turnsCompleted }) => {
   const { t } = useTranslation();
-  const stages = resolveStages(form, departmentId);
+  const stages = STAGES_BY_FORM[form] ?? STAGES_BY_FORM.roundtable;
   const reached = new Set(reachedLabels);
 
   let current = 0;

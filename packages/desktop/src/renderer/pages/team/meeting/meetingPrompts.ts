@@ -34,10 +34,11 @@ export const PANEL_LENSES: string[] = [
 
 /** UI metadata for the discussion-format picker. */
 export const MEETING_FORMS: { id: MeetingForm; label: string; hint: string }[] = [
-  { id: 'roundtable', label: '圆桌辩论', hint: '多视角 + 互相反驳，适合有取舍的决策' },
-  { id: 'redteam', label: '红蓝评审', hint: '一方起草、其余红队攻击再修订，适合打磨草案' },
-  { id: 'tournament', label: '多方案竞标', hint: '各出完整方案 → 评委打分 → 合成，适合解法空间大' },
-  { id: 'diverge', label: '发散→收敛', hint: '先独立发散最大化多样性 → 聚类合成，适合创意探索' },
+  { id: 'roundtable', label: '圆桌共识', hint: '并行立场 → 交锋质询 → 综合，通用、平衡' },
+  { id: 'redteam', label: '红蓝对抗', hint: '并行立场 → 红队猛攻找漏洞 → 综合，压力测试' },
+  { id: 'tournament', label: '方案竞标', hint: '并行各出完整方案 → 互评 → 嫁接综合，适合解法空间大' },
+  { id: 'diverge', label: '发散收敛', hint: '并行发散 → 聚类 → 收敛，适合创意探索' },
+  { id: 'deepdive', label: '逐层深挖', hint: '并行初判 → 主持人多轮追问 → 综合，把复杂难题挖到底' },
 ];
 
 /**
@@ -83,26 +84,50 @@ export function buildModeratorOpeningPrompt(topic: string, panelists: PanelistBr
 }
 
 /**
- * Decision-edition preset-department phase prompt. Generic over a department's
- * phase (label + instruction), so all preset departments reuse one builder
- * (see presetDepartments.ts) — the 流程 lives in data, not in code.
+ * Moderator's step-① turn. The moderator is an equal contributor: it briefly frames
+ * the core tension, then gives its OWN substantive initial judgment (runs in parallel
+ * with the panel). Optional `framing` injects the chosen department's context.
  */
-export function buildDeptPhasePrompt(params: {
-  topic: string;
-  persona: string;
-  lens?: string;
-  phaseLabel: string;
-  instruction: string;
-  priorContext: string;
-}): string {
-  const { topic, persona, lens, phaseLabel, instruction, priorContext } = params;
+export function buildModeratorPositionPrompt(topic: string, panelists: PanelistBrief[], framing?: string): string {
   return [
-    `你是参加这场决策会议的专家「${persona}」，主攻【${lens ?? '综合'}】视角。本环节是【${phaseLabel}】。`,
+    framing ? framing : '',
+    '你是这场决策会议的主持人，但你同时也是一位重要的决策参谋——本环节请你和专家们同时发声。',
     `决策议题：${topic}`,
-    priorContext ? `\n会议进展（已有发言）：\n${priorContext}` : '\n（你是本环节第一位发言的专家）',
+    `同场专家及其主攻视角：${lensRoster(panelists)}`,
     '',
-    `本环节要求：${instruction}`,
-    '请结合你的视角，言之有物、给出具体可执行的判断；若老板在上面有过插话或约束，必须当作硬性前提。绝不说正确的废话。',
+    '请完成（务实有力、不说套话）：',
+    '1）一两句点破这个决策【真正的核心张力】（难在哪），并拆出 2-3 个必须辩清的关键问题；',
+    '2）给出你自己的【初步判断 / 推荐方向】，要具体、可落地，敢于亮明立场。',
+    '只输出你的发言本身。',
+  ]
+    .filter(Boolean)
+    .join('\n');
+}
+
+/**
+ * Deep-dive (逐层深挖) — moderator drives a probing follow-up round, picking the
+ * weakest-justified / most-uncertain points from the discussion so far and pressing on them.
+ */
+export function buildDeepDiveProbePrompt(params: { topic: string; round: number; priorContext: string }): string {
+  const { topic, round, priorContext } = params;
+  return [
+    `你是主持人，进入第 ${round} 轮【逐层深挖】。请基于目前的讨论，挑出 2-3 个最关键、但还没被充分论证清楚、或分歧最大的点，向专家们追问下去。`,
+    `议题：${topic}`,
+    priorContext ? `\n讨论进展：\n${priorContext}` : '',
+    '',
+    '每个追问要具体、尖锐、指向决策（"如果……会怎样？""凭什么这么说？数据/机制是什么？""最坏情况是什么？"）。只输出你的追问，逐条列出。',
+  ].join('\n');
+}
+
+/** Deep-dive — a panelist answers the moderator's probing questions from their angle. */
+export function buildDeepDiveAnswerPrompt(params: { topic: string; persona: string; lens?: string; probeContext: string }): string {
+  const { topic, persona, lens, probeContext } = params;
+  return [
+    `你是专家「${persona}」（主攻【${lens ?? '综合'}】）。主持人提出了一轮追问，请从你的视角【正面、深入】地回应——不回避、不打太极。`,
+    `议题：${topic}`,
+    `\n追问与上下文：\n${probeContext}`,
+    '',
+    '逐条回应你能回应的追问，给出具体依据（机制 / 数据量级 / 案例）；如果某点你也没把握，明确说出不确定性与它对决策的影响。',
   ].join('\n');
 }
 
