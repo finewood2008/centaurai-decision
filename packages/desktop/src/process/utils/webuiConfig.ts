@@ -288,17 +288,99 @@ export function setDesktopWebUIInitialPassword(password: string | undefined): vo
   currentInitialPassword = password;
 }
 
-const getLanIP = (): string | null => {
+// Interface names that are virtual / VPN / tunnel / VM — never a real LAN NIC.
+// `utun` is the macOS tunnel device used by Clash/mihomo (TUN mode), Tailscale,
+// WireGuard, etc.; bridge/vmnet/vboxnet are VM bridges; awdl/llw are Apple
+// peer-to-peer Wi-Fi. Picking any of these as "the LAN IP" yields an address no
+// other device on the office network can reach.
+const VIRTUAL_IFACE_RE = /^(utun|tun|tap|ppp|ipsec|wg|awdl|llw|bridge|vmnet|vboxnet|gif|stf|ap\d)/i;
+
+/**
+ * Addresses that are technically non-internal IPv4 but are NOT a usable office
+ * LAN IP — handing these to clients would silently break remote access:
+ *  - 169.254.0.0/16  link-local (APIPA, no DHCP)
+ *  - 198.18.0.0/15   benchmarking range hijacked by Clash/mihomo TUN (e.g. 198.18.0.1)
+ *  - 100.64.0.0/10   CGNAT range used by Tailscale
+ */
+const isProxyOrCgnatAddr = (addr: string): boolean => {
+  if (/^198\.1[89]\./.test(addr)) return true;
+  const cgnat = /^100\.(\d+)\./.exec(addr);
+  if (cgnat && Number(cgnat[1]) >= 64 && Number(cgnat[1]) <= 127) return true;
+  return false;
+};
+
+const isUsableLanAddr = (addr: string): boolean => !addr.startsWith('169.254.') && !isProxyOrCgnatAddr(addr);
+
+// Rank real RFC1918 private ranges above anything else so a genuine office LAN
+// IP always beats a stray public/odd address.
+const lanAddrScore = (addr: string): number => {
+  if (addr.startsWith('192.168.')) return 3;
+  if (addr.startsWith('10.')) return 2;
+  if (/^172\.(1[6-9]|2\d|3[01])\./.test(addr)) return 2;
+  return 1;
+};
+
+/**
+ * All plausible LAN IPv4 addresses for this host, best first. Skips virtual/VPN
+ * interfaces and proxy/CGNAT ranges, then prefers RFC1918 + physical `en*` NICs.
+ * Robust against the common failure where a TUN proxy's `utun` (198.18.x) or a
+ * stale `en0` would otherwise be chosen over the active `en1` LAN address.
+ */
+export const getLanIPCandidates = (): string[] => {
   const nets = networkInterfaces();
+  const found: { iface: string; address: string }[] = [];
   for (const name of Object.keys(nets)) {
+    if (VIRTUAL_IFACE_RE.test(name)) continue;
     const netInfo = nets[name];
     if (!netInfo) continue;
     for (const net of netInfo) {
       const isIPv4 = net.family === 'IPv4' || (net.family as unknown) === 4;
-      if (isIPv4 && !net.internal) return net.address;
+      if (!isIPv4 || net.internal) continue;
+      if (!isUsableLanAddr(net.address)) continue;
+      found.push({ iface: name, address: net.address });
     }
   }
-  return null;
+  found.sort((a, b) => {
+    const byScore = lanAddrScore(b.address) - lanAddrScore(a.address);
+    if (byScore !== 0) return byScore;
+    const physicalA = /^en\d/i.test(a.iface) ? 0 : 1;
+    const physicalB = /^en\d/i.test(b.iface) ? 0 : 1;
+    return physicalA - physicalB;
+  });
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const c of found) {
+    if (!seen.has(c.address)) {
+      seen.add(c.address);
+      out.push(c.address);
+    }
+  }
+  return out;
+};
+
+const getLanIP = (): string | null => getLanIPCandidates()[0] ?? null;
+
+/**
+ * Detect a TUN-mode proxy / VPN on THIS host (Clash/mihomo `utun` on 198.18.x,
+ * Tailscale 100.64/10, WireGuard, …). When present, LAN clients that ALSO run a
+ * proxy commonly have their requests to this server hijacked into the tunnel
+ * unless they bypass the LAN — the #1 cause of "the LAN address won't open" in
+ * proxy-heavy setups. Surfaced as an advisory in the remote-access panel.
+ */
+const detectProxyInterference = (): { detected: boolean; interfaces: string[] } => {
+  const nets = networkInterfaces();
+  const hits: string[] = [];
+  for (const name of Object.keys(nets)) {
+    const netInfo = nets[name];
+    if (!netInfo) continue;
+    const tunnelName = /^(utun|tun|wg|ppp|ipsec)/i.test(name);
+    for (const net of netInfo) {
+      const isIPv4 = net.family === 'IPv4' || (net.family as unknown) === 4;
+      if (!isIPv4 || net.internal) continue;
+      if (tunnelName || isProxyOrCgnatAddr(net.address)) hits.push(`${name} (${net.address})`);
+    }
+  }
+  return { detected: hits.length > 0, interfaces: hits };
 };
 
 const toDesktopHandle = (handle: WebHostHandle, allowRemote: boolean): DesktopWebUIHandle => ({
@@ -459,14 +541,82 @@ export async function getDesktopWebUIEntryHealth(): Promise<EntryHealth | null> 
  * User-triggered "repair connection": force a check + heal of the entry
  * document and return the resulting health. Returns null when no WebUI runs.
  */
-export async function repairDesktopWebUIEntry(): Promise<EntryHealth | null> {
-  if (!currentHandle) return null;
+/** Live network reachability picture for the remote-access settings panel. */
+export type RemoteAccessConnectivity = {
+  running: boolean;
+  allowRemote: boolean;
+  /** Address the server socket is bound to: '0.0.0.0' = LAN, '127.0.0.1' = loopback only. */
+  boundHost: string;
+  port: number;
+  lanIP: string | null;
+  lanIPCandidates: string[];
+  /** URL to hand to LAN clients (null when not LAN-exposed or no LAN IP). */
+  accessUrl: string | null;
+  /** Whether web-host can currently reach the aioncore backend. */
+  backendReachable: boolean;
+  proxy: { detected: boolean; interfaces: string[] };
+};
+
+/** Probe the local aioncore HTTP port. A 401 still proves the backend is up. */
+const probeBackendReachable = async (port: number): Promise<boolean> => {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 1500);
   try {
-    return await currentHandle.repairEntry();
-  } catch (error) {
-    console.error('[WebUI] entry repair failed:', error);
-    return null;
+    const res = await fetch(`http://127.0.0.1:${port}/api/auth/status`, { signal: controller.signal });
+    return res.ok || res.status === 401;
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(timer);
   }
+};
+
+/**
+ * Gather an actionable connectivity snapshot for "repair connection". Unlike the
+ * entry-HTML self-heal, this answers the question users actually have when a LAN
+ * address won't open: is it LAN-exposed, what is the correct URL, is the backend
+ * up, and is a local TUN proxy likely hijacking client traffic?
+ */
+export async function getRemoteAccessConnectivity(): Promise<RemoteAccessConnectivity> {
+  const candidates = getLanIPCandidates();
+  const lanIP = candidates[0] ?? null;
+  const running = currentHandle !== null;
+  const allowRemote = currentHandle?.allowRemote ?? false;
+  const port = currentHandle?.port ?? DEFAULT_WEBUI_PORT;
+  const boundHost = allowRemote ? '0.0.0.0' : '127.0.0.1';
+  const accessUrl = allowRemote && lanIP ? `http://${lanIP}:${port}` : null;
+  const backendPort = (globalThis as typeof globalThis & { __backendPort?: number }).__backendPort;
+  const backendReachable = typeof backendPort === 'number' ? await probeBackendReachable(backendPort) : false;
+  return {
+    running,
+    allowRemote,
+    boundHost,
+    port,
+    lanIP,
+    lanIPCandidates: candidates,
+    accessUrl,
+    backendReachable,
+    proxy: detectProxyInterference(),
+  };
+}
+
+/** Result of a user-triggered "repair connection": entry-HTML heal + diagnostics. */
+export type WebUIRepairResult = {
+  entryHealth: EntryHealth | null;
+  connectivity: RemoteAccessConnectivity;
+};
+
+export async function repairDesktopWebUIEntry(): Promise<WebUIRepairResult> {
+  const connectivity = await getRemoteAccessConnectivity();
+  let entryHealth: EntryHealth | null = null;
+  if (currentHandle) {
+    try {
+      entryHealth = await currentHandle.repairEntry();
+    } catch (error) {
+      console.error('[WebUI] entry repair failed:', error);
+    }
+  }
+  return { entryHealth, connectivity };
 }
 
 export const restoreDesktopWebUIFromPreferences = async (opts?: {
