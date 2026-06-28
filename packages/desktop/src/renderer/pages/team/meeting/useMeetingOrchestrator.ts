@@ -27,21 +27,22 @@ import {
   removeGuest as storeRemoveGuest,
   type MeetingGuest,
 } from './meetingGuests';
+import { resolveDepartment } from './presetDepartments';
 import {
   PANEL_LENSES,
   buildClusterPrompt,
   buildConvergePrompt,
+  buildDeepDiveAnswerPrompt,
+  buildDeepDiveProbePrompt,
   buildDivergePrompt,
-  buildDraftPrompt,
   buildExportTask,
   buildLocalSynthesisPrompt,
-  buildModeratorOpeningPrompt,
+  buildModeratorPositionPrompt,
   buildPanelistDebatePrompt,
   buildPanelistPositionPrompt,
   buildProposalPrompt,
   buildRedTeamPrompt,
   buildReferenceContext,
-  buildRevisePrompt,
   buildRoundPausePrompt,
   parsePlan,
   parseResolutionOptions,
@@ -161,6 +162,19 @@ function writeStore(map: StoredMap): void {
 }
 
 /**
+ * Seed a team's fixed workflow (+ optional preset department) into the meeting
+ * store at create time. The Decision edition fixes the 流程 when the 决策会议室 is
+ * created — there is no runtime picker — so hydrate() reads this back into
+ * state.form / state.departmentId and startMeeting falls back to state.form.
+ */
+export function setTeamMeetingForm(team_id: string, form: MeetingForm, departmentId?: string): void {
+  const store = readStore();
+  const prev = store[team_id] ?? {};
+  store[team_id] = departmentId ? { ...prev, form, departmentId } : { ...prev, form };
+  writeStore(store);
+}
+
+/**
  * Hydrate persisted meeting state for a COLD engine (first visit this session, or
  * after an app reload). A run that was live when the app last closed can't be
  * resumed — its renderer loop is gone — so we park it back to idle. Within a
@@ -277,6 +291,7 @@ class MeetingEngine {
       runState: next.runState,
       topic: next.topic,
       form: next.form,
+      departmentId: next.departmentId,
       plan: next.plan,
       options: next.options,
       decidedOptionId: next.decidedOptionId,
@@ -289,11 +304,22 @@ class MeetingEngine {
     if (!this.warmup) {
       this.warmup = ipcBridge.team.ensureSession
         .invoke({ team_id: this.team.id })
-        // A freshly created team's first GET can race agent provisioning, leaving
-        // empty conversation_ids (→ canStart stays false → auto-start never fires).
-        // Refetch the team once the session is warm so canStart flips true.
-        .then(() => {
-          void globalMutate(`team/${this.team.id}`);
+        // A freshly created team provisions agent conversations ASYNCHRONOUSLY — and
+        // teammate conversation_ids often land AFTER ensureSession resolves. A single
+        // refetch can therefore miss them, so a selected teammate stays invisible in
+        // the roster (moderator/panelists require a conversation_id) and the boss thinks
+        // their pick was lost. Poll the team until every agent has a conversation_id,
+        // pushing each fresh snapshot into the SWR cache so the roster fills in.
+        .then(async () => {
+          for (let i = 0; i < 8; i++) {
+            const fresh: TTeam | null = await ipcBridge.team.get.invoke({ id: this.team.id }).catch((): null => null);
+            if (fresh) {
+              await globalMutate(`team/${this.team.id}`, fresh, false);
+              const agents = fresh.agents ?? [];
+              if (agents.length > 0 && agents.every((a) => a.conversation_id)) break;
+            }
+            await new Promise((r) => setTimeout(r, 1000));
+          }
         })
         .catch(() => {
           this.warmup = null;
@@ -405,7 +431,7 @@ class MeetingEngine {
   }
 
   /** Append a fresh "speaking" turn for a participant; returns its id. */
-  private addTurn(p: Participant, phaseLabel: string): string {
+  private addTurn(p: Participant, phaseLabel: string, parallel = false): string {
     const id = `t-${this.state.transcript.length}-${p.id}`;
     const turn: MeetingTurn = {
       id,
@@ -415,6 +441,7 @@ class MeetingEngine {
       agent_type: p.agent_type,
       isModerator: p.isModerator,
       phaseLabel,
+      parallel,
       text: '',
       status: 'speaking',
     };
@@ -641,30 +668,28 @@ class MeetingEngine {
       const { mod, panel } = parts;
       // Assign each panelist a DISTINCT angle (round-robin) so the debate has real
       // perspective diversity instead of everyone saying the same thing.
-      const lensByPanel = new Map(panel.map((p, i) => [p.id, PANEL_LENSES[i % PANEL_LENSES.length]]));
+      // Optional department template: overrides the lens set + frames the opening.
+      const dept = resolveDepartment(this.state.departmentId);
+      const lenses = dept && dept.lenses.length > 0 ? dept.lenses : PANEL_LENSES;
+      const lensByPanel = new Map(panel.map((p, i) => [p.id, lenses[i % lenses.length]]));
       const briefs: PanelistBrief[] = panel.map((p) => ({ name: p.name, lens: lensByPanel.get(p.id) }));
       const transcriptText = () =>
         this.state.transcript
           .filter((t) => t.text.trim())
           .map((t) => `${t.name}（${t.phaseLabel}）：${t.text}`)
           .join('\n\n');
-      const speak = async (p: Participant, label: string, prompt: string): Promise<void> => {
+      const speak = async (p: Participant, label: string, prompt: string, parallel = false): Promise<void> => {
         if (stale()) return;
-        const tid = this.addTurn(p, label);
+        const tid = this.addTurn(p, label, parallel);
         const text = await this.askTurn(p.conversationId, tid, prompt);
         if (stale()) return;
         this.updateTurn(tid, { text, status: text ? 'done' : 'error' });
         this.commit({ turnsCompleted: this.state.turnsCompleted + 1, activeSlotId: null });
       };
 
-      // 1) Moderator opens — addressed to the boss, frames the real tension (+ optional 背景资料).
-      const openingPrompt = reference
-        ? `${buildModeratorOpeningPrompt(topic, briefs)}\n\n${reference}\n\n请在开场时简要提示专家们参考上述背景资料。`
-        : buildModeratorOpeningPrompt(topic, briefs);
-      await speak(mod, '开场', openingPrompt);
-      // 2) Form-specific middle phases. Every form reuses speak / transcriptText /
-      //    the moderator recap + PAUSE (boss reads, optionally interjects, clicks
-      //    继续讨论), so the meeting is paced like a real one regardless of format.
+      // The backbone reuses speak / transcriptText / the moderator recap + PAUSE
+      // (boss reads, optionally interjects, clicks 继续讨论), so every form is paced
+      // like a real meeting: ① 并行立场 → ② 交锋讨论(form-specific) → ③ 综合决议.
       const pauseAndWait = async (round: number, stage: string): Promise<boolean> => {
         if (!stale()) {
           await speak(mod, '阶段小结', buildRoundPausePrompt({ topic, round, stage, recentContext: transcriptText() }));
@@ -679,60 +704,58 @@ class MeetingEngine {
         }
       };
 
+      const refNote = reference ? `\n\n${reference}\n\n请充分参考上述背景资料。` : '';
+      // The moderator (the meeting's core role) opens FIRST: frames the tension, gives
+      // its own take, and sets the agenda — then hands off to the panel.
+      await speak(mod, '开场', buildModeratorPositionPrompt(topic, briefs, dept?.framing) + refNote);
+      // ① 并行立场 — the PANEL answers SIMULTANEOUSLY (only this first round is parallel,
+      //    for speed); rendered as a horizontal collapsed strip. Step ② onward is one-by-one.
+      const panelOpening = (p: Participant): string => {
+        const lens = lensByPanel.get(p.id);
+        if (form === 'tournament') return buildProposalPrompt({ topic, persona: p.name, lens, reference }) + refNote;
+        if (form === 'diverge') return buildDivergePrompt({ topic, persona: p.name, lens }) + refNote;
+        return buildPanelistPositionPrompt({ topic, persona: p.name, lens, priorContext: '' }) + refNote;
+      };
+      // Fire every panelist turn up-front (all appear at once), then stream concurrently.
+      await Promise.all(panel.map((p) => speak(p, '并行立场', panelOpening(p), true)));
+      if (!(await pauseAndWait(1, '并行立场'))) return;
+
+      // ② 交锋讨论 — form-specific (the parallel positions above are the shared input).
       if (form === 'redteam') {
-        // 起草 → 红队攻击 →(暂停)→ 修订
-        const drafter = panel[0];
-        const redTeam = panel.slice(1);
-        await speak(drafter, '起草', buildDraftPrompt({ topic, persona: drafter.name, reference }));
-        for (const p of redTeam) {
-          if (stale()) break;
-          await speak(
-            p,
-            '红队',
-            buildRedTeamPrompt({ topic, persona: p.name, lens: lensByPanel.get(p.id), draftContext: transcriptText() })
-          );
-        }
-        if (redTeam.length > 0) {
-          if (!(await pauseAndWait(1, '红队攻击'))) return;
-          await speak(
-            drafter,
-            '修订',
-            buildRevisePrompt({ topic, persona: drafter.name, critiqueContext: transcriptText() })
-          );
-        }
-      } else if (form === 'tournament') {
-        // 各自提案 →(暂停)→（合成阶段由主持人评审打分+嫁接）
-        await eachPanelist('提案', (p) =>
-          buildProposalPrompt({ topic, persona: p.name, lens: lensByPanel.get(p.id), reference })
+        await eachPanelist('红队猛攻', (p) =>
+          buildRedTeamPrompt({ topic, persona: p.name, lens: lensByPanel.get(p.id), draftContext: transcriptText() })
         );
-        if (!(await pauseAndWait(1, '提案'))) return;
+        if (!(await pauseAndWait(2, '红队猛攻'))) return;
+      } else if (form === 'tournament') {
+        await eachPanelist('互评', (p) =>
+          buildPanelistDebatePrompt({
+            topic,
+            persona: p.name,
+            lens: lensByPanel.get(p.id),
+            round: 2,
+            recentContext: transcriptText(),
+          })
+        );
+        if (!(await pauseAndWait(2, '互评'))) return;
       } else if (form === 'diverge') {
-        // 发散 → 主持人聚类 →(暂停)→ 收敛
-        await eachPanelist('发散', (p) => buildDivergePrompt({ topic, persona: p.name, lens: lensByPanel.get(p.id) }));
         if (!stale()) {
           await speak(mod, '聚类', buildClusterPrompt({ topic, ideasContext: transcriptText() }));
         }
-        if (!(await pauseAndWait(1, '发散'))) return;
         await eachPanelist('收敛', (p) =>
-          buildConvergePrompt({
-            topic,
-            persona: p.name,
-            lens: lensByPanel.get(p.id),
-            clustersContext: transcriptText(),
-          })
+          buildConvergePrompt({ topic, persona: p.name, lens: lensByPanel.get(p.id), clustersContext: transcriptText() })
         );
         if (!(await pauseAndWait(2, '收敛'))) return;
+      } else if (form === 'deepdive') {
+        for (let round = 2; round <= 3; round++) {
+          if (stale()) break;
+          await speak(mod, '追问', buildDeepDiveProbePrompt({ topic, round: round - 1, priorContext: transcriptText() }));
+          await eachPanelist('深答', (p) =>
+            buildDeepDiveAnswerPrompt({ topic, persona: p.name, lens: lensByPanel.get(p.id), probeContext: transcriptText() })
+          );
+          if (!(await pauseAndWait(round, '追问'))) return;
+        }
       } else {
-        // roundtable (default): 立论 →(暂停)→ 交锋 →(暂停)
-        await eachPanelist('立论', (p) =>
-          buildPanelistPositionPrompt({
-            topic,
-            persona: p.name,
-            lens: lensByPanel.get(p.id),
-            priorContext: transcriptText(),
-          })
-        );
-        if (!(await pauseAndWait(1, '立论'))) return;
+        // roundtable (default): 交锋质询
         await eachPanelist('交锋', (p) =>
           buildPanelistDebatePrompt({
             topic,

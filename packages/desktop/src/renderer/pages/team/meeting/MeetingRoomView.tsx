@@ -15,6 +15,8 @@ import MeetingResolutionCard from './MeetingResolutionCard';
 import MeetingGuestPanel from './MeetingGuestPanel';
 import { stripResolutionMarkers } from './meetingPrompts';
 import { useMeetingOrchestrator } from './useMeetingOrchestrator';
+import type { MeetingTurn } from './meetingTypes';
+import { IS_DECISION } from '@/common/config/constants';
 
 type Props = {
   team: TTeam;
@@ -42,6 +44,66 @@ const TurnAvatar: React.FC<{ icon?: string; agentType: string; name: string }> =
 };
 
 /**
+ * Step-① 并行立场 presentation: the 顾问墙 — every agent answers at once, filling the
+ * view as a dense grid of LIVE-streaming cards (each glowing while speaking), so the
+ * boss feels surrounded by a wall of AI thinking for them simultaneously. Only this
+ * first round is parallel; later rounds render one-by-one as full cards.
+ */
+const ParallelTurnWall: React.FC<{ turns: MeetingTurn[] }> = ({ turns }) => {
+  const { t } = useTranslation();
+  const speaking = turns.filter((tn) => tn.status === 'speaking').length;
+  // Denser columns as the council grows, so the wall stays full and immersive.
+  const cols =
+    turns.length <= 2
+      ? 'sm:grid-cols-2'
+      : turns.length <= 6
+        ? 'sm:grid-cols-2 lg:grid-cols-3'
+        : 'sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4';
+  return (
+    <div className='flex flex-col gap-10px'>
+      <div className='flex items-center gap-7px text-12px font-medium text-[color:var(--primary)]'>
+        <span className={`w-7px h-7px rd-full bg-[var(--primary)] ${speaking > 0 ? 'animate-pulse' : ''}`} aria-hidden='true' />
+        <span>
+          {turns.length} {t('team.meeting.parallelWall', { defaultValue: '位 AI 顾问同时发言中，群策群力' })}
+        </span>
+      </div>
+      <div className={`grid grid-cols-1 ${cols} gap-12px`}>
+        {turns.map((turn) => {
+          const isSpeaking = turn.status === 'speaking';
+          return (
+            <div
+              key={turn.id}
+              data-testid={`meeting-turn-${turn.participantId}`}
+              className={`flex flex-col rd-14px border border-solid overflow-hidden transition-shadow bg-[var(--bg-1)] ${
+                isSpeaking ? 'border-[color:var(--color-primary-light-3)]' : 'border-[color:var(--border-light)]'
+              }`}
+              style={isSpeaking ? { boxShadow: '0 0 0 2px var(--color-primary-light-2), 0 6px 24px -6px var(--color-primary-light-3)' } : undefined}
+            >
+              <div className='flex items-center gap-8px px-12px h-40px shrink-0 border-b border-solid border-[color:var(--border-light)]'>
+                <TurnAvatar icon={turn.icon} agentType={turn.agent_type} name={turn.name} />
+                <span className='text-13px font-semibold text-[color:var(--text-primary)] truncate flex-1'>{turn.name}</span>
+                {isSpeaking ? (
+                  <Spin loading size={12} className='shrink-0' />
+                ) : turn.status === 'error' ? (
+                  <span className='shrink-0 text-11px text-[color:var(--danger)]'>{t('team.meeting.turn.failed', { defaultValue: '未发言' })}</span>
+                ) : null}
+              </div>
+              <div className='px-14px py-11px text-13px leading-[1.7] overflow-y-auto max-h-300px min-h-110px [scrollbar-width:thin]'>
+                {turn.text.trim() ? (
+                  <MarkdownView>{stripResolutionMarkers(turn.text)}</MarkdownView>
+                ) : (
+                  <span className='text-[color:var(--bg-6)]'>{t('team.meeting.thinking', { defaultValue: '思考中…' })}</span>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+/**
  * Meeting room: the boss throws a topic; CentaurAI orchestrates a moderated debate
  * among ALL experts — team-capable (claude/codex/aionrs) AND openclaw/hermes — each
  * driven as a single-turn ACP conversation. We render the live transcript + who's
@@ -51,7 +113,13 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const orchestrator = useMeetingOrchestrator(team);
-  const { state, moderator, panelists, guests } = orchestrator;
+  const { state, guests } = orchestrator;
+  // Show ALL selected team members in the roster immediately — even before their
+  // conversation provisions (rendered as 连接中) — so a freshly created team never
+  // looks like the selection was lost. canStart / who actually speaks still use the
+  // orchestrator's conversation-gated lists (so a meeting only runs warmed agents).
+  const rosterModerator = useMemo(() => team.agents.find((a) => a.role === 'leader') ?? null, [team.agents]);
+  const rosterPanelists = useMemo(() => team.agents.filter((a) => a.role === 'teammate'), [team.agents]);
   const transcript = state.transcript;
   const [topicDraft, setTopicDraft] = useState('');
 
@@ -101,6 +169,49 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
   // Distinct phaseLabels seen so far — drives the stage tracker's progress.
   const reachedLabels = useMemo(() => [...new Set(transcript.map((tn) => tn.phaseLabel))], [transcript]);
 
+  // Group contiguous step-① parallel turns so they render side-by-side as columns
+  // (every model answering the topic at once); other turns stay full-width.
+  const turnGroups = useMemo(() => {
+    const groups: MeetingTurn[][] = [];
+    for (const turn of transcript) {
+      const last = groups[groups.length - 1];
+      if (turn.parallel && last && last[0].parallel) last.push(turn);
+      else groups.push([turn]);
+    }
+    return groups;
+  }, [transcript]);
+
+  const renderTurnCard = (turn: MeetingTurn) =>
+    turn.text.trim() || turn.status === 'speaking' ? (
+      <div
+        key={turn.id}
+        data-testid={`meeting-turn-${turn.participantId}`}
+        className={`rd-16px border border-solid overflow-hidden transition-colors ${
+          turn.isModerator
+            ? 'border-[color:var(--color-primary-light-3)] bg-[color:var(--color-primary-light-1)]'
+            : 'border-[color:var(--border-light)] bg-[var(--bg-1)]'
+        }`}
+      >
+        <div className='flex items-center gap-8px px-16px h-44px'>
+          <TurnAvatar icon={turn.icon} agentType={turn.agent_type} name={turn.name} />
+          <span className='text-14px font-semibold text-[color:var(--text-primary)] truncate max-w-220px'>{turn.name}</span>
+          <span className='shrink-0 px-7px h-18px flex items-center rd-full text-11px leading-none bg-[var(--bg-2)] text-[color:var(--bg-6)]'>
+            {turn.isModerator ? t('team.meeting.role.moderator', { defaultValue: '主持人' }) : turn.phaseLabel}
+          </span>
+          <div className='flex-1' />
+          {turn.status === 'speaking' && <Spin loading size={13} className='shrink-0' />}
+          {turn.status === 'error' && (
+            <span className='shrink-0 text-11px text-[color:var(--danger)]'>{t('team.meeting.turn.failed', { defaultValue: '未发言' })}</span>
+          )}
+        </div>
+        {turn.text.trim() && (
+          <div className='px-18px pb-14px pt-2px text-14px leading-[1.75]'>
+            <MarkdownView>{stripResolutionMarkers(turn.text)}</MarkdownView>
+          </div>
+        )}
+      </div>
+    ) : null;
+
   const isIdle = state.phase === 'idle';
   const atResolution = state.phase === 'resolution' || state.phase === 'decided';
   const showPlan = atResolution && state.plan.trim().length > 0;
@@ -114,10 +225,10 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
         </span>
         <div className='flex flex-col min-w-0'>
           <span className='centaur-title centaur-title-sm leading-tight'>
-            {t('team.meeting.boardTitle', { defaultValue: '智囊团' })}
+            {t(IS_DECISION ? 'decision.roomTitle' : 'team.meeting.boardTitle', { defaultValue: '智囊团' })}
           </span>
           <span className='text-11px text-[color:var(--bg-6)] leading-tight'>
-            {t('team.meeting.boardSubtitle', { defaultValue: 'AI 圆桌会议' })}
+            {t(IS_DECISION ? 'decision.roomSubtitle' : 'team.meeting.boardSubtitle', { defaultValue: 'AI 圆桌会议' })}
           </span>
         </div>
         <div className='flex-1' />
@@ -155,8 +266,8 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
         </Button>
       </div>
       <MeetingRoster
-        moderator={moderator}
-        panelists={panelists}
+        moderator={rosterModerator}
+        panelists={rosterPanelists}
         activeSlotId={state.activeSlotId}
         guests={guests}
         compact={!isIdle}
@@ -180,7 +291,7 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
               <VideoConference theme='outline' size='30' fill='var(--primary)' />
             </span>
             <span className='centaur-title centaur-title-lg'>
-              {t('team.meeting.emptyTitle', { defaultValue: '智囊团 · 召集 AI 专家开会' })}
+              {t(IS_DECISION ? 'decision.emptyTitle' : 'team.meeting.emptyTitle', { defaultValue: '智囊团 · 召集 AI 专家开会' })}
             </span>
             <span className='text-14px leading-relaxed max-w-420px text-[color:var(--text-secondary)]'>
               {t('team.meeting.emptyHint', {
@@ -203,42 +314,12 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
           </div>
         ) : (
           <div className='flex flex-col gap-16px py-20px px-24px'>
-            {transcript.map((turn) =>
-              turn.text.trim() || turn.status === 'speaking' ? (
-                <div
-                  key={turn.id}
-                  data-testid={`meeting-turn-${turn.participantId}`}
-                  className={`rd-16px border border-solid overflow-hidden transition-colors ${
-                    turn.isModerator
-                      ? 'border-[color:var(--color-primary-light-3)] bg-[color:var(--color-primary-light-1)]'
-                      : 'border-[color:var(--border-light)] bg-[var(--bg-1)]'
-                  }`}
-                >
-                  <div className='flex items-center gap-8px px-16px h-44px'>
-                    <TurnAvatar icon={turn.icon} agentType={turn.agent_type} name={turn.name} />
-                    <span className='text-14px font-semibold text-[color:var(--text-primary)] truncate max-w-220px'>
-                      {turn.name}
-                    </span>
-                    <span className='shrink-0 px-7px h-18px flex items-center rd-full text-11px leading-none bg-[var(--bg-2)] text-[color:var(--bg-6)]'>
-                      {turn.isModerator
-                        ? t('team.meeting.role.moderator', { defaultValue: '主持人' })
-                        : turn.phaseLabel}
-                    </span>
-                    <div className='flex-1' />
-                    {turn.status === 'speaking' && <Spin loading size={13} className='shrink-0' />}
-                    {turn.status === 'error' && (
-                      <span className='shrink-0 text-11px text-[color:var(--danger)]'>
-                        {t('team.meeting.turn.failed', { defaultValue: '未发言' })}
-                      </span>
-                    )}
-                  </div>
-                  {turn.text.trim() && (
-                    <div className='px-18px pb-14px pt-2px text-14px leading-[1.75]'>
-                      <MarkdownView>{stripResolutionMarkers(turn.text)}</MarkdownView>
-                    </div>
-                  )}
-                </div>
-              ) : null
+            {turnGroups.map((group, gi) =>
+              group[0].parallel ? (
+                <ParallelTurnWall key={`pg-${gi}`} turns={group} />
+              ) : (
+                renderTurnCard(group[0])
+              )
             )}
             {showPlan && (
               <div data-testid='meeting-plan' className='centaur-surface my-8px overflow-hidden'>

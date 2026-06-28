@@ -1,5 +1,5 @@
 {
-  "subtitle": "Your decision war-room — convene the advisory council anytime, hear every angle, and make the call.",
+  "subtitle": "Convene your advisory council in the Decision Meeting Room anytime — hear every angle, make the call.",
   "startMeeting": "Start a decision meeting",
   "greeting": {
     "morning": "Good morning, Chief",
@@ -23,8 +23,34 @@
   },
   "advisors": {
     "title": "Advisory council",
-    "desc": "Pull into the war-room anytime",
+    "desc": "Pull into the meeting room anytime",
     "count": "{{count}} on call"
   },
-  "enter": "Enter war-room"
+  "enter": "Enter meeting room",
+  "roomTitle": "Decision Meeting Room",
+  "roomSubtitle": "AI decision roundtable",
+  "emptyTitle": "Decision Meeting Room · convene your advisors",
+  "createTitle": "New decision meeting room",
+  "namePlaceholder": "Name this decision, e.g. “Q3 growth strategy”, “Pricing review”…",
+  "siderTitle": "Decision rooms",
+  "siderCreate": "New decision meeting room",
+  "renameTitle": "Rename",
+  "renamePlaceholder": "Meeting room name",
+  "deleteConfirm": "Delete this decision meeting room?",
+  "methodLabel": "Discussion method",
+  "templateLabel": "Preset template (optional)",
+  "templatePlaceholder": "Optional: start from a department template (presets the method & domain prompts)",
+  "deptLabel": "Decision department",
+  "deptPlaceholder": "Pick a department (fixes the workflow & prompts)",
+  "deptFlow": "Workflow",
+  "deptDecide": "Decide",
+  "dept": {
+    "marketing": { "name": "Marketing", "hint": "Campaigns, brand, growth, spend" },
+    "product": { "name": "Product", "hint": "Direction, prioritization, roadmap" },
+    "legal": { "name": "Legal", "hint": "Legal risk, compliance, clauses, remedy" },
+    "finance": { "name": "Finance", "hint": "Modeling, cash flow, financial risk" },
+    "operations": { "name": "Operations", "hint": "Process, execution, efficiency" },
+    "hr": { "name": "People / HR", "hint": "Org, talent, team" },
+    "strategy": { "name": "Strategy", "hint": "Goals, plan bake-off, decision" }
+  }
 }

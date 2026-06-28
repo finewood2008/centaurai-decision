@@ -7,6 +7,7 @@ import SharedLibraryPicker from '@/renderer/components/media/SharedLibraryPicker
 import type { MeetingOrchestrator } from './useMeetingOrchestrator';
 import { MEETING_FORMS } from './meetingPrompts';
 import type { MeetingForm } from './meetingTypes';
+import { IS_DECISION } from '@/common/config/constants';
 
 /** Last path segment, for a compact attachment chip label. */
 const baseName = (p: string): string => p.split(/[\\/]/).pop() || p;
@@ -81,25 +82,29 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
             </div>
           )}
         </div>
-        <div className='flex items-center gap-10px mb-10px flex-wrap'>
-          <Radio.Group
-            type='button'
-            size='small'
-            value={form}
-            onChange={(v) => setForm(v as MeetingForm)}
-            disabled={!canStart}
-            data-testid='meeting-form-picker'
-          >
-            {MEETING_FORMS.map((f) => (
-              <Radio key={f.id} value={f.id}>
-                {f.label}
-              </Radio>
-            ))}
-          </Radio.Group>
-          <span className='text-12px text-[color:var(--bg-6)] truncate'>
-            {MEETING_FORMS.find((f) => f.id === form)?.hint}
-          </span>
-        </div>
+        {/* Flow picker — Decision edition fixes the 流程 at create time (by department),
+            so the runtime picker is hidden there; full/team keep it. */}
+        {!IS_DECISION && (
+          <div className='flex items-center gap-10px mb-10px flex-wrap'>
+            <Radio.Group
+              type='button'
+              size='small'
+              value={form}
+              onChange={(v) => setForm(v as MeetingForm)}
+              disabled={!canStart}
+              data-testid='meeting-form-picker'
+            >
+              {MEETING_FORMS.map((f) => (
+                <Radio key={f.id} value={f.id}>
+                  {f.label}
+                </Radio>
+              ))}
+            </Radio.Group>
+            <span className='text-12px text-[color:var(--bg-6)] truncate'>
+              {MEETING_FORMS.find((f) => f.id === form)?.hint}
+            </span>
+          </div>
+        )}
         <div className='flex items-end gap-10px'>
           <Input.TextArea
             value={topic}
@@ -117,7 +122,8 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
             icon={<RightOne theme='filled' size='14' fill='currentColor' />}
             disabled={!canStart || !topic.trim()}
             onClick={() => {
-              startMeeting(topic, { useKnowledgeBase, attachments, form });
+              // Decision: omit form → startMeeting falls back to the team-fixed workflow (state.form).
+              startMeeting(topic, IS_DECISION ? { useKnowledgeBase, attachments } : { useKnowledgeBase, attachments, form });
               onTopicChange('');
               setAttachments([]);
             }}

@@ -96,6 +96,8 @@ export const TEAM_MODE_ENABLED = EDITION !== 'team';
 export const WORKBENCH_ENABLED = EDITION !== 'decision';
 /** Multi-user WebUI / LAN server: present in full + team; decision is single-user, loopback-only. */
 export const MULTI_USER_ENABLED = EDITION !== 'decision';
+/** Office assistants (办公助理: word/ppt/excel/财务/学术/Mermaid…): present in full + team; removed in decision (experts/专家 stay). */
+export const OFFICE_ASSISTANTS_ENABLED = EDITION !== 'decision';
 
 // ===== AI Provider 相关常量 =====
 

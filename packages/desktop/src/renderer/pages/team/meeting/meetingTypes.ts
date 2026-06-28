@@ -17,11 +17,15 @@ export type MeetingPhase =
  * Discussion format — each is a different strategy for squeezing higher quality
  * out of a heterogeneous panel of agents. Encoded as the team_run leader task.
  */
+// Every form shares the universal backbone: ① 并行立场 (ALL participants incl. the
+// moderator answer the topic SIMULTANEOUSLY, streamed side-by-side) → ② 交锋讨论
+// (form-specific) → ③ 综合决议. The form only changes step ②.
 export type MeetingForm =
-  | 'roundtable' // multi-angle debate + rebuttal
-  | 'redteam' // one drafts, others red-team, then revise
-  | 'tournament' // each agent produces a full plan → judged → synthesized
-  | 'diverge'; // independent divergence → cluster → converge
+  | 'roundtable' // ② cross-examination debate
+  | 'redteam' // ② red-team attacks the collective positions, then revise
+  | 'tournament' // ① each gives a FULL plan in parallel → ② cross-score → synthesize
+  | 'diverge' // ① parallel divergence → ② cluster + converge
+  | 'deepdive'; // ② moderator drives multi-round probing to dig the problem to the bottom
 
 /** A candidate solution the boss can pick from at the resolution stage. */
 export type MeetingResolutionOption = {
@@ -51,8 +55,10 @@ export type MeetingTurn = {
   icon?: string;
   agent_type: string;
   isModerator: boolean;
-  /** Which phase this turn belongs to: 开场 / 立论 / 交锋 / 收敛 / 综合. */
+  /** Which phase this turn belongs to: 并行立场 / 交锋 / 收敛 / 综合 … */
   phaseLabel: string;
+  /** True for step-① turns that run simultaneously — rendered side-by-side as columns. */
+  parallel?: boolean;
   /** Streamed reply text so far. */
   text: string;
   status: MeetingTurnStatus;
@@ -66,6 +72,8 @@ export type MeetingState = {
   topic: string;
   /** Chosen discussion format for the session. */
   form: MeetingForm;
+  /** Preset department id (Decision edition, when form==='department') — drives the phases. */
+  departmentId?: string;
   /** Synthesized 方案书 (markdown) produced by the synthesizer at the end. */
   plan: string;
   /** Backend team_run id (needed to cancel). */

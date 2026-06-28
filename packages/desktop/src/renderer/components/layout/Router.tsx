@@ -4,7 +4,7 @@ import { Button, Result } from '@arco-design/web-react';
 import { useTranslation } from 'react-i18next';
 import AppLoader from '@renderer/components/layout/AppLoader';
 import { useAuth } from '@renderer/hooks/context/AuthContext';
-import { TEAM_MODE_ENABLED, IS_DECISION, WORKBENCH_ENABLED, MULTI_USER_ENABLED } from '@/common/config/constants';
+import { TEAM_MODE_ENABLED, IS_DECISION, WORKBENCH_ENABLED, MULTI_USER_ENABLED, OFFICE_ASSISTANTS_ENABLED } from '@/common/config/constants';
 const Conversation = React.lazy(() => import('@renderer/pages/conversation'));
 const Guid = React.lazy(() => import('@renderer/pages/guid'));
 const AgentSettings = React.lazy(() => import('@renderer/pages/settings/AgentSettings'));
@@ -165,7 +165,8 @@ const PanelRoute: React.FC<{ layout: React.ReactElement }> = ({ layout }) => {
           />
           <Route path='/settings/model' element={withRouteFallback(ModeSettings)} />
           <Route path='/settings/local-models' element={withRouteFallback(LocalModelsSettings)} />
-          <Route path='/settings/assistants' element={withRouteFallback(AssistantSettings)} />
+          {/* 办公助理 (office assistants) — full + Team; removed in Decision (experts/专家 stay). */}
+          <Route path='/settings/assistants' element={OFFICE_ASSISTANTS_ENABLED ? withRouteFallback(AssistantSettings) : <Navigate to='/settings/experts' replace />} />
           <Route path='/settings/experts' element={withRouteFallback(ExpertsSettings)} />
           <Route path='/settings/agent' element={withRouteFallback(AgentSettings)} />
           <Route path='/settings/capabilities' element={withRouteFallback(CapabilitiesSettings)} />

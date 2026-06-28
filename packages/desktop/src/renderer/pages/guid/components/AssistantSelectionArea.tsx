@@ -21,6 +21,7 @@ import { CUSTOM_AVATAR_IMAGE_MAP } from '../constants';
 import styles from '../index.module.css';
 import type { AvailableAgent, EffectiveAgentInfo } from '../types';
 import type { Assistant } from '@/common/types/agent/assistantTypes';
+import { OFFICE_ASSISTANTS_ENABLED } from '@/common/config/constants';
 import { Message } from '@arco-design/web-react';
 import { Plus, Robot } from '@icon-park/react';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
@@ -350,7 +351,8 @@ const AssistantSelectionArea: React.FC<AssistantSelectionAreaProps> = ({
   // list, so here we only keep the modals mounted.
   if (railMode) return <>{modalTree}</>;
 
-  const showAssistants = true;
+  // 办公助理 (office assistants) is removed in the Decision edition; 专家 (experts) stays.
+  const showAssistants = OFFICE_ASSISTANTS_ENABLED;
   const showExperts = true;
 
   // Two independent, parallel sections: 办公助理 (office) first, then 专家
