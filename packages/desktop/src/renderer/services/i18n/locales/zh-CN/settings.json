@@ -357,6 +357,7 @@
   "webui.repairNoServer": "请先启用 WebUI 再修复。",
   "webui.repairFailed": "修复失败，请重试。",
   "webui.diagAccessUrl": "局域网访问地址",
+  "webui.diagTailscaleUrl": "Tailscale 访问地址（任何地方）",
   "webui.diagBackendOk": "后端服务正常",
   "webui.diagBackendDown": "后端服务不可达，远程访问无法工作。",
   "webui.diagLoopbackOnly": "未开启局域网访问，目前仅本机可访问。",

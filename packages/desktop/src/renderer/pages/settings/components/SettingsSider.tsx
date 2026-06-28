@@ -157,10 +157,10 @@ const SettingsSider: React.FC<{ collapsed?: boolean; tooltipEnabled?: boolean }>
     // mirror image of 'pet'/'users': it only makes sense for LAN/browser users,
     // so it's hidden on the desktop admin and shown only in browser mode.
     const result: SiderItem[] = BUILTIN_TAB_IDS.filter((id) => {
-      // Decision edition: drop the multi-user / WebUI / client-download tabs
-      // (single-user, loopback-only) and the 办公助理 (office assistants) tab.
-      // The 专家 (experts) tab stays.
-      if (IS_DECISION && (id === 'users' || id === 'webui' || id === 'client' || id === 'assistants')) return false;
+      // Decision edition: single-user, so drop the multiple-user-accounts tab and
+      // the 办公助理 (office assistants) tab. The WebUI/remote-access tab STAYS
+      // (Decision is reachable over LAN and/or Tailscale). 专家 (experts) stays too.
+      if (IS_DECISION && (id === 'users' || id === 'assistants')) return false;
       // Team edition: drop the desktop-pet (宠物) settings tab.
       if (IS_TEAM && id === 'pet') return false;
       // local-models needs the local ollama daemon + ability to launch the

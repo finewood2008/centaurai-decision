@@ -9,7 +9,7 @@ import AionScrollArea from '@/renderer/components/base/AionScrollArea';
 import { iconColors } from '@/renderer/styles/colors';
 import { isElectronDesktop, resolveExtensionAssetUrl } from '@/renderer/utils/platform';
 import { type IExtensionSettingsTab } from '@/common/adapter/ipcBridge';
-import { MULTI_USER_ENABLED } from '@/common/config/constants';
+import { MULTI_USER_ENABLED, REMOTE_ACCESS_ENABLED } from '@/common/config/constants';
 import { useExtI18n } from '@/renderer/hooks/system/useExtI18n';
 import { useExtensionSettingsTabs } from '@/renderer/hooks/system/useExtensionSettingsTabs';
 import { Tabs } from '@arco-design/web-react';
@@ -204,14 +204,17 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ visible, onCancel, defaul
       },
     ];
 
-    // WebUI server + multi-user management — full + Team. Decision is single-user
-    // and loopback-only, so these tabs are omitted entirely.
-    if (isDesktop && MULTI_USER_ENABLED) {
+    // WebUI / remote-access settings — all editions, including Decision (single-user
+    // but reachable over LAN and/or Tailscale).
+    if (isDesktop && REMOTE_ACCESS_ENABLED) {
       builtinItems.push({
         key: 'webui',
         label: t('settings.webui'),
         icon: <Earth theme='outline' size='20' fill={iconColors.secondary} />,
       });
+    }
+    // Multiple user accounts — full + Team only; Decision stays single-user.
+    if (isDesktop && MULTI_USER_ENABLED) {
       builtinItems.push({
         key: 'users',
         label: t('settings.users'),

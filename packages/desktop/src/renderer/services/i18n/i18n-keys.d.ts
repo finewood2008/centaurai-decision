@@ -2112,6 +2112,7 @@ export type I18nKey =
   | 'settings.webui.diagOtherIps'
   | 'settings.webui.diagProxyDetected'
   | 'settings.webui.diagProxyHint'
+  | 'settings.webui.diagTailscaleUrl'
   | 'settings.webui.downloadClient.description'
   | 'settings.webui.downloadClient.download'
   | 'settings.webui.downloadClient.empty'
