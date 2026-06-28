@@ -4,7 +4,7 @@ import { Button, Result } from '@arco-design/web-react';
 import { useTranslation } from 'react-i18next';
 import AppLoader from '@renderer/components/layout/AppLoader';
 import { useAuth } from '@renderer/hooks/context/AuthContext';
-import { TEAM_MODE_ENABLED, IS_DECISION, WORKBENCH_ENABLED, MULTI_USER_ENABLED, OFFICE_ASSISTANTS_ENABLED } from '@/common/config/constants';
+import { TEAM_MODE_ENABLED, IS_DECISION, IS_TEAM, WORKBENCH_ENABLED, MULTI_USER_ENABLED, OFFICE_ASSISTANTS_ENABLED } from '@/common/config/constants';
 const Conversation = React.lazy(() => import('@renderer/pages/conversation'));
 const Guid = React.lazy(() => import('@renderer/pages/guid'));
 const AgentSettings = React.lazy(() => import('@renderer/pages/settings/AgentSettings'));
@@ -179,7 +179,8 @@ const PanelRoute: React.FC<{ layout: React.ReactElement }> = ({ layout }) => {
           <Route path='/settings/webui' element={MULTI_USER_ENABLED ? withRouteFallback(WebuiSettings) : <Navigate to='/settings/model' replace />} />
           <Route path='/settings/client' element={MULTI_USER_ENABLED ? withRouteFallback(ClientSettings) : <Navigate to='/settings/model' replace />} />
           <Route path='/settings/users' element={MULTI_USER_ENABLED ? withRouteFallback(UsersSettings) : <Navigate to='/settings/model' replace />} />
-          <Route path='/settings/pet' element={withRouteFallback(PetSettings)} />
+          {/* Desktop pet (宠物) — hidden in the Team edition. */}
+          <Route path='/settings/pet' element={IS_TEAM ? <Navigate to='/settings/model' replace /> : withRouteFallback(PetSettings)} />
           <Route path='/settings/system' element={withRouteFallback(SystemSettings)} />
           <Route path='/settings/about' element={withRouteFallback(SystemSettings)} />
           <Route path='/settings/ext/:tabId' element={withRouteFallback(ExtensionSettingsPage)} />
