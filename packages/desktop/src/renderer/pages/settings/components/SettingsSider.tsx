@@ -1,7 +1,7 @@
 import FlexFullContainer from '@/renderer/components/layout/FlexFullContainer';
 import { isElectronDesktop, resolveExtensionAssetUrl } from '@/renderer/utils/platform';
 import { type IExtensionSettingsTab } from '@/common/adapter/ipcBridge';
-import { IS_DECISION } from '@/common/config/constants';
+import { IS_DECISION, IS_TEAM } from '@/common/config/constants';
 import { useExtI18n } from '@/renderer/hooks/system/useExtI18n';
 import { useExtensionSettingsTabs } from '@/renderer/hooks/system/useExtensionSettingsTabs';
 import {
@@ -161,6 +161,8 @@ const SettingsSider: React.FC<{ collapsed?: boolean; tooltipEnabled?: boolean }>
       // (single-user, loopback-only) and the 办公助理 (office assistants) tab.
       // The 专家 (experts) tab stays.
       if (IS_DECISION && (id === 'users' || id === 'webui' || id === 'client' || id === 'assistants')) return false;
+      // Team edition: drop the desktop-pet (宠物) settings tab.
+      if (IS_TEAM && id === 'pet') return false;
       // local-models needs the local ollama daemon + ability to launch the
       // manager app — desktop-only, like pet/users.
       return id === 'client' ? !isDesktop : isDesktop || (id !== 'pet' && id !== 'users' && id !== 'local-models');
