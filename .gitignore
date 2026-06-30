@@ -205,6 +205,9 @@ worktrees/
 # Superpowers brainstorm tool (runtime files, session data)
 .superpowers/
 docs/superpowers/
+!docs/superpowers/
+!docs/superpowers/specs/
+!docs/superpowers/specs/*.md
 resources/bundled-bun
 resources/bundled-aioncore
 resources/hub
