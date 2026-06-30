@@ -489,6 +489,27 @@ function ensureAdminUserOnce(backendPort: number): Promise<void> {
   return ensureAdminUserPromise;
 }
 
+function scheduleBillingRetention(): void {
+  void (async () => {
+    try {
+      const { getDataPath } = await import('./process/utils/utils');
+      const { BetterSqlite3Driver } = await import('./process/services/database/drivers/BetterSqlite3Driver');
+      const { BillingRepository, runBillingRetention } = await import('./process/services/billing');
+      const driver = new BetterSqlite3Driver(path.join(getDataPath(), 'aionui-backend.db'));
+      try {
+        const deleted = runBillingRetention(new BillingRepository(driver));
+        if (deleted > 0) {
+          console.info(`[Billing] Deleted ${deleted} expired usage detail rows`);
+        }
+      } finally {
+        driver.close();
+      }
+    } catch (error) {
+      console.warn('[Billing] Retention cleanup skipped:', error);
+    }
+  })();
+}
+
 function markBackendReady(backendPort: number, source: string): void {
   if (backendStartedOk) return;
   console.log(`[AionUi] ${source} ready (port=${backendPort})`);
@@ -773,6 +794,7 @@ const handleAppReady = async (): Promise<void> => {
   try {
     await initializeProcess();
     rendererInitialLanguage = ProcessConfig.getSync('language') ?? null;
+    scheduleBillingRetention();
     mark('initializeProcess');
   } catch (error) {
     console.error('Failed to initialize process:', error);

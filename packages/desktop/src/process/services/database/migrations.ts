@@ -1219,6 +1219,115 @@ const migration_v26: IMigration = {
 };
 
 /**
+ * Migration v26 -> v27: Add billing usage and pricing tables
+ */
+const migration_v27: IMigration = {
+  version: 27,
+  name: 'Add billing usage tables',
+  up: (db) => {
+    db.exec(`CREATE TABLE IF NOT EXISTS billing_usage_events (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      conversation_id TEXT,
+      message_id TEXT,
+      request_id TEXT,
+      source_type TEXT NOT NULL,
+      provider_id TEXT,
+      provider_platform TEXT,
+      provider_name TEXT,
+      model TEXT NOT NULL,
+      input_tokens INTEGER NOT NULL DEFAULT 0,
+      output_tokens INTEGER NOT NULL DEFAULT 0,
+      total_tokens INTEGER NOT NULL DEFAULT 0,
+      currency TEXT NOT NULL DEFAULT 'CNY',
+      exchange_rate REAL NOT NULL,
+      input_unit_price_usd REAL,
+      output_unit_price_usd REAL,
+      cost_usd REAL NOT NULL DEFAULT 0,
+      cost_cny REAL NOT NULL DEFAULT 0,
+      pricing_status TEXT NOT NULL,
+      request_status TEXT NOT NULL,
+      metadata TEXT NOT NULL DEFAULT '{}',
+      occurred_at INTEGER NOT NULL,
+      hour_bucket INTEGER NOT NULL,
+      day_bucket INTEGER NOT NULL,
+      month_bucket INTEGER NOT NULL,
+      created_at INTEGER NOT NULL,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    )`);
+    db.exec('CREATE INDEX IF NOT EXISTS idx_billing_events_user_time ON billing_usage_events(user_id, occurred_at DESC)');
+    db.exec('CREATE INDEX IF NOT EXISTS idx_billing_events_time ON billing_usage_events(occurred_at DESC)');
+    db.exec('CREATE INDEX IF NOT EXISTS idx_billing_events_model_time ON billing_usage_events(model, occurred_at DESC)');
+    db.exec('CREATE INDEX IF NOT EXISTS idx_billing_events_provider_time ON billing_usage_events(provider_id, occurred_at DESC)');
+    db.exec('CREATE INDEX IF NOT EXISTS idx_billing_events_source_time ON billing_usage_events(source_type, occurred_at DESC)');
+    db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_billing_events_dedupe
+      ON billing_usage_events(conversation_id, message_id, provider_id, model)
+      WHERE conversation_id IS NOT NULL AND message_id IS NOT NULL AND provider_id IS NOT NULL`);
+
+    db.exec(`CREATE TABLE IF NOT EXISTS billing_model_prices (
+      id TEXT PRIMARY KEY,
+      scope_type TEXT NOT NULL,
+      scope_id TEXT,
+      provider_platform TEXT,
+      provider_id TEXT,
+      model TEXT NOT NULL,
+      input_unit_price_usd REAL NOT NULL,
+      output_unit_price_usd REAL NOT NULL,
+      currency TEXT NOT NULL DEFAULT 'USD',
+      effective_from INTEGER,
+      effective_to INTEGER,
+      enabled INTEGER NOT NULL DEFAULT 1,
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL
+    )`);
+    db.exec('CREATE INDEX IF NOT EXISTS idx_billing_prices_lookup ON billing_model_prices(scope_type, scope_id, provider_platform, provider_id, model, enabled)');
+
+    db.exec(`CREATE TABLE IF NOT EXISTS billing_usage_aggregates (
+      id TEXT PRIMARY KEY,
+      granularity TEXT NOT NULL,
+      bucket_start INTEGER NOT NULL,
+      user_id TEXT,
+      provider_id TEXT,
+      provider_platform TEXT,
+      model TEXT,
+      source_type TEXT,
+      request_count INTEGER NOT NULL DEFAULT 0,
+      input_tokens INTEGER NOT NULL DEFAULT 0,
+      output_tokens INTEGER NOT NULL DEFAULT 0,
+      total_tokens INTEGER NOT NULL DEFAULT 0,
+      cost_usd REAL NOT NULL DEFAULT 0,
+      cost_cny REAL NOT NULL DEFAULT 0,
+      updated_at INTEGER NOT NULL
+    )`);
+    db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_billing_aggregates_key ON billing_usage_aggregates(id)');
+    db.exec('CREATE INDEX IF NOT EXISTS idx_billing_aggregates_bucket ON billing_usage_aggregates(granularity, bucket_start)');
+
+    db.exec(`CREATE TABLE IF NOT EXISTS billing_settings (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
+      updated_at INTEGER NOT NULL
+    )`);
+    console.log('[Migration v27] Added billing usage tables');
+  },
+  down: (db) => {
+    db.exec('DROP INDEX IF EXISTS idx_billing_aggregates_bucket');
+    db.exec('DROP INDEX IF EXISTS idx_billing_aggregates_key');
+    db.exec('DROP INDEX IF EXISTS idx_billing_prices_lookup');
+    db.exec('DROP INDEX IF EXISTS idx_billing_events_dedupe');
+    db.exec('DROP INDEX IF EXISTS idx_billing_events_source_time');
+    db.exec('DROP INDEX IF EXISTS idx_billing_events_provider_time');
+    db.exec('DROP INDEX IF EXISTS idx_billing_events_model_time');
+    db.exec('DROP INDEX IF EXISTS idx_billing_events_time');
+    db.exec('DROP INDEX IF EXISTS idx_billing_events_user_time');
+    db.exec('DROP TABLE IF EXISTS billing_settings');
+    db.exec('DROP TABLE IF EXISTS billing_usage_aggregates');
+    db.exec('DROP TABLE IF EXISTS billing_model_prices');
+    db.exec('DROP TABLE IF EXISTS billing_usage_events');
+    console.log('[Migration v27] Rolled back: Removed billing usage tables');
+  },
+};
+
+/**
  * All migrations in order
  */
 // prettier-ignore
@@ -1227,7 +1336,7 @@ export const ALL_MIGRATIONS: IMigration[] = [
   migration_v7, migration_v8, migration_v9, migration_v10, migration_v11, migration_v12,
   migration_v13, migration_v14, migration_v15, migration_v16, migration_v17, migration_v18,
   migration_v19, migration_v20, migration_v21, migration_v22, migration_v23, migration_v24,
-  migration_v25, migration_v26,
+  migration_v25, migration_v26, migration_v27,
 ];
 
 /**

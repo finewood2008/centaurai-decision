@@ -1,0 +1,66 @@
+{
+  "title": "Billing Dashboard",
+  "subtitle": "Track token usage, model cost, and billing trends",
+  "tabs": {
+    "overview": "Overview",
+    "details": "Details",
+    "prices": "Price Settings"
+  },
+  "granularity": {
+    "hour": "Hourly",
+    "day": "Daily",
+    "month": "Monthly"
+  },
+  "metric": {
+    "cost": "Total Cost",
+    "tokens": "Total Tokens",
+    "requests": "Requests",
+    "input": "Input Tokens",
+    "output": "Output Tokens"
+  },
+  "trend": {
+    "title": "Cost Trend"
+  },
+  "breakdown": {
+    "model": "Top Models",
+    "user": "Top Users"
+  },
+  "table": {
+    "time": "Time",
+    "user": "User",
+    "model": "Model",
+    "provider": "Provider",
+    "tokens": "Tokens",
+    "cost": "Cost",
+    "pricing": "Pricing"
+  },
+  "pricingStatus": {
+    "priced": "Priced",
+    "missing_price": "Missing Price"
+  },
+  "requestStatus": {
+    "completed": "Completed",
+    "failed": "Failed",
+    "cancelled": "Cancelled"
+  },
+  "priceScope": {
+    "builtin": "Built-in",
+    "global": "Global",
+    "user_provider": "User Provider"
+  },
+  "settings": {
+    "title": "Billing Settings",
+    "exchangeRate": "USD/CNY Exchange Rate",
+    "retentionDays": "Detail Retention Days"
+  },
+  "prices": {
+    "add": "Add Model Price",
+    "scope": "Price Scope",
+    "providerId": "Provider ID",
+    "inputPrice": "Input Price / 1M Tokens",
+    "outputPrice": "Output Price / 1M Tokens",
+    "tableTitle": "Custom Prices"
+  },
+  "exportCsv": "Export CSV",
+  "exportFailed": "Export failed"
+}

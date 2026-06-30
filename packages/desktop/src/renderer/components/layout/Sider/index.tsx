@@ -14,6 +14,7 @@ import {
   SiderSearchEntry,
   SiderScheduledEntry,
   SiderFilesEntry,
+  SiderBillingEntry,
   WorkbenchSiderSection,
 } from './SiderNav';
 import SiderFooter from './SiderFooter';
@@ -118,6 +119,19 @@ const Sider: React.FC<SiderProps> = ({ onSessionClick, collapsed = false }) => {
     }
   };
 
+  const handleBillingClick = () => {
+    cleanupSiderTooltips();
+    blurActiveElement();
+    closePreview();
+    setIsBatchMode(false);
+    Promise.resolve(navigate('/billing')).catch((error) => {
+      console.error('Navigation failed:', error);
+    });
+    if (onSessionClick) {
+      onSessionClick();
+    }
+  };
+
   const handleQuickThemeToggle = () => {
     void setTheme(theme === 'dark' ? 'light' : 'dark');
   };
@@ -212,6 +226,13 @@ const Sider: React.FC<SiderProps> = ({ onSessionClick, collapsed = false }) => {
               collapsed={collapsed}
               siderTooltipProps={siderTooltipProps}
               onClick={handleFilesClick}
+            />
+            <SiderBillingEntry
+              isMobile={isMobile}
+              isActive={pathname === '/billing'}
+              collapsed={collapsed}
+              siderTooltipProps={siderTooltipProps}
+              onClick={handleBillingClick}
             />
             {/* Divider between fixed top nav and scrollable content area */}
             <div

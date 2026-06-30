@@ -43,6 +43,17 @@ import type {
 } from '../types/provider/providerApi';
 import type { SpeechToTextRequest, SpeechToTextResult } from '../types/provider/speech';
 import type {
+  BillingBreakdownDimension,
+  BillingBreakdownRow,
+  BillingModelPrice,
+  BillingQuery,
+  BillingSettings,
+  BillingSummary,
+  BillingTimeseriesPoint,
+  BillingUsageEvent,
+  BillingUsageInput,
+} from '../types/billing';
+import type {
   ITeamAgentRemovedEvent,
   ITeamAgentRenamedEvent,
   ITeamAgentSpawnedEvent,
@@ -1569,6 +1580,28 @@ export const users = {
   create: bridge.buildProvider<IUserRecord, ICreateUserParams>('users.create'),
   delete: bridge.buildProvider<void, { user_id: string }>('users.delete'),
   resetPassword: bridge.buildProvider<IResetUserPasswordResult, { user_id: string }>('users.reset-password'),
+};
+
+// ---------------------------------------------------------------------------
+// Billing — main-process IPC backed by the local SQLite ledger
+// ---------------------------------------------------------------------------
+
+export const billing = {
+  summary: bridge.buildProvider<BillingSummary, BillingQuery>('billing.summary'),
+  events: bridge.buildProvider<BillingUsageEvent[], BillingQuery>('billing.events'),
+  timeseries: bridge.buildProvider<BillingTimeseriesPoint[], BillingQuery>('billing.timeseries'),
+  breakdown: bridge.buildProvider<
+    BillingBreakdownRow[],
+    { query: BillingQuery; dimension: BillingBreakdownDimension }
+  >('billing.breakdown'),
+  exportCsv: bridge.buildProvider<string, BillingQuery>('billing.exportCsv'),
+  prices: bridge.buildProvider<BillingModelPrice[], void>('billing.prices'),
+  savePrice: bridge.buildProvider<void, BillingModelPrice>('billing.savePrice'),
+  settings: bridge.buildProvider<BillingSettings, void>('billing.settings'),
+  saveSettings: bridge.buildProvider<void, Partial<Pick<BillingSettings, 'usd_to_cny_exchange_rate' | 'detail_retention_days'>>>(
+    'billing.saveSettings'
+  ),
+  recordUsage: bridge.buildProvider<BillingUsageEvent, BillingUsageInput>('billing.recordUsage'),
 };
 
 // ---------------------------------------------------------------------------

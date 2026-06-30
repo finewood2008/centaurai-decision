@@ -1,0 +1,66 @@
+{
+  "title": "费用看板",
+  "subtitle": "查看 Token 使用量、模型成本和费用趋势",
+  "tabs": {
+    "overview": "总览",
+    "details": "明细",
+    "prices": "价格设置"
+  },
+  "granularity": {
+    "hour": "按小时",
+    "day": "按天",
+    "month": "按月"
+  },
+  "metric": {
+    "cost": "总费用",
+    "tokens": "总 Token",
+    "requests": "请求数",
+    "input": "输入 Token",
+    "output": "输出 Token"
+  },
+  "trend": {
+    "title": "费用趋势"
+  },
+  "breakdown": {
+    "model": "模型排行",
+    "user": "用户排行"
+  },
+  "table": {
+    "time": "时间",
+    "user": "用户",
+    "model": "模型",
+    "provider": "供应商",
+    "tokens": "Token",
+    "cost": "费用",
+    "pricing": "计价状态"
+  },
+  "pricingStatus": {
+    "priced": "已计价",
+    "missing_price": "缺少价格"
+  },
+  "requestStatus": {
+    "completed": "完成",
+    "failed": "失败",
+    "cancelled": "已取消"
+  },
+  "priceScope": {
+    "builtin": "内置",
+    "global": "全局",
+    "user_provider": "用户供应商"
+  },
+  "settings": {
+    "title": "计费设置",
+    "exchangeRate": "USD/CNY 汇率",
+    "retentionDays": "明细保留天数"
+  },
+  "prices": {
+    "add": "添加模型价格",
+    "scope": "价格范围",
+    "providerId": "供应商 ID",
+    "inputPrice": "输入价格 / 1M Token",
+    "outputPrice": "输出价格 / 1M Token",
+    "tableTitle": "自定义价格"
+  },
+  "exportCsv": "导出 CSV",
+  "exportFailed": "导出失败"
+}

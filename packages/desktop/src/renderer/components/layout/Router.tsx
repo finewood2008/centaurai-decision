@@ -38,6 +38,7 @@ const WorkbenchPage = React.lazy(() => import('@renderer/pages/workbench'));
 const AdvisorsPage = React.lazy(() => import('@renderer/pages/advisors/AdvisorsPage'));
 const ContentHubPage = React.lazy(() => import('@renderer/pages/contentHub'));
 const DecisionHome = React.lazy(() => import('@renderer/pages/decision/DecisionHome'));
+const BillingPage = React.lazy(() => import('@renderer/pages/billing'));
 
 // Edition-aware landing: Decision opens on the 决策作战室 home; Team on the guide page.
 const HOME_PATH = IS_DECISION ? '/decision' : '/guid';
@@ -233,6 +234,7 @@ const PanelRoute: React.FC<{ layout: React.ReactElement }> = ({ layout }) => {
           <Route path='/toolbox' element={<Navigate to='/workbench' replace />} />
           <Route path='/advisors' element={withRouteFallback(AdvisorsPage)} />
           <Route path='/files' element={withRouteFallback(ContentHubPage)} />
+          <Route path='/billing' element={withRouteFallback(BillingPage)} />
           <Route path='/scheduled' element={withRouteFallback(ScheduledTasksPage)} />
           <Route path='/scheduled/:job_id' element={withRouteFallback(TaskDetailPage)} />
         </Route>
