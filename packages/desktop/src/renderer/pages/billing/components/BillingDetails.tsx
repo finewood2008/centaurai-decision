@@ -3,7 +3,7 @@ import { Button, Message, Table, Tag } from '@arco-design/web-react';
 import { Download } from '@icon-park/react';
 import { useTranslation } from 'react-i18next';
 import { ipcBridge } from '@/common';
-import type { BillingQuery, BillingUsageEvent } from '@/common/types/billing';
+import type { BillingEvent, BillingQuery } from '@/common/types/billing';
 import { useBillingEvents } from '../hooks/useBillingData';
 import { formatCny, formatTime, formatTokens } from '../utils/formatters';
 
@@ -21,9 +21,11 @@ const downloadCsv = (csv: string): void => {
   URL.revokeObjectURL(url);
 };
 
-const pricingStatusLabelKey: Record<BillingUsageEvent['pricing_status'], string> = {
-  priced: 'billing.pricingStatus.priced',
-  missing_price: 'billing.pricingStatus.missing_price',
+const statusLabelKey: Record<BillingEvent['status'], string> = {
+  completed: 'billing.requestStatus.completed',
+  failed: 'billing.requestStatus.failed',
+  cancelled: 'billing.requestStatus.cancelled',
+  unknown: 'billing.requestStatus.unknown',
 };
 
 const BillingDetails: React.FC<BillingDetailsProps> = ({ query }) => {
@@ -58,29 +60,29 @@ const BillingDetails: React.FC<BillingDetailsProps> = ({ query }) => {
         columns={[
           {
             title: t('billing.table.time'),
-            dataIndex: 'occurred_at',
+            dataIndex: 'occurred_at_ms',
             width: 150,
             render: (value: number) => formatTime(value),
           },
-          { title: t('billing.table.user'), dataIndex: 'user_id', width: 160 },
+          { title: t('billing.table.user'), dataIndex: 'user_name', width: 160 },
           { title: t('billing.table.model'), dataIndex: 'model', width: 180 },
           {
             title: t('billing.table.provider'),
-            render: (_: unknown, row: BillingUsageEvent) => row.provider_name || row.provider_platform || '-',
+            render: (_: unknown, row: BillingEvent) => row.provider_name || row.provider_platform || row.provider_key_id || '-',
           },
           {
             title: t('billing.table.tokens'),
-            render: (_: unknown, row: BillingUsageEvent) => formatTokens(row.total_tokens),
+            render: (_: unknown, row: BillingEvent) => formatTokens(row.total_tokens),
           },
           {
             title: t('billing.table.cost'),
-            render: (_: unknown, row: BillingUsageEvent) => formatCny(row.cost_cny),
+            render: (_: unknown, row: BillingEvent) => formatCny(row.cost_cny),
           },
           {
-            title: t('billing.table.pricing'),
-            dataIndex: 'pricing_status',
-            render: (value: BillingUsageEvent['pricing_status']) => (
-              <Tag color={value === 'priced' ? 'green' : 'orangered'}>{t(pricingStatusLabelKey[value])}</Tag>
+            title: t('billing.table.status'),
+            dataIndex: 'status',
+            render: (value: BillingEvent['status']) => (
+              <Tag color={value === 'completed' ? 'green' : 'orangered'}>{t(statusLabelKey[value] ?? statusLabelKey.unknown)}</Tag>
             ),
           },
         ]}

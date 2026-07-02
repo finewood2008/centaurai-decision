@@ -1,10 +1,13 @@
 {
   "title": "Billing Dashboard",
-  "subtitle": "Track token usage, model cost, and billing trends",
+  "subtitle": "View token usage, model cost, and billing trends from upstream APIs",
   "tabs": {
     "overview": "Overview",
-    "details": "Details",
-    "prices": "Price Settings"
+    "details": "Details"
+  },
+  "providerKey": {
+    "placeholder": "Select API key",
+    "all": "All visible keys"
   },
   "granularity": {
     "hour": "Hourly",
@@ -22,8 +25,9 @@
     "title": "Cost Trend"
   },
   "breakdown": {
-    "model": "Top Models",
-    "user": "Top Users"
+    "model": "Model Ranking",
+    "providerKey": "API Key Ranking",
+    "user": "User Ranking"
   },
   "table": {
     "time": "Time",
@@ -32,35 +36,27 @@
     "provider": "Provider",
     "tokens": "Tokens",
     "cost": "Cost",
-    "pricing": "Pricing"
-  },
-  "pricingStatus": {
-    "priced": "Priced",
-    "missing_price": "Missing Price"
+    "status": "Status"
   },
   "requestStatus": {
     "completed": "Completed",
     "failed": "Failed",
-    "cancelled": "Cancelled"
+    "cancelled": "Cancelled",
+    "unknown": "Unknown"
   },
-  "priceScope": {
-    "builtin": "Built-in",
-    "global": "Global",
-    "user_provider": "User Provider"
-  },
-  "settings": {
-    "title": "Billing Settings",
-    "exchangeRate": "USD/CNY Exchange Rate",
-    "retentionDays": "Detail Retention Days"
-  },
-  "prices": {
-    "add": "Add Model Price",
-    "scope": "Price Scope",
-    "providerId": "Provider ID",
-    "inputPrice": "Input Price / 1M Tokens",
-    "outputPrice": "Output Price / 1M Tokens",
-    "tableTitle": "Custom Prices"
+  "sync": {
+    "refresh": "Sync upstream data",
+    "syncing": "Syncing"
   },
   "exportCsv": "Export CSV",
-  "exportFailed": "Export failed"
+  "exportFailed": "Export failed",
+  "upstream": {
+    "placeholder": "选择上游服务"
+  },
+  "onboarding": {
+    "title": "配置中转站 Key",
+    "stepCreateKey": "在中转站平台注册或登录帐号，并创建用户 API Key",
+    "stepConfigureProvider": "回到 CentaurAI，在模型设置里新增上游服务，填写 Base URL 和 API Key",
+    "noSession": "CentaurAI 不保存中转站帐号密码或登录态，只使用你配置的 Key 访问上游接口"
+  }
 }

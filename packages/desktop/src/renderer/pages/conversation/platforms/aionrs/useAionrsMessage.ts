@@ -9,9 +9,7 @@ import { isErrorTipMessage, transformMessage } from '@/common/chat/chatLib';
 import type { IResponseMessage } from '@/common/adapter/ipcBridge';
 import type { TChatConversation, TokenUsageData } from '@/common/config/storage';
 import { uuid } from '@/common/utils';
-import { resolveCurrentFrontendUserId } from '@/common/utils/frontendUserScope';
 import type { ThoughtData } from '@/renderer/components/chat/ThoughtDisplay';
-import { resolveBillingSourceType } from '@/renderer/pages/billing/utils/sourceType';
 import { useAddOrUpdateMessage } from '@/renderer/pages/conversation/Messages/hooks';
 import { logStreamTerminalObserved } from '@/renderer/pages/conversation/runtime/useConversationRuntimeView';
 import { getConversationOrNull } from '@/renderer/pages/conversation/utils/conversationCache';
@@ -22,11 +20,6 @@ import { processLocalCronResponse } from './localCronCommands';
 type TokenUsage = {
   input_tokens?: number;
   output_tokens?: number;
-};
-
-const getConversationModel = (conversation: TChatConversation | null) => {
-  if (!conversation || !('model' in conversation)) return undefined;
-  return conversation.model;
 };
 
 export const useAionrsMessage = (
@@ -53,40 +46,6 @@ export const useAionrsMessage = (
   const activeMsgIdRef = useRef<string | null>(null);
   const messageBufferRef = useRef(new Map<string, string>());
   const processedCronMsgIdsRef = useRef(new Set<string>());
-
-  const recordBillingUsage = useCallback(
-    async (message: IResponseMessage, usageData: TokenUsage) => {
-      const input_tokens = usageData.input_tokens || 0;
-      const output_tokens = usageData.output_tokens || 0;
-      if (input_tokens + output_tokens <= 0) return;
-
-      try {
-        const [conversation, user_id] = await Promise.all([
-          getConversationOrNull(conversation_id),
-          resolveCurrentFrontendUserId(),
-        ]);
-        const model = getConversationModel(conversation);
-        await ipcBridge.billing.recordUsage.invoke({
-          user_id,
-          conversation_id,
-          message_id: message.msg_id,
-          request_id: message.msg_id ? `aionrs:${conversation_id}:${message.msg_id}` : undefined,
-          source_type: resolveBillingSourceType(conversation),
-          provider_id: model?.id,
-          provider_platform: model?.platform,
-          provider_name: model?.name,
-          model: model?.use_model || 'unknown',
-          input_tokens,
-          output_tokens,
-          request_status: 'completed',
-          occurred_at: message.created_at ?? Date.now(),
-        });
-      } catch (error) {
-        console.warn('[Billing] Failed to record aionrs usage:', error);
-      }
-    },
-    [conversation_id]
-  );
 
   // Use refs to avoid useEffect re-subscription when these states change
   const hasActiveToolsRef = useRef(hasActiveTools);
@@ -297,7 +256,6 @@ export const useAionrsMessage = (
                 },
                 merge_extra: true,
               });
-              void recordBillingUsage(message, usageData);
             }
             setStreamRunning(false);
             setWaitingResponse(false);

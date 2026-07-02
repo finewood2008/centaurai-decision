@@ -1,10 +1,13 @@
 {
   "title": "费用看板",
-  "subtitle": "查看 Token 使用量、模型成本和费用趋势",
+  "subtitle": "从上游接口查看 Token 使用量、模型成本和费用趋势",
   "tabs": {
     "overview": "总览",
-    "details": "明细",
-    "prices": "价格设置"
+    "details": "明细"
+  },
+  "providerKey": {
+    "placeholder": "选择 API Key",
+    "all": "全部可见 Key"
   },
   "granularity": {
     "hour": "按小时",
@@ -23,6 +26,7 @@
   },
   "breakdown": {
     "model": "模型排行",
+    "providerKey": "API Key 排行",
     "user": "用户排行"
   },
   "table": {
@@ -32,35 +36,27 @@
     "provider": "供应商",
     "tokens": "Token",
     "cost": "费用",
-    "pricing": "计价状态"
-  },
-  "pricingStatus": {
-    "priced": "已计价",
-    "missing_price": "缺少价格"
+    "status": "状态"
   },
   "requestStatus": {
     "completed": "完成",
     "failed": "失败",
-    "cancelled": "已取消"
+    "cancelled": "已取消",
+    "unknown": "未知"
   },
-  "priceScope": {
-    "builtin": "内置",
-    "global": "全局",
-    "user_provider": "用户供应商"
-  },
-  "settings": {
-    "title": "计费设置",
-    "exchangeRate": "USD/CNY 汇率",
-    "retentionDays": "明细保留天数"
-  },
-  "prices": {
-    "add": "添加模型价格",
-    "scope": "价格范围",
-    "providerId": "供应商 ID",
-    "inputPrice": "输入价格 / 1M Token",
-    "outputPrice": "输出价格 / 1M Token",
-    "tableTitle": "自定义价格"
+  "sync": {
+    "refresh": "同步上游数据",
+    "syncing": "同步中"
   },
   "exportCsv": "导出 CSV",
-  "exportFailed": "导出失败"
+  "exportFailed": "导出失败",
+  "upstream": {
+    "placeholder": "选择上游服务"
+  },
+  "onboarding": {
+    "title": "配置中转站 Key",
+    "stepCreateKey": "在中转站平台注册或登录帐号，并创建用户 API Key",
+    "stepConfigureProvider": "回到 CentaurAI，在模型设置里新增上游服务，填写 Base URL 和 API Key",
+    "noSession": "CentaurAI 不保存中转站帐号密码或登录态，只使用你配置的 Key 访问上游接口"
+  }
 }

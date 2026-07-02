@@ -209,6 +209,8 @@ export function isBackendHttpError(error: unknown): error is BackendHttpError {
  */
 export type HttpRequestOptions = {
   silentStatuses?: number[];
+  baseUrl?: string;
+  headers?: Record<string, string>;
 };
 
 const SENSITIVE_LOG_KEY_PATTERN = /api[_-]?key|authorization|auth[_-]?token|access[_-]?token|refresh[_-]?token|secret/i;
@@ -235,13 +237,14 @@ export async function httpRequest<T>(
   body?: unknown,
   options?: HttpRequestOptions
 ): Promise<T> {
-  const url = `${getBaseUrl()}${path}`;
+  const url = `${options?.baseUrl ?? getBaseUrl()}${path}`;
   const headers: Record<string, string> = {};
 
   if (body !== undefined) {
     headers['Content-Type'] = 'application/json';
   }
   Object.assign(headers, getWebuiGateHeaders());
+  Object.assign(headers, options?.headers);
 
   console.debug(
     `[httpBridge] ${method} ${path}`,
@@ -274,7 +277,8 @@ export async function httpRequest<T>(
 
   const contentType = response.headers.get('Content-Type');
   if (!contentType?.includes('application/json')) {
-    return undefined as T;
+    const text = await response.text();
+    return (text || undefined) as T;
   }
 
   const json = await response.json();

@@ -19,7 +19,6 @@ import { initNasDriveBridge } from './nasDriveBridge';
 import { initVideostudioBridge } from './videostudioBridge';
 import { initAppstoreBridge } from './appstoreBridge';
 import { initLocalModelManagerBridge } from './localModelManagerBridge';
-import { initBillingBridge } from './billingBridge';
 import { MULTI_USER_ENABLED } from '@/common/config/constants';
 
 export type BridgeDependencies = Record<string, never>;
@@ -42,7 +41,6 @@ export function initAllBridges(_deps: BridgeDependencies = {}): void {
   initVideostudioBridge();
   initAppstoreBridge();
   initLocalModelManagerBridge();
-  initBillingBridge();
 }
 
 export {
@@ -61,7 +59,6 @@ export {
   initVideostudioBridge,
   initAppstoreBridge,
   initLocalModelManagerBridge,
-  initBillingBridge,
 };
 export { registerWindowMaximizeListeners } from './windowControlsBridge';
 export const disposeAllTeamSessions = (): Promise<void> => Promise.resolve();

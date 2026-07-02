@@ -26,7 +26,7 @@ const TrendBars: React.FC<{ points: BillingTimeseriesPoint[] }> = ({ points }) =
       {points.map((point) => {
         const height = maxCost > 0 ? Math.max(8, (point.cost_cny / maxCost) * 160) : 8;
         return (
-          <div key={point.bucket_start} className='min-w-24px flex-1 flex flex-col items-center justify-end gap-6px'>
+          <div key={point.bucket_start_ms} className='min-w-24px flex-1 flex flex-col items-center justify-end gap-6px'>
             <div className='w-full rd-4px bg-[rgb(var(--primary-6))]' style={{ height }} title={formatCny(point.cost_cny)} />
           </div>
         );
@@ -37,7 +37,7 @@ const TrendBars: React.FC<{ points: BillingTimeseriesPoint[] }> = ({ points }) =
 
 const summaryHint = (summary?: BillingSummary): string => {
   if (!summary || summary.total_tokens === 0) return '';
-  return `${formatCny(summary.average_cost_cny_per_1m_tokens)} / 1M tokens`;
+  return `${formatCny(summary.average_cost_cny_per_1m_tokens ?? 0)} / 1M tokens`;
 };
 
 const BillingOverview: React.FC<BillingOverviewProps> = ({ query }) => {
@@ -45,7 +45,7 @@ const BillingOverview: React.FC<BillingOverviewProps> = ({ query }) => {
   const summary = useBillingSummary(query);
   const timeseries = useBillingTimeseries(query);
   const modelBreakdown = useBillingBreakdown(query, 'model');
-  const userBreakdown = useBillingBreakdown(query, 'user');
+  const providerBreakdown = useBillingBreakdown(query, 'provider_key');
 
   if (summary.isLoading) {
     return (
@@ -82,12 +82,12 @@ const BillingOverview: React.FC<BillingOverviewProps> = ({ query }) => {
             </div>
           )}
         </Card>
-        <Card title={t('billing.breakdown.user')} bordered={false}>
-          {(userBreakdown.data ?? []).length === 0 ? (
+        <Card title={t('billing.breakdown.providerKey')} bordered={false}>
+          {(providerBreakdown.data ?? []).length === 0 ? (
             <Empty />
           ) : (
             <div className='flex flex-col gap-10px'>
-              {(userBreakdown.data ?? []).map((row) => (
+              {(providerBreakdown.data ?? []).map((row) => (
                 <div key={row.key} className='flex items-center justify-between gap-12px text-13px'>
                   <span className='min-w-0 flex-1 truncate text-t-primary'>{row.label}</span>
                   <span className='shrink-0 text-t-secondary'>{formatTokens(row.total_tokens)}</span>

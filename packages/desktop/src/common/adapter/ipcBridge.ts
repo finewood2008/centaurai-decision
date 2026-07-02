@@ -43,15 +43,26 @@ import type {
 } from '../types/provider/providerApi';
 import type { SpeechToTextRequest, SpeechToTextResult } from '../types/provider/speech';
 import type {
-  BillingBreakdownDimension,
+  BillingBreakdownRequest,
+  BillingBreakdownResponse,
   BillingBreakdownRow,
-  BillingModelPrice,
+  BillingCapabilities,
+  BillingEvent,
+  BillingEventsResponse,
+  BillingExportDownloadRequest,
+  BillingExportRequest,
+  BillingExportResponse,
+  BillingProviderKey,
+  BillingProviderKeysRequest,
+  BillingProviderKeysResponse,
   BillingQuery,
-  BillingSettings,
+  BillingSummaryResponse,
   BillingSummary,
   BillingTimeseriesPoint,
-  BillingUsageEvent,
-  BillingUsageInput,
+  BillingTimeseriesResponse,
+  BillingSyncJob,
+  BillingSyncRequest,
+  BillingUpstreamAuth,
 } from '../types/billing';
 import type {
   ITeamAgentRemovedEvent,
@@ -1583,25 +1594,140 @@ export const users = {
 };
 
 // ---------------------------------------------------------------------------
-// Billing — main-process IPC backed by the local SQLite ledger
+// Billing — upstream API only. The client displays upstream-calculated usage and costs.
 // ---------------------------------------------------------------------------
 
+const BILLING_SECRET_FIELD_PATTERN =
+  /^(api[-_]?key|raw[-_]?key|provider[-_]?api[-_]?key|authorization|access[-_]?token|secret[-_]?key|upstream[-_]?token|upstream)$/i;
+
+function stripBillingSecrets<T>(value: T): T {
+  if (!value || typeof value !== 'object') return value;
+  if (Array.isArray(value)) return value.map(stripBillingSecrets) as T;
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>)
+      .filter(([key]) => !BILLING_SECRET_FIELD_PATTERN.test(key))
+      .map(([key, entry]) => [key, stripBillingSecrets(entry)])
+  ) as T;
+}
+
+function normalizeBillingBaseUrl(baseUrl: string): string {
+  return baseUrl.replace(/\/+$/, '');
+}
+
+function getBillingRequestOptions(upstream: BillingUpstreamAuth) {
+  if (!upstream.base_url?.trim() || !upstream.api_key?.trim()) {
+    throw new Error('Billing upstream base_url and api_key are required');
+  }
+  return {
+    baseUrl: normalizeBillingBaseUrl(upstream.base_url.trim()),
+    headers: {
+      Authorization: `Bearer ${upstream.api_key.trim()}`,
+    },
+  };
+}
+
+function omitBillingUpstream<T extends { upstream: BillingUpstreamAuth }>(params: T): Omit<T, 'upstream'> {
+  const { upstream: _upstream, ...body } = params;
+  return body;
+}
+
+async function billingGet<Data>(upstream: BillingUpstreamAuth, path: string): Promise<Data> {
+  return httpRequest<Data>('GET', path, undefined, getBillingRequestOptions(upstream));
+}
+
+async function billingPost<Data, Params extends { upstream: BillingUpstreamAuth }>(
+  path: string,
+  params: Params
+): Promise<Data> {
+  return httpRequest<Data>('POST', path, stripBillingSecrets(omitBillingUpstream(params)), getBillingRequestOptions(params.upstream));
+}
+
 export const billing = {
-  summary: bridge.buildProvider<BillingSummary, BillingQuery>('billing.summary'),
-  events: bridge.buildProvider<BillingUsageEvent[], BillingQuery>('billing.events'),
-  timeseries: bridge.buildProvider<BillingTimeseriesPoint[], BillingQuery>('billing.timeseries'),
-  breakdown: bridge.buildProvider<
-    BillingBreakdownRow[],
-    { query: BillingQuery; dimension: BillingBreakdownDimension }
-  >('billing.breakdown'),
-  exportCsv: bridge.buildProvider<string, BillingQuery>('billing.exportCsv'),
-  prices: bridge.buildProvider<BillingModelPrice[], void>('billing.prices'),
-  savePrice: bridge.buildProvider<void, BillingModelPrice>('billing.savePrice'),
-  settings: bridge.buildProvider<BillingSettings, void>('billing.settings'),
-  saveSettings: bridge.buildProvider<void, Partial<Pick<BillingSettings, 'usd_to_cny_exchange_rate' | 'detail_retention_days'>>>(
-    'billing.saveSettings'
-  ),
-  recordUsage: bridge.buildProvider<BillingUsageEvent, BillingUsageInput>('billing.recordUsage'),
+  capabilities: {
+    provider: () => {},
+    invoke: async (params: { upstream: BillingUpstreamAuth }): Promise<BillingCapabilities> =>
+      billingGet<BillingCapabilities>(params.upstream, '/api/billing/capabilities'),
+  },
+  providerKeys: {
+    provider: () => {},
+    invoke: async (params: BillingProviderKeysRequest): Promise<BillingProviderKey[]> => {
+      const search = new URLSearchParams();
+      if (params?.scope) search.set('scope', params.scope);
+      if (params?.provider_platform) search.set('provider_platform', params.provider_platform);
+      const query = search.toString();
+      const response = await billingGet<BillingProviderKeysResponse>(
+        params.upstream,
+        `/api/billing/provider-keys${query ? `?${query}` : ''}`
+      );
+      return response.items.map(stripBillingSecrets);
+    },
+  },
+  summary: {
+    provider: () => {},
+    invoke: async (query: BillingQuery): Promise<BillingSummary> =>
+      (await billingPost<BillingSummaryResponse, BillingQuery>('/api/billing/summary', query)).summary,
+  },
+  events: {
+    provider: () => {},
+    invoke: async (query: BillingQuery): Promise<BillingEvent[]> =>
+      (await billingPost<BillingEventsResponse, BillingQuery>('/api/billing/events', query)).items,
+  },
+  timeseries: {
+    provider: () => {},
+    invoke: async (query: BillingQuery): Promise<BillingTimeseriesPoint[]> =>
+      (await billingPost<BillingTimeseriesResponse, BillingQuery>('/api/billing/timeseries', query)).items,
+  },
+  breakdown: {
+    provider: () => {},
+    invoke: async (request: BillingBreakdownRequest): Promise<BillingBreakdownRow[]> =>
+      (await billingPost<BillingBreakdownResponse, BillingBreakdownRequest>('/api/billing/breakdown', request)).items,
+  },
+  sync: {
+    provider: () => {},
+    invoke: async (request: BillingSyncRequest): Promise<BillingSyncJob> =>
+      billingPost<BillingSyncJob, BillingSyncRequest>('/api/billing/sync', request),
+  },
+  getSync: {
+    provider: () => {},
+    invoke: async (params: { upstream: BillingUpstreamAuth; sync_id: string }): Promise<BillingSyncJob> =>
+      billingGet<BillingSyncJob>(params.upstream, `/api/billing/sync/${encodeURIComponent(params.sync_id)}`),
+  },
+  createExport: {
+    provider: () => {},
+    invoke: async (request: BillingExportRequest): Promise<BillingExportResponse> =>
+      billingPost<BillingExportResponse, BillingExportRequest>('/api/billing/export', request),
+  },
+  downloadExport: {
+    provider: () => {},
+    invoke: async (params: BillingExportDownloadRequest): Promise<string> =>
+      billingGet<string>(params.upstream, `/api/billing/export/${encodeURIComponent(params.export_id)}`),
+  },
+  exportCsv: {
+    provider: () => {},
+    invoke: async (query: BillingQuery): Promise<string> => {
+      const exportJob = await billing.createExport.invoke({
+        ...query,
+        format: 'csv',
+        level: 'events',
+      });
+      if (!exportJob.export_id) return '';
+      return billing.downloadExport.invoke({ upstream: query.upstream, export_id: exportJob.export_id });
+    },
+  },
+};
+
+export type BillingBridge = {
+  capabilities: typeof billing.capabilities;
+  providerKeys: typeof billing.providerKeys;
+  summary: typeof billing.summary;
+  events: typeof billing.events;
+  timeseries: typeof billing.timeseries;
+  breakdown: typeof billing.breakdown;
+  sync: typeof billing.sync;
+  getSync: typeof billing.getSync;
+  createExport: typeof billing.createExport;
+  downloadExport: typeof billing.downloadExport;
+  exportCsv: typeof billing.exportCsv;
 };
 
 // ---------------------------------------------------------------------------

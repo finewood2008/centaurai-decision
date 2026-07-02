@@ -61,26 +61,30 @@ class MemoryDriver implements ISqliteDriver {
 }
 
 describe('billing database schema', () => {
-  it('creates billing tables for fresh databases', () => {
+  it('does not create local billing tables for fresh databases', () => {
     const db = new MemoryDriver();
 
     initSchema(db);
 
-    expect(db.createdTables.has('billing_usage_events')).toBe(true);
-    expect(db.createdTables.has('billing_model_prices')).toBe(true);
-    expect(db.createdTables.has('billing_usage_aggregates')).toBe(true);
-    expect(db.createdTables.has('billing_settings')).toBe(true);
+    expect(db.createdTables.has('billing_usage_events')).toBe(false);
+    expect(db.createdTables.has('billing_model_prices')).toBe(false);
+    expect(db.createdTables.has('billing_usage_aggregates')).toBe(false);
+    expect(db.createdTables.has('billing_settings')).toBe(false);
   });
 
-  it('migration v27 adds billing tables and indexes', () => {
+  it('migration v28 removes local billing prototype tables', () => {
     const db = new MemoryDriver();
+    db.createdTables.add('billing_usage_events');
+    db.createdTables.add('billing_model_prices');
+    db.createdTables.add('billing_usage_aggregates');
+    db.createdTables.add('billing_settings');
 
-    runMigrations(db, 26, 27);
+    runMigrations(db, 27, 28);
 
-    expect(CURRENT_DB_VERSION).toBe(27);
-    expect(db.createdTables.has('billing_usage_events')).toBe(true);
-    expect(db.createdTables.has('billing_model_prices')).toBe(true);
-    expect(db.createdTables.has('billing_usage_aggregates')).toBe(true);
-    expect(db.createdIndexes.has('idx_billing_events_user_time')).toBe(true);
+    expect(CURRENT_DB_VERSION).toBe(28);
+    expect(db.createdTables.has('billing_usage_events')).toBe(false);
+    expect(db.createdTables.has('billing_model_prices')).toBe(false);
+    expect(db.createdTables.has('billing_usage_aggregates')).toBe(false);
+    expect(db.createdTables.has('billing_settings')).toBe(false);
   });
 });
