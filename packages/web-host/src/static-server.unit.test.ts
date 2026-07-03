@@ -88,6 +88,19 @@ describe('static-server', () => {
     expect(json.path).toBe('/api/anything');
   });
 
+  it('/api/webui-host/health reports the WebHost listener before auth/proxying', async () => {
+    const backend = await startMockBackend((_req, res) => {
+      res.writeHead(500).end('should not proxy');
+    });
+    stopBackend = backend.close;
+    handle = await startStaticServer({ staticDir, backendPort: backend.port, port: 0, allowRemote: true });
+
+    const r = await fetch(`${handle.localUrl}/api/webui-host/health`);
+
+    expect(r.status).toBe(200);
+    expect(await r.json()).toEqual({ ok: true });
+  });
+
   it('blockTeamRoutes: 403s /api/teams* (Team edition removes 智囊团 at the API level)', async () => {
     const backend = await startMockBackend((_req, res) => {
       res.writeHead(200, { 'content-type': 'application/json' });

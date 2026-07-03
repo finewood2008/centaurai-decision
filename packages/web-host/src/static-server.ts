@@ -113,15 +113,54 @@ const DEFAULT_PORT = 25808;
  * the backend directly (not through this proxy), so it still sees the butler.
  */
 const ADMIN_ONLY_ASSISTANT_IDS = new Set<string>(['centaurai-butler']);
+const VIRTUAL_IFACE_RE = /^(utun|tun|tap|ppp|ipsec|wg|awdl|llw|bridge|vmnet|vboxnet|gif|stf|ap\d)/i;
 
-function getLanIP(): string | null {
+const isProxyOrCgnatAddr = (addr: string): boolean => {
+  if (/^198\.1[89]\./.test(addr)) return true;
+  const cgnat = /^100\.(\d+)\./.exec(addr);
+  if (cgnat && Number(cgnat[1]) >= 64 && Number(cgnat[1]) <= 127) return true;
+  return false;
+};
+
+const isUsableLanAddr = (addr: string): boolean => !addr.startsWith('169.254.') && !isProxyOrCgnatAddr(addr);
+
+const lanAddrScore = (addr: string): number => {
+  if (addr.startsWith('192.168.')) return 3;
+  if (addr.startsWith('10.')) return 2;
+  if (/^172\.(1[6-9]|2\d|3[01])\./.test(addr)) return 2;
+  return 1;
+};
+
+function getLanIPCandidates(): string[] {
   const nets = networkInterfaces();
+  const found: { iface: string; address: string }[] = [];
   for (const name of Object.keys(nets)) {
+    if (VIRTUAL_IFACE_RE.test(name)) continue;
     for (const iface of nets[name] || []) {
-      if (iface.family === 'IPv4' && !iface.internal) return iface.address;
+      const isIPv4 = iface.family === 'IPv4' || (iface.family as unknown) === 4;
+      if (!isIPv4 || iface.internal || !isUsableLanAddr(iface.address)) continue;
+      found.push({ iface: name, address: iface.address });
     }
   }
-  return null;
+  found.sort((a, b) => {
+    const byScore = lanAddrScore(b.address) - lanAddrScore(a.address);
+    if (byScore !== 0) return byScore;
+    const physicalA = /^en\d/i.test(a.iface) ? 0 : 1;
+    const physicalB = /^en\d/i.test(b.iface) ? 0 : 1;
+    return physicalA - physicalB;
+  });
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const item of found) {
+    if (seen.has(item.address)) continue;
+    seen.add(item.address);
+    out.push(item.address);
+  }
+  return out;
+}
+
+function getLanIP(): string | null {
+  return getLanIPCandidates()[0] ?? null;
 }
 
 function forwardToBackend(req: IncomingMessage, res: ServerResponse, backendPort: number): void {
@@ -619,6 +658,12 @@ export async function startStaticServer(opts: StaticServerOptions): Promise<Stat
     try {
       if (!req.url || !req.method) {
         res.writeHead(400).end();
+        return;
+      }
+
+      if (req.url === '/api/webui-host/health' || req.url.startsWith('/api/webui-host/health?')) {
+        res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' });
+        res.end(JSON.stringify({ ok: true }));
         return;
       }
 

@@ -274,7 +274,13 @@ export type DesktopWebUIHandle = {
   initialPassword?: string;
 };
 
+type DesktopWebUIRuntimeOptions = {
+  port: number;
+  allowRemote: boolean;
+};
+
 let currentHandle: (WebHostHandle & { allowRemote: boolean }) | null = null;
+let currentRuntimeOptions: DesktopWebUIRuntimeOptions | null = null;
 // First-use plaintext password for the active handle. Set by webui.start IPC
 // handler before startDesktopWebUI() when the backend reports needs_setup=true,
 // so Settings can display the generated password exactly once. Cleared on stop.
@@ -418,6 +424,70 @@ const toDesktopHandle = (handle: WebHostHandle, allowRemote: boolean): DesktopWe
   initialPassword: currentInitialPassword,
 });
 
+const activeBackendPort = (): number | undefined =>
+  (globalThis as typeof globalThis & { __backendPort?: number }).__backendPort;
+
+const probeHttpOk = async (url: string, timeoutMs = 1500): Promise<boolean> => {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { cache: 'no-store', signal: controller.signal });
+    return res.status < 500;
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(timer);
+  }
+};
+
+type WebUIHealDecision = {
+  needed: boolean;
+  reason?: 'listener_unreachable' | 'backend_port_changed' | 'lan_ip_changed';
+};
+
+async function getWebUIHealDecision(): Promise<WebUIHealDecision> {
+  if (!currentHandle) return { needed: false };
+
+  const backendPort = activeBackendPort();
+  if (backendPort && backendPort !== currentHandle.backendPort) {
+    return { needed: true, reason: 'backend_port_changed' };
+  }
+
+  if (currentHandle.allowRemote) {
+    const currentLanIP = getLanIP();
+    if (currentLanIP && currentLanIP !== currentHandle.lanIP) {
+      return { needed: true, reason: 'lan_ip_changed' };
+    }
+  }
+
+  const listenerOk = await probeHttpOk(`${currentHandle.localUrl}/api/webui-host/health`);
+  if (!listenerOk) return { needed: true, reason: 'listener_unreachable' };
+
+  return { needed: false };
+}
+
+/**
+ * Restart the active desktop WebUI only when it is already supposed to be
+ * running and a concrete reachability check says the current handle is stale.
+ */
+export async function healDesktopWebUIIfNeeded(): Promise<DesktopWebUIHandle | null> {
+  if (!currentHandle || !currentRuntimeOptions) return null;
+
+  const decision = await getWebUIHealDecision();
+  if (!decision.needed) return null;
+
+  const opts = currentRuntimeOptions;
+  console.warn('[WebUI] Self-healing desktop WebUI by restarting stale handle', {
+    reason: decision.reason,
+    port: opts.port,
+    allowRemote: opts.allowRemote,
+  });
+  const initialPassword = currentInitialPassword;
+  const handle = await startDesktopWebUI(opts);
+  currentInitialPassword = initialPassword;
+  return { ...handle, initialPassword };
+}
+
 /**
  * Spawn a WebUI instance (static server + backend) and remember the handle so
  * callers can later stop it or query its status.
@@ -497,6 +567,7 @@ export async function startDesktopWebUI(opts: { port?: number; allowRemote?: boo
   });
 
   currentHandle = Object.assign(handle, { allowRemote });
+  currentRuntimeOptions = { port: preferredPort, allowRemote };
   return toDesktopHandle(handle, allowRemote);
 }
 
@@ -507,6 +578,7 @@ export async function stopDesktopWebUI(): Promise<void> {
   const handle = currentHandle;
   if (!handle) return;
   currentHandle = null;
+  currentRuntimeOptions = null;
   currentInitialPassword = undefined;
   try {
     await handle.stop();
@@ -647,6 +719,7 @@ export type WebUIRepairResult = {
 };
 
 export async function repairDesktopWebUIEntry(): Promise<WebUIRepairResult> {
+  await healDesktopWebUIIfNeeded();
   const connectivity = await getRemoteAccessConnectivity();
   let entryHealth: EntryHealth | null = null;
   if (currentHandle) {

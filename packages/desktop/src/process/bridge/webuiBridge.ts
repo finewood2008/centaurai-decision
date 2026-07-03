@@ -21,6 +21,7 @@ import {
   stopDesktopWebUI,
   getDesktopWebUIStatus,
   getDesktopWebUIEntryHealth,
+  healDesktopWebUIIfNeeded,
   repairDesktopWebUIEntry,
   setDesktopWebUIInitialPassword,
 } from '@process/utils/webuiConfig';
@@ -132,6 +133,8 @@ async function maybeSeedInitialPassword(): Promise<void> {
 
 export function initWebuiBridge(): void {
   ipcBridge.webui.getStatus.provider(async () => {
+    const healedHandle = await healDesktopWebUIIfNeeded();
+    if (healedHandle) await announceDesktopWebUIStarted(healedHandle);
     const snapshot = getDesktopWebUIStatus();
     const adminUsername = await fetchAdminUsername();
     // Entry-page health only exists while the server runs; null otherwise.
@@ -141,7 +144,10 @@ export function initWebuiBridge(): void {
 
   // "Repair connection": force a re-check + heal of the WebUI entry page.
   ipcBridge.webui.repairConnection.provider(async () => {
-    return repairDesktopWebUIEntry();
+    const result = await repairDesktopWebUIEntry();
+    const snapshot = getDesktopWebUIStatus();
+    if (snapshot.running) await announceDesktopWebUIStarted(snapshot);
+    return result;
   });
 
   ipcBridge.webui.start.provider(async (params) => {

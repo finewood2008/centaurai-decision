@@ -40,20 +40,45 @@ const ConnectScreen: React.FC = () => {
     void scan();
   }, [scan]);
 
-  const connect = useCallback(async (host: string, port: number, key: string) => {
-    if (!host || !port) {
-      Message.warning('请填写服务器地址和端口');
-      return;
-    }
-    setConnecting(key);
+  const probeServer = useCallback(async (host: string, port: number): Promise<boolean> => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 2500);
     try {
-      await window.electronAPI?.connectToServer?.(host, port);
-      // The main process reloads the window after this; no further action needed.
+      const response = await fetch(`http://${host}:${port}/api/webui-host/health`, {
+        cache: 'no-store',
+        signal: controller.signal,
+      });
+      return response.ok;
     } catch {
-      Message.error('连接失败，请检查服务器地址');
-      setConnecting(null);
+      return false;
+    } finally {
+      clearTimeout(timer);
     }
   }, []);
+
+  const connect = useCallback(
+    async (host: string, port: number, key: string) => {
+      if (!host || !port) {
+        Message.warning('请填写服务器地址和端口');
+        return;
+      }
+      setConnecting(key);
+      try {
+        const reachable = await probeServer(host, port);
+        if (!reachable) {
+          Message.error('连接失败，请检查服务器地址');
+          setConnecting(null);
+          return;
+        }
+        await window.electronAPI?.connectToServer?.(host, port);
+        // The main process reloads the window after this; no further action needed.
+      } catch {
+        Message.error('连接失败，请检查服务器地址');
+        setConnecting(null);
+      }
+    },
+    [probeServer]
+  );
 
   return (
     <div className='centaur-brand flex h-100vh w-full items-center justify-center p-24px'>

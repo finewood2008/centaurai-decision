@@ -439,7 +439,13 @@ const WebuiModalContent: React.FC = () => {
       const conn = result?.connectivity ?? null;
       setConnectivity(conn);
       // Reflect the freshly-computed entry health in the panel.
-      setStatus((prev) => (prev ? { ...prev, entryHealth: health } : prev));
+      const latestStatus = await webui.getStatus.invoke();
+      if (latestStatus) {
+        setStatus({ ...latestStatus, entryHealth: health });
+        if (latestStatus.lanIP) setCachedIP(latestStatus.lanIP);
+      } else {
+        setStatus((prev) => (prev ? { ...prev, entryHealth: health } : prev));
+      }
 
       // Surface the MOST actionable problem first — these are what actually
       // break "the LAN address won't open", not a corrupt entry page.
