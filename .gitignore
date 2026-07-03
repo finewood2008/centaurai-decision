@@ -92,6 +92,7 @@ typings/
 
 # Vite
 .vite/
+electron.vite.config.*.mjs
 
 # Electron-Forge
 out/
