@@ -37,11 +37,47 @@ export type DiscoveredServer = {
 /** Handle returned by {@link advertiseServer}; call stop() to unpublish. */
 export type AdvertiseHandle = { stop: () => Promise<void> };
 
-const pickHost = (addresses: string[] | undefined): string => {
-  const list = addresses ?? [];
-  // Prefer a routable IPv4 address; fall back to the first address.
-  const ipv4 = list.find((a) => /^\d{1,3}(\.\d{1,3}){3}$/.test(a) && !a.startsWith('127.'));
-  return ipv4 || list[0] || '';
+const DISCOVERY_PROBE_TIMEOUT_MS = 900;
+const IPV4_RE = /^\d{1,3}(\.\d{1,3}){3}$/;
+
+const isIpv4Address = (addr: string): boolean => {
+  if (!IPV4_RE.test(addr)) return false;
+  return addr.split('.').every((part) => {
+    const n = Number(part);
+    return Number.isInteger(n) && n >= 0 && n <= 255;
+  });
+};
+
+const isProxyOrCgnatAddr = (addr: string): boolean => {
+  if (/^198\.1[89]\./.test(addr)) return true;
+  const cgnat = /^100\.(\d+)\./.exec(addr);
+  if (cgnat && Number(cgnat[1]) >= 64 && Number(cgnat[1]) <= 127) return true;
+  return false;
+};
+
+const isUsableLanAddr = (addr: string): boolean => {
+  if (!isIpv4Address(addr)) return false;
+  if (addr.startsWith('127.') || addr.startsWith('0.') || addr.startsWith('169.254.')) return false;
+  if (Number(addr.split('.')[0]) >= 224) return false;
+  return !isProxyOrCgnatAddr(addr);
+};
+
+const lanAddrScore = (addr: string): number => {
+  if (addr.startsWith('192.168.')) return 3;
+  if (addr.startsWith('10.')) return 2;
+  if (/^172\.(1[6-9]|2\d|3[01])\./.test(addr)) return 2;
+  return 1;
+};
+
+const unique = (items: string[]): string[] => {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const item of items) {
+    if (!item || seen.has(item)) continue;
+    seen.add(item);
+    out.push(item);
+  }
+  return out;
 };
 
 const toRecord = (txt: unknown): Record<string, string> => {
@@ -49,6 +85,83 @@ const toRecord = (txt: unknown): Record<string, string> => {
   const out: Record<string, string> = {};
   for (const [k, v] of Object.entries(txt as Record<string, unknown>)) out[k] = String(v);
   return out;
+};
+
+export const getDiscoveredHostCandidates = (
+  addresses: string[] | undefined,
+  txt: Record<string, string> = {}
+): string[] => {
+  const txtLanIP = txt.lanIP?.trim();
+  const usable = (addresses ?? []).filter(isUsableLanAddr).sort((a, b) => lanAddrScore(b) - lanAddrScore(a));
+  const fallback = addresses?.[0] ? [addresses[0]] : [];
+  return unique([...(txtLanIP && isUsableLanAddr(txtLanIP) ? [txtLanIP] : []), ...usable, ...fallback]);
+};
+
+export const pickDiscoveredHost = (addresses: string[] | undefined, txt: Record<string, string> = {}): string => {
+  return getDiscoveredHostCandidates(addresses, txt)[0] ?? '';
+};
+
+const httpHost = (host: string): string => (host.includes(':') && !host.startsWith('[') ? `[${host}]` : host);
+
+const probeUrlOk = async (url: string, timeoutMs: number): Promise<boolean> => {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, { cache: 'no-store', signal: controller.signal });
+    return response.ok;
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(timer);
+  }
+};
+
+const probeHost = async (host: string, port: number, timeoutMs: number): Promise<boolean> => {
+  const baseUrl = `http://${httpHost(host)}:${port}`;
+  if (await probeUrlOk(`${baseUrl}/api/webui-host/health`, timeoutMs)) return true;
+  return probeUrlOk(`${baseUrl}/api/auth/status`, timeoutMs);
+};
+
+export const probeLanServer = (
+  host: string,
+  port: number,
+  timeoutMs = DISCOVERY_PROBE_TIMEOUT_MS
+): Promise<boolean> => {
+  return probeHost(host, port, timeoutMs);
+};
+
+export const probeDiscoveredServer = async (
+  server: DiscoveredServer,
+  timeoutMs = DISCOVERY_PROBE_TIMEOUT_MS
+): Promise<DiscoveredServer | null> => {
+  const candidates = getDiscoveredHostCandidates(server.addresses, server.txt);
+  if (server.host && !candidates.includes(server.host)) candidates.push(server.host);
+  const results = await Promise.all(
+    candidates.map(async (host) => ({ host, ok: await probeHost(host, server.port, timeoutMs) }))
+  );
+  const reachable = candidates.find((host) => results.some((result) => result.host === host && result.ok));
+  if (!reachable) return null;
+  return { ...server, host: reachable, addresses: unique([reachable, ...server.addresses]) };
+};
+
+export const filterReachableDiscoveredServers = async (
+  servers: DiscoveredServer[],
+  timeoutMs = DISCOVERY_PROBE_TIMEOUT_MS
+): Promise<DiscoveredServer[]> => {
+  const probed = await Promise.all(servers.map((server) => probeDiscoveredServer(server, timeoutMs)));
+  return probed.filter((server): server is DiscoveredServer => server !== null);
+};
+
+const serviceToDiscoveredServer = (s: Service): DiscoveredServer => {
+  const txt = toRecord(s.txt);
+  return {
+    name: s.name,
+    host: pickDiscoveredHost(s.addresses, txt),
+    port: s.port,
+    addresses: s.addresses ?? [],
+    txt,
+    source: 'mdns',
+  };
 };
 
 /**
@@ -108,14 +221,7 @@ export function discoverServers(onUpdate: (servers: DiscoveredServer[]) => void)
 
   const browser = instance.find({ type: CENTAUR_SERVICE_TYPE, protocol: CENTAUR_SERVICE_PROTOCOL });
   browser.on('up', (s: Service) => {
-    byKey.set(keyOf(s), {
-      name: s.name,
-      host: pickHost(s.addresses),
-      port: s.port,
-      addresses: s.addresses ?? [],
-      txt: toRecord(s.txt),
-      source: 'mdns',
-    });
+    byKey.set(keyOf(s), serviceToDiscoveredServer(s));
     emit();
   });
   browser.on('down', (s: Service) => {
@@ -144,7 +250,7 @@ export function discoverServersOnce(timeoutMs = 3000): Promise<DiscoveredServer[
     });
     setTimeout(() => {
       handle.stop();
-      resolve(latest);
+      void filterReachableDiscoveredServers(latest).then(resolve);
     }, timeoutMs);
   });
 }

@@ -62,6 +62,8 @@ import {
   resolveWebUIPort,
   restoreDesktopWebUIFromPreferences,
 } from './process/utils/webuiConfig';
+import { loadReachableClientRemoteServer, saveClientRemoteServer } from './process/discovery/clientConnection';
+import { probeLanServer } from './process/discovery/lanDiscovery';
 import {
   createOrUpdateTray,
   destroyTray,
@@ -402,9 +404,16 @@ ipcMain.on('get-client-mode', (event) => {
 
 // Distributed client: connect to the chosen remote server, then reload so the
 // preload re-exposes the new backend host/port to the renderer.
-ipcMain.handle('client:connect', (_event, payload: { host: string; port: number }) => {
-  clientBackendHost = payload?.host || '';
-  clientBackendPort = Number(payload?.port) || 0;
+ipcMain.handle('client:connect', async (_event, payload: { host: string; port: number }) => {
+  const host = payload?.host?.trim() || '';
+  const port = Number(payload?.port) || 0;
+  const reachable = host && port ? await probeLanServer(host, port) : false;
+  if (!reachable) {
+    throw new Error('[Client] Selected LAN server is not reachable');
+  }
+  const saved = await saveClientRemoteServer(ProcessConfig, host, port);
+  clientBackendHost = saved.host;
+  clientBackendPort = saved.port;
   if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.reload();
   return { host: clientBackendHost, port: clientBackendPort };
 });
@@ -785,6 +794,12 @@ const handleAppReady = async (): Promise<void> => {
   // screen; once the user connects, the window reloads pointing at the remote
   // server. This keeps the client lightweight (no aioncore on each PC).
   if (isClientMode) {
+    const savedServer = await loadReachableClientRemoteServer(ProcessConfig);
+    if (savedServer) {
+      clientBackendHost = savedServer.host;
+      clientBackendPort = savedServer.port;
+      mark(`client-mode restored server (${savedServer.host}:${savedServer.port})`);
+    }
     createWindow({ showOnReady: true });
     appReadyDone = true;
     mark('client-mode ready (no local backend)');
