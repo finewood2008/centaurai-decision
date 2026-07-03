@@ -82,6 +82,7 @@ export async function startWebHost(opts: WebHostOptions): Promise<WebHostHandle>
       imageWorkbenchDir: opts.imageWorkbenchDir,
       imageKey: opts.imageKey,
       videoUpstreamUrl: opts.videoUpstreamUrl,
+      rendererDevUrl: opts.rendererDevUrl,
       blockTeamRoutes: opts.blockTeamRoutes,
     });
   } catch (err) {

@@ -922,6 +922,7 @@ const handleAppReady = async (): Promise<void> => {
         staticDir: path.join(__dirname, '../renderer'),
         port: resolvedPort,
         allowRemote,
+        rendererDevUrl: app.isPackaged ? undefined : process.env.ELECTRON_RENDERER_URL,
         dataDir: getDataPath(),
         logDir: sysDirWebUI.logDir,
         // Expose the same AIONUI_{CACHE,WORK,LOG}_DIR env the desktop IPC path

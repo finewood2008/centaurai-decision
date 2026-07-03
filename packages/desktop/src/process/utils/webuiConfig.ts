@@ -531,6 +531,7 @@ export async function startDesktopWebUI(opts: { port?: number; allowRemote?: boo
     staticDir: path.join(__dirname, '../renderer'),
     port: preferredPort,
     allowRemote,
+    rendererDevUrl: app.isPackaged ? undefined : process.env.ELECTRON_RENDERER_URL,
     // Team server only: 403 the aioncore team/meeting API at the WebUI proxy so LAN
     // employees can't run 智囊团 (decision meetings) by hitting /api/teams* directly,
     // even though the bundled backend still exposes it. No-op on full + Decision (both keep 智囊团).

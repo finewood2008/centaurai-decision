@@ -14,6 +14,7 @@
  */
 
 import http, { type IncomingMessage, type Server, type ServerResponse } from 'node:http';
+import https from 'node:https';
 import { networkInterfaces } from 'node:os';
 import net, { type Socket } from 'node:net';
 import path from 'node:path';
@@ -88,6 +89,12 @@ export type StaticServerOptions = {
    * Decision box talks to the backend over IPC, not through this proxy.
    */
   blockTeamRoutes?: boolean;
+  /**
+   * Development only: Vite renderer origin to proxy non-API page/assets from.
+   * Keeps LAN/WebUI usable under `electron-vite dev`, where out/renderer may
+   * not exist yet while the desktop renderer is served from Vite.
+   */
+  rendererDevUrl?: string;
 };
 
 export type StaticServerHandle = {
@@ -179,6 +186,39 @@ function forwardToBackend(req: IncomingMessage, res: ServerResponse, backendPort
     if (!res.headersSent) {
       res.writeHead(502, { 'content-type': 'application/json' });
       res.end(JSON.stringify({ error: 'BACKEND_UNREACHABLE' }));
+    } else {
+      res.destroy();
+    }
+  });
+  req.pipe(proxy);
+}
+
+function proxyToOrigin(req: IncomingMessage, res: ServerResponse, origin: string): void {
+  let target: URL;
+  try {
+    target = new URL(req.url ?? '/', origin);
+  } catch {
+    res.writeHead(400).end();
+    return;
+  }
+  const headers = { ...req.headers, host: target.host };
+  const proxy = (target.protocol === 'https:' ? https.request : http.request)(
+    {
+      hostname: target.hostname,
+      port: target.port || (target.protocol === 'https:' ? 443 : 80),
+      path: `${target.pathname}${target.search}`,
+      method: req.method,
+      headers,
+    },
+    (proxyRes) => {
+      res.writeHead(proxyRes.statusCode ?? 502, proxyRes.headers);
+      proxyRes.pipe(res);
+    }
+  );
+  proxy.on('error', () => {
+    if (!res.headersSent) {
+      res.writeHead(502, { 'content-type': 'text/plain; charset=utf-8' });
+      res.end('Renderer dev server unreachable');
     } else {
       res.destroy();
     }
@@ -856,6 +896,12 @@ export async function startStaticServer(opts: StaticServerOptions): Promise<Stat
 
       const isHtmlEntry =
         requestPath === '/' || requestPath === '/index.html' || !requestPath.split('/').pop()?.includes('.');
+
+      if (opts.rendererDevUrl) {
+        proxyToOrigin(req, res, opts.rendererDevUrl);
+        return;
+      }
+
       if (isHtmlEntry || requestPath === '/sw.js') {
         res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
         res.setHeader('Pragma', 'no-cache');

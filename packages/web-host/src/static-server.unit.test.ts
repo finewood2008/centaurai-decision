@@ -29,6 +29,7 @@ async function startMockBackend(
 describe('static-server', () => {
   let handle: StaticServerHandle | null = null;
   let stopBackend: (() => Promise<void>) | null = null;
+  let stopRendererDev: (() => Promise<void>) | null = null;
   let staticDir = '';
 
   beforeEach(async () => {
@@ -43,6 +44,10 @@ describe('static-server', () => {
     if (stopBackend) {
       await stopBackend();
       stopBackend = null;
+    }
+    if (stopRendererDev) {
+      await stopRendererDev();
+      stopRendererDev = null;
     }
     await fs.rm(staticDir, { recursive: true, force: true });
   });
@@ -86,6 +91,32 @@ describe('static-server', () => {
     expect(r.status).toBe(200);
     const json = (await r.json()) as { path: string };
     expect(json.path).toBe('/api/anything');
+  });
+
+  it('proxies non-API requests to the renderer dev server when configured', async () => {
+    const backend = await startMockBackend((req, res) => {
+      res.writeHead(200, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ backendPath: req.url }));
+    });
+    stopBackend = backend.close;
+    const rendererDev = await startMockBackend((req, res) => {
+      res.writeHead(200, { 'content-type': req.url === '/assets/main.js' ? 'text/javascript' : 'text/html' });
+      res.end(req.url === '/assets/main.js' ? 'console.log("dev")' : '<!doctype html><title>dev-renderer</title>');
+    });
+    stopRendererDev = rendererDev.close;
+    handle = await startStaticServer({
+      staticDir,
+      backendPort: backend.port,
+      port: 0,
+      rendererDevUrl: `http://127.0.0.1:${rendererDev.port}`,
+    });
+
+    const page = await fetch(`${handle.localUrl}/`);
+    expect(await page.text()).toContain('<title>dev-renderer</title>');
+    const asset = await fetch(`${handle.localUrl}/assets/main.js`);
+    expect(await asset.text()).toContain('console.log("dev")');
+    const api = await fetch(`${handle.localUrl}/api/anything`);
+    expect(((await api.json()) as { backendPath: string }).backendPath).toBe('/api/anything');
   });
 
   it('/api/webui-host/health reports the WebHost listener before auth/proxying', async () => {

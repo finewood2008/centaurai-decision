@@ -13,6 +13,7 @@
  */
 import { ipcBridge } from '@/common';
 import type { DiscoveredServerInfo } from '@/common/adapter/ipcBridge';
+import { WEBUI_DEFAULT_PORT } from '@/common/config/constants';
 import { Button, Input, InputNumber, Message, Spin } from '@arco-design/web-react';
 import { Refresh, Search, Wifi } from '@icon-park/react';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -22,7 +23,7 @@ const ConnectScreen: React.FC = () => {
   const [scanning, setScanning] = useState(true);
   const [connecting, setConnecting] = useState<string | null>(null);
   const [manualHost, setManualHost] = useState('');
-  const [manualPort, setManualPort] = useState<number>(25808);
+  const [manualPort, setManualPort] = useState<number>(WEBUI_DEFAULT_PORT);
 
   const scan = useCallback(async () => {
     setScanning(true);
@@ -40,11 +41,11 @@ const ConnectScreen: React.FC = () => {
     void scan();
   }, [scan]);
 
-  const probeServer = useCallback(async (host: string, port: number): Promise<boolean> => {
+  const probeUrl = useCallback(async (url: string): Promise<boolean> => {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 2500);
     try {
-      const response = await fetch(`http://${host}:${port}/api/webui-host/health`, {
+      const response = await fetch(url, {
         cache: 'no-store',
         signal: controller.signal,
       });
@@ -55,6 +56,15 @@ const ConnectScreen: React.FC = () => {
       clearTimeout(timer);
     }
   }, []);
+
+  const probeServer = useCallback(
+    async (host: string, port: number): Promise<boolean> => {
+      const baseUrl = `http://${host}:${port}`;
+      if (await probeUrl(`${baseUrl}/api/webui-host/health`)) return true;
+      return probeUrl(`${baseUrl}/api/auth/status`);
+    },
+    [probeUrl]
+  );
 
   const connect = useCallback(
     async (host: string, port: number, key: string) => {
@@ -167,7 +177,7 @@ const ConnectScreen: React.FC = () => {
               min={1}
               max={65535}
               value={manualPort}
-              onChange={(v) => setManualPort(Number(v) || 25808)}
+              onChange={(v) => setManualPort(Number(v) || WEBUI_DEFAULT_PORT)}
               style={{ width: 110 }}
             />
             <Button
