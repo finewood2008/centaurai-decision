@@ -26,7 +26,7 @@
     "desc": "隨時拉進會議室",
     "count": "{{count}} 位待命"
   },
-  "enter": "進入會議室",
+  "enter": "進入",
   "roomTitle": "決策會議室",
   "roomSubtitle": "AI 決策圓桌",
   "emptyTitle": "決策會議室 · 召集顧問開會",
@@ -45,12 +45,193 @@
   "deptFlow": "專有流程",
   "deptDecide": "決議",
   "dept": {
-    "marketing": { "name": "市場部", "hint": "行銷策略、品牌、增長、投放" },
-    "product": { "name": "產品部", "hint": "產品方向、需求取捨、路線落地" },
-    "legal": { "name": "法務部", "hint": "法律風險、合規、條款、處置" },
-    "finance": { "name": "財務部", "hint": "資料測算、現金流、財務風險" },
-    "operations": { "name": "營運部", "hint": "流程、執行、效率" },
-    "hr": { "name": "人力部 / HR", "hint": "組織、人才、團隊" },
-    "strategy": { "name": "戰略部", "hint": "目標、多方案競標、定案" }
+    "marketing": {
+      "name": "市場部",
+      "hint": "行銷策略、品牌、增長、投放"
+    },
+    "product": {
+      "name": "產品部",
+      "hint": "產品方向、需求取捨、路線落地"
+    },
+    "legal": {
+      "name": "法務部",
+      "hint": "法律風險、合規、條款、處置"
+    },
+    "finance": {
+      "name": "財務部",
+      "hint": "資料測算、現金流、財務風險"
+    },
+    "operations": {
+      "name": "營運部",
+      "hint": "流程、執行、效率"
+    },
+    "hr": {
+      "name": "人力部 / HR",
+      "hint": "組織、人才、團隊"
+    },
+    "strategy": {
+      "name": "戰略部",
+      "hint": "目標、多方案競標、定案"
+    }
+  },
+  "hero": {
+    "eyebrow": "決策主廳",
+    "title": "今天要拍板什麼？",
+    "subtitle": "拋出一個複雜問題，半人馬 AI 會召集全球頂級 AI 顧問入席，讓他們各持立場互相攻防，最後把決定權交還給你。",
+    "commandTitle": "把要拍板的問題說清楚",
+    "commandStatus": "顧問團待命",
+    "placeholder": "例如：我們是否應該在本季度進入東南亞市場？可以補充預算、時間、風險偏好和不可接受的紅線。",
+    "commandHint": "議題越具體、約束越清楚，顧問交鋒越有價值。",
+    "cta": "召集顧問討論",
+    "examples": {
+      "market": "現在要不要進入一個新市場？",
+      "product": "這個產品方向該砍掉還是加碼？",
+      "budget": "下季度預算應該投增長還是投研發？",
+      "crisis": "這場潛在公關風險應該怎麼處理？"
+    }
+  },
+  "council": {
+    "title": "顧問席位",
+    "subtitle": "先排立場，再開交鋒",
+    "seats": {
+      "strategy": "戰略席",
+      "growth": "增長席",
+      "risk": "風險席",
+      "finance": "財務席",
+      "market": "市場席",
+      "synthesis": "首席綜合"
+    },
+    "flow": {
+      "issue": "議題",
+      "debate": "交鋒",
+      "verdict": "拍板"
+    }
+  },
+  "recent": {
+    "title": "決策席",
+    "desc": "繼續未完的討論、查看方案，或完成最終拍板。",
+    "empty": "還沒有入席的決策。先在上方拋出一個真正複雜的問題。"
+  },
+  "verdict": {
+    "title": "決策流程",
+    "badge": "由你掌控",
+    "steps": {
+      "debate": "顧問交鋒",
+      "debateDesc": "不同模型各自站位，攻擊假設，接受反駁並修正。",
+      "options": "形成候選",
+      "optionsDesc": "主持人把爭論收束成可比較的方案與取捨。",
+      "archive": "老闆拍板",
+      "archiveDesc": "你的決定會沉澱為會議紀要、方案書和行動清單。"
+    }
+  },
+  "feed": {
+    "eyebrow": "資訊流預覽",
+    "title": "老闆關心的資訊流",
+    "desc": "未來會同步半人馬 AI 超級工作台和 Agent 自動化帶來的關鍵動態，像首頁資訊流一樣把值得拍板的變化推到你面前。",
+    "mockBadge": "未上線 · Mock 資料",
+    "action": "同步未開啟",
+    "previewOnly": "預覽",
+    "sources": {
+      "workbench": "超級工作台",
+      "agent": "Agent 自動化",
+      "automation": "自動化巡檢"
+    },
+    "items": {
+      "marketSignal": {
+        "time": "12 分鐘前",
+        "title": "市場組提交了東南亞競品異動摘要",
+        "body": "超級工作台捕捉到三家競品開始調整本地通路政策，建議評估是否提前開一場市場進入決策。",
+        "tag": "可能影響：市場進入"
+      },
+      "salesDigest": {
+        "time": "38 分鐘前",
+        "title": "銷售 Agent 彙總了本週高價值客戶阻塞點",
+        "body": "自動化任務發現企業客戶對部署週期和資料合規仍有疑慮，建議讓法務、交付和增長顧問共同評估。",
+        "tag": "可能影響：增長策略"
+      },
+      "riskAlert": {
+        "time": "今天 09:20",
+        "title": "營運自動化標記了一項執行風險",
+        "body": "多個任務依賴同一位核心負責人，若下週繼續延遲，Q3 發布節奏可能需要重新排優先級。",
+        "tag": "可能影響：資源調度"
+      }
+    }
+  },
+  "emptyHint": "把一個決策擺上桌面。顧問會從不同席位各持立場、互相攻防，最後把真正需要你拍板的取捨擺出來。",
+  "createSubtitle": "先定議題，再安排不同立場的 AI 顧問入席。",
+  "createConfirm": "發起會議",
+  "createNameLabel": "決策標題",
+  "createMembersLabel": "顧問席位",
+  "createMembersDesc": "選擇參與這場決策的顧問。第一個支援團隊協作的模型會擔任首席主持。",
+  "createMakeLeader": "設為主持",
+  "createLeaderBadge": "首席主持",
+  "createWorkspaceLabel": "決策工作區",
+  "createBrief": {
+    "title": "會議流程",
+    "issue": "1. 明確決策議題",
+    "seats": "2. 安排顧問席位",
+    "verdict": "3. 形成候選方案"
+  },
+  "room": {
+    "status": {
+      "idle": "待發起",
+      "running": "交鋒中",
+      "awaiting": "等待你的方向",
+      "resolution": "待你拍板",
+      "decided": "已拍板"
+    },
+    "addAdvisor": "加顧問",
+    "newDecision": "新決策",
+    "details": "顧問席",
+    "detailsTitle": "會議詳情",
+    "topicLabel": "決策議題：",
+    "stepIssue": "① 拋出議題",
+    "stepDebate": "② 開始交鋒",
+    "planTitle": "本場方案書",
+    "continue": "繼續討論",
+    "turns": "已完成 {{count}} 段顧問發言",
+    "resolutionStatus": "討論結束，請老闆拍板",
+    "searchKnowledgeBase": "檢索知識庫",
+    "attachShared": "引用共享庫",
+    "topicPlaceholder": "拋出一個議題，讓 AI 顧問團圍繞它交鋒論證…",
+    "start": "開始會議",
+    "needAgents": "需要 1 位首席主持和至少 1 位顧問才能開始。",
+    "newMeeting": "開一場新決策",
+    "pickHint": "請在上方選擇一個方案完成拍板",
+    "pausedHint": "主持人正在等你的方向 —— 可在下方補充紅線、預算、傾向或繼續交鋒。",
+    "runningHint": "顧問正在圍繞議題交鋒。你可以隨時下達約束或糾偏。",
+    "reset": "重開",
+    "cancel": "取消會議",
+    "interjectPausePlaceholder": "補充你的方向：風險偏好、預算紅線、時間要求，或表達你的傾向…",
+    "interjectPlaceholder": "下達補充約束或要求顧問重新聚焦…"
+  },
+  "authority": {
+    "bossSeat": "主位",
+    "bossHint": "最終決定權在你手上",
+    "disputeTitle": "交鋒進度",
+    "disputeDesc": "已完成 {{count}} 段顧問發言",
+    "verdictTitle": "決策台",
+    "verdictDesc": "{{count}} 個候選方案待拍板"
+  },
+  "stage": {
+    "parallel": "各陳主張",
+    "debate": "觀點交鋒",
+    "redteamAttack": "紅隊猛攻",
+    "crossreview": "互相評案",
+    "converge": "收斂成案",
+    "probe": "逐層追問",
+    "synthesis": "形成建議",
+    "decision": "最終拍板"
+  },
+  "resolution": {
+    "title": "決策台 — 請老闆拍板",
+    "subtitle": "{{count}} 個方案待選擇",
+    "optionMeta": "請權衡收益、代價與執行節奏",
+    "chosenMeta": "此方案已按你的決定進入歸檔",
+    "pick": "拍板此方案",
+    "picked": "已拍板"
+  },
+  "dashboard": {
+    "navLabel": "決策看板"
   }
 }

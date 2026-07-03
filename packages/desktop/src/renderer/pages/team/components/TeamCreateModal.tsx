@@ -37,6 +37,7 @@ const FormItem = Form.Item;
 
 type Props = {
   visible: boolean;
+  initialName?: string;
   onClose: () => void;
   onCreated: (team: TTeam) => void;
 };
@@ -94,24 +95,24 @@ const AgentMultiSelectRow: React.FC<{
           {leaderBadge}
         </span>
       ) : (
-        <button
-          type='button'
+        <Button
+          type='text'
           onClick={(e) => {
             e.stopPropagation();
             onPromoteLeader();
           }}
           title={makeLeaderTitle}
-          className='shrink-0 flex items-center gap-3px text-11px text-[color:var(--color-text-3)] hover:text-[color:var(--aou-6)] px-6px py-2px rd-10px border border-solid border-[color:var(--color-border-3)] hover:border-[color:var(--aou-6)] bg-transparent cursor-pointer transition-colors'
+          className='shrink-0 !h-24px !px-6px !py-0 !rd-10px !border !border-solid !border-[color:var(--color-border-3)] !bg-transparent !text-11px !text-[color:var(--color-text-3)] hover:!text-[color:var(--aou-6)] hover:!border-[color:var(--aou-6)]'
           data-testid={`team-create-promote-${agentKey(agent)}`}
         >
           <Crown theme='outline' size='11' fill='currentColor' />
           {makeLeaderTitle}
-        </button>
+        </Button>
       ))}
   </div>
 );
 
-const TeamCreateModal: React.FC<Props> = ({ visible, onClose, onCreated }) => {
+const TeamCreateModal: React.FC<Props> = ({ visible, initialName = '', onClose, onCreated }) => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { cliAgents } = useConversationAgents();
@@ -170,9 +171,10 @@ const TeamCreateModal: React.FC<Props> = ({ visible, onClose, onCreated }) => {
 
   useEffect(() => {
     if (visible) {
+      setName(initialName);
       setTimeout(() => nameInputRef.current?.focus(), 50);
     }
-  }, [visible]);
+  }, [visible, initialName]);
 
   // Pre-fill the agent panel from the user's last 智囊团, once per open.
   useEffect(() => {
@@ -329,9 +331,16 @@ const TeamCreateModal: React.FC<Props> = ({ visible, onClose, onCreated }) => {
       header={{
         render: () => (
           <div className='flex items-center justify-between border-b border-border-2 bg-dialog-fill-0 px-24px py-18px'>
-            <h3 className='m-0 text-16px font-600 text-t-primary'>
-              {t(IS_DECISION ? 'decision.createTitle' : 'team.create.title', { defaultValue: '新建智囊团' })}
-            </h3>
+            <div className='min-w-0'>
+              <h3 className='m-0 text-16px font-600 text-t-primary'>
+                {t(IS_DECISION ? 'decision.createTitle' : 'team.create.title', { defaultValue: '新建智囊团' })}
+              </h3>
+              {IS_DECISION && (
+                <div className='mt-3px text-12px text-t-tertiary truncate'>
+                  {t('decision.createSubtitle', { defaultValue: '先定议题，再召集不同立场的 AI 顾问入席。' })}
+                </div>
+              )}
+            </div>
             <Button
               type='text'
               icon={<Close size='18' fill='currentColor' className='text-t-secondary' />}
@@ -354,7 +363,7 @@ const TeamCreateModal: React.FC<Props> = ({ visible, onClose, onCreated }) => {
             className='min-w-80px'
             style={{ borderRadius: 8 }}
           >
-            {t('team.create.confirm', { defaultValue: '创建' })}
+            {t(IS_DECISION ? 'decision.createConfirm' : 'team.create.confirm', { defaultValue: '创建' })}
           </Button>
         </div>
       }
@@ -364,6 +373,22 @@ const TeamCreateModal: React.FC<Props> = ({ visible, onClose, onCreated }) => {
           {/* Decision edition: manually pick a discussion method; optionally start from a department template. */}
           {IS_DECISION && (
             <>
+              <div className='mb-18px rounded-12px border border-solid border-border-2 bg-bg-2 px-16px py-14px'>
+                <div className='text-13px font-600 text-t-primary'>
+                  {t('decision.createBrief.title', { defaultValue: '召集逻辑' })}
+                </div>
+                <div className='mt-8px grid grid-cols-3 gap-8px text-12px text-t-secondary'>
+                  <div className='rounded-8px bg-fill-1 px-10px py-8px'>
+                    {t('decision.createBrief.issue', { defaultValue: '1. 明确决策议题' })}
+                  </div>
+                  <div className='rounded-8px bg-fill-1 px-10px py-8px'>
+                    {t('decision.createBrief.seats', { defaultValue: '2. 安排顾问席位' })}
+                  </div>
+                  <div className='rounded-8px bg-fill-1 px-10px py-8px'>
+                    {t('decision.createBrief.verdict', { defaultValue: '3. 形成候选方案' })}
+                  </div>
+                </div>
+              </div>
               <FormItem
                 label={
                   <span className='text-12px font-500 text-t-secondary'>
@@ -431,7 +456,9 @@ const TeamCreateModal: React.FC<Props> = ({ visible, onClose, onCreated }) => {
           <FormItem
             label={
               <span className='text-12px font-500 text-t-secondary'>
-                {t('team.create.nameLabel', { defaultValue: '团队名称' })}
+                {t(IS_DECISION ? 'decision.createNameLabel' : 'team.create.nameLabel', {
+                  defaultValue: '团队名称',
+                })}
                 <span className='ml-4px text-danger-6'>*</span>
               </span>
             }
@@ -453,7 +480,9 @@ const TeamCreateModal: React.FC<Props> = ({ visible, onClose, onCreated }) => {
               <div className='flex flex-col gap-2px'>
                 <div className='flex items-center justify-between gap-8px'>
                   <span className='text-12px font-500 text-t-secondary'>
-                    {t('team.create.step.members', { defaultValue: 'Team Members' })}
+                    {t(IS_DECISION ? 'decision.createMembersLabel' : 'team.create.step.members', {
+                      defaultValue: 'Team Members',
+                    })}
                     <span className='ml-4px text-danger-6'>*</span>
                     {selectedKeys.length > 0 && (
                       <span className='ml-6px text-11px font-normal text-t-tertiary'>
@@ -465,21 +494,21 @@ const TeamCreateModal: React.FC<Props> = ({ visible, onClose, onCreated }) => {
                     )}
                   </span>
                   {allAgents.length > 0 && (
-                    <button
-                      type='button'
+                    <Button
+                      type='text'
                       onClick={handleToggleSearch}
                       title={t('team.create.searchPlaceholder', { defaultValue: 'Search agents...' })}
                       aria-label={t('team.create.searchPlaceholder', { defaultValue: 'Search agents...' })}
-                      className='shrink-0 flex items-center justify-center w-20px h-20px rd-4px text-[color:var(--color-text-3)] hover:text-[color:var(--color-text-1)] hover:bg-[var(--fill-2)] cursor-pointer border-none bg-transparent transition-colors'
+                      className='shrink-0 !w-24px !h-24px !min-w-24px !p-0 !rd-6px !text-[color:var(--color-text-3)] hover:!text-[color:var(--color-text-1)] hover:!bg-[var(--fill-2)]'
                       style={{ lineHeight: 0 }}
                       data-testid='team-create-search-toggle'
                     >
                       <Search size='13' fill='currentColor' />
-                    </button>
+                    </Button>
                   )}
                 </div>
                 <span className='text-11px font-normal leading-16px text-t-tertiary'>
-                  {t('team.create.membersDesc', {
+                  {t(IS_DECISION ? 'decision.createMembersDesc' : 'team.create.membersDesc', {
                     defaultValue: 'Pick one or more agents. The first selected becomes the team leader.',
                   })}
                 </span>
@@ -525,8 +554,12 @@ const TeamCreateModal: React.FC<Props> = ({ visible, onClose, onCreated }) => {
                           canLead={Boolean(agent.team_capable)}
                           onToggle={() => handleToggleAgent(key)}
                           onPromoteLeader={() => handlePromoteLeader(key)}
-                          makeLeaderTitle={t('team.create.makeLeader', { defaultValue: 'Set as leader' })}
-                          leaderBadge={t('team.create.leaderBadge', { defaultValue: 'Leader' })}
+                          makeLeaderTitle={t(IS_DECISION ? 'decision.createMakeLeader' : 'team.create.makeLeader', {
+                            defaultValue: 'Set as leader',
+                          })}
+                          leaderBadge={t(IS_DECISION ? 'decision.createLeaderBadge' : 'team.create.leaderBadge', {
+                            defaultValue: 'Leader',
+                          })}
                           expertTag={t('team.create.modelExpertTag', { defaultValue: '直连模型' })}
                         />
                       );
@@ -541,7 +574,9 @@ const TeamCreateModal: React.FC<Props> = ({ visible, onClose, onCreated }) => {
           <FormItem
             label={
               <span className='text-12px font-500 text-t-secondary'>
-                {t('team.create.step.workspace', { defaultValue: 'Project' })}
+                {t(IS_DECISION ? 'decision.createWorkspaceLabel' : 'team.create.step.workspace', {
+                  defaultValue: 'Project',
+                })}
                 <span className='ml-4px text-11px font-normal text-t-tertiary'>
                   {t('common.optional', { defaultValue: '(optional)' })}
                 </span>

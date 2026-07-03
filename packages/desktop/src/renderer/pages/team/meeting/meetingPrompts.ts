@@ -85,21 +85,23 @@ export function buildModeratorOpeningPrompt(topic: string, panelists: PanelistBr
 
 /**
  * Moderator's step-① turn. The moderator is an equal contributor: it briefly frames
- * the core tension, then gives its OWN substantive initial judgment (runs in parallel
- * with the panel). Optional `framing` injects the chosen department's context.
+ * the core tension, then gives its OWN substantive initial judgment (runs after
+ * the opening, in parallel with the panel). Optional `framing` injects the chosen
+ * department's context.
  */
 export function buildModeratorPositionPrompt(topic: string, panelists: PanelistBrief[], framing?: string): string {
   return [
     framing ? framing : '',
-    '你是这场决策会议的主持人，也是整场会议的核心。请你先开场（面向【老板】，用主持人的口吻）。',
+    '你是这场决策会议的主持人，也是首席顾问；开场主持已经完成，现在进入【并行立场】。请你暂时以专家身份发表首席判断，但不要丢掉主持人的全局视角。',
     `决策议题：${topic}`,
     `与会专家及其主攻视角：${lensRoster(panelists)}`,
     '',
-    '请完成开场（务实有力、可稍长、不说套话）：',
-    '1）一两句点破这个决策【真正的核心张力】（难在哪），并拆出 2-3 个必须辩清的关键问题；',
-    '2）给出你自己的【初步判断 / 倾向】，敢于亮明立场（你是核心，不要和稀泥）；',
-    '3）告诉老板：接下来各位专家会【各自独立给出立场】，再进入交锋，最后由你综合、请老板拍板；如有特别约束（预算/时间/风险偏好/红线）随时插话。',
-    '只输出开场词本身。',
+    '请直接发表你的首席专家观点（务实有力、可稍长、不说套话）：',
+    '1）你的【首席判断 / 初步倾向】是什么，敢于亮明立场；',
+    '2）最关键的 2-3 个理由，要说清机制、数据量级、因果链或真实案例；',
+    '3）你最担心的风险或反对意见，以及老板最该盯住的一个指标或红线；',
+    '4）提醒其他顾问可以从哪些角度挑战你的判断。',
+    '不要再重复主持开场，不要宣布流程，只输出你的首席专家发言。',
   ]
     .filter(Boolean)
     .join('\n');

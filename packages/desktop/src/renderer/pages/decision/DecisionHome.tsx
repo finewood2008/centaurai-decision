@@ -18,8 +18,24 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Button, Empty } from '@arco-design/web-react';
-import { Plus, Right, FileText, Peoples, Communication } from '@icon-park/react';
+import { Button, Empty, Input } from '@arco-design/web-react';
+import {
+  Analysis,
+  Audit,
+  Checklist,
+  Command,
+  Crown,
+  FileText,
+  Lightning,
+  Peoples,
+  Radar,
+  Right,
+  Scale,
+  Share,
+  Target,
+  Workbench,
+  Robot,
+} from '@icon-park/react';
 import TeamCreateModal from '@renderer/pages/team/components/TeamCreateModal';
 import { useTeamList } from '@renderer/pages/team/hooks/useTeamList';
 import { useAssistantList } from '@/renderer/hooks/assistant';
@@ -34,12 +50,29 @@ function greetingSlot(): 'morning' | 'afternoon' | 'evening' | 'night' {
   return 'evening';
 }
 
+const SUGGESTION_KEYS = ['market', 'product', 'budget', 'crisis'] as const;
+const COUNCIL_SEATS = [
+  { key: 'strategy', icon: Command },
+  { key: 'growth', icon: Target },
+  { key: 'risk', icon: Audit },
+  { key: 'finance', icon: Scale },
+  { key: 'market', icon: Radar },
+  { key: 'synthesis', icon: Analysis },
+] as const;
+const FEED_ITEMS = [
+  { key: 'marketSignal', source: 'workbench', icon: Workbench, tone: 'team' },
+  { key: 'salesDigest', source: 'agent', icon: Robot, tone: 'agent' },
+  { key: 'riskAlert', source: 'automation', icon: Lightning, tone: 'automation' },
+] as const;
+
 const DecisionHome: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { teams } = useTeamList();
   const { assistants } = useAssistantList();
   const [createVisible, setCreateVisible] = useState(false);
+  const [decisionDraft, setDecisionDraft] = useState('');
+  const [createInitialName, setCreateInitialName] = useState('');
 
   const greeting = t(`decision.greeting.${greetingSlot()}`);
 
@@ -48,42 +81,125 @@ const DecisionHome: React.FC = () => {
     [assistants]
   );
 
-  const sortedTeams = useMemo(() => [...teams].sort((a, b) => (b.updated_at ?? 0) - (a.updated_at ?? 0)), [teams]);
-  const ongoing = sortedTeams.slice(0, 6);
+  const sortedTeams = useMemo(() => teams.toSorted((a, b) => (b.updated_at ?? 0) - (a.updated_at ?? 0)), [teams]);
+  const recent = sortedTeams.slice(0, 5);
 
   const openTeam = (id: string) => {
     Promise.resolve(navigate(`/team/${id}`)).catch(console.error);
   };
 
+  const startDecision = (initialName?: string) => {
+    const next = (initialName ?? decisionDraft).trim();
+    setCreateInitialName(next);
+    setCreateVisible(true);
+  };
+
   const handleCreated = (team: TTeam) => {
     setCreateVisible(false);
+    setDecisionDraft('');
+    setCreateInitialName('');
     openTeam(team.id);
   };
 
   return (
-    <div className={styles.root}>
-      <header className={styles.header}>
-        <div className={styles.heading}>
-          <h1 className={styles.greeting}>{greeting}</h1>
-          <p className={styles.subtitle}>{t('decision.subtitle')}</p>
-        </div>
-        <Button type='primary' size='large' icon={<Plus />} onClick={() => setCreateVisible(true)}>
-          {t('decision.startMeeting')}
-        </Button>
-      </header>
-
-      <div className={styles.grid}>
-        <section className={styles.card}>
-          <div className={styles.cardHead}>
-            <span className={styles.cardTitle}>{t('decision.ongoing.title')}</span>
-            {ongoing.length > 0 && <span className={styles.badge}>{ongoing.length}</span>}
+    <div className={`centaur-brand ${styles.root}`}>
+      <section className={styles.hero}>
+        <div className={styles.heroMain}>
+          <div className={styles.eyebrowRow}>
+            <span className='centaur-mark'>
+              <Crown theme='outline' size='14' fill='currentColor' />
+            </span>
+            <span className={styles.eyebrow}>{t('decision.hero.eyebrow')}</span>
           </div>
-          {ongoing.length === 0 ? (
-            <Empty className={styles.empty} description={t('decision.ongoing.empty')} />
+          <h1 className={styles.heroTitle}>{t('decision.hero.title')}</h1>
+          <p className={styles.heroSubtitle}>{t('decision.hero.subtitle')}</p>
+
+          <div className={styles.commandPanel}>
+            <div className={styles.commandHead}>
+              <div>
+                <div className={styles.commandLabel}>{greeting}</div>
+                <div className={styles.commandTitle}>{t('decision.hero.commandTitle')}</div>
+              </div>
+              <span className={styles.commandStatus}>{t('decision.hero.commandStatus')}</span>
+            </div>
+            <Input.TextArea
+              value={decisionDraft}
+              onChange={setDecisionDraft}
+              autoSize={{ minRows: 2, maxRows: 4 }}
+              className={styles.commandInput}
+              placeholder={t('decision.hero.placeholder')}
+            />
+            <div className={styles.commandActions}>
+              <div className={styles.commandHint}>{t('decision.hero.commandHint')}</div>
+              <Button
+                type='primary'
+                size='large'
+                icon={<Crown theme='outline' size='16' fill='currentColor' />}
+                onClick={() => startDecision()}
+              >
+                {t('decision.hero.cta')}
+              </Button>
+            </div>
+          </div>
+
+          <div className={styles.suggestions}>
+            {SUGGESTION_KEYS.map((key) => (
+              <Button
+                key={key}
+                type='outline'
+                className={styles.suggestion}
+                onClick={() => startDecision(t(`decision.hero.examples.${key}`))}
+              >
+                {t(`decision.hero.examples.${key}`)}
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        <aside className={styles.councilPanel}>
+          <div className={styles.councilTop}>
+            <div>
+              <div className={styles.councilLabel}>{t('decision.council.title')}</div>
+              <div className={styles.councilTitle}>{t('decision.council.subtitle')}</div>
+            </div>
+            <div className={styles.councilCount}>{t('decision.advisors.count', { count: advisorCount })}</div>
+          </div>
+          <div className={styles.seatGrid}>
+            {COUNCIL_SEATS.map(({ key, icon: Icon }) => (
+              <div key={key} className={styles.seat}>
+                <Icon theme='outline' size='18' fill='currentColor' />
+                <span>{t(`decision.council.seats.${key}`)}</span>
+              </div>
+            ))}
+          </div>
+          <div className={styles.councilFlow}>
+            <span>{t('decision.council.flow.issue')}</span>
+            <Right theme='outline' size='13' fill='currentColor' />
+            <span>{t('decision.council.flow.debate')}</span>
+            <Right theme='outline' size='13' fill='currentColor' />
+            <span>{t('decision.council.flow.verdict')}</span>
+          </div>
+        </aside>
+      </section>
+
+      <div className={styles.dashboard}>
+        <section className={styles.recentPanel}>
+          <div className={styles.cardHead}>
+            <div>
+              <span className={styles.cardTitle}>{t('decision.recent.title')}</span>
+              <p className={styles.cardDesc}>{t('decision.recent.desc')}</p>
+            </div>
+            {recent.length > 0 && <span className={styles.badge}>{recent.length}</span>}
+          </div>
+          {recent.length === 0 ? (
+            <Empty className={styles.empty} description={t('decision.recent.empty')} />
           ) : (
             <div className={styles.list}>
-              {ongoing.map((team) => (
+              {recent.map((team) => (
                 <Button key={team.id} long type='text' className={styles.row} onClick={() => openTeam(team.id)}>
+                  <span className={styles.rowIcon}>
+                    <Checklist theme='outline' size='14' fill='currentColor' />
+                  </span>
                   <span className={styles.rowName}>{team.name}</span>
                   <span className={styles.rowEnter}>
                     {t('decision.enter')}
@@ -95,17 +211,67 @@ const DecisionHome: React.FC = () => {
           )}
         </section>
 
-        <section className={styles.card}>
-          <div className={styles.cardHead}>
-            <span className={styles.cardTitle}>{t('decision.intel.title')}</span>
-            <span className={styles.tag}>
-              <Communication className={styles.tagIcon} />
-              {t('decision.intel.tag')}
-            </span>
+        <section className={styles.verdictPanel}>
+          <div className={styles.verdictHeader}>
+            <span className={styles.cardTitle}>{t('decision.verdict.title')}</span>
+            <span className={styles.verdictBadge}>{t('decision.verdict.badge')}</span>
           </div>
-          <Empty className={styles.empty} description={t('decision.intel.empty')} />
+          <div className={styles.verdictSteps}>
+            <div>
+              <span>{t('decision.verdict.steps.debate')}</span>
+              <strong>{t('decision.verdict.steps.debateDesc')}</strong>
+            </div>
+            <div>
+              <span>{t('decision.verdict.steps.options')}</span>
+              <strong>{t('decision.verdict.steps.optionsDesc')}</strong>
+            </div>
+            <div>
+              <span>{t('decision.verdict.steps.archive')}</span>
+              <strong>{t('decision.verdict.steps.archiveDesc')}</strong>
+            </div>
+          </div>
         </section>
       </div>
+
+      <section className={styles.feedPanel}>
+        <div className={styles.feedHeader}>
+          <div>
+            <div className={styles.feedEyebrow}>
+              <Share theme='outline' size='14' fill='currentColor' />
+              <span>{t('decision.feed.eyebrow')}</span>
+            </div>
+            <h2 className={styles.feedTitle}>{t('decision.feed.title')}</h2>
+            <p className={styles.feedDesc}>{t('decision.feed.desc')}</p>
+          </div>
+          <div className={styles.feedStatus}>
+            <span>{t('decision.feed.mockBadge')}</span>
+            <Button type='outline' size='small' disabled>
+              {t('decision.feed.action')}
+            </Button>
+          </div>
+        </div>
+        <div className={styles.feedList}>
+          {FEED_ITEMS.map(({ key, source, icon: Icon, tone }) => (
+            <article key={key} className={styles.feedItem}>
+              <div className={`${styles.feedIcon} ${styles[`feedIcon_${tone}`]}`}>
+                <Icon theme='outline' size='16' fill='currentColor' />
+              </div>
+              <div className={styles.feedBody}>
+                <div className={styles.feedMeta}>
+                  <span>{t(`decision.feed.sources.${source}`)}</span>
+                  <span>{t(`decision.feed.items.${key}.time`)}</span>
+                </div>
+                <h3>{t(`decision.feed.items.${key}.title`)}</h3>
+                <p>{t(`decision.feed.items.${key}.body`)}</p>
+                <div className={styles.feedTags}>
+                  <span>{t(`decision.feed.items.${key}.tag`)}</span>
+                  <strong>{t('decision.feed.previewOnly')}</strong>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
 
       <div className={styles.stats}>
         <div className={styles.stat}>
@@ -130,7 +296,15 @@ const DecisionHome: React.FC = () => {
         </Button>
       </div>
 
-      <TeamCreateModal visible={createVisible} onClose={() => setCreateVisible(false)} onCreated={handleCreated} />
+      <TeamCreateModal
+        visible={createVisible}
+        initialName={createInitialName}
+        onClose={() => {
+          setCreateVisible(false);
+          setCreateInitialName('');
+        }}
+        onCreated={handleCreated}
+      />
     </div>
   );
 };

@@ -7,6 +7,92 @@
     "evening": "晚上好，老板",
     "night": "夜深了，老板"
   },
+  "hero": {
+    "eyebrow": "决策主厅",
+    "title": "今天要拍板什么？",
+    "subtitle": "抛出一个复杂问题，半人马 AI 会召集全球顶级 AI 顾问入席，让他们各持立场互相攻防，最后把决定权交还给你。",
+    "commandTitle": "把要拍板的问题说清楚",
+    "commandStatus": "顾问团待命",
+    "placeholder": "例如：我们是否应该在本季度进入东南亚市场？可以补充预算、时间、风险偏好和不可接受的红线。",
+    "commandHint": "议题越具体、约束越清楚，顾问交锋越有价值。",
+    "cta": "召集顾问讨论",
+    "examples": {
+      "market": "现在要不要进入一个新市场？",
+      "product": "这个产品方向该砍掉还是加码？",
+      "budget": "下季度预算应该投增长还是投研发？",
+      "crisis": "这场潜在公关风险应该怎么处理？"
+    }
+  },
+  "council": {
+    "title": "顾问席位",
+    "subtitle": "先排立场，再开交锋",
+    "seats": {
+      "strategy": "战略席",
+      "growth": "增长席",
+      "risk": "风险席",
+      "finance": "财务席",
+      "market": "市场席",
+      "synthesis": "首席综合"
+    },
+    "flow": {
+      "issue": "议题",
+      "debate": "交锋",
+      "verdict": "拍板"
+    }
+  },
+  "recent": {
+    "title": "决策席",
+    "desc": "继续未完的讨论、查看方案，或完成最终拍板。",
+    "empty": "还没有入席的决策。先在上方抛出一个真正复杂的问题。"
+  },
+  "verdict": {
+    "title": "决策流程",
+    "badge": "由你掌控",
+    "steps": {
+      "debate": "顾问交锋",
+      "debateDesc": "不同模型各自站位，攻击假设，接受反驳并修正。",
+      "options": "形成候选",
+      "optionsDesc": "主持人把争论收束成可比较的方案与取舍。",
+      "archive": "老板拍板",
+      "archiveDesc": "你的决定会沉淀为会议纪要、方案书和行动清单。"
+    }
+  },
+  "feed": {
+    "eyebrow": "信息流预览",
+    "title": "老板关心的信息流",
+    "desc": "未来会同步半人马 AI 超级工作台和 Agent 自动化带来的关键动态，像首页信息流一样把值得拍板的变化推到你面前。",
+    "mockBadge": "未上线 · Mock 数据",
+    "action": "同步未开启",
+    "previewOnly": "预览",
+    "sources": {
+      "workbench": "超级工作台",
+      "agent": "Agent 自动化",
+      "automation": "自动化巡检"
+    },
+    "items": {
+      "marketSignal": {
+        "time": "12 分钟前",
+        "title": "市场组提交了东南亚竞品异动摘要",
+        "body": "超级工作台捕捉到三家竞品开始调整本地渠道政策，建议评估是否提前开一场市场进入决策。",
+        "tag": "可能影响：市场进入"
+      },
+      "salesDigest": {
+        "time": "38 分钟前",
+        "title": "销售 Agent 汇总了本周高价值客户阻塞点",
+        "body": "自动化任务发现企业客户对部署周期和数据合规仍有疑虑，建议让法务、交付和增长顾问共同评估。",
+        "tag": "可能影响：增长策略"
+      },
+      "riskAlert": {
+        "time": "今天 09:20",
+        "title": "运营自动化标记了一项执行风险",
+        "body": "多个任务依赖同一位核心负责人，若下周继续延迟，Q3 发布节奏可能需要重新排优先级。",
+        "tag": "可能影响：资源调度"
+      }
+    }
+  },
+  "dashboard": {
+    "navLabel": "决策看板"
+  },
   "ongoing": {
     "title": "进行中的决策",
     "empty": "还没有进行中的决策。点击「发起决策会议」开一场。"
@@ -18,32 +104,106 @@
   },
   "archive": {
     "title": "决策档案",
-    "desc": "历史决议与方案书",
+    "desc": "历史决策与方案书",
     "count": "已归档 {{count}} 场"
   },
   "advisors": {
     "title": "顾问团",
-    "desc": "随时拉进会议室",
+    "desc": "随时参与复杂决策",
     "count": "{{count}} 位待命"
   },
-  "enter": "进入会议室",
+  "enter": "进入",
   "roomTitle": "决策会议室",
-  "roomSubtitle": "AI 决策圆桌",
+  "roomSubtitle": "AI 顾问交锋，你来拍板",
   "emptyTitle": "决策会议室 · 召集顾问开会",
-  "createTitle": "新建决策会议室",
+  "emptyHint": "把一个决策摆上桌面。顾问会从不同席位各持立场、互相攻防，最后把真正需要你拍板的取舍摆出来。",
+  "createTitle": "发起一场决策会议",
+  "createSubtitle": "先定议题，再安排不同立场的 AI 顾问入席。",
+  "createConfirm": "发起会议",
+  "createNameLabel": "决策标题",
+  "createMembersLabel": "顾问席位",
+  "createMembersDesc": "选择参与这场决策的顾问。第一个支持团队协作的模型会担任首席主持。",
+  "createMakeLeader": "设为主持",
+  "createLeaderBadge": "首席主持",
+  "createWorkspaceLabel": "决策工作区",
+  "createBrief": {
+    "title": "会议流程",
+    "issue": "1. 明确决策议题",
+    "seats": "2. 安排顾问席位",
+    "verdict": "3. 形成候选方案"
+  },
   "namePlaceholder": "给这场决策起个名字，如「Q3 增长策略」「定价方案评审」…",
   "siderTitle": "决策会议室",
   "siderCreate": "新建决策会议室",
   "renameTitle": "重命名",
   "renamePlaceholder": "会议室名称",
   "deleteConfirm": "删除此决策会议室？",
-  "methodLabel": "讨论方式",
-  "templateLabel": "预设模板（可选）",
+  "methodLabel": "交锋方式",
+  "templateLabel": "决策模板（可选）",
   "templatePlaceholder": "可选：套用一个部门模板（自动设好讨论方式与领域提示词）",
   "deptLabel": "决策部门",
   "deptPlaceholder": "选择一个决策部门（决定流程与提示词）",
   "deptFlow": "专有流程",
   "deptDecide": "决议",
+  "room": {
+    "status": {
+      "idle": "待发起",
+      "running": "交锋中",
+      "awaiting": "等待你的方向",
+      "resolution": "待你拍板",
+      "decided": "已拍板"
+    },
+    "addAdvisor": "加顾问",
+    "newDecision": "新决策",
+    "details": "顾问席",
+    "detailsTitle": "会议详情",
+    "topicLabel": "决策议题：",
+    "stepIssue": "① 抛出议题",
+    "stepDebate": "② 开始交锋",
+    "planTitle": "本场方案书",
+    "continue": "继续讨论",
+    "turns": "已完成 {{count}} 段顾问发言",
+    "resolutionStatus": "讨论结束，请老板拍板",
+    "searchKnowledgeBase": "检索知识库",
+    "attachShared": "引用共享库",
+    "topicPlaceholder": "抛出一个议题，让 AI 顾问团围绕它交锋论证…",
+    "start": "开始会议",
+    "needAgents": "需要 1 位首席主持和至少 1 位顾问才能开始。",
+    "newMeeting": "开一场新决策",
+    "pickHint": "请在上方选择一个方案完成拍板",
+    "pausedHint": "主持人正在等你的方向 —— 可在下方补充红线、预算、倾向或继续交锋。",
+    "runningHint": "顾问正在围绕议题交锋。你可以随时下达约束或纠偏。",
+    "reset": "重开",
+    "cancel": "取消会议",
+    "interjectPausePlaceholder": "补充你的方向：风险偏好、预算红线、时间要求，或表达你的倾向…",
+    "interjectPlaceholder": "下达补充约束或要求顾问重新聚焦…"
+  },
+  "authority": {
+    "bossSeat": "主位",
+    "bossHint": "最终决定权在你手上",
+    "disputeTitle": "交锋进度",
+    "disputeDesc": "已完成 {{count}} 段顾问发言",
+    "verdictTitle": "决策台",
+    "verdictDesc": "{{count}} 个候选方案待拍板"
+  },
+  "stage": {
+    "parallel": "各陈主张",
+    "debate": "观点交锋",
+    "redteamAttack": "红队猛攻",
+    "crossreview": "互相评案",
+    "converge": "收敛成案",
+    "probe": "逐层追问",
+    "synthesis": "形成建议",
+    "decision": "最终拍板"
+  },
+  "resolution": {
+    "title": "决策台 — 请老板拍板",
+    "subtitle": "{{count}} 个方案待选择",
+    "optionMeta": "请权衡收益、代价与执行节奏",
+    "chosenMeta": "此方案已按你的决定进入归档",
+    "pick": "拍板此方案",
+    "picked": "已拍板"
+  },
   "dept": {
     "marketing": { "name": "市场部", "hint": "营销策略、品牌、增长、投放" },
     "product": { "name": "产品部", "hint": "产品方向、需求取舍、路线落地" },

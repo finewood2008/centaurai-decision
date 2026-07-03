@@ -37,6 +37,7 @@ import {
   buildDivergePrompt,
   buildExportTask,
   buildLocalSynthesisPrompt,
+  buildModeratorOpeningPrompt,
   buildModeratorPositionPrompt,
   buildPanelistDebatePrompt,
   buildPanelistPositionPrompt,
@@ -671,8 +672,13 @@ class MeetingEngine {
       // Optional department template: overrides the lens set + frames the opening.
       const dept = resolveDepartment(this.state.departmentId);
       const lenses = dept && dept.lenses.length > 0 ? dept.lenses : PANEL_LENSES;
+      const contributors = [mod, ...panel];
       const lensByPanel = new Map(panel.map((p, i) => [p.id, lenses[i % lenses.length]]));
       const briefs: PanelistBrief[] = panel.map((p) => ({ name: p.name, lens: lensByPanel.get(p.id) }));
+      const moderatorBriefs: PanelistBrief[] = [
+        { name: mod.name, lens: '首席综合判断（主持节奏、亮明倾向、抓核心取舍）' },
+        ...briefs,
+      ];
       const transcriptText = () =>
         this.state.transcript
           .filter((t) => t.text.trim())
@@ -705,19 +711,21 @@ class MeetingEngine {
       };
 
       const refNote = reference ? `\n\n${reference}\n\n请充分参考上述背景资料。` : '';
-      // The moderator (the meeting's core role) opens FIRST: frames the tension, gives
-      // its own take, and sets the agenda — then hands off to the panel.
-      await speak(mod, '开场', buildModeratorPositionPrompt(topic, briefs, dept?.framing) + refNote);
-      // ① 并行立场 — the PANEL answers SIMULTANEOUSLY (only this first round is parallel,
-      //    for speed); rendered as a horizontal collapsed strip. Step ② onward is one-by-one.
-      const panelOpening = (p: Participant): string => {
+      // The moderator's role stays intact: open the chamber first, frame the agenda,
+      // then participate as the chief expert in the following parallel position round.
+      await speak(mod, '开场', buildModeratorOpeningPrompt(topic, moderatorBriefs) + refNote);
+      if (stale()) return;
+      // ① 并行立场 — the moderator participates as the first / chief advisor and gives
+      //    a substantive view, while the rest of the council answers simultaneously.
+      const openingPosition = (p: Participant): string => {
+        if (p.isModerator) return buildModeratorPositionPrompt(topic, moderatorBriefs, dept?.framing) + refNote;
         const lens = lensByPanel.get(p.id);
         if (form === 'tournament') return buildProposalPrompt({ topic, persona: p.name, lens, reference }) + refNote;
         if (form === 'diverge') return buildDivergePrompt({ topic, persona: p.name, lens }) + refNote;
         return buildPanelistPositionPrompt({ topic, persona: p.name, lens, priorContext: '' }) + refNote;
       };
-      // Fire every panelist turn up-front (all appear at once), then stream concurrently.
-      await Promise.all(panel.map((p) => speak(p, '并行立场', panelOpening(p), true)));
+      // Fire every opening turn up-front (all appear at once), then stream concurrently.
+      await Promise.all(contributors.map((p) => speak(p, '并行立场', openingPosition(p), true)));
       if (!(await pauseAndWait(1, '并行立场'))) return;
 
       // ② 交锋讨论 — form-specific (the parallel positions above are the shared input).

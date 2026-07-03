@@ -12,6 +12,7 @@ import {
   MULTI_USER_ENABLED,
   REMOTE_ACCESS_ENABLED,
   OFFICE_ASSISTANTS_ENABLED,
+  BILLING_ENABLED,
 } from '@/common/config/constants';
 const Conversation = React.lazy(() => import('@renderer/pages/conversation'));
 const Guid = React.lazy(() => import('@renderer/pages/guid'));
@@ -234,7 +235,10 @@ const PanelRoute: React.FC<{ layout: React.ReactElement }> = ({ layout }) => {
           <Route path='/toolbox' element={<Navigate to='/workbench' replace />} />
           <Route path='/advisors' element={withRouteFallback(AdvisorsPage)} />
           <Route path='/files' element={withRouteFallback(ContentHubPage)} />
-          <Route path='/billing' element={withRouteFallback(BillingPage)} />
+          <Route
+            path='/billing'
+            element={BILLING_ENABLED ? withRouteFallback(BillingPage) : <Navigate to={HOME_PATH} replace />}
+          />
           <Route path='/scheduled' element={withRouteFallback(ScheduledTasksPage)} />
           <Route path='/scheduled/:job_id' element={withRouteFallback(TaskDetailPage)} />
         </Route>

@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, Loading } from '@icon-park/react';
 import type { MeetingForm, MeetingPhase } from './meetingTypes';
+import { IS_DECISION } from '@/common/config/constants';
 
 /**
  * One stage in the meeting flow. `key` matches the turn's `phaseLabel` (Chinese,
@@ -61,6 +62,10 @@ const MeetingPhaseBar: React.FC<Props> = ({ phase, form, reachedLabels, turnsCom
       {stages.map((s, i) => {
         const done = decided || i < current;
         const active = !decided && i === current;
+        const stageName = s.i18nKey.replace('team.meeting.stage.', '');
+        const label = IS_DECISION
+          ? t(`decision.stage.${stageName}`, { defaultValue: t(s.i18nKey, { defaultValue: s.zh }) })
+          : t(s.i18nKey, { defaultValue: s.zh });
         return (
           <React.Fragment key={s.key}>
             {i > 0 && (
@@ -94,7 +99,7 @@ const MeetingPhaseBar: React.FC<Props> = ({ phase, form, reachedLabels, turnsCom
                   i + 1
                 )}
               </span>
-              {t(s.i18nKey, { defaultValue: s.zh })}
+              {label}
             </span>
           </React.Fragment>
         );
@@ -102,12 +107,17 @@ const MeetingPhaseBar: React.FC<Props> = ({ phase, form, reachedLabels, turnsCom
       <div className='flex-1 min-w-12px' />
       {phase === 'running' && turnsCompleted > 0 && (
         <span className='shrink-0 text-11px text-[color:var(--bg-6)]'>
-          {t('team.meeting.status.turns', { count: turnsCompleted, defaultValue: `已完成 ${turnsCompleted} 段发言` })}
+          {t(IS_DECISION ? 'decision.room.turns' : 'team.meeting.status.turns', {
+            count: turnsCompleted,
+            defaultValue: `已完成 ${turnsCompleted} 段发言`,
+          })}
         </span>
       )}
       {phase === 'resolution' && (
         <span className='shrink-0 text-12px font-medium text-[color:var(--accent-gold-deep)]'>
-          {t('team.meeting.status.resolution', { defaultValue: '讨论结束，请拍板' })}
+          {t(IS_DECISION ? 'decision.room.resolutionStatus' : 'team.meeting.status.resolution', {
+            defaultValue: '讨论结束，请拍板',
+          })}
         </span>
       )}
     </div>

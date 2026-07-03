@@ -2,7 +2,18 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button, Message, Popover, Spin } from '@arco-design/web-react';
-import { Copy, Download, Notes, PeoplePlus, Plus, RightOne, VideoConference } from '@icon-park/react';
+import {
+  Checklist,
+  Copy,
+  Crown,
+  Download,
+  Notes,
+  PeoplePlus,
+  Plus,
+  RightOne,
+  Scale,
+  VideoConference,
+} from '@icon-park/react';
 import type { TTeam } from '@/common/types/team/teamTypes';
 import MarkdownView from '@/renderer/components/Markdown';
 import { emitter } from '@/renderer/utils/emitter';
@@ -52,13 +63,6 @@ const TurnAvatar: React.FC<{ icon?: string; agentType: string; name: string }> =
 const ParallelTurnWall: React.FC<{ turns: MeetingTurn[] }> = ({ turns }) => {
   const { t } = useTranslation();
   const speaking = turns.filter((tn) => tn.status === 'speaking').length;
-  // Denser columns as the council grows, so the wall stays full and immersive.
-  const cols =
-    turns.length <= 2
-      ? 'sm:grid-cols-2'
-      : turns.length <= 6
-        ? 'sm:grid-cols-2 lg:grid-cols-3'
-        : 'sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4';
   return (
     <div className='flex flex-col gap-10px'>
       <div className='flex items-center gap-7px text-12px font-medium text-[color:var(--primary)]'>
@@ -70,7 +74,7 @@ const ParallelTurnWall: React.FC<{ turns: MeetingTurn[] }> = ({ turns }) => {
           {turns.length} {t('team.meeting.parallelWall', { defaultValue: '位 AI 顾问同时发言中，群策群力' })}
         </span>
       </div>
-      <div className={`grid grid-cols-1 ${cols} gap-12px`}>
+      <div className='grid grid-cols-1 xl:grid-cols-2 gap-12px'>
         {turns.map((turn) => {
           const isSpeaking = turn.status === 'speaking';
           return (
@@ -78,10 +82,12 @@ const ParallelTurnWall: React.FC<{ turns: MeetingTurn[] }> = ({ turns }) => {
               key={turn.id}
               data-testid={`meeting-turn-${turn.participantId}`}
               className={`flex flex-col rd-14px border border-solid overflow-hidden transition-shadow bg-[var(--bg-1)] ${
-                isSpeaking ? 'border-[color:var(--color-primary-light-3)]' : 'border-[color:var(--border-light)]'
+                isSpeaking || turn.isModerator
+                  ? 'border-[color:var(--color-primary-light-3)]'
+                  : 'border-[color:var(--border-light)]'
               }`}
               style={
-                isSpeaking
+                isSpeaking || turn.isModerator
                   ? {
                       boxShadow: '0 0 0 2px var(--color-primary-light-2), 0 6px 24px -6px var(--color-primary-light-3)',
                     }
@@ -93,6 +99,13 @@ const ParallelTurnWall: React.FC<{ turns: MeetingTurn[] }> = ({ turns }) => {
                 <span className='text-13px font-semibold text-[color:var(--text-primary)] truncate flex-1'>
                   {turn.name}
                 </span>
+                {turn.isModerator && (
+                  <span className='shrink-0 px-7px h-18px flex items-center rd-full text-11px leading-none bg-[var(--color-primary-light-1)] text-[color:var(--primary)] font-medium'>
+                    {t(IS_DECISION ? 'decision.createLeaderBadge' : 'team.meeting.role.moderator', {
+                      defaultValue: '主持人',
+                    })}
+                  </span>
+                )}
                 {isSpeaking ? (
                   <Spin loading size={12} className='shrink-0' />
                 ) : turn.status === 'error' ? (
@@ -101,7 +114,7 @@ const ParallelTurnWall: React.FC<{ turns: MeetingTurn[] }> = ({ turns }) => {
                   </span>
                 ) : null}
               </div>
-              <div className='px-14px py-11px text-13px leading-[1.7] overflow-y-auto max-h-300px min-h-110px [scrollbar-width:thin]'>
+              <div className='px-14px py-11px text-13px leading-[1.7] overflow-y-auto max-h-340px min-h-150px [scrollbar-width:thin]'>
                 {turn.text.trim() ? (
                   <MarkdownView>{stripResolutionMarkers(turn.text)}</MarkdownView>
                 ) : (
@@ -232,71 +245,280 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
     ) : null;
 
   const isIdle = state.phase === 'idle';
+  const isDecisionFocus = IS_DECISION && !isIdle;
   const atResolution = state.phase === 'resolution' || state.phase === 'decided';
   const showPlan = atResolution && state.plan.trim().length > 0;
   const showResolution = state.options.length > 0 && atResolution;
+  const statusKey = state.awaitingContinue && state.phase === 'running' ? 'awaiting' : state.phase;
+  const decisionStatus = t(`decision.room.status.${statusKey}`, {
+    defaultValue:
+      statusKey === 'idle'
+        ? '待发起'
+        : statusKey === 'running'
+          ? '交锋中'
+          : statusKey === 'awaiting'
+            ? '等待你的方向'
+            : statusKey === 'resolution'
+              ? '待拍板'
+              : '已拍板',
+  });
+  const advisorCount = (rosterModerator ? 1 : 0) + rosterPanelists.length + guests.length;
+
+  const renderDecisionAuthorityCards = (compact = false) => {
+    const items = [
+      {
+        key: 'boss',
+        icon: <Crown theme='outline' size={compact ? '15' : '17'} fill='currentColor' />,
+        iconClass: 'bg-[var(--color-primary-light-1)] text-[color:var(--primary)]',
+        title: t('decision.authority.bossSeat', { defaultValue: '主位' }),
+        desc: t('decision.authority.bossHint', { defaultValue: '最终决定权在你手上' }),
+      },
+      {
+        key: 'dispute',
+        icon: <Scale theme='outline' size={compact ? '15' : '17'} fill='currentColor' />,
+        iconClass: 'bg-[var(--centaur-gold-tint)] text-[color:var(--accent-gold-deep)]',
+        title: t('decision.authority.disputeTitle', { defaultValue: '交锋进度' }),
+        desc: t('decision.authority.disputeDesc', {
+          count: state.turnsCompleted,
+          defaultValue: `已完成 ${state.turnsCompleted} 段顾问发言`,
+        }),
+      },
+      {
+        key: 'verdict',
+        icon: <Checklist theme='outline' size={compact ? '15' : '17'} fill='currentColor' />,
+        iconClass: 'bg-[var(--accent-green-tint)] text-[color:var(--success)]',
+        title: t('decision.authority.verdictTitle', { defaultValue: '决策台' }),
+        desc: t('decision.authority.verdictDesc', {
+          count: state.options.length,
+          defaultValue:
+            state.options.length > 0 ? `${state.options.length} 个候选方案待拍板` : '等待主持人形成候选方案',
+        }),
+      },
+    ];
+
+    return (
+      <div className={`grid grid-cols-1 ${compact ? 'gap-8px lg:grid-cols-3' : 'lg:grid-cols-3 gap-10px'}`}>
+        {items.map((item) => (
+          <div
+            key={item.key}
+            className={`flex items-center gap-10px rd-12px border border-solid border-[color:var(--border-light)] bg-[var(--bg-1)] ${
+              compact ? 'px-10px py-8px' : 'px-14px py-10px'
+            }`}
+          >
+            <span
+              className={`${compact ? 'w-28px h-28px rd-9px' : 'w-32px h-32px rd-10px'} flex items-center justify-center ${item.iconClass} shrink-0`}
+            >
+              {item.icon}
+            </span>
+            <div className='min-w-0'>
+              <div className='text-12px text-[color:var(--bg-6)]'>{item.title}</div>
+              <div
+                className={`${compact ? 'text-13px' : 'text-14px'} font-semibold text-[color:var(--text-primary)] truncate`}
+              >
+                {item.desc}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  const decisionDetails = (
+    <div className='w-620px max-w-[calc(100vw-96px)] flex flex-col gap-12px py-2px'>
+      <div className='flex items-center gap-8px'>
+        <span className='w-26px h-26px rd-8px flex items-center justify-center bg-[var(--color-primary-light-1)] text-[color:var(--primary)] shrink-0'>
+          <Checklist theme='outline' size='15' fill='currentColor' />
+        </span>
+        <div className='min-w-0'>
+          <div className='text-14px font-semibold text-[color:var(--text-primary)]'>
+            {t('decision.room.detailsTitle', { defaultValue: '会议详情' })}
+          </div>
+          <div className='text-12px text-[color:var(--bg-6)] truncate'>
+            {t('decision.advisors.count', { count: advisorCount, defaultValue: `${advisorCount} 位待命` })}
+          </div>
+        </div>
+      </div>
+      {state.topic && (
+        <div className='rd-12px border border-solid border-[color:var(--border-light)] bg-[var(--bg-1)] px-12px py-10px'>
+          <div className='text-11px font-semibold text-[color:var(--primary)] mb-4px'>
+            {t('decision.room.topicLabel', { defaultValue: '决策议题：' })}
+          </div>
+          <div className='text-13px leading-relaxed text-[color:var(--text-primary)]'>{state.topic}</div>
+        </div>
+      )}
+      <div className='overflow-hidden rd-12px border border-solid border-[color:var(--border-light)] bg-[var(--bg-1)]'>
+        <MeetingRoster
+          moderator={rosterModerator}
+          panelists={rosterPanelists}
+          activeSlotId={state.activeSlotId}
+          guests={guests}
+          compact
+        />
+      </div>
+      <div className='overflow-hidden rd-12px border border-solid border-[color:var(--border-light)] bg-[var(--bg-1)]'>
+        <MeetingPhaseBar
+          phase={state.phase}
+          form={state.form}
+          reachedLabels={reachedLabels}
+          turnsCompleted={state.turnsCompleted}
+        />
+      </div>
+      {renderDecisionAuthorityCards(true)}
+    </div>
+  );
 
   return (
     <div className='centaur-brand flex flex-col h-full bg-[var(--bg-base)]'>
-      <div className='shrink-0 flex items-center gap-10px px-20px h-52px border-b border-solid border-[color:var(--border-light)]'>
-        <span className='centaur-mark w-26px h-26px shrink-0' aria-hidden='true'>
-          <VideoConference theme='outline' size='14' fill='var(--primary)' />
-        </span>
-        <div className='flex flex-col min-w-0'>
-          <span className='centaur-title centaur-title-sm leading-tight'>
-            {t(IS_DECISION ? 'decision.roomTitle' : 'team.meeting.boardTitle', { defaultValue: '智囊团' })}
+      {isDecisionFocus ? (
+        <div className='shrink-0 flex items-center gap-10px px-18px h-48px border-b border-solid border-[color:var(--border-light)] bg-[var(--bg-base)]'>
+          <span className='centaur-mark w-26px h-26px shrink-0' aria-hidden='true'>
+            <Crown theme='outline' size='14' fill='var(--primary)' />
           </span>
-          <span className='text-11px text-[color:var(--bg-6)] leading-tight'>
-            {t(IS_DECISION ? 'decision.roomSubtitle' : 'team.meeting.boardSubtitle', { defaultValue: 'AI 圆桌会议' })}
+          <span className='shrink-0 px-9px h-24px inline-flex items-center rd-full text-12px font-medium bg-[var(--color-primary-light-1)] text-[color:var(--centaur-clay-deep)]'>
+            {decisionStatus}
           </span>
-        </div>
-        <div className='flex-1' />
-        <Popover
-          trigger='click'
-          position='br'
-          content={
-            <MeetingGuestPanel
-              guests={guests}
-              onAdd={orchestrator.addGuest}
-              onRemove={orchestrator.removeGuest}
-              variant='compact'
-            />
-          }
-        >
+          <div className='min-w-0 flex-1 flex items-center gap-7px'>
+            <span className='shrink-0 text-12px font-semibold text-[color:var(--primary)]'>
+              {t('decision.room.topicLabel', { defaultValue: '决策议题：' })}
+            </span>
+            <span className='truncate text-14px font-semibold text-[color:var(--text-primary)]' title={state.topic}>
+              {state.topic}
+            </span>
+          </div>
+          {state.turnsCompleted > 0 && (
+            <span className='hidden xl:inline-flex shrink-0 text-11px text-[color:var(--bg-6)]'>
+              {t('decision.room.turns', {
+                count: state.turnsCompleted,
+                defaultValue: `已完成 ${state.turnsCompleted} 段顾问发言`,
+              })}
+            </span>
+          )}
+          <Popover trigger='click' position='br' content={decisionDetails}>
+            <Button
+              size='small'
+              shape='round'
+              icon={<Checklist theme='outline' size='13' fill='currentColor' />}
+              data-testid='meeting-details-btn'
+            >
+              {t('decision.room.details', { defaultValue: '顾问席' })}
+            </Button>
+          </Popover>
+          <Popover
+            trigger='click'
+            position='br'
+            content={
+              <MeetingGuestPanel
+                guests={guests}
+                onAdd={orchestrator.addGuest}
+                onRemove={orchestrator.removeGuest}
+                variant='compact'
+              />
+            }
+          >
+            <Button
+              size='small'
+              shape='round'
+              icon={<PeoplePlus theme='outline' size='13' fill='currentColor' />}
+              data-testid='meeting-guest-btn'
+              title={t('decision.room.addAdvisor', { defaultValue: '加顾问' })}
+            >
+              {t('decision.room.addAdvisor', { defaultValue: '加顾问' })}
+              {guests.length > 0 ? `（${guests.length}）` : ''}
+            </Button>
+          </Popover>
           <Button
             size='small'
             shape='round'
-            icon={<PeoplePlus theme='outline' size='13' fill='currentColor' />}
-            data-testid='meeting-guest-btn'
+            type='outline'
+            icon={<Plus theme='outline' size='13' fill='currentColor' />}
+            onClick={orchestrator.reset}
+            data-testid='meeting-new-btn'
           >
-            {t('team.meeting.extraExpertLabel', { defaultValue: '加专家' })}
-            {guests.length > 0 ? `（${guests.length}）` : ''}
+            {t('decision.room.newDecision', { defaultValue: '新决策' })}
           </Button>
-        </Popover>
-        <Button
-          size='small'
-          shape='round'
-          type='outline'
-          icon={<Plus theme='outline' size='13' fill='currentColor' />}
-          onClick={orchestrator.reset}
-          data-testid='meeting-new-btn'
-        >
-          {t('team.meeting.newShort', { defaultValue: '新会议' })}
-        </Button>
-      </div>
-      <MeetingRoster
-        moderator={rosterModerator}
-        panelists={rosterPanelists}
-        activeSlotId={state.activeSlotId}
-        guests={guests}
-        compact={!isIdle}
-      />
+        </div>
+      ) : (
+        <div className='shrink-0 flex items-center gap-10px px-20px h-52px border-b border-solid border-[color:var(--border-light)]'>
+          <span className='centaur-mark w-26px h-26px shrink-0' aria-hidden='true'>
+            <VideoConference theme='outline' size='14' fill='var(--primary)' />
+          </span>
+          <div className='flex flex-col min-w-0'>
+            <span className='centaur-title centaur-title-sm leading-tight'>
+              {t(IS_DECISION ? 'decision.roomTitle' : 'team.meeting.boardTitle', { defaultValue: '智囊团' })}
+            </span>
+            <span className='text-11px text-[color:var(--bg-6)] leading-tight'>
+              {t(IS_DECISION ? 'decision.roomSubtitle' : 'team.meeting.boardSubtitle', {
+                defaultValue: 'AI 圆桌会议',
+              })}
+            </span>
+          </div>
+          {IS_DECISION && (
+            <span className='shrink-0 ml-4px px-9px h-24px inline-flex items-center rd-full text-12px font-medium bg-[var(--color-primary-light-1)] text-[color:var(--centaur-clay-deep)]'>
+              {decisionStatus}
+            </span>
+          )}
+          <div className='flex-1' />
+          <Popover
+            trigger='click'
+            position='br'
+            content={
+              <MeetingGuestPanel
+                guests={guests}
+                onAdd={orchestrator.addGuest}
+                onRemove={orchestrator.removeGuest}
+                variant='compact'
+              />
+            }
+          >
+            <Button
+              size='small'
+              shape='round'
+              icon={<PeoplePlus theme='outline' size='13' fill='currentColor' />}
+              data-testid='meeting-guest-btn'
+            >
+              {t(IS_DECISION ? 'decision.room.addAdvisor' : 'team.meeting.extraExpertLabel', {
+                defaultValue: '加专家',
+              })}
+              {guests.length > 0 ? `（${guests.length}）` : ''}
+            </Button>
+          </Popover>
+          <Button
+            size='small'
+            shape='round'
+            type='outline'
+            icon={<Plus theme='outline' size='13' fill='currentColor' />}
+            onClick={orchestrator.reset}
+            data-testid='meeting-new-btn'
+          >
+            {t(IS_DECISION ? 'decision.room.newDecision' : 'team.meeting.newShort', { defaultValue: '新会议' })}
+          </Button>
+        </div>
+      )}
+      {!isDecisionFocus && (
+        <MeetingRoster
+          moderator={rosterModerator}
+          panelists={rosterPanelists}
+          activeSlotId={state.activeSlotId}
+          guests={guests}
+          compact={!isIdle}
+        />
+      )}
 
-      {!isIdle && state.topic && (
+      {IS_DECISION && !isDecisionFocus && (
+        <div
+          className='shrink-0 px-20px py-12px border-b border-solid border-[color:var(--border-light)]'
+          style={{ background: 'color-mix(in srgb, var(--bg-1) 72%, transparent)' }}
+        >
+          {renderDecisionAuthorityCards()}
+        </div>
+      )}
+
+      {!isDecisionFocus && !isIdle && state.topic && (
         <div className='shrink-0 px-24px py-10px border-b border-solid border-[color:var(--border-light)]'>
           <div className='flex items-baseline gap-6px'>
             <span className='shrink-0 text-12px font-semibold text-[color:var(--primary)]'>
-              {t('team.meeting.topicLabel', { defaultValue: '议题：' })}
+              {t(IS_DECISION ? 'decision.room.topicLabel' : 'team.meeting.topicLabel', { defaultValue: '议题：' })}
             </span>
             <span className='text-14px text-[color:var(--text-primary)] leading-relaxed'>{state.topic}</span>
           </div>
@@ -315,18 +537,22 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
               })}
             </span>
             <span className='text-14px leading-relaxed max-w-420px text-[color:var(--text-secondary)]'>
-              {t('team.meeting.emptyHint', {
+              {t(IS_DECISION ? 'decision.emptyHint' : 'team.meeting.emptyHint', {
                 defaultValue:
                   '让不同模型的 AI 专家围绕你的议题结构化研讨、互相博弈，最后合成一份比单个 AI 更高质量的《方案书》。',
               })}
             </span>
             <div className='flex items-center gap-10px text-12px text-[color:var(--bg-6)] mt-2px'>
               <span className='centaur-chip px-10px py-3px'>
-                {t('team.meeting.step1', { defaultValue: '① 在下方输入主题' })}
+                {t(IS_DECISION ? 'decision.room.stepIssue' : 'team.meeting.step1', {
+                  defaultValue: '① 在下方输入主题',
+                })}
               </span>
               <span className='text-[color:var(--bg-5)]'>›</span>
               <span className='centaur-chip px-10px py-3px'>
-                {t('team.meeting.step3', { defaultValue: '② 开始讨论' })}
+                {t(IS_DECISION ? 'decision.room.stepDebate' : 'team.meeting.step3', {
+                  defaultValue: '② 开始讨论',
+                })}
               </span>
             </div>
             <div className='w-full max-w-520px mt-8px'>
@@ -334,7 +560,11 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
             </div>
           </div>
         ) : (
-          <div className='flex flex-col gap-16px py-20px px-24px'>
+          <div
+            className={
+              isDecisionFocus ? 'flex flex-col gap-12px py-14px px-18px' : 'flex flex-col gap-16px py-20px px-24px'
+            }
+          >
             {turnGroups.map((group, gi) =>
               group[0].parallel ? <ParallelTurnWall key={`pg-${gi}`} turns={group} /> : renderTurnCard(group[0])
             )}
@@ -344,7 +574,9 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
                 <div className='flex items-center gap-8px px-20px h-52px border-b border-solid border-[color:var(--border-light)]'>
                   <Notes theme='outline' size='18' fill='var(--primary)' />
                   <span className='centaur-title centaur-title-md'>
-                    {t('team.meeting.planTitle', { defaultValue: '本场方案书' })}
+                    {t(IS_DECISION ? 'decision.room.planTitle' : 'team.meeting.planTitle', {
+                      defaultValue: '本场方案书',
+                    })}
                   </span>
                   <div className='ml-auto flex items-center gap-8px'>
                     <Button
@@ -425,7 +657,9 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
                   onClick={orchestrator.continueMeeting}
                   data-testid='meeting-continue'
                 >
-                  {t('team.meeting.continue', { defaultValue: '继续讨论 →' })}
+                  {t(IS_DECISION ? 'decision.room.continue' : 'team.meeting.continue', {
+                    defaultValue: '继续讨论 →',
+                  })}
                 </Button>
               </div>
             )}
@@ -433,7 +667,7 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
         )}
       </div>
 
-      {!isIdle && (
+      {!isIdle && !isDecisionFocus && (
         <MeetingPhaseBar
           phase={state.phase}
           form={state.form}

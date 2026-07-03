@@ -36,7 +36,10 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
   const [pickerOpen, setPickerOpen] = useState(false);
   const [form, setForm] = useState<MeetingForm>(state.form || 'roundtable');
 
-  const wrapperClass = 'shrink-0 px-24px pt-12px pb-16px border-t border-solid border-[color:var(--border-light)]';
+  const activeDecision = IS_DECISION && state.phase !== 'idle' && state.phase !== 'decided';
+  const wrapperClass = activeDecision
+    ? 'shrink-0 px-18px py-8px border-t border-solid border-[color:var(--border-light)] bg-[var(--bg-base)]'
+    : 'shrink-0 px-24px pt-12px pb-16px border-t border-solid border-[color:var(--border-light)]';
 
   if (state.phase === 'idle') {
     return (
@@ -49,7 +52,9 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
             className='text-12px text-[color:var(--color-text-2)] shrink-0'
             data-testid='meeting-kb-toggle'
           >
-            {t('team.meeting.searchKnowledgeBase', { defaultValue: '检索知识库' })}
+            {t(IS_DECISION ? 'decision.room.searchKnowledgeBase' : 'team.meeting.searchKnowledgeBase', {
+              defaultValue: '检索知识库',
+            })}
           </Checkbox>
           <Button
             size='small'
@@ -59,7 +64,9 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
             onClick={() => setPickerOpen(true)}
             data-testid='meeting-shared-attach'
           >
-            {t('team.meeting.attachShared', { defaultValue: '引用共享库' })}
+            {t(IS_DECISION ? 'decision.room.attachShared' : 'team.meeting.attachShared', {
+              defaultValue: '引用共享库',
+            })}
           </Button>
           {attachments.length > 0 && (
             <div className='flex items-center gap-4px overflow-x-auto [scrollbar-width:none]'>
@@ -110,7 +117,7 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
             value={topic}
             onChange={onTopicChange}
             autoSize={{ minRows: 1, maxRows: 4 }}
-            placeholder={t('team.meeting.topicPlaceholder', {
+            placeholder={t(IS_DECISION ? 'decision.room.topicPlaceholder' : 'team.meeting.topicPlaceholder', {
               defaultValue: '抛出一个议题，让一群 AI 专家帮你开会论证…',
             })}
             className='flex-1'
@@ -132,12 +139,14 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
             }}
             data-testid='meeting-start'
           >
-            {t('team.meeting.start', { defaultValue: '开会' })}
+            {t(IS_DECISION ? 'decision.room.start' : 'team.meeting.start', { defaultValue: '开会' })}
           </Button>
         </div>
         {!canStart && (
           <div className='mt-8px text-12px text-[color:var(--bg-6)]'>
-            {t('team.meeting.needAgents', { defaultValue: '需要 1 位主持人（队长）和至少 1 位专家才能开会。' })}
+            {t(IS_DECISION ? 'decision.room.needAgents' : 'team.meeting.needAgents', {
+              defaultValue: '需要 1 位主持人（队长）和至少 1 位专家才能开会。',
+            })}
           </div>
         )}
         <SharedLibraryPicker
@@ -161,7 +170,9 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
           onClick={reset}
           data-testid='meeting-restart'
         >
-          {t('team.meeting.newMeeting', { defaultValue: '开一场新会议' })}
+          {t(IS_DECISION ? 'decision.room.newMeeting' : 'team.meeting.newMeeting', {
+            defaultValue: '开一场新会议',
+          })}
         </Button>
       </div>
     );
@@ -170,24 +181,87 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
   const isResolution = state.phase === 'resolution';
   // Between-round pause: the moderator has recapped and is waiting for the boss.
   const awaiting = state.awaitingContinue && state.phase === 'running';
+  const hint = isResolution
+    ? t(IS_DECISION ? 'decision.room.pickHint' : 'team.meeting.pickHint', {
+        defaultValue: '请在上方选择一个方案拍板',
+      })
+    : awaiting
+      ? t(IS_DECISION ? 'decision.room.pausedHint' : 'team.meeting.pausedHint', {
+          defaultValue: '主持人等你看完 — 可在下方补充想法，准备好后点「继续讨论」',
+        })
+      : t(IS_DECISION ? 'decision.room.runningHint' : 'team.meeting.runningHint', {
+          defaultValue: '主持人正在带领专家讨论…可随时举手插话',
+        });
+  const resetLabel = isResolution
+    ? t(IS_DECISION ? 'decision.room.reset' : 'team.meeting.reset', { defaultValue: '重开' })
+    : t(IS_DECISION ? 'decision.room.cancel' : 'team.meeting.cancel', { defaultValue: '取消会议' });
+
+  if (activeDecision) {
+    return (
+      <div data-testid='meeting-control-active' className={wrapperClass}>
+        <div className='flex items-center gap-10px'>
+          <span
+            className={`hidden md:inline-flex shrink-0 max-w-260px truncate text-12px ${
+              awaiting ? 'text-[color:var(--primary)] font-medium' : 'text-[color:var(--bg-6)]'
+            }`}
+            title={hint}
+          >
+            {hint}
+          </span>
+          <div className='min-w-0 flex-1'>
+            {!isResolution && (
+              <SendBox
+                value={interjection}
+                onChange={setInterjection}
+                onSend={async (msg: string) => {
+                  interject(msg);
+                  setInterjection('');
+                }}
+                placeholder={
+                  awaiting
+                    ? t(
+                        IS_DECISION
+                          ? 'decision.room.interjectPausePlaceholder'
+                          : 'team.meeting.interjectPausePlaceholder',
+                        {
+                          defaultValue: '想补充什么？说给主持人和专家们…',
+                        }
+                      )
+                    : t(IS_DECISION ? 'decision.room.interjectPlaceholder' : 'team.meeting.interjectPlaceholder', {
+                        defaultValue: '举手插话：随时补充想法或纠偏…',
+                      })
+                }
+                className='[&_.sendbox-panel]:!p-8px [&_.sendbox-panel]:!rd-14px'
+                bottomHint=''
+                compactActions
+              />
+            )}
+          </div>
+          <Button
+            size='small'
+            type='text'
+            status='danger'
+            icon={<Redo theme='outline' size='14' fill='currentColor' />}
+            onClick={isResolution ? reset : cancel}
+            data-testid='meeting-cancel'
+            className='shrink-0'
+          >
+            {resetLabel}
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div data-testid='meeting-control-active' className={wrapperClass}>
       <div className='flex items-center gap-6px mb-8px'>
         {isResolution ? (
-          <span className='text-12px text-[color:var(--bg-6)]'>
-            {t('team.meeting.pickHint', { defaultValue: '请在上方选择一个方案拍板' })}
-          </span>
+          <span className='text-12px text-[color:var(--bg-6)]'>{hint}</span>
         ) : awaiting ? (
-          <span className='text-12px text-[color:var(--primary)] font-medium'>
-            {t('team.meeting.pausedHint', {
-              defaultValue: '⏸ 主持人等你看完 — 可在下方补充想法，准备好后点「继续讨论」',
-            })}
-          </span>
+          <span className='text-12px text-[color:var(--primary)] font-medium'>{hint}</span>
         ) : (
-          <span className='text-12px text-[color:var(--bg-6)]'>
-            {t('team.meeting.runningHint', { defaultValue: '主持人正在带领专家讨论…可随时举手插话' })}
-          </span>
+          <span className='text-12px text-[color:var(--bg-6)]'>{hint}</span>
         )}
         <div className='flex-1' />
         <Button
@@ -198,9 +272,7 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
           onClick={isResolution ? reset : cancel}
           data-testid='meeting-cancel'
         >
-          {isResolution
-            ? t('team.meeting.reset', { defaultValue: '重开' })
-            : t('team.meeting.cancel', { defaultValue: '取消会议' })}
+          {resetLabel}
         </Button>
       </div>
       {!isResolution && (
@@ -213,8 +285,12 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
           }}
           placeholder={
             awaiting
-              ? t('team.meeting.interjectPausePlaceholder', { defaultValue: '💡 想补充什么？说给主持人和专家们…' })
-              : t('team.meeting.interjectPlaceholder', { defaultValue: '✋ 举手插话：随时补充想法或纠偏…' })
+              ? t(IS_DECISION ? 'decision.room.interjectPausePlaceholder' : 'team.meeting.interjectPausePlaceholder', {
+                  defaultValue: '想补充什么？说给主持人和专家们…',
+                })
+              : t(IS_DECISION ? 'decision.room.interjectPlaceholder' : 'team.meeting.interjectPlaceholder', {
+                  defaultValue: '举手插话：随时补充想法或纠偏…',
+                })
           }
         />
       )}

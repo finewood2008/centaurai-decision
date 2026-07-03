@@ -111,6 +111,8 @@ export const MULTI_USER_ENABLED = EDITION !== 'decision';
 export const REMOTE_ACCESS_ENABLED = true;
 /** Office assistants (办公助理: word/ppt/excel/财务/学术/Mermaid…): present in full + team; removed in decision (experts/专家 stay). */
 export const OFFICE_ASSISTANTS_ENABLED = EDITION !== 'decision';
+/** Billing / cost dashboard: hidden in Decision edition to keep the owner flow focused on decisions. */
+export const BILLING_ENABLED = EDITION !== 'decision';
 
 // ===== AI Provider 相关常量 =====
 
