@@ -1,10 +1,10 @@
 <div align="center">
 
-# CentaurAI AIStation · 半人马 AI 工作站
+# 半人马AI-超级参谋团
 
-**半人马 AI 自主研发的跨平台 AI 协作工作站 —— 内置 Agent、多 Agent 接入、办公助理、专家团队，以及局域网分发式客户端。**
+**半人马AI-超级参谋团 —— 老板的AI超级参谋团，随时召集200+专家顾问开决策会议，多方意见、快速拍板。**
 
-A cross-platform AI cowork workstation developed by CentaurAI — built-in agent, multi-agent support, office assistants, expert advisors, and a LAN distributed client.
+半人马AI-超级参谋团 — CentaurAI's Super Advisory Council: the boss's AI advisory council with 200+ expert advisors for strategic decision-making.
 
 [![License](https://img.shields.io/badge/license-Proprietary%20%2B%20Apache--2.0%20components-32CD32?style=flat-square)](#-license--attribution)
 ![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-6C757D?style=flat-square)
@@ -26,33 +26,27 @@ A cross-platform AI cowork workstation developed by CentaurAI — built-in agent
 
 ## ✨ 核心特性 / Features
 
-- **内置 Agent，零配置** — 安装即用,粘贴任意 API Key 即可开始;无需单独安装 CLI 工具。
-- **多 Agent 接入** — 自动检测并统一接入 Claude Code、Codex、Gemini、Qwen、Hermes 等命令行 Agent。
-- **办公助理(Office Assistants)** — 通用办公文档类助手:PPT / Word / Excel / 看板 / 财务模型 / 学术论文 / Mermaid 等。
-- **专家团队(Experts)** — 200+ 各领域专业专家(营销 / 工程 / 设计 / 财务 / 安全…),按部门筛选,每位专家预设了**主代理 + 内置技能**。
-- **管理员统一管理模型** — 管理员在桌面端集中配置模型 / API 接口,所有用户自动调用;WebUI 远程用户为只读。
-- **局域网分发式客户端** — 把轻量客户端分发到每台电脑,开机**自动发现局域网内的服务器**(mDNS),登录即用;原生客户端让**语音输入**等能力可直接使用。
-- **半人马 AI 图形工作台** — 内置独立图像生成与编辑工作台,支持参考图、蒙版、批量和历史管理;API 地址与 Key 完全由用户自行配置,不会默认注入 TokenClub 或任何预置 Key。
+- **超级参谋团会议室** — 面向老板的单用户 AI 决策圆桌,围绕一个议题快速召集顾问、展开多方论证并沉淀决议。
+- **200+ 专家顾问** — 覆盖营销、产品、法务、财务、运营、人力、战略等领域,可按部门模板快速组团。
+- **多 Agent 底座** — 统一接入 Claude Code、Codex、Gemini、Qwen、Hermes 等命令行 Agent,按可用状态选择参会角色。
+- **单机私有部署** — 默认单用户、仅回环访问,不启用团队版的多用户 WebUI / 局域网服务器能力。
 - **本地模型管理** — 检测本机 Ollama 等本地模型能力,可在设置中集中管理并加入对话配置。
+- **决策档案** — 进行中的会议、历史决议与方案书集中管理,便于复盘与追踪。
 - **品牌主题** — 三套核心主题:暖米(默认)/ 素白 / 墨夜,遵循 centaurloop.com 设计语言。
-- **随处访问** — WebUI(浏览器/手机)+ Telegram / 飞书 / 钉钉 / 微信 等渠道。
-- **定时任务、文件管理、预览面板、图像生成** 等。
 
 ---
 
 ## 🚀 快速开始 / Quick Start
 
-### 安装(普通用户)
+### 安装
 
-> 客户端安装包**不在公网公开下载**。它内置在管理员部署的服务器中,由公司内部分发。
+> 安装包不在公网公开下载,由半人马人工智能或授权渠道分发。
 
-普通用户的上手流程:
+老板机上手流程:
 
-1. **浏览器登录** —— 打开管理员提供的服务器地址(WebUI),用账号登录即可直接使用。
-2. **下载客户端(可选)** —— 登录后进入 **设置 → 本地客户端**,选择对应平台与版本的安装包(Windows / macOS / Linux)下载安装。
-3. **客户端登录** —— 安装后启动客户端,自动发现局域网内的服务器并登录(详见下方「局域网客户端模式」)。
-
-> 为什么还要装客户端:浏览器在局域网 HTTP(非安全上下文)下会禁用麦克风等能力;原生客户端是安全上下文,**语音输入可直接录音**。
+1. **安装桌面端** —— 下载对应平台安装包并安装。
+2. **配置模型 / API Key** —— 首次启动后在设置中配置可用模型或本地模型。
+3. **发起会议** —— 进入「超级参谋团」,选择议题、讨论方式和部门模板,召集顾问开始决策会议。
 
 | 平台    | 产物                                             |
 | ------- | ------------------------------------------------ |
@@ -60,19 +54,12 @@ A cross-platform AI cowork workstation developed by CentaurAI — built-in agent
 | macOS   | `*-mac-arm64.dmg` / `*-mac-x64.dmg`              |
 | Linux   | `*-linux-x64.AppImage` / `.deb`                  |
 
-### 局域网客户端模式 / LAN client mode
-
-把同一个安装包分发到各电脑,用 **客户端模式** 启动即可连接中心服务器:
+### 启动超级参谋团构建
 
 ```bash
-# 以客户端模式启动(做一个带该参数的快捷方式即可"双击即客户端")
-CentaurAI.exe --client          # Windows
-# 或设置环境变量 AIONUI_CLIENT=1
+# 开发时启用超级参谋团 UI
+AIONUI_EDITION=decision bun dev
 ```
-
-客户端启动后会自动发现局域网内的服务器(管理员机器开启 WebUI 后会广播 `_centaurai._tcp`),选择服务器 → 账号登录即可。未发现时可手动输入服务器 IP。
-
-> 为什么用客户端而不是浏览器:浏览器在局域网 HTTP(非安全上下文)下会禁用麦克风,只能上传音频;原生客户端是安全上下文,**语音输入可直接录音**。
 
 ---
 
@@ -82,7 +69,8 @@ CentaurAI.exe --client          # Windows
 
 ```bash
 bun install            # 安装依赖
-bun run dev            # 启动开发(electron-vite dev,从源码实时编译)
+bun run dev            # 启动完整核心版开发
+AIONUI_EDITION=decision bun dev  # 启动超级参谋团开发
 bun run test           # 单元测试 (Vitest)
 bunx tsc --noEmit      # 类型检查
 bun run lint           # oxlint
@@ -121,12 +109,12 @@ gh run download <run-id>     # 构建完成后下载产物
 原生模块与后端二进制是平台相关的,**需在对应系统上构建**(不能在 Linux 上交叉打 Windows/mac 的可用包):
 
 ```bash
-bun run build-win      # Windows(在 Windows 上)
-bun run build-mac      # macOS(在 macOS 上)
-bun run build-deb      # Linux
+bun run build-win:decision      # Windows(在 Windows 上)
+bun run build-mac:decision      # macOS(在 macOS 上)
+bun run build-deb:decision      # Linux
 ```
 
-产物输出到 `out/`,文件名形如 `CentaurAI-<version>-<os>-<arch>.<ext>`。
+产物输出到 `out/`,文件名形如 `半人马AI-超级参谋团-<version>-<os>-<arch>.<ext>`。
 
 ---
 

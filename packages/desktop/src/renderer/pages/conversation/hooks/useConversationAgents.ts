@@ -52,7 +52,7 @@ export const useConversationAgents = (): UseConversationAgentsResult => {
   };
 
   return {
-    cliAgents: cliAgents || [],
+    cliAgents: (cliAgents || []).filter((a) => a.enabled !== false),
     presetAssistants: presetAssistants || [],
     isLoading: isLoadingAgents || isLoadingPresets,
     refresh,

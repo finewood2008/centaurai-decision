@@ -178,7 +178,7 @@ export interface AcpAvailableMode {
   description?: string;
 }
 
-/** Modes info returned by session/new (used by qoder, opencode, etc.) */
+/** Modes info returned by session/new (used by qoder, openclaw, etc.) */
 export interface AcpSessionModes {
   current_mode_id?: string;
   available_modes?: AcpAvailableMode[];

@@ -71,10 +71,9 @@ describe('agentLogo', () => {
       expect(logo2).toContain('openclaw.svg');
     });
 
-    it('applies dark theme variant for opencode', () => {
-      (global.document.documentElement.getAttribute as any).mockReturnValue('dark');
-      const logo = getAgentLogo('opencode');
-      expect(logo).toContain('opencode-dark.svg');
+    it('returns openclaw logo', () => {
+      const logo = getAgentLogo('openclaw');
+      expect(logo).toContain('openclaw.svg');
     });
   });
 

@@ -10,7 +10,7 @@ let _services: IPlatformServices | null = null;
  */
 export function getDevAppName(): string {
   const isMultiInstance = process.env.AIONUI_MULTI_INSTANCE === '1';
-  return isMultiInstance ? 'CentaurAI-Dev-2' : 'CentaurAI-Dev';
+  return isMultiInstance ? '半人马AI-超级参谋团-Dev-2' : '半人马AI-超级参谋团-Dev';
 }
 
 export function registerPlatformServices(services: IPlatformServices): void {

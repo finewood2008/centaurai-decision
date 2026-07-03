@@ -5,7 +5,7 @@
  */
 
 /**
- * DecisionHome — the landing shell for the Decision edition (决策版).
+ * DecisionHome — the landing shell for the `decision` build target.
  *
  * A boss-facing "决策作战室" home: a greeting, a prominent "发起决策会议" CTA, the
  * decisions currently in progress (existing 智囊团 sessions), an intelligence inbox

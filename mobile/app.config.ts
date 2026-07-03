@@ -5,7 +5,7 @@ import VERSION from './versions/version.json';
 export default ({ config }: ConfigContext): ExpoConfig => {
   return {
     ...config,
-    name: 'CentaurAI Mobile',
+    name: '半人马AI-超级参谋团 Mobile',
     slug: 'centaurai-mobile',
     version: VERSION.version,
     orientation: 'portrait',
@@ -18,7 +18,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       buildNumber: String(VERSION.buildNumber),
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
-        NSCameraUsageDescription: 'CentaurAI needs camera access to scan QR codes for server login.',
+        NSCameraUsageDescription: '半人马AI-超级参谋团 needs camera access to scan QR codes for server login.',
       },
     },
     android: {

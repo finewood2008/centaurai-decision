@@ -49,7 +49,7 @@ const AGENT_NAMES: Partial<Record<string, string>> = {
   claude: 'Claude',
   codex: 'Codex',
   codebuddy: 'CodeBuddy',
-  opencode: 'OpenCode',
+  openclaw: 'OpenClaw',
   gemini: 'Gemini',
   qwen: 'Qwen Code',
   droid: 'Droid',

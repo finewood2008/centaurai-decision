@@ -27,7 +27,7 @@ export type AgentModeOption = {
  *   - Modes: default (execute), plan, bypassPermissions (YOLO)
  * - Qwen: ACP session/set_mode returns success but does not enforce plan mode behavior.
  *   Plan mode disabled until upstream fix. See https://github.com/QwenLM/qwen-code/issues/1806
- * - OpenCode: plan/build modes via ACP session/set_mode (no yolo support)
+ * - OpenClaw: default/plan/yolo modes via ACP session/set_mode
  * - Gemini: supports default/autoEdit/yolo (auto-approve at manager layer, not via ACP)
  * - Codex: supports suggest/autoEdit/fullAuto (maps to CLI's Suggest/Auto Edit/Full Auto via Shift+Tab)
  * - Goose: mode set at startup only, not during session
@@ -43,9 +43,10 @@ export const AGENT_MODES: Record<string, AgentModeOption[]> = {
     { value: 'default', label: 'Default' },
     { value: 'yolo', label: 'YOLO' },
   ],
-  opencode: [
-    { value: 'build', label: 'Build' },
+  openclaw: [
+    { value: 'default', label: 'Default' },
     { value: 'plan', label: 'Plan' },
+    { value: 'yolo', label: 'YOLO' },
   ],
   gemini: [
     { value: 'default', label: 'Default' },

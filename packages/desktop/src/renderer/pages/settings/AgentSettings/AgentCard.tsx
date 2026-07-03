@@ -40,6 +40,8 @@ type AgentCardProps =
       type: 'detected';
       agent: DetectedAgent;
       onGoToChat: () => void;
+      enabled: boolean;
+      onToggle: (enabled: boolean) => void;
     }
   | {
       type: 'custom';
@@ -52,10 +54,9 @@ type AgentCardProps =
 
 const AgentCard: React.FC<AgentCardProps> = (props) => {
   const { t } = useTranslation();
-  const goToChatButtonClassName = '!w-full !justify-center !rounded-10px !text-12px';
 
   if (props.type === 'detected') {
-    const { agent, onGoToChat } = props;
+    const { agent, onGoToChat, enabled, onToggle } = props;
     const displayName = getAgentDisplayName(agent);
     const extensionAvatar = resolveExtensionAssetUrl(agent.isExtension ? agent.avatar : undefined);
     const logo =
@@ -68,25 +69,30 @@ const AgentCard: React.FC<AgentCardProps> = (props) => {
       });
 
     return (
-      <div className='flex min-h-[154px] flex-col rounded-12px border border-solid border-[var(--color-border-2)] bg-[var(--color-bg-2)] p-12px transition-colors hover:border-[var(--color-border-3)]'>
-        <div className='mb-10px flex justify-center'>
-          <Avatar size={40} shape='square' style={{ flexShrink: 0, backgroundColor: 'transparent' }}>
-            {logo ? <img src={logo} alt={agent.name} className='h-full w-full object-contain' /> : '🤖'}
+      <div
+        className={`flex items-center justify-between px-16px py-10px rd-8px bg-aou-1 hover:bg-aou-2 transition-opacity ${!enabled ? 'opacity-50' : ''}`}
+      >
+        <div className='flex items-center gap-12px min-w-0 flex-1'>
+          <Avatar size={32} shape='square' style={{ flexShrink: 0, backgroundColor: 'transparent' }}>
+            {logo ? (
+              <img src={logo} alt={displayName} className='h-full w-full object-contain' />
+            ) : (
+              <Robot theme='outline' size='20' />
+            )}
           </Avatar>
+          <div className='min-w-0 flex-1'>
+            <Typography.Text className='font-medium text-14px'>{displayName}</Typography.Text>
+            <Typography.Text className='block text-11px text-t-secondary'>
+              {enabled ? t('settings.agentManagement.detected') : t('settings.agentManagement.disabled')}
+            </Typography.Text>
+          </div>
         </div>
-
-        <div className='mb-10px flex-1 text-center'>
-          <Typography.Text className='block text-13px font-medium leading-18px line-clamp-2'>
-            {displayName}
-          </Typography.Text>
-          <Typography.Text className='mt-4px block text-11px text-t-secondary'>
-            {t('settings.agentManagement.detected')}
-          </Typography.Text>
+        <div className='flex items-center gap-8px'>
+          <Switch size='small' checked={enabled} onChange={onToggle} />
+          <Button size='small' type='text' onClick={onGoToChat} disabled={!enabled}>
+            {t('settings.agentManagement.goToChat')}
+          </Button>
         </div>
-
-        <Button size='small' type='secondary' onClick={onGoToChat} className={goToChatButtonClassName}>
-          {t('settings.agentManagement.goToChat')}
-        </Button>
       </div>
     );
   }
@@ -104,7 +110,9 @@ const AgentCard: React.FC<AgentCardProps> = (props) => {
           {agent.icon || <Robot theme='outline' size='20' />}
         </Avatar>
         <div className='min-w-0 flex-1'>
-          <Typography.Text className='font-medium text-14px'>{agent.name || 'Custom Agent'}</Typography.Text>
+          <Typography.Text className='font-medium text-14px'>
+            {agent.name || t('settings.agentManagement.custom')}
+          </Typography.Text>
           <div className='text-12px text-t-secondary truncate'>
             {agent.command}
             {agent.args && agent.args.length > 0 ? ` ${agent.args.join(' ')}` : ''}

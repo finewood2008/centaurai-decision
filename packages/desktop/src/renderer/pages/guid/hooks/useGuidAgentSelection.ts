@@ -301,16 +301,18 @@ export const useGuidAgentSelection = ({
     // tokens / preset resolver). Custom-row `icon` is a user-picked emoji,
     // exposed as `avatar` so AgentPillBar renders the glyph directly
     // instead of mistaking it for a logo URL.
-    const normalisedDetected: AvailableAgent[] = availableAgentsData.map((a) => {
-      const asAgent = a as AgentMetadata;
-      const isCustomRow = asAgent.agent_source === 'custom';
-      return {
-        ...a,
-        id: asAgent.id,
-        custom_agent_id: isCustomRow ? asAgent.id : (a as AvailableAgent).custom_agent_id,
-        avatar: isCustomRow ? asAgent.icon : (a as AvailableAgent).avatar,
-      };
-    });
+    const normalisedDetected: AvailableAgent[] = availableAgentsData
+      .filter((a) => (a as AgentMetadata).enabled !== false)
+      .map((a) => {
+        const asAgent = a as AgentMetadata;
+        const isCustomRow = asAgent.agent_source === 'custom';
+        return {
+          ...a,
+          id: asAgent.id,
+          custom_agent_id: isCustomRow ? asAgent.id : (a as AvailableAgent).custom_agent_id,
+          avatar: isCustomRow ? asAgent.icon : (a as AvailableAgent).avatar,
+        };
+      });
     const remoteAsAvailable: AvailableAgent[] = (remoteAgentsData || []).map((ra) => ({
       agent_type: 'remote',
       name: ra.name,
@@ -462,7 +464,7 @@ export const useGuidAgentSelection = ({
     const configKey = is_presetAgent ? currentEffectiveAgentInfo.agent_type : selectedAgent;
     selectedAgentRef.current = configKey;
     // Reset to the backend's actual default (from handshake.available_modes),
-    // not the literal 'default' — codex/opencode/cursor don't have that value.
+    // not the literal 'default' — codex/cursor don't have that value.
     const fallbackMode = resolveDefaultMode(configKey, availableAgentsData as unknown as AgentMetadata[] | undefined);
     _setSelectedMode(fallbackMode);
     if (!configKey) return;

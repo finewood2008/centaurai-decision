@@ -351,13 +351,13 @@ const Layout: React.FC<{
                   })}
                   onClick={onClick}
                 >
-                  <img src={appLogo} alt='CentaurAI' className='absolute inset-0 size-full object-contain' />
+                  <img src={appLogo} alt='半人马AI-超级参谋团' className='absolute inset-0 size-full object-contain' />
                 </div>
                 <div className='collapsed-hidden flex flex-col justify-center leading-tight'>
-                  <span className='text-12px text-t-secondary'>
-                    半人马AI{IS_DECISION ? '-决策版' : IS_TEAM ? '-团队版' : ''}
+                  <span className='text-12px text-t-secondary'>半人马AI{IS_TEAM ? '-团队版' : ''}</span>
+                  <span className='text-16px text-t-primary font-semibold'>
+                    {IS_DECISION ? '超级参谋团' : 'CentaurAI'}
                   </span>
-                  <span className='text-16px text-t-primary font-semibold'>CentaurAI</span>
                 </div>
                 {isMobile && !collapsed && (
                   <button

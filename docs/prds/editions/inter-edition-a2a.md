@@ -1,4 +1,4 @@
-# 决策版 ↔ 团队版 跨机器 A2A 通讯（F-A2A）
+# 超级参谋团 ↔ 团队版 跨机器 A2A 通讯（F-A2A）
 
 > **状态：📋 计划中（控制平面，后续可选）。本文档为设计与实施计划，尚未实现。**
 >
@@ -7,8 +7,8 @@
 > [shared-drive-access.md](shared-drive-access.md)），本文档的实时能力推迟到"真的需要老板即时追问"时再做。
 > 两套方案共用同一套 mDNS 发现与 token 鉴权底子，不冲突。
 >
-> 本文档定义决策版（老板机）与团队版（团队服务器）在同一局域网内的 agent-to-agent 通讯能力：
-> 决策版能拉取团队版的日常工作汇报；团队版能主动向决策者发起汇报。双方均为 agent，通讯是真·A2A 对话。
+> 本文档定义超级参谋团（老板机）与团队版（团队服务器）在同一局域网内的 agent-to-agent 通讯能力：
+> 超级参谋团能拉取团队版的日常工作汇报；团队版能主动向决策者发起汇报。双方均为 agent，通讯是真·A2A 对话。
 > 设计方向已与产品方确认（见 §3 已锁定决策）。
 
 ---
@@ -17,13 +17,13 @@
 
 ### 1.1 用户故事
 
-- **作为老板（决策版）**，我希望随时问一句「看看销售部这周进展」，系统就去团队那边把信息聚合回来，落到我的「最新情报」里。
+- **作为老板（超级参谋团）**，我希望随时问一句「看看销售部这周进展」，系统就去团队那边把信息聚合回来，落到我的「最新情报」里。
 - **作为员工 / 团队负责人（团队版）**，我希望能主动把一份日报 / 阶段汇报推送给老板，也希望系统能每天定时自动汇报。
 - 双方背后都是 agent：决策侧的「情报官」对团队侧的「对外联络」agent 发起对话，而不是冷冰冰的数据同步。
 
 ### 1.2 目标
 
-1. 决策版按需向团队版发起**实时提问**（query），团队版聚合后应答（report）。
+1. 超级参谋团按需向团队版发起**实时提问**（query），团队版聚合后应答（report）。
 2. 团队版**定时自动**产出并推送日报，以及员工**手动发起**汇报。
 3. 全程在局域网内完成，零公网依赖；老板机保持回环、不对外开端口。
 4. 最大化复用现有基建（mDNS、Remote Agent 连接机制、cron、共享盘）。
@@ -32,7 +32,7 @@
 
 - 跨公网 / 跨局域网的通讯（仅同一 LAN）。
 - 与外部第三方 A2A agent 互通（见 §9 待定项，可能后续升级为标准协议）。
-- 多个决策版之间、或团队版之间的横向通讯（仅 1 决策 ↔ N 团队服务器，典型为 1↔1）。
+- 多个超级参谋团之间、或团队版之间的横向通讯（仅 1 决策 ↔ N 团队服务器，典型为 1↔1）。
 - 修改 Rust 后端 aioncore（设计目标为纯 TS 层实现，见 §5.1）。
 
 ---
@@ -81,7 +81,7 @@
 | **Remote Agent 协议**：WS + Ed25519 签名 + 配对 + 设备 token + 指数退避重连 + 心跳 | `OpenClawGatewayConnection`、`remoteAgentBridge.ts`、`RemoteAgentCore`/`RemoteAgentManager`、`remoteAgentTypes.ts`，DB `remote_agents` 表 | **配对 / 签名 / 持久连接 / 重连的轮子已造好**，直接改造为 A2A 客户端           |
 | **Cron 定时任务**（能让 agent 定时产「日报 / 巡检 / 汇总」）                       | `packages/desktop/src/renderer/pages/cron/`，`/api/cron/jobs`（`ipcBridge.ts` cron 段），`ICronJob`                                       | 「定时自动日报」直接挂 cron 触发对外联络 agent                                 |
 | **共享盘 / NAS API**（list/upload/download/preview）                               | `static-server.ts` 的 `/api/shared-drive/*`、`/api/nas/*`                                                                                 | 大附件落共享盘，信封只带引用                                                   |
-| **决策版 intel 板块**（UI 占位 + i18n 已就位，目前 `<Empty>`）                     | `packages/desktop/src/renderer/pages/decision/DecisionHome.tsx`（intel 段）、`locales/*/decision.json` 的 `intel.*`                       | 替换 `<Empty>` 为真实收件箱                                                    |
+| **超级参谋团 intel 板块**（UI 占位 + i18n 已就位，目前 `<Empty>`）                     | `packages/desktop/src/renderer/pages/decision/DecisionHome.tsx`（intel 段）、`locales/*/decision.json` 的 `intel.*`                       | 替换 `<Empty>` 为真实收件箱                                                    |
 | **edition 标志**                                                                   | `packages/desktop/src/common/config/constants.ts`                                                                                         | `IS_DECISION`/`IS_TEAM` 门控两侧代码                                           |
 
 ### 4.2 缺口（本期要补）
@@ -96,7 +96,7 @@
 ## 5. 总体架构
 
 ```
-       决策机 (决策版 · 回环)                团队服务器 (团队版 · 0.0.0.0)
+       决策机 (超级参谋团 · 回环)                团队服务器 (团队版 · 0.0.0.0)
    ┌─────────────────────────┐          ┌───────────────────────────┐
    │  情报官 agent            │          │  对外联络 agent(聚合本团队)│
    │      ▲ IPC               │          │      ▲ IPC                │
@@ -135,7 +135,7 @@
 **配对（一次性，参考 Remote Agent 握手 F-RAGENT-06/07）**：
 
 1. 决策机生成 Ed25519 密钥对（`deviceId` = 公钥指纹），向团队服务器发起 `pair.request`（带公钥、设备名）。
-2. 团队服务器（D5：人工批准）弹出「新设备请求接入：CentaurAI 决策版 · {hostname}」，管理员点「批准」。
+2. 团队服务器（D5：人工批准）弹出「新设备请求接入：半人马AI-超级参谋团 · {hostname}」，管理员点「批准」。
 3. 团队签发设备 token（写入团队侧 DB），回传决策机持久化。
 4. 此后决策机每次连接用 Ed25519 私钥对挑战 nonce 签名（v2 格式），团队验签放行。
 
@@ -208,7 +208,7 @@ type A2AError = { ofId?: string; code: string; message: string };
 
 ### 6.6 定时日报（cron 集成）
 
-- 复用 cron：在团队服务器为「对外联络 agent」的 conversation 建一条 `ICronJob`（如每工作日 18:00），`target.payload` 为「生成今日团队日报并推送给决策版」。
+- 复用 cron：在团队服务器为「对外联络 agent」的 conversation 建一条 `ICronJob`（如每工作日 18:00），`target.payload` 为「生成今日团队日报并推送给超级参谋团」。
 - cron 触发 → 联络 agent 产出 → §6.4 主动推送路径。
 - 决策侧无需配置；团队侧在设置中可开关 / 调频率。
 
@@ -227,7 +227,7 @@ type A2AError = { ofId?: string; code: string; message: string };
 ### 6.9 edition 门控与代码归属（D6）
 
 - 代码放核心仓库，用 `IS_DECISION`/`IS_TEAM` 门控：
-  - 决策版编译：A2A **client** + 情报官 + intel 收件箱。
+  - 超级参谋团编译：A2A **client** + 情报官 + intel 收件箱。
   - 团队版编译：A2A **server**（`/a2a/ws`、配对审批）+ 对外联络 agent + 日报 cron 默认项。
   - full 版编译两侧，便于单机自测（client 连本机 server）。
 - 沿现有 fork 同步流程发布到 `centaurai-decision` / `centaurai-team`。
@@ -328,8 +328,8 @@ type A2AError = { ofId?: string; code: string; message: string };
 - [ ] 决策机经 mDNS 发现团队服务器，完成一次性 Ed25519 配对（人工批准），持久化设备 token。
 - [ ] 两机维持一条经鉴权的双向 WebSocket，支持自动重连与心跳。
 - [ ] 决策机不监听任何 LAN 端口（仅回环 + 拨出）。
-- [ ] 团队版 cron 定时产出日报并推送，决策版「最新情报」实时显示（替换 `<Empty>`）。
-- [ ] 决策版可发起实时提问，团队版聚合本团队后应答，结果落 intel。
+- [ ] 团队版 cron 定时产出日报并推送，超级参谋团「最新情报」实时显示（替换 `<Empty>`）。
+- [ ] 超级参谋团可发起实时提问，团队版聚合本团队后应答，结果落 intel。
 - [ ] 团队版「发起汇报」按钮可手动推送。
 - [ ] 大附件经共享盘传递，信封仅带引用，不超 payload 上限。
 - [ ] A2A 信道仅放行信封白名单类型，不等同完整 API 访问。

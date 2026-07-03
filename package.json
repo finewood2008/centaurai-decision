@@ -2,7 +2,7 @@
   "name": "centaurai-aistation",
   "version": "2.5.0",
   "private": true,
-  "description": "CentaurAI AIStation — a free, cross-platform AI cowork workstation with built-in & multi-agent support, office assistants, expert advisors, and a LAN distributed client. Based on AionUi (Apache-2.0).",
+  "description": "半人马AI-超级参谋团 — 老板的AI超级参谋团，内置多Agent协作、专家顾问团和局域网分布式客户端。基于 AionUi (Apache-2.0)。",
   "keywords": [],
   "license": "SEE LICENSE IN NOTICE",
   "author": {
@@ -279,5 +279,5 @@
   "patchedDependencies": {
     "7zip-bin@5.2.0": "patches/7zip-bin@5.2.0.patch"
   },
-  "productName": "CentaurAI"
+  "productName": "半人马AI-超级参谋团"
 }

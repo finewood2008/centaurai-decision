@@ -16,7 +16,7 @@ import FeedbackReportModal from './FeedbackReportModal';
 
 // Per-edition identity + update source. Each edition installs from — and auto-updates
 // against — its OWN downstream repo (see electron-builder.{decision,team}.yml publish).
-const EDITION_LABEL = IS_DECISION ? '决策版' : IS_TEAM ? '团队版' : '';
+const EDITION_LABEL = IS_DECISION ? '超级参谋团' : IS_TEAM ? '团队版' : '';
 const EDITION_REPO = IS_DECISION
   ? 'finewood2008/centaurai-decision'
   : IS_TEAM
@@ -108,7 +108,7 @@ const AboutModalContent: React.FC = () => {
           {/* App Info Section */}
           <div className='flex flex-col items-center pb-24px'>
             <Typography.Title heading={3} className='text-24px font-bold text-t-primary mb-8px'>
-              CentaurAI
+              {t('login.brand')}
             </Typography.Title>
             <Typography.Text className='text-14px text-t-secondary mb-12px text-center'>
               {t('settings.appDescription')}

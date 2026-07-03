@@ -1307,6 +1307,7 @@ export type I18nKey =
   | 'settings.agentManagement.customEmpty'
   | 'settings.agentManagement.detectCustomAgent'
   | 'settings.agentManagement.detected'
+  | 'settings.agentManagement.disabled'
   | 'settings.agentManagement.discoverMoreAgents'
   | 'settings.agentManagement.editCustomAgent'
   | 'settings.agentManagement.geminiDescription'

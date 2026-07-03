@@ -13,7 +13,7 @@ import { CODEX_MODE_NATIVE_FULL_ACCESS } from '@/common/types/codex/codexModes';
 const FULL_AUTO_MODE: Record<string, string> = {
   claude: 'bypassPermissions',
   qwen: 'yolo',
-  opencode: 'build',
+  openclaw: 'yolo',
   gemini: 'yolo',
   aionrs: 'yolo',
   codex: CODEX_MODE_NATIVE_FULL_ACCESS,

@@ -1,4 +1,4 @@
-# DECISION edition (决策版) build variant.
+# 超级参谋团 build variant (`AIONUI_EDITION=decision`).
 # Differs from electron-builder.yml ONLY by branding (appId / productName /
 # executableName / linux launcher name). Same full payload as the base (keeps the
 # bundled aioncore backend — the decision box is a standalone single-user machine).
@@ -6,8 +6,8 @@
 # `define` → common/config/constants.ts), NOT via this packaging config.
 # Keep in sync with electron-builder.yml for any shared files/target changes.
 appId: com.centaurai.decision
-productName: CentaurAI Decision
-executableName: CentaurAI Decision
+productName: 半人马AI-超级参谋团
+executableName: CentaurAI-SuperBrain
 copyright: Copyright © 2026 半人马人工智能（深圳）有限公司
 
 protocols:
@@ -200,7 +200,7 @@ linux:
   description: ${description}
   desktop:
     entry:
-      Name: CentaurAI 决策版
+      Name: 半人马AI-超级参谋团
       Comment: ${description}
       Icon: centaurai
       Categories: Office;Utility;

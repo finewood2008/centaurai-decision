@@ -935,7 +935,8 @@
     "customAgents": "Agentes Personalizados",
     "custom": "Personalizado",
     "addCustomAgent": "Adicionar Agente Personalizado",
-    "customEmpty": "Nenhum agente personalizado configurado. Clique em \"Adicionar Agente Personalizado\" para criar um."
+    "customEmpty": "Nenhum agente personalizado configurado. Clique em \"Adicionar Agente Personalizado\" para criar um.",
+    "disabled": "Desativado"
   },
   "remoteAgent": {
     "title": "Agentes Remotos",

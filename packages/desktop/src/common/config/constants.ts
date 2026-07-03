@@ -65,7 +65,7 @@ export const WEBUI_DEFAULT_PORT = (() => {
 // repo that tracks this core (merges upstream/main for updates):
 //   - 'full'     (DEFAULT): every feature on, multi-user — today's behavior. What
 //                the core repo, `bun dev`, and a plain build produce. Inert flag.
-//   - 'decision' (决策版): single-user; core is 智囊团 (the multi-agent decision
+//   - 'decision' (超级参谋团): single-user; core is 智囊团 (the multi-agent decision
 //                room) reframed as a 决策作战室. No workbench, no multi-user WebUI.
 //   - 'team'     (团队版): 智囊团 removed; core is office assistants + advisors +
 //                workbench, with the multi-user WebUI / LAN server.

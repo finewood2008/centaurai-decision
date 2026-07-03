@@ -16,11 +16,11 @@
   },
   "connect": {
     "scanTitle": "Scan QR Code",
-    "scanHint": "Open CentaurAI desktop → Settings → WebUI → Show QR Code",
+    "scanHint": "Open 半人马AI-超级参谋团 desktop → Settings → WebUI → Show QR Code",
     "cameraPermissionTitle": "Camera Access Required",
-    "cameraPermissionMessage": "CentaurAI needs camera access to scan QR codes for quick server login.",
+    "cameraPermissionMessage": "半人马AI-超级参谋团 needs camera access to scan QR codes for quick server login.",
     "requestPermission": "Allow Camera",
-    "invalidQRCode": "Invalid QR code. Please scan the QR code from CentaurAI desktop.",
+    "invalidQRCode": "Invalid QR code. Please scan the QR code from 半人马AI-超级参谋团 desktop.",
     "verifying": "Verifying...",
     "connectionFailed": "Connection failed",
     "invalidToken": "Invalid or expired token",
@@ -29,7 +29,7 @@
     "pasteLinkHint": "Paste the QR code link from desktop",
     "urlPlaceholder": "Paste QR login URL here",
     "connect": "Connect",
-    "invalidURL": "Invalid URL. Please paste the QR login link from CentaurAI desktop."
+    "invalidURL": "Invalid URL. Please paste the QR login link from 半人马AI-超级参谋团 desktop."
   },
   "tabs": {
     "chat": "Chat",

@@ -77,7 +77,7 @@ export class ClientFactory {
           timeout: options.timeout,
           defaultHeaders: {
             'HTTP-Referer': 'https://www.centaurloop.com',
-            'X-Title': 'CentaurAI',
+            'X-Title': '半人马AI-超级参谋团',
           },
           ...(options.baseConfig as OpenAIClientConfig),
         };
@@ -128,7 +128,7 @@ export class ClientFactory {
           timeout: options.timeout,
           defaultHeaders: {
             'HTTP-Referer': 'https://www.centaurloop.com',
-            'X-Title': 'CentaurAI',
+            'X-Title': '半人马AI-超级参谋团',
           },
           ...(options.baseConfig as OpenAIClientConfig),
         };

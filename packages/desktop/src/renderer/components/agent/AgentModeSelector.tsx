@@ -102,7 +102,7 @@ const AgentModeSelector: React.FC<AgentModeSelectorProps> = ({
   const isMobile = Boolean(layout?.isMobile);
   const [cachedModes, setCachedModes] = useState<AgentModeOption[]>([]);
 
-  // Load modes from cache: try top-level `acp.cachedModes` first (qoder, opencode),
+  // Load modes from cache: try top-level `acp.cachedModes` first (qoder, openclaw),
   // then fall back to `acp.cached_config_options` category=mode (codex)
   useEffect(() => {
     if (!backend) return;
@@ -137,7 +137,7 @@ const AgentModeSelector: React.FC<AgentModeSelectorProps> = ({
   }, [dynamicModes, cachedModes, backend]);
   const defaultMode = modes[0]?.value ?? 'default';
   // Validate initialMode against available modes; fall back to backend's default
-  // when the provided value doesn't match (e.g. opencode has 'build'/'plan', not 'default')
+  // when the provided value doesn't match (e.g. openclaw has 'default'/'plan'/'yolo',
   const validInitialMode = initialMode && modes.some((m) => m.value === initialMode) ? initialMode : defaultMode;
   const [current_mode, setCurrentMode] = useState<string>(validInitialMode);
   const [isLoading, setIsLoading] = useState(false);
@@ -153,7 +153,7 @@ const AgentModeSelector: React.FC<AgentModeSelectorProps> = ({
 
   // When initialMode prop changes (e.g. agent switch on Guid page), update local state.
   // Validate against available modes to handle backends with non-standard default
-  // (e.g. opencode uses 'build' instead of 'default').
+  // (e.g. openclaw supports 'default'/'plan'/'yolo').
   useEffect(() => {
     if (initialMode !== undefined) {
       const valid = modes.some((m) => m.value === initialMode) ? initialMode : defaultMode;
@@ -174,7 +174,7 @@ const AgentModeSelector: React.FC<AgentModeSelectorProps> = ({
         if (!cancelled && result) {
           // Only sync from backend when manager is initialized;
           // before first message, getMode returns { mode: 'default', initialized: false }
-          // which would overwrite the correct initialMode (e.g. opencode has no 'default').
+          // which would overwrite the correct initialMode (e.g. openclaw supports 'default').
           if (result.initialized !== false) {
             setCurrentMode(result.mode);
           }

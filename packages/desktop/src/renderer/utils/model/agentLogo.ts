@@ -54,8 +54,6 @@ const AGENT_LOGO_PATH_MAP = {
   snow: 'tools/coding/snow.png',
   auggie: 'brand/auggie.svg',
   kimi: 'ai-china/kimi.svg',
-  opencode: 'tools/coding/opencode-light.svg',
-  'opencode-dark': 'tools/coding/opencode-dark.svg',
   copilot: 'tools/github.svg',
   openclaw: 'tools/openclaw.svg',
   'openclaw-gateway': 'tools/openclaw.svg',
@@ -65,9 +63,6 @@ const AGENT_LOGO_PATH_MAP = {
   qoder: 'tools/coding/qoder.png',
   cursor: 'tools/coding/cursor.png',
 } as const satisfies Record<string, string>;
-
-const OPEN_CODE_LIGHT_FILE_NAME = 'opencode-light.svg';
-const OPEN_CODE_DARK_FILE_NAME = 'opencode-dark.svg';
 
 function buildAssetUrl(path: string): string {
   if (/^data:/i.test(path)) return path;
@@ -79,9 +74,7 @@ function isLegacyAionLogoUrl(logo: string): boolean {
 }
 
 function applyThemeVariant(logo: string): string {
-  if (!isDarkTheme()) return logo;
-  if (!logo.endsWith(OPEN_CODE_LIGHT_FILE_NAME)) return logo;
-  return logo.replace(new RegExp(`${OPEN_CODE_LIGHT_FILE_NAME}$`), OPEN_CODE_DARK_FILE_NAME);
+  return logo;
 }
 
 function normalizeLogoUrl(logo: string): string {

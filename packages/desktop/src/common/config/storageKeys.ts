@@ -25,6 +25,9 @@ export const STORAGE_KEYS = {
 
   /** Language preference / 语言偏好 */
   LANGUAGE: 'aionui_language',
+
+  /** Agent rows hidden by the backend after the user disables them */
+  DISABLED_AGENT_SNAPSHOTS: 'aionui_disabled_agent_snapshots',
 } as const;
 
 export type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];
