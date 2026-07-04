@@ -20,7 +20,14 @@ import {
   type MeetingState,
   type MeetingTurn,
 } from './meetingTypes';
-import { decisionDocxBase64, decisionFileName } from '@/renderer/services/meetingPlanDocx';
+import {
+  decisionDocxBase64,
+  decisionFileName,
+  decisionMarkdownContent,
+  decisionMarkdownFileName,
+  decisionPptxBase64,
+  decisionPptxFileName,
+} from '@/renderer/services/meetingPlanDocx';
 import {
   addGuest as storeAddGuest,
   readGuests,
@@ -373,25 +380,28 @@ class MeetingEngine {
   }
 
   /**
-   * Generate a well-formatted Word (.docx) of the 方案书 with the boss's chosen
-   * option highlighted, and write it to the team workspace (→ Content Hub), falling
-   * back to the Downloads folder. Blob downloads are dropped by this app and the
-   * aioncore fs.write is text-only, so we route bytes through the Electron main IPC.
+   * Generate deterministic Markdown / Word / PPTX exports of the 方案书 with the
+   * boss's chosen option highlighted, and write them to the team workspace
+   * (→ Content Hub), falling back to the Downloads folder. Blob downloads are
+   * dropped by this app and aioncore fs.write is text-only, so binary Office
+   * files go through the Electron main IPC.
    */
-  private async exportDecisionDocx(decision: MeetingResolutionOption | null): Promise<void> {
+  private async exportDecisionFiles(decision: MeetingResolutionOption | null): Promise<void> {
     const topic = this.state.topic;
     const plan = this.state.plan;
     if (!plan.trim()) return;
     try {
-      Message.info('正在生成 Word 决策文档…');
-      const base64 = await decisionDocxBase64({
+      Message.info('正在生成决策方案文档…');
+      const docArgs = {
         topic,
         teamName: this.team.name,
         plan,
         decision,
         dateLabel: new Date().toLocaleDateString('zh-CN'),
-      });
-      const fileName = decisionFileName(topic, this.team.name);
+      };
+      const docxBase64 = await decisionDocxBase64(docArgs);
+      const pptxBase64 = await decisionPptxBase64(docArgs);
+      const mdContent = decisionMarkdownContent(docArgs);
       let dir = await this.resolveWorkspace();
       const inWorkspace = Boolean(dir);
       if (!dir) {
@@ -403,25 +413,52 @@ class MeetingEngine {
         }
       }
       if (!dir) {
-        Message.error('生成 Word 文档失败：未找到保存位置');
+        Message.error('生成决策方案文档失败：未找到保存位置');
         return;
       }
-      const res = await ipcBridge.application.saveBinaryFile.invoke({ dir, fileName, base64 });
-      if (res?.success && res.data?.path) {
-        if (inWorkspace) {
-          emitter.emit('acp.workspace.refresh');
-          emitter.emit('codex.workspace.refresh');
-          emitter.emit('aionrs.workspace.refresh');
-          Message.success(`已生成 Word 决策文档：${fileName}（已存入内容中心）`);
-        } else {
-          Message.success(`已生成 Word 决策文档：${fileName}（已保存到下载文件夹）`);
-        }
+
+      const mdPath = joinPath(dir, decisionMarkdownFileName(topic, this.team.name));
+      const mdOk = await ipcBridge.fs.writeFile.invoke({ path: mdPath, data: mdContent });
+      const docxFileName = decisionFileName(topic, this.team.name);
+      const pptxFileName = decisionPptxFileName(topic, this.team.name);
+      const docxRes = await ipcBridge.application.saveBinaryFile.invoke({
+        dir,
+        fileName: docxFileName,
+        base64: docxBase64,
+      });
+      const pptxRes = await ipcBridge.application.saveBinaryFile.invoke({
+        dir,
+        fileName: pptxFileName,
+        base64: pptxBase64,
+      });
+
+      if (mdOk && docxRes?.success && docxRes.data?.path && pptxRes?.success && pptxRes.data?.path) {
+        emitter.emit('acp.workspace.refresh');
+        emitter.emit('codex.workspace.refresh');
+        emitter.emit('aionrs.workspace.refresh');
+        const where = inWorkspace ? '已存入内容中心' : '已保存到下载文件夹';
+        Message.success(`已生成决策方案：Markdown / Word / PPT（${where}）`);
       } else {
-        Message.error(`生成 Word 文档失败${res?.msg ? '：' + res.msg : ''}`);
+        const msg = docxRes?.msg || pptxRes?.msg || (!mdOk ? 'Markdown 写入失败' : '');
+        Message.error(`生成决策方案文档失败${msg ? '：' + msg : ''}`);
+        this.fallbackExportWithCodex();
       }
     } catch {
-      Message.error('生成 Word 文档失败');
+      Message.error('生成决策方案文档失败，已尝试交给 Codex 兜底生成');
+      this.fallbackExportWithCodex();
     }
+  }
+
+  private fallbackExportWithCodex(): void {
+    const plan = this.state.plan;
+    if (!plan.trim()) return;
+    const codex = this.team.agents.find((a) => (a.agent_type || '').toLowerCase() === 'codex' && a.conversation_id);
+    const target = codex ?? this.moderator;
+    if (!target?.conversation_id) return;
+    void ipcBridge.conversation.sendMessage.invoke({
+      conversation_id: target.conversation_id,
+      input: buildExportTask(plan),
+    });
   }
 
   // ---- transcript turns ----------------------------------------------------
@@ -945,19 +982,15 @@ class MeetingEngine {
 
   decide = (optionId: string): void => {
     this.commit({ decidedOptionId: optionId, phase: 'decided', runState: 'stopped', activeSlotId: null });
-    // Auto-generate a well-formatted Word doc of the final decision.
+    // Auto-generate well-formed Markdown / Word / PPT files of the final decision.
     const decision = this.state.options.find((o) => o.id === optionId) ?? null;
-    void this.exportDecisionDocx(decision);
+    void this.exportDecisionFiles(decision);
   };
 
   exportPlan = (): boolean => {
     const plan = this.state.plan;
-    const moderator = this.moderator;
-    if (!plan.trim() || !moderator) return false;
-    void ipcBridge.conversation.sendMessage.invoke({
-      conversation_id: moderator.conversation_id,
-      input: buildExportTask(plan),
-    });
+    if (!plan.trim()) return false;
+    void this.exportDecisionFiles(this.state.options.find((o) => o.id === this.state.decidedOptionId) ?? null);
     return true;
   };
 
