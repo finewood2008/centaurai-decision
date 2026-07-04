@@ -116,5 +116,6 @@
   "unit": {
     "minute_short": "хв",
     "second_short": "с"
-  }
+  },
+  "fileAttach.countLabel": "{{count}} файл(ів)"
 }

@@ -244,10 +244,8 @@ const DecisionHome: React.FC = () => {
             <p className={styles.feedDesc}>{t('decision.feed.desc')}</p>
           </div>
           <div className={styles.feedStatus}>
-            <span>{t('decision.feed.mockBadge')}</span>
-            <Button type='outline' size='small' disabled>
-              {t('decision.feed.action')}
-            </Button>
+            <span className={styles.feedBadge}>{t('decision.feed.mockBadge')}</span>
+            <span className={styles.feedSyncState}>{t('decision.feed.action')}</span>
           </div>
         </div>
         <div className={styles.feedList}>
@@ -283,7 +281,7 @@ const DecisionHome: React.FC = () => {
           <div className={styles.statValue}>{t('decision.archive.count', { count: teams.length })}</div>
         </div>
         <Button
-          className={styles.stat}
+          className={`${styles.stat} ${styles.statInteractive}`}
           type='text'
           onClick={() => Promise.resolve(navigate('/advisors')).catch(console.error)}
         >

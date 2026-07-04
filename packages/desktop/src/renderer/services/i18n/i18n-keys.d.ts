@@ -272,6 +272,7 @@ export type I18nKey =
   | 'common.fileAttach.addFiles'
   | 'common.fileAttach.attachSelected'
   | 'common.fileAttach.cancelUpload'
+  | 'common.fileAttach.countLabel'
   | 'common.fileAttach.failed'
   | 'common.fileAttach.fromSharedLibrary'
   | 'common.fileAttach.myDevice'

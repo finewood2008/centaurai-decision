@@ -182,7 +182,7 @@ const GuidActionRow: React.FC<GuidActionRowProps> = ({
             onClick={(e: React.MouseEvent) => e.stopPropagation()}
             onChange={() => onToggleSearchKB()}
           >
-            <span className='text-13px'>检索知识库</span>
+            <span className='text-13px'>{t('decision.room.searchKnowledgeBase')}</span>
           </Checkbox>
         </Menu.Item>
       )}
@@ -325,7 +325,7 @@ const GuidActionRow: React.FC<GuidActionRowProps> = ({
                   className={'!max-w-max'}
                   content={<span className='whitespace-break-spaces'>{getCleanFileNames(files).join('\n')}</span>}
                 >
-                  <span className='text-t-primary'>File({files.length})</span>
+                  <span className='text-t-primary'>{t('common.fileAttach.countLabel', { count: files.length })}</span>
                 </Tooltip>
               )}
             </span>

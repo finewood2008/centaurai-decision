@@ -33,7 +33,7 @@ import { ensureBackendMcpCatalog } from '@/renderer/hooks/mcp/catalog';
 import { resolveAgentLogo } from '@/renderer/utils/model/agentLogo';
 import { getAgentDisplayName } from '@/renderer/utils/model/agentTypes';
 import { normalizeBrandText } from '@/renderer/utils/brandText';
-import { Button, Checkbox, ConfigProvider, Dropdown, Menu, Message } from '@arco-design/web-react';
+import { Button, ConfigProvider, Dropdown, Menu, Message } from '@arco-design/web-react';
 import { Down, Left, Robot, Write } from '@icon-park/react';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -649,17 +649,6 @@ const GuidPage: React.FC = () => {
         onToggleSearchKB={() => setSearchKnowledgeBase((prev) => !prev)}
       />
     </div>
-  );
-
-  // 知识库检索勾选框
-  const searchKBCheckbox = (
-    <Checkbox
-      checked={searchKnowledgeBase}
-      onChange={setSearchKnowledgeBase}
-      className='text-12px text-t-secondary shrink-0'
-    >
-      检索知识库
-    </Checkbox>
   );
 
   return (

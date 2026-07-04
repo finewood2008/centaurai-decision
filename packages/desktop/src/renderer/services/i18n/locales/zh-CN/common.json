@@ -113,5 +113,6 @@
   "import": "导入",
   "processing": "处理中...",
   "optional": "（可选）",
-  "clear": "清除"
+  "clear": "清除",
+  "fileAttach.countLabel": "{{count}} 个文件"
 }

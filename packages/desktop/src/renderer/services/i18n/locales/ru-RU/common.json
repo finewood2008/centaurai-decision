@@ -111,5 +111,6 @@
   "optional": "(необязательно)",
   "clear": "Очистить",
   "historyBack": "Назад",
-  "agentMode": "Режим агента"
+  "agentMode": "Режим агента",
+  "fileAttach.countLabel": "{{count}} файл(ов)"
 }

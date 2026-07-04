@@ -117,5 +117,6 @@
   "unit": {
     "minute_short": "m",
     "second_short": "s"
-  }
+  },
+  "fileAttach.countLabel": "{{count}} files"
 }

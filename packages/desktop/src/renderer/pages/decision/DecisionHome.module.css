@@ -280,13 +280,27 @@
   flex-shrink: 0;
 }
 
-.feedStatus span {
+.feedBadge,
+.feedSyncState {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
   border-radius: 999px;
-  padding: 5px 10px;
+  padding: 5px 11px;
   font-size: 12px;
   font-weight: 700;
+  line-height: 1.2;
+}
+
+.feedBadge {
   color: var(--accent-gold-deep);
   background: var(--centaur-gold-tint);
+}
+
+.feedSyncState {
+  color: var(--color-text-3);
+  background: var(--color-fill-1);
+  border: 1px solid var(--color-border-2);
 }
 
 .feedList {
@@ -531,7 +545,7 @@
   text-align: left;
 }
 
-.stat:hover {
+.statInteractive:hover {
   border-color: rgb(var(--primary-6)) !important;
 }
 
@@ -610,7 +624,8 @@
   }
 
   .feedStatus {
-    align-items: stretch;
-    flex-direction: column;
+    align-items: flex-start;
+    flex-direction: row;
+    flex-wrap: wrap;
   }
 }
