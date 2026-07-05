@@ -70,16 +70,17 @@ function lensRoster(panelists: PanelistBrief[]): string {
  */
 export function buildModeratorOpeningPrompt(topic: string, panelists: PanelistBrief[]): string {
   return [
-    '你是这场 AI 智囊团研讨的主持人，面对的是【老板】（也就是用户本人），全程用中文、用主持人的口吻。',
+    '你是这场 AI 智囊团研讨的 leader / 主持人，面对的是【老板】（也就是用户本人），全程用中文、用主持人的口吻。',
     `本次议题：${topic}`,
     `与会专家及其主攻视角：${lensRoster(panelists)}`,
     '',
     '请完成开场（务实有力，可稍长，不要套话）：',
     '1）一两句话点破这个决策【真正的核心张力】是什么（不是泛泛重述题目，而是说清"难就难在哪")；',
-    '2）拆出 2-4 个必须辩清楚的关键问题；',
-    '3）明确告诉老板：这场会让不同视角【互相博弈、彼此挑刺】，目标是给出一个比任何单个 AI 都更可靠的方案，最后请您拍板；',
-    '4）邀请老板：如果有特别看重的约束（预算 / 时间 / 风险偏好 / 已定的红线），随时插话，我们会据此调整。',
-    '最后点名第一位专家开始。只输出开场词本身。',
+    '2）把老板的问题拆成 2-4 个必须回答清楚的关键问题，并明确这些问题分别要抛给哪些专家视角去判断；',
+    '3）说明你不会在第一轮并行发言里抢专家席，你的核心工作是主持、追问、提炼精华，并帮老板看见真正有价值的观点；',
+    '4）明确告诉老板：专家会先并行给出立场，之后你会逐一提炼重点、综合分歧，再邀请老板补充倾向或约束；',
+    '5）邀请老板：如果有特别看重的约束（预算 / 时间 / 风险偏好 / 已定的红线），随时插话，我们会据此调整。',
+    '最后把拆解后的问题抛给全体专家开始第一轮。只输出开场词本身。',
   ].join('\n');
 }
 
@@ -221,10 +222,29 @@ export function buildRoundPausePrompt(args: {
     args.recentContext || '（暂无）',
     '',
     '请用口语化、简洁的中文，做一段"让老板秒懂并能参与"的小结：',
-    '1）3-5 句话说清这一轮专家们的关键观点、已形成的共识、以及真正的分歧；',
-    '2）点出此刻最值得老板关注或拿主意的 1 个问题/取舍；',
-    '3）最后用一句话邀请老板：可以在下方补充想法或提出关注点，看完后点「继续讨论」进入下一环节。',
+    '1）先按专家逐一提炼：每位专家最有价值的 1-2 个观点是什么，不要让老板自己去读长篇发言；',
+    '2）再做综合：哪些观点已经形成共识，哪些分歧真的会影响结论，哪些观点可以被组合成更强方案；',
+    '3）点出此刻最值得老板关注或拿主意的 1 个问题/取舍；',
+    '4）最后用一句话邀请老板：可以在下方补充想法或提出关注点，看完后点「继续讨论」进入下一环节。',
     '不要长篇大论，重点是把节奏交给老板，让他跟得上、愿意参与。先不要给最终方案。',
+  ].join('\n');
+}
+
+/** Moderator joins the debate as a host: not an extra first-round opinion, but a pressure tester. */
+export function buildModeratorDebatePrompt(params: { topic: string; recentContext: string }): string {
+  return [
+    '你是这场决策会议的 leader / 主持人。现在进入交锋阶段，你必须深度参与辩论，但你的目标不是证明自己对，而是挖出真正有价值、能回答老板关键决策问题的观点。',
+    `议题：${params.topic}`,
+    '',
+    '当前讨论：',
+    params.recentContext || '（暂无）',
+    '',
+    '请直接主持追辩：',
+    '1）点名 2-3 个最值得继续追问的专家观点，说清它们为什么关键；',
+    '2）指出至少 1 个论证不足、假设过强或相互冲突的地方，并提出尖锐问题；',
+    '3）把可被整合的观点合成一个更强判断，说明它如何回答老板的核心问题；',
+    '4）如果有某个专家观点被你认为应该升级为最终方案的重要组成部分，要明确标出。',
+    '语言要像会议主持，不要像论文摘要；允许有锋芒，但对事不对人。',
   ].join('\n');
 }
 
@@ -450,14 +470,14 @@ export function hasResolutionOptions(text: string): boolean {
 
 /**
  * Task asking the leader (who has officecli + file skills) to archive the 方案书
- * as Word/PPT/Markdown into the workspace, where it surfaces in the Content Hub.
+ * as Word/Markdown into the workspace, where it surfaces in the Content Hub.
  */
 export function buildExportTask(plan: string): string {
   return [
     '请把下面这份《方案书》整理并归档到当前工作区目录（之后可在「内容中心」查看）：',
     '1）用 officecli 导出为 Word（.docx）一份；',
-    '2）用 officecli 导出为 PPT（.pptx）一份；',
-    '3）同时保存一份 Markdown（.md）。',
+    '2）同时保存一份 Markdown（.md）。',
+    '不要生成 PPT / PPTX。',
     '文件名用方案书标题或议题，保存完成后简要回复保存的文件名。',
     '',
     '《方案书》原文：',

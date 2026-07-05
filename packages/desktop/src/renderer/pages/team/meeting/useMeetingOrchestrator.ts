@@ -25,8 +25,6 @@ import {
   decisionFileName,
   decisionMarkdownContent,
   decisionMarkdownFileName,
-  decisionPptxBase64,
-  decisionPptxFileName,
 } from '@/renderer/services/meetingPlanDocx';
 import {
   addGuest as storeAddGuest,
@@ -44,8 +42,8 @@ import {
   buildDivergePrompt,
   buildExportTask,
   buildLocalSynthesisPrompt,
+  buildModeratorDebatePrompt,
   buildModeratorOpeningPrompt,
-  buildModeratorPositionPrompt,
   buildPanelistDebatePrompt,
   buildPanelistPositionPrompt,
   buildProposalPrompt,
@@ -107,7 +105,7 @@ export type MeetingOrchestrator = {
   cancel: () => void;
   /** Boss picks a final option. */
   decide: (optionId: string) => void;
-  /** Ask the leader to archive the 方案书 as docx/pptx/md into the Content Hub. */
+  /** Ask the leader to archive the 方案书 as docx/md into the Content Hub. */
   exportPlan: () => boolean;
   /** Reopen a past meeting's 方案书 from history. */
   openRecord: (rec: MeetingRecord) => void;
@@ -142,6 +140,23 @@ function appendHistory(team_id: string, record: MeetingRecord): void {
     const parsed = raw ? (JSON.parse(raw) as HistoryMap) : {};
     const list = Array.isArray(parsed[team_id]) ? parsed[team_id] : [];
     parsed[team_id] = [record, ...list].slice(0, HISTORY_LIMIT);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(parsed));
+    emitter.emit('meeting.outputs.changed');
+  } catch {
+    // ignore quota errors
+  }
+}
+
+function patchHistoryRecord(team_id: string, recordId: string, patch: Partial<MeetingRecord>): void {
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY);
+    const parsed = raw ? (JSON.parse(raw) as HistoryMap) : {};
+    const list = Array.isArray(parsed[team_id]) ? parsed[team_id] : [];
+    const index = list.findIndex((record) => record.id === recordId);
+    if (index >= 0) {
+      list[index] = { ...list[index], ...patch };
+      parsed[team_id] = list;
+    }
     localStorage.setItem(HISTORY_KEY, JSON.stringify(parsed));
     emitter.emit('meeting.outputs.changed');
   } catch {
@@ -185,13 +200,29 @@ export function setTeamMeetingForm(team_id: string, form: MeetingForm, departmen
 /**
  * Hydrate persisted meeting state for a COLD engine (first visit this session, or
  * after an app reload). A run that was live when the app last closed can't be
- * resumed — its renderer loop is gone — so we park it back to idle. Within a
- * session this never runs on navigation, because the in-memory engine is reused.
+ * resumed — its renderer loop is gone — so we stop the spinner but keep the
+ * transcript visible. Within a session this never runs on navigation, because
+ * the in-memory engine is reused.
  */
 function hydrate(team_id: string, teamName: string): MeetingState {
   const stored = readStore()[team_id];
   const base: MeetingState = stored ? { ...EMPTY_MEETING_STATE, ...stored, revision: 0 } : { ...EMPTY_MEETING_STATE };
-  if (base.phase === 'running') return { ...EMPTY_MEETING_STATE, topic: base.topic || teamName };
+  if (base.phase === 'running') {
+    const transcript: MeetingTurn[] = base.transcript.map((turn) =>
+      turn.status === 'speaking'
+        ? { ...turn, status: (turn.text.trim() ? 'done' : 'error') as MeetingTurn['status'] }
+        : turn
+    );
+    return {
+      ...base,
+      phase: base.plan.trim() || base.options.length > 0 ? 'resolution' : 'idle',
+      runState: base.plan.trim() || base.options.length > 0 ? 'awaiting_decision' : 'stopped',
+      activeSlotId: null,
+      runId: null,
+      transcript,
+      awaitingContinue: false,
+    };
+  }
   if (!base.topic) base.topic = teamName;
   return base;
 }
@@ -303,6 +334,8 @@ class MeetingEngine {
       plan: next.plan,
       options: next.options,
       decidedOptionId: next.decidedOptionId,
+      transcript: next.transcript,
+      archivedPath: next.archivedPath,
     };
     writeStore(store);
     this.notify();
@@ -380,7 +413,7 @@ class MeetingEngine {
   }
 
   /**
-   * Generate deterministic Markdown / Word / PPTX exports of the 方案书 with the
+   * Generate deterministic Markdown / Word exports of the 方案书 with the
    * boss's chosen option highlighted, and write them to the team workspace
    * (→ Content Hub), falling back to the Downloads folder. Blob downloads are
    * dropped by this app and aioncore fs.write is text-only, so binary Office
@@ -400,7 +433,6 @@ class MeetingEngine {
         dateLabel: new Date().toLocaleDateString('zh-CN'),
       };
       const docxBase64 = await decisionDocxBase64(docArgs);
-      const pptxBase64 = await decisionPptxBase64(docArgs);
       const mdContent = decisionMarkdownContent(docArgs);
       let dir = await this.resolveWorkspace();
       const inWorkspace = Boolean(dir);
@@ -420,26 +452,20 @@ class MeetingEngine {
       const mdPath = joinPath(dir, decisionMarkdownFileName(topic, this.team.name));
       const mdOk = await ipcBridge.fs.writeFile.invoke({ path: mdPath, data: mdContent });
       const docxFileName = decisionFileName(topic, this.team.name);
-      const pptxFileName = decisionPptxFileName(topic, this.team.name);
       const docxRes = await ipcBridge.application.saveBinaryFile.invoke({
         dir,
         fileName: docxFileName,
         base64: docxBase64,
       });
-      const pptxRes = await ipcBridge.application.saveBinaryFile.invoke({
-        dir,
-        fileName: pptxFileName,
-        base64: pptxBase64,
-      });
 
-      if (mdOk && docxRes?.success && docxRes.data?.path && pptxRes?.success && pptxRes.data?.path) {
+      if (mdOk && docxRes?.success && docxRes.data?.path) {
         emitter.emit('acp.workspace.refresh');
         emitter.emit('codex.workspace.refresh');
         emitter.emit('aionrs.workspace.refresh');
         const where = inWorkspace ? '已存入内容中心' : '已保存到下载文件夹';
-        Message.success(`已生成决策方案：Markdown / Word / PPT（${where}）`);
+        Message.success(`已生成决策方案：Markdown / Word（${where}）`);
       } else {
-        const msg = docxRes?.msg || pptxRes?.msg || (!mdOk ? 'Markdown 写入失败' : '');
+        const msg = docxRes?.msg || (!mdOk ? 'Markdown 写入失败' : '');
         Message.error(`生成决策方案文档失败${msg ? '：' + msg : ''}`);
         this.fallbackExportWithCodex();
       }
@@ -709,13 +735,8 @@ class MeetingEngine {
       // Optional department template: overrides the lens set + frames the opening.
       const dept = resolveDepartment(this.state.departmentId);
       const lenses = dept && dept.lenses.length > 0 ? dept.lenses : PANEL_LENSES;
-      const contributors = [mod, ...panel];
       const lensByPanel = new Map(panel.map((p, i) => [p.id, lenses[i % lenses.length]]));
       const briefs: PanelistBrief[] = panel.map((p) => ({ name: p.name, lens: lensByPanel.get(p.id) }));
-      const moderatorBriefs: PanelistBrief[] = [
-        { name: mod.name, lens: '首席综合判断（主持节奏、亮明倾向、抓核心取舍）' },
-        ...briefs,
-      ];
       const transcriptText = () =>
         this.state.transcript
           .filter((t) => t.text.trim())
@@ -748,21 +769,20 @@ class MeetingEngine {
       };
 
       const refNote = reference ? `\n\n${reference}\n\n请充分参考上述背景资料。` : '';
-      // The moderator's role stays intact: open the chamber first, frame the agenda,
-      // then participate as the chief expert in the following parallel position round.
-      await speak(mod, '开场', buildModeratorOpeningPrompt(topic, moderatorBriefs) + refNote);
+      const framingNote = dept?.framing ? `\n\n${dept.framing}` : '';
+      // The leader opens the chamber, decomposes the boss's question, and throws
+      // those questions to all experts. The leader does not join the first parallel wall.
+      await speak(mod, '开场', buildModeratorOpeningPrompt(topic, briefs) + framingNote + refNote);
       if (stale()) return;
-      // ① 并行立场 — the moderator participates as the first / chief advisor and gives
-      //    a substantive view, while the rest of the council answers simultaneously.
+      // ① 并行立场 — experts answer simultaneously; the leader waits to summarize.
       const openingPosition = (p: Participant): string => {
-        if (p.isModerator) return buildModeratorPositionPrompt(topic, moderatorBriefs, dept?.framing) + refNote;
         const lens = lensByPanel.get(p.id);
         if (form === 'tournament') return buildProposalPrompt({ topic, persona: p.name, lens, reference }) + refNote;
         if (form === 'diverge') return buildDivergePrompt({ topic, persona: p.name, lens }) + refNote;
         return buildPanelistPositionPrompt({ topic, persona: p.name, lens, priorContext: '' }) + refNote;
       };
       // Fire every opening turn up-front (all appear at once), then stream concurrently.
-      await Promise.all(contributors.map((p) => speak(p, '并行立场', openingPosition(p), true)));
+      await Promise.all(panel.map((p) => speak(p, '并行立场', openingPosition(p), true)));
       if (!(await pauseAndWait(1, '并行立场'))) return;
 
       // ② 交锋讨论 — form-specific (the parallel positions above are the shared input).
@@ -770,6 +790,8 @@ class MeetingEngine {
         await eachPanelist('红队猛攻', (p) =>
           buildRedTeamPrompt({ topic, persona: p.name, lens: lensByPanel.get(p.id), draftContext: transcriptText() })
         );
+        if (!stale())
+          await speak(mod, '主持追辩', buildModeratorDebatePrompt({ topic, recentContext: transcriptText() }));
         if (!(await pauseAndWait(2, '红队猛攻'))) return;
       } else if (form === 'tournament') {
         await eachPanelist('互评', (p) =>
@@ -781,6 +803,8 @@ class MeetingEngine {
             recentContext: transcriptText(),
           })
         );
+        if (!stale())
+          await speak(mod, '主持追辩', buildModeratorDebatePrompt({ topic, recentContext: transcriptText() }));
         if (!(await pauseAndWait(2, '互评'))) return;
       } else if (form === 'diverge') {
         if (!stale()) {
@@ -794,6 +818,8 @@ class MeetingEngine {
             clustersContext: transcriptText(),
           })
         );
+        if (!stale())
+          await speak(mod, '主持追辩', buildModeratorDebatePrompt({ topic, recentContext: transcriptText() }));
         if (!(await pauseAndWait(2, '收敛'))) return;
       } else if (form === 'deepdive') {
         for (let round = 2; round <= 3; round++) {
@@ -811,6 +837,8 @@ class MeetingEngine {
               probeContext: transcriptText(),
             })
           );
+          if (!stale())
+            await speak(mod, '主持追辩', buildModeratorDebatePrompt({ topic, recentContext: transcriptText() }));
           if (!(await pauseAndWait(round, '追问'))) return;
         }
       } else {
@@ -824,6 +852,8 @@ class MeetingEngine {
             recentContext: transcriptText(),
           })
         );
+        if (!stale())
+          await speak(mod, '主持追辩', buildModeratorDebatePrompt({ topic, recentContext: transcriptText() }));
         if (!(await pauseAndWait(2, '交锋'))) return;
       }
 
@@ -838,20 +868,27 @@ class MeetingEngine {
         // machine option markers so the 方案书 (panel/copy/.md/Word export) stays clean.
         const plan = parsePlan(synth) || stripResolutionMarkers(synth);
         this.commit({ phase: 'resolution', runState: 'awaiting_decision', activeSlotId: null, options, plan });
+        const recordId = `m-${Date.now()}`;
         if (plan.trim() || options.length > 0) {
           const s = this.state;
           appendHistory(this.team.id, {
-            id: `m-${Date.now()}`,
+            id: recordId,
             topic: s.topic,
             form: s.form,
             plan,
             options,
+            transcript: s.transcript,
+            decidedOptionId: s.decidedOptionId,
+            archivedPath: s.archivedPath,
             ts: Date.now(),
           });
         }
         if (plan.trim()) {
           void this.archivePlan(plan, this.state.topic).then((archivedPath) => {
-            if (!stale() && archivedPath) this.commit({ archivedPath });
+            if (!stale() && archivedPath) {
+              this.commit({ archivedPath });
+              patchHistoryRecord(this.team.id, recordId, { archivedPath });
+            }
           });
         }
       }
@@ -982,7 +1019,7 @@ class MeetingEngine {
 
   decide = (optionId: string): void => {
     this.commit({ decidedOptionId: optionId, phase: 'decided', runState: 'stopped', activeSlotId: null });
-    // Auto-generate well-formed Markdown / Word / PPT files of the final decision.
+    // Auto-generate well-formed Markdown / Word files of the final decision.
     const decision = this.state.options.find((o) => o.id === optionId) ?? null;
     void this.exportDecisionFiles(decision);
   };
@@ -1002,10 +1039,11 @@ class MeetingEngine {
       form: rec.form,
       plan: rec.plan,
       options: rec.options,
-      decidedOptionId: null,
+      decidedOptionId: rec.decidedOptionId ?? null,
+      transcript: rec.transcript ?? [],
       activeSlotId: null,
       runId: null,
-      archivedPath: null,
+      archivedPath: rec.archivedPath ?? null,
     });
   };
 

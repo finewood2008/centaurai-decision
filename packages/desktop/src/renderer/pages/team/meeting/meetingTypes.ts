@@ -17,9 +17,10 @@ export type MeetingPhase =
  * Discussion format — each is a different strategy for squeezing higher quality
  * out of a heterogeneous panel of agents. Encoded as the team_run leader task.
  */
-// Every form shares the universal backbone: ① 并行立场 (ALL participants incl. the
-// moderator answer the topic SIMULTANEOUSLY, streamed side-by-side) → ② 交锋讨论
-// (form-specific) → ③ 综合决议. The form only changes step ②.
+// Every form shares the universal backbone: ① 专家并行立场 (panelists answer the
+// topic simultaneously; the leader hosts and summarizes instead of joining this
+// wall) → ② 交锋讨论 (form-specific, with the leader pressing the debate) → ③ 综合决议.
+// The form only changes step ②.
 export type MeetingForm =
   | 'roundtable' // ② cross-examination debate
   | 'redteam' // ② red-team attacks the collective positions, then revise
@@ -41,10 +42,10 @@ export type MeetingRunState = 'stopped' | 'running' | 'awaiting_decision';
 export type MeetingTurnStatus = 'speaking' | 'done' | 'error';
 
 /**
- * One participant's turn in the CentaurAI-orchestrated roundtable. EVERY agent —
- * team-capable (claude/codex/aionrs) AND non-team-capable (openclaw/hermes) — is
- * an equal expert here; each is driven as a single-turn ACP conversation by the
- * renderer-side moderator loop, and its streamed reply becomes one transcript turn.
+ * One participant's turn in the CentaurAI-orchestrated roundtable. Team-capable
+ * (claude/codex/aionrs) and non-team-capable (openclaw/hermes) experts are each
+ * driven as a single-turn ACP conversation by the renderer-side moderator loop,
+ * and the leader's hosted summaries / probes are persisted in the same transcript.
  */
 export type MeetingTurn = {
   /** Unique per turn. */
@@ -109,6 +110,9 @@ export type MeetingRecord = {
   form: MeetingForm;
   plan: string;
   options: MeetingResolutionOption[];
+  transcript: MeetingTurn[];
+  decidedOptionId: string | null;
+  archivedPath: string | null;
   /** epoch ms */
   ts: number;
 };

@@ -55,10 +55,10 @@ const TurnAvatar: React.FC<{ icon?: string; agentType: string; name: string }> =
 };
 
 /**
- * Step-① 并行立场 presentation: the 顾问墙 — every agent answers at once, filling the
+ * Step-① 并行立场 presentation: the 专家墙 — panel experts answer at once, filling the
  * view as a dense grid of LIVE-streaming cards (each glowing while speaking), so the
- * boss feels surrounded by a wall of AI thinking for them simultaneously. Only this
- * first round is parallel; later rounds render one-by-one as full cards.
+ * boss can scan the expert field while the leader later summarizes the useful parts.
+ * Only this first round is parallel; later rounds render one-by-one as full cards.
  */
 const ParallelTurnWall: React.FC<{ turns: MeetingTurn[] }> = ({ turns }) => {
   const { t } = useTranslation();
@@ -71,7 +71,7 @@ const ParallelTurnWall: React.FC<{ turns: MeetingTurn[] }> = ({ turns }) => {
           aria-hidden='true'
         />
         <span>
-          {turns.length} {t('team.meeting.parallelWall', { defaultValue: '位 AI 顾问同时发言中，群策群力' })}
+          {turns.length} {t('team.meeting.parallelWall', { defaultValue: '位 AI 专家同时发言中，群策群力' })}
         </span>
       </div>
       <div className='grid grid-cols-1 xl:grid-cols-2 gap-12px'>
@@ -604,7 +604,7 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
                         if (orchestrator.exportPlan())
                           Message.success(
                             t('team.meeting.export.archiving', {
-                              defaultValue: '已请主持人导出 Word/PPT 并归档到内容中心，稍后可在内容中心查看',
+                              defaultValue: '已请主持人导出 Word/Markdown 并归档到内容中心，稍后可在内容中心查看',
                             })
                           );
                       }}
