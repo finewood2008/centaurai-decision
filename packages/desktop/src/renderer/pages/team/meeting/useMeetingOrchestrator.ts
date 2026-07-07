@@ -804,36 +804,32 @@ class MeetingEngine {
         this.updateTurn(moveTurnId, { text: moveText, status: moveText ? 'done' : 'error' });
         const move = parseModeratorMove(moveText, panelNames);
         if (move.conclude) break;
-        if (move.targetNames.length > 0) {
-          for (const targetName of move.targetNames) {
-            if (stale()) return;
-            const p = panel.find((pp) => pp.name === targetName);
-            if (!p) continue;
-            const prompt = [
-              `你是专家「${p.name}」。主持人点名向你追问，请直面回答，不要回避或打太极：`,
-              `议题：${topic}`,
-              refNote ? `\n【背景参考资料】：\n${refNote}` : '',
-              '',
-              `主持人的追问：\n${move.challenge}`,
-              '',
-              '直接回应，有锋芒。如果你之前的观点确实有漏洞，坦然承认并调整。',
-            ].join('\n');
-            await speak(p, '回应主持', prompt);
-          }
-        } else {
-          for (const p of panel) {
-            if (stale()) return;
-            const prompt = [
-              `你是专家「${p.name}」。主持人提出了一轮追问/挑战，请从你的视角回应：`,
-              `议题：${topic}`,
-              refNote ? `\n【背景参考资料】：\n${refNote}` : '',
-              '',
-              `主持人的追问：\n${move.challenge}`,
-              '',
-              '直接回应。可以反驳主持人、可以支持、也可以提出完全不同的视角。',
-            ].join('\n');
-            await speak(p, '交锋回应', prompt);
-          }
+        // Drive ALL panelists every round — @mentions are additive signals, not exclusive.
+        // Named experts get a targeted prompt; everyone else gets the general challenge.
+        const named = new Set(move.targetNames);
+        for (const p of panel) {
+          if (stale()) return;
+          const isNamed = named.has(p.name);
+          const prompt = isNamed
+            ? [
+                `你是专家「${p.name}」。主持人点名向你追问，请直面回答，不要回避或打太极：`,
+                `议题：${topic}`,
+                refNote ? `\n【背景参考资料】：\n${refNote}` : '',
+                '',
+                `主持人的追问：\n${move.challenge}`,
+                '',
+                '直接回应，有锋芒。如果你之前的观点确实有漏洞，坦然承认并调整。',
+              ].join('\n')
+            : [
+                `你是专家「${p.name}」。主持人正在推动新一轮讨论，请从你的视角回应：`,
+                `议题：${topic}`,
+                refNote ? `\n【背景参考资料】：\n${refNote}` : '',
+                '',
+                `主持人的追问（${named.size > 0 ? `点名了 ${Array.from(named).join('、')}` : '面向全体'}）：\n${move.challenge || '请各位专家基于前面的讨论继续深入发表观点。'}`,
+                '',
+                '直接回应。可以反驳主持人、可以回应被点名专家的观点、也可以提出完全不同的视角。',
+              ].join('\n');
+          await speak(p, isNamed ? '回应主持' : '交锋回应', prompt);
         }
         await speak(mod, '本轮回应小结', buildRoundPausePrompt({
           topic, round: debateRound + 1, stage: '交锋', recentContext: transcriptText(),
