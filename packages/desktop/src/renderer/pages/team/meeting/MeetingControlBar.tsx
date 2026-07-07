@@ -1,5 +1,5 @@
 import { Button, Checkbox, Input, Radio } from '@arco-design/web-react';
-import { CloseSmall, FolderClose, Redo, RightOne } from '@icon-park/react';
+import { CloseSmall, FolderClose, Redo, RightOne, Search } from '@icon-park/react';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import SendBox from '@/renderer/components/chat/SendBox';
@@ -237,6 +237,20 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
               />
             )}
           </div>
+          {!isResolution && (
+            <Button
+              size='small'
+              shape='round'
+              icon={<Search theme='outline' size='13' fill='currentColor' />}
+              onClick={orchestrator.refreshKnowledge}
+              data-testid='meeting-refresh-kb'
+              title={t(IS_DECISION ? 'decision.room.refreshKnowledge' : 'team.meeting.refreshKnowledge', {
+                defaultValue: '检索知识库',
+              })}
+            >
+              {t('team.meeting.searchKBCompact', { defaultValue: '查资料' })}
+            </Button>
+          )}
           <Button
             size='small'
             type='text'
@@ -264,6 +278,17 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
           <span className='text-12px text-[color:var(--bg-6)]'>{hint}</span>
         )}
         <div className='flex-1' />
+        {!isResolution && (
+          <Button
+            size='small'
+            shape='round'
+            icon={<Search theme='outline' size='13' fill='currentColor' />}
+            onClick={orchestrator.refreshKnowledge}
+            data-testid='meeting-refresh-kb'
+          >
+            {t('team.meeting.searchKBCompact', { defaultValue: '查资料' })}
+          </Button>
+        )}
         <Button
           size='small'
           type='text'

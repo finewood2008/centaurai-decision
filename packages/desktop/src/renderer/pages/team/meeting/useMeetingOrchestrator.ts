@@ -42,6 +42,7 @@ import {
   buildDivergePrompt,
   buildExportTask,
   buildLocalSynthesisPrompt,
+  buildModeratorDebateMovePrompt,
   buildModeratorDebatePrompt,
   buildModeratorOpeningPrompt,
   buildPanelistDebatePrompt,
@@ -50,6 +51,7 @@ import {
   buildRedTeamPrompt,
   buildReferenceContext,
   buildRoundPausePrompt,
+  parseModeratorMove,
   parsePlan,
   parseResolutionOptions,
   stripResolutionMarkers,
@@ -101,6 +103,8 @@ export type MeetingOrchestrator = {
   interject: (text: string) => void;
   /** Resume the next round after a between-round pause (boss clicks 继续讨论). */
   continueMeeting: () => void;
+  /** Re-query the knowledge base mid-meeting and inject results as a transcript turn. */
+  refreshKnowledge: () => void;
   /** Cancel the in-flight debate. */
   cancel: () => void;
   /** Boss picks a final option. */
@@ -785,102 +789,77 @@ class MeetingEngine {
       await Promise.all(panel.map((p) => speak(p, '并行立场', openingPosition(p), true)));
       if (!(await pauseAndWait(1, '并行立场'))) return;
 
-      // ② 交锋讨论 — form-specific (the parallel positions above are the shared input).
-      if (form === 'redteam') {
-        await eachPanelist('红队猛攻', (p) =>
-          buildRedTeamPrompt({ topic, persona: p.name, lens: lensByPanel.get(p.id), draftContext: transcriptText() })
-        );
-        if (!stale())
-          await speak(mod, '主持追辩', buildModeratorDebatePrompt({ topic, recentContext: transcriptText() }));
-        if (!(await pauseAndWait(2, '红队猛攻'))) return;
-      } else if (form === 'tournament') {
-        await eachPanelist('互评', (p) =>
-          buildPanelistDebatePrompt({
-            topic,
-            persona: p.name,
-            lens: lensByPanel.get(p.id),
-            round: 2,
-            recentContext: transcriptText(),
-          })
-        );
-        if (!stale())
-          await speak(mod, '主持追辩', buildModeratorDebatePrompt({ topic, recentContext: transcriptText() }));
-        if (!(await pauseAndWait(2, '互评'))) return;
-      } else if (form === 'diverge') {
-        if (!stale()) {
-          await speak(mod, '聚类', buildClusterPrompt({ topic, ideasContext: transcriptText() }));
+      // ② Adaptive debate — moderator dynamically drives the discussion.
+      const panelNames = panel.map((p) => p.name);
+      const MAX_DEBATE_ROUNDS = 5;
+      for (let debateRound = 1; debateRound <= MAX_DEBATE_ROUNDS; debateRound++) {
+        if (stale()) return;
+        const movePrompt = buildModeratorDebateMovePrompt({
+          topic, form, round: debateRound, fullTranscript: transcriptText(),
+          panelNames, refNote: refNote || undefined,
+        });
+        const moveTurnId = this.addTurn(mod, `交锋·第${debateRound}轮`);
+        const moveText = await this.askTurn(mod.conversationId, moveTurnId, movePrompt);
+        if (stale()) return;
+        this.updateTurn(moveTurnId, { text: moveText, status: moveText ? 'done' : 'error' });
+        const move = parseModeratorMove(moveText, panelNames);
+        if (move.conclude) break;
+        if (move.targetNames.length > 0) {
+          for (const targetName of move.targetNames) {
+            if (stale()) return;
+            const p = panel.find((pp) => pp.name === targetName);
+            if (!p) continue;
+            const prompt = [
+              `你是专家「${p.name}」。主持人点名向你追问，请直面回答，不要回避或打太极：`,
+              `议题：${topic}`,
+              refNote ? `\n【背景参考资料】：\n${refNote}` : '',
+              '',
+              `主持人的追问：\n${move.challenge}`,
+              '',
+              '直接回应，有锋芒。如果你之前的观点确实有漏洞，坦然承认并调整。',
+            ].join('\n');
+            await speak(p, '回应主持', prompt);
+          }
+        } else {
+          for (const p of panel) {
+            if (stale()) return;
+            const prompt = [
+              `你是专家「${p.name}」。主持人提出了一轮追问/挑战，请从你的视角回应：`,
+              `议题：${topic}`,
+              refNote ? `\n【背景参考资料】：\n${refNote}` : '',
+              '',
+              `主持人的追问：\n${move.challenge}`,
+              '',
+              '直接回应。可以反驳主持人、可以支持、也可以提出完全不同的视角。',
+            ].join('\n');
+            await speak(p, '交锋回应', prompt);
+          }
         }
-        await eachPanelist('收敛', (p) =>
-          buildConvergePrompt({
-            topic,
-            persona: p.name,
-            lens: lensByPanel.get(p.id),
-            clustersContext: transcriptText(),
-          })
-        );
-        if (!stale())
-          await speak(mod, '主持追辩', buildModeratorDebatePrompt({ topic, recentContext: transcriptText() }));
-        if (!(await pauseAndWait(2, '收敛'))) return;
-      } else if (form === 'deepdive') {
-        for (let round = 2; round <= 3; round++) {
-          if (stale()) break;
-          await speak(
-            mod,
-            '追问',
-            buildDeepDiveProbePrompt({ topic, round: round - 1, priorContext: transcriptText() })
-          );
-          await eachPanelist('深答', (p) =>
-            buildDeepDiveAnswerPrompt({
-              topic,
-              persona: p.name,
-              lens: lensByPanel.get(p.id),
-              probeContext: transcriptText(),
-            })
-          );
-          if (!stale())
-            await speak(mod, '主持追辩', buildModeratorDebatePrompt({ topic, recentContext: transcriptText() }));
-          if (!(await pauseAndWait(round, '追问'))) return;
-        }
-      } else {
-        // roundtable (default): 交锋质询
-        await eachPanelist('交锋', (p) =>
-          buildPanelistDebatePrompt({
-            topic,
-            persona: p.name,
-            lens: lensByPanel.get(p.id),
-            round: 2,
-            recentContext: transcriptText(),
-          })
-        );
-        if (!stale())
-          await speak(mod, '主持追辩', buildModeratorDebatePrompt({ topic, recentContext: transcriptText() }));
-        if (!(await pauseAndWait(2, '交锋'))) return;
+        await speak(mod, '本轮回应小结', buildRoundPausePrompt({
+          topic, round: debateRound + 1, stage: '交锋', recentContext: transcriptText(),
+        }));
+        await this.waitForContinue(myRun);
+        if (stale()) return;
       }
 
-      // 4) Moderator synthesizes the 方案书 + decision options.
+      // ③ 综合决议
       if (!stale()) {
+        const synthPrompt = buildLocalSynthesisPrompt(topic, transcriptText()) +
+          (refNote ? `\n\n【注意：请综合参考以下背景资料进行最终判断】\n${refNote}` : '');
         const tid = this.addTurn(mod, '综合');
-        const synth = await this.askTurn(mod.conversationId, tid, buildLocalSynthesisPrompt(topic, transcriptText()));
+        const synth = await this.askTurn(mod.conversationId, tid, synthPrompt);
         if (stale()) return;
         this.updateTurn(tid, { text: synth, status: synth ? 'done' : 'error' });
         const options = parseResolutionOptions(synth);
-        // When the model omits @@PLAN@@, fall back to the whole synthesis but strip the
-        // machine option markers so the 方案书 (panel/copy/.md/Word export) stays clean.
         const plan = parsePlan(synth) || stripResolutionMarkers(synth);
         this.commit({ phase: 'resolution', runState: 'awaiting_decision', activeSlotId: null, options, plan });
         const recordId = `m-${Date.now()}`;
         if (plan.trim() || options.length > 0) {
           const s = this.state;
           appendHistory(this.team.id, {
-            id: recordId,
-            topic: s.topic,
-            form: s.form,
-            plan,
-            options,
-            transcript: s.transcript,
-            decidedOptionId: s.decidedOptionId,
-            archivedPath: s.archivedPath,
-            ts: Date.now(),
+            id: recordId, topic: s.topic, form: s.form, plan, options,
+            transcript: s.transcript, decidedOptionId: s.decidedOptionId,
+            archivedPath: s.archivedPath, ts: Date.now(),
           });
         }
         if (plan.trim()) {
@@ -1057,6 +1036,23 @@ class MeetingEngine {
     this.notify();
   };
 
+  refreshKnowledge = (): void => {
+    const topic = this.state.topic;
+    if (!topic) return;
+    void retrieveKnowledgeContext(topic).then((result) => {
+      if (!result.context) { Message.info('知识库中未找到相关内容'); return; }
+      const id = `t-${this.state.transcript.length}-system-kb`;
+      this.commit({ transcript: [...this.state.transcript, {
+        id, participantId: 'system-kb', name: '知识库', icon: '📚',
+        agent_type: 'system', isModerator: false, phaseLabel: '参考资料',
+        parallel: false,
+        text: `📚 **知识库检索结果（${result.count} 条）**\n\n${result.context}`,
+        status: 'done',
+      }]});
+      Message.success(`已注入 ${result.count} 条知识库参考资料`);
+    }).catch(() => { Message.warning('知识库检索失败，请确认向量库服务已启动'); });
+  };
+
   reset = (): void => {
     this.runSeq++; // invalidate the active run; the awaiting frame unwinds via loopUnsubs
     this.loopUnsubs.forEach((o) => o());
@@ -1087,6 +1083,7 @@ class MeetingEngine {
       openRecord: this.openRecord,
       addGuest: this.addGuest,
       removeGuest: this.removeGuest,
+      refreshKnowledge: this.refreshKnowledge,
       reset: this.reset,
     };
   }

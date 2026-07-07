@@ -613,3 +613,79 @@ export function matchSpeakerName(answer: string, names: string[]): string | null
   const contained = names.find((n) => cleaned.includes(n));
   return contained ?? null;
 }
+
+// --- Adaptive debate: moderator-driven dynamic rounds -----------------------
+
+export type ModeratorMove = {
+  conclude: boolean;
+  targetNames: string[];
+  challenge: string;
+};
+
+export function buildModeratorDebateMovePrompt(params: {
+  topic: string;
+  form: import('./meetingTypes').MeetingForm;
+  round: number;
+  fullTranscript: string;
+  panelNames: string[];
+  refNote?: string;
+}): string {
+  const { topic, form, round, fullTranscript, panelNames, refNote } = params;
+  const formHints: Record<string, string> = {
+    roundtable: '圆桌共识模式：推动交锋质询，暴露各自论据的强弱，促成共识。',
+    redteam: '红蓝对抗模式：继续猛攻已有方案的漏洞和盲区，不要手下留情。',
+    tournament: '方案竞标模式：对各方案交叉打分、挑战弱项，看哪个方案经得起拷打。',
+    diverge: '发散收敛模式：推动聚类和提炼，把散点想法收拢成可执行的路径。',
+    deepdive: '逐层深挖模式：追问不够深入的点，把模糊的论断挖到具体机制和数字。',
+  };
+  return [
+    '你是这场决策会议的主持人。现在需要你**主动驱动辩论**，而不是被动做小结。',
+    `议题：${topic}`,
+    `当前是第 ${round} 轮交锋。会议模式：${formHints[form] ?? formHints.roundtable}`,
+    `专家名单：${panelNames.join('、')}（你可以 @名字 点名指定谁来回应）`,
+    refNote ? `\n【背景参考资料，请持续参考】：\n${refNote}` : '',
+    '',
+    '== 完整讨论记录 ==',
+    fullTranscript || '（尚未有发言）',
+    '',
+    '请完成两件事（简洁、有力）：',
+    '',
+    '**1) 态势评估（1-3 句话，让老板看懂现状）：**',
+    '- 哪些观点已经站得住脚 / 形成共识？',
+    '- 哪些点还在对撞、论据不足、或存在盲区？',
+    '- 讨论是否可以收束了？',
+    '',
+    '**2) 下一步行动（二选一）：**',
+    '',
+    '**如果还需要继续讨论：**',
+    '- 明确指出你要追问哪位/哪些专家（用 @专家名），追问什么具体问题',
+    '- 不要泛泛说"大家再讨论一下"，要说"@张三，你刚才说 ROI 能做到 3 倍，但你的计算忽略了获客成本的递增加速——请回应"',
+    '- 可以是点名互怼（"@李四，@王五 刚才的观点互相矛盾，请各自回应对方"）',
+    '- 可以是红队攻击（"我要求所有人用最悲观假设重算一遍"）',
+    '- 可以是推动收敛（"现在大家把各自方案精简到一句话，然后投票"）',
+    '',
+    '**如果讨论已经充分：**',
+    '- 在回复末尾单独一行写上 @@CONCLUDE@@',
+    '- 前面的内容仍要包含态势评估（总结共识、分歧、结论方向），这会直接给老板看',
+    '',
+    '记住：你是辩论主持人，不是会议记录员。你要把讨论**推向深处**，不要放任专家自说自话。',
+  ].join('\n');
+}
+
+const CONCLUDE_MARKER = '@@CONCLUDE@@';
+
+export function parseModeratorMove(text: string, panelNames: string[]): ModeratorMove {
+  const cleaned = text.trim();
+  if (!cleaned) return { conclude: true, targetNames: [], challenge: '' };
+  if (cleaned.lastIndexOf(CONCLUDE_MARKER) >= 0) return { conclude: true, targetNames: [], challenge: '' };
+  const concludePatterns = [
+    /讨论已经?充分/i, /可以综合/i, /进入综合/i, /准备决议/i,
+    /综上所述/i, /最终建议/i, /达成共识/i, /可以拍板/i,
+  ];
+  if (concludePatterns.some((p) => p.test(cleaned))) return { conclude: true, targetNames: [], challenge: '' };
+  const targets: string[] = [];
+  for (const name of panelNames) {
+    if (cleaned.includes(`@${name}`)) targets.push(name);
+  }
+  return { conclude: false, targetNames: targets.length > 0 ? targets : [], challenge: cleaned };
+}
