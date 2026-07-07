@@ -94,6 +94,231 @@ const useFormatContent = (content: string) => {
   }, [content]);
 };
 
+const LOCAL_VECTOR_DB_DISPLAY_MARK = '【local-vector-db 检索结果】';
+
+type LocalVectorDbDisplay = {
+  question: string;
+  mode: string;
+  count: string;
+  sources: string[];
+  snippet: string;
+  preview: string;
+};
+
+const decodeLocalVectorText = (value: string): string =>
+  String(value || '')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, '&');
+
+const cleanLocalVectorText = (value: string): string =>
+  decodeLocalVectorText(
+    String(value || '')
+      .replace(/<\/details>/g, '\n')
+      .replace(/<\/section>/g, '\n')
+      .replace(/<br\s*\/?\s*>/gi, '\n')
+      .replace(/<[^>]+>/g, ' ')
+  )
+    .replace(/\n{3,}/g, '\n\n')
+    .replace(/[ \t]{2,}/g, ' ')
+    .trim();
+
+const isLocalVectorSourceName = (value: string): boolean =>
+  /\.[A-Za-z0-9]{1,8}(\b|$)/.test(value) || /[\\/]/.test(value) || /^(USER|AGENTS)\.md$/i.test(value);
+
+const localVectorPreview = (value: string): string =>
+  cleanLocalVectorText(value)
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(
+      (line) =>
+        line &&
+        !/^检索模式[：:]/.test(line) &&
+        !/^[-—]{3,}$/.test(line) &&
+        !/^用户问题[：:]/.test(line) &&
+        !/^##\s*/.test(line) &&
+        !/^\[\d+\]\s+/.test(line)
+    )
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+
+const clampLocalVectorText = (value: string): string => {
+  const text = String(value || '').trim();
+  return text.length > 520 ? `${text.slice(0, 520)}…` : text;
+};
+
+const parseLocalVectorDisplay = (content: string): LocalVectorDbDisplay | null => {
+  const text = String(content || '');
+  if (!text.startsWith(LOCAL_VECTOR_DB_DISPLAY_MARK)) return null;
+
+  const questionMatch = text.match(/\n---\n(?:#{1,6}\s*)?用户问题(?:[：:]?\s*\n|[：:]\s*)([\s\S]*)$/);
+  const question = questionMatch ? questionMatch[1].trim() : '';
+  const body = text.slice(LOCAL_VECTOR_DB_DISPLAY_MARK.length, questionMatch?.index ?? text.length).trim();
+  const mode = ((body.match(/(?:检索模式|模式)[：:]\s*([^·\n<]+)/) || [])[1] || '本地检索').trim();
+
+  let sources: string[] = [];
+  for (const match of body.matchAll(/local-vector-db-source-name[^>]*>([\s\S]*?)<\/span>/g)) {
+    sources.push(cleanLocalVectorText(match[1]));
+  }
+  for (const match of body.matchAll(/^\[(\d+)\]\s*([^\n]+)/gm)) {
+    sources.push(cleanLocalVectorText(match[2]).replace(/\s*·\s*score.*$/, ''));
+  }
+  for (const match of body.matchAll(/^##\s+(.+)$/gm)) {
+    const source = cleanLocalVectorText(match[1]).replace(/（\d+\s*条）$/, '').trim();
+    if (isLocalVectorSourceName(source)) {
+      sources.push(source);
+    }
+  }
+  sources = [...new Set(sources.map((source) => source.trim()).filter(Boolean))].slice(0, 6);
+
+  const count = ((body.match(/(\d+)\s*条/) || [])[1] || sources.length || '').toString();
+  const snippet = cleanLocalVectorText(body).slice(0, 2200);
+  const preview = clampLocalVectorText(localVectorPreview(body) || snippet);
+
+  return { question: question || text, mode, count, sources, snippet, preview };
+};
+
+const renderLocalVectorUserMessage = (content: string): React.ReactNode => {
+  const result = parseLocalVectorDisplay(content);
+
+  if (!result) {
+    return (
+      <div className='whitespace-pre-wrap break-words' data-testid='message-text-content'>
+        {content}
+      </div>
+    );
+  }
+
+  const sourceCount = result.count ? ` · ${result.count} 条来源` : '';
+
+  return (
+    <div className='flex flex-col gap-8px' data-testid='message-text-content'>
+      <div className='whitespace-pre-wrap break-words'>{result.question}</div>
+      <div
+        className='w-full'
+        style={{
+          width: 'min(560px,72vw)',
+          maxWidth: '100%',
+          boxSizing: 'border-box',
+          border: '1px solid var(--aou-3, #ddccb4)',
+          borderLeft: '3px solid var(--brand, #c0755a)',
+          background: 'var(--aou-1, #f3ece2)',
+          borderRadius: 8,
+          padding: '12px 13px',
+          boxShadow: '0 12px 32px rgba(78,44,32,.12)',
+        }}
+      >
+        <div className='flex items-start justify-between gap-12px'>
+          <div className='flex items-start gap-9px min-w-0'>
+            <span
+              className='shrink-0 text-11px font-700'
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: 7,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'var(--brand-light, #f4e7e0)',
+                border: '1px solid var(--aou-3, #ddccb4)',
+                color: 'var(--brand, #c0755a)',
+                letterSpacing: 0,
+              }}
+            >
+              KB
+            </span>
+            <div className='min-w-0'>
+              <div className='text-13px font-700 text-t-primary truncate'>本地知识库检索</div>
+              <div className='text-11px text-t-secondary mt-1px'>已选取相关片段作为回答依据</div>
+            </div>
+          </div>
+          <span
+            className='text-11px shrink-0'
+            style={{
+              border: '1px solid var(--aou-3, #ddccb4)',
+              background: 'var(--bg-1, #fffdfa)',
+              borderRadius: 999,
+              padding: '3px 8px',
+              color: 'var(--color-text-2,#4e5969)',
+            }}
+          >
+            {result.mode}
+            {sourceCount}
+          </span>
+        </div>
+
+        {result.preview && (
+          <div className='mt-10px' style={{ borderTop: '1px solid var(--aou-3, #ddccb4)', paddingTop: 9 }}>
+            <div className='text-11px font-600 mb-5px' style={{ color: 'var(--color-text-2,#4e5969)' }}>
+              检索内容预览
+            </div>
+            <div
+              className='whitespace-pre-wrap break-words'
+              style={{
+                fontSize: 12,
+                lineHeight: 1.65,
+                maxHeight: 104,
+                overflow: 'hidden',
+                color: 'var(--color-text-1,#1d2129)',
+              }}
+            >
+              {result.preview}
+            </div>
+          </div>
+        )}
+
+        {result.sources.length > 0 && (
+          <div className='mt-10px flex flex-wrap gap-6px'>
+            {result.sources.slice(0, 5).map((source, index) => (
+              <span
+                key={index}
+                className='text-11px truncate'
+                style={{
+                  maxWidth: 220,
+                  border: '1px solid var(--aou-3, #ddccb4)',
+                  background: 'var(--bg-1, #fffdfa)',
+                  borderRadius: 6,
+                  padding: '3px 7px',
+                  color: 'var(--color-text-2,#4e5969)',
+                }}
+              >
+                {source}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {result.snippet && (
+          <details className='mt-9px'>
+            <summary className='text-12px cursor-pointer select-none' style={{ color: 'var(--brand)', outline: 'none' }}>
+              展开完整检索片段
+            </summary>
+            <pre
+              className='mt-7px mb-0 whitespace-pre-wrap break-words'
+              style={{
+                maxHeight: 280,
+                overflow: 'auto',
+                fontSize: 11,
+                lineHeight: 1.6,
+                border: '1px solid var(--aou-3, #ddccb4)',
+                borderRadius: 7,
+                padding: 10,
+                background: 'var(--bg-1, #fffdfa)',
+                color: 'var(--color-text-2,#4e5969)',
+              }}
+            >
+              {result.snippet}
+            </pre>
+          </details>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const MessageText: React.FC<{ message: IMessageText }> = ({ message }) => {
   // Filter think tags from content before rendering
   // 在渲染前过滤 think 标签
@@ -209,9 +434,7 @@ const MessageText: React.FC<{ message: IMessageText }> = ({ message }) => {
         >
           {/* JSON 内容使用折叠组件 Use CollapsibleContent for JSON content */}
           {shouldRenderPlainText ? (
-            <div className='whitespace-pre-wrap break-words' data-testid='message-text-content'>
-              {text}
-            </div>
+            renderLocalVectorUserMessage(text)
           ) : json ? (
             <CollapsibleContent maxHeight={200} defaultCollapsed={true}>
               <div data-testid='message-text-content'>

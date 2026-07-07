@@ -13,6 +13,7 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getConversationRuntimeWorkspaceErrorMessage } from '../../utils/conversationCreateError';
 import { buildSendFailureError } from './buildSendFailureError';
+import { maybeAttachLocalVectorContext } from './localVectorDbContext';
 
 type UseAcpInitialMessageParams = {
   conversation_id: string;
@@ -59,7 +60,8 @@ export const useAcpInitialMessage = ({
         const initialMessage = JSON.parse(storedMessage);
         const input = typeof initialMessage.input === 'string' ? initialMessage.input : '';
         const files = Array.isArray(initialMessage.files) ? initialMessage.files : [];
-        const displayMessage = buildDisplayMessage(input, files, workspacePath || '');
+        const inputWithLocalContext = await maybeAttachLocalVectorContext(input, backend);
+        const displayMessage = buildDisplayMessage(inputWithLocalContext, files, workspacePath || '');
 
         markSendStarted?.();
         setAiProcessing(true);
