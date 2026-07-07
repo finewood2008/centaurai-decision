@@ -1,13 +1,14 @@
-import { Button, Checkbox, Input, Radio } from '@arco-design/web-react';
+import { Button, Checkbox, Input, Radio, Spin } from '@arco-design/web-react';
 import { CloseSmall, FolderClose, Redo, RightOne, Search } from '@icon-park/react';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import SendBox from '@/renderer/components/chat/SendBox';
 import SharedLibraryPicker from '@/renderer/components/media/SharedLibraryPicker';
+import { retrieveKnowledgeContext } from '@/renderer/services/knowledgeBaseSearch';
+import { IS_DECISION } from '@/common/config/constants';
 import type { MeetingOrchestrator } from './useMeetingOrchestrator';
 import { MEETING_FORMS } from './meetingPrompts';
 import type { MeetingForm } from './meetingTypes';
-import { IS_DECISION } from '@/common/config/constants';
 
 /** Last path segment, for a compact attachment chip label. */
 const baseName = (p: string): string => p.split(/[\\/]/).pop() || p;
@@ -36,6 +37,34 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
   const [pickerOpen, setPickerOpen] = useState(false);
   const [form, setForm] = useState<MeetingForm>(state.form || 'roundtable');
 
+  // KB preview state
+  const [kbPreviewOpen, setKbPreviewOpen] = useState(false);
+  const [kbLoading, setKbLoading] = useState(false);
+  const [kbHits, setKbHits] = useState<{ fileName: string; text: string }[]>([]);
+  const [kbError, setKbError] = useState('');
+
+  const handleKbPreview = async () => {
+    const q = topic.trim();
+    if (!q) return;
+    setKbLoading(true);
+    setKbError('');
+    try {
+      const result = await retrieveKnowledgeContext(q);
+      if (!result.context) { setKbHits([]); return; }
+      // Parse individual hits from the formatted context block
+      const hits = (result.context || '').split('\n\n').filter(Boolean).map((block) => {
+        const m = block.match(/^\[知识库 \d+\] (.+):\n([\s\S]*)/);
+        return m ? { fileName: m[1], text: m[2].trim() } : { fileName: '未知', text: block.trim() };
+      });
+      setKbHits(hits);
+      setKbPreviewOpen(true);
+    } catch (e) {
+      setKbError('检索失败，请确认向量库服务已启动');
+    } finally {
+      setKbLoading(false);
+    }
+  };
+
   const activeDecision = IS_DECISION && state.phase !== 'idle' && state.phase !== 'decided';
   const wrapperClass = activeDecision
     ? 'shrink-0 px-18px py-8px border-t border-solid border-[color:var(--border-light)] bg-[var(--bg-base)]'
@@ -47,7 +76,7 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
         <div className='flex items-center gap-12px mb-10px'>
           <Checkbox
             checked={useKnowledgeBase}
-            onChange={setUseKnowledgeBase}
+            onChange={(v) => { setUseKnowledgeBase(v); if (!v) setKbPreviewOpen(false); }}
             disabled={!canStart}
             className='text-12px text-[color:var(--color-text-2)] shrink-0'
             data-testid='meeting-kb-toggle'
@@ -56,6 +85,28 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
               defaultValue: '检索知识库',
             })}
           </Checkbox>
+          {useKnowledgeBase && (
+            <>
+              <Button
+                size='small'
+                shape='round'
+                loading={kbLoading}
+                disabled={!topic.trim()}
+                onClick={handleKbPreview}
+                data-testid='meeting-kb-preview'
+              >
+                {t(IS_DECISION ? 'decision.room.kbPreview' : 'team.meeting.kbPreview', {
+                  defaultValue: '预览检索',
+                })}
+              </Button>
+              {kbHits.length > 0 && (
+                <span className='shrink-0 text-12px text-[color:var(--primary)] font-medium'>
+                  {t('team.meeting.kbHitCount', { count: kbHits.length, defaultValue: `${kbHits.length} 条命中` })}
+                </span>
+              )}
+            </>
+          )}
+          {kbError && <span className='shrink-0 text-11px text-[color:var(--danger)]'>{kbError}</span>}
           <Button
             size='small'
             shape='round'
@@ -89,6 +140,44 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
             </div>
           )}
         </div>
+        {/* KB preview results — shows when preview has been clicked */}
+        {kbPreviewOpen && kbHits.length > 0 && (
+          <div className='rd-12px border border-solid border-[color:var(--border-light)] bg-[var(--bg-1)] mb-10px overflow-hidden'>
+            <div className='flex items-center gap-6px px-14px h-34px border-b border-solid border-[color:var(--border-light)] text-12px font-medium text-[color:var(--primary)]'>
+              <Search theme='outline' size='13' fill='currentColor' />
+              <span>
+                {t('team.meeting.kbResultsTitle', {
+                  count: kbHits.length,
+                  defaultValue: `知识库检索结果 · ${kbHits.length} 条命中`,
+                })}
+              </span>
+              <div className='flex-1' />
+              <Button size='mini' type='text' onClick={() => setKbPreviewOpen(false)}>
+                {t('team.meeting.kbCollapse', { defaultValue: '收起' })}
+              </Button>
+            </div>
+            <div className='max-h-220px overflow-y-auto [scrollbar-width:thin]'>
+              {kbHits.map((hit, i) => (
+                <div
+                  key={i}
+                  className='px-14px py-9px border-b border-solid border-[color:var(--border-light)] last:border-b-0'
+                >
+                  <div className='text-11px font-semibold text-[color:var(--text-secondary)] mb-3px truncate'>
+                    {hit.fileName}
+                  </div>
+                  <div className='text-12px leading-[1.6] text-[color:var(--text-primary)] line-clamp-3'>
+                    {hit.text.length > 240 ? hit.text.slice(0, 240) + '…' : hit.text}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {kbPreviewOpen && kbHits.length === 0 && !kbLoading && (
+          <div className='rd-12px border border-solid border-[color:var(--border-light)] px-14px py-12px mb-10px text-12px text-[color:var(--bg-6)]'>
+            {t('team.meeting.kbNoResults', { defaultValue: '知识库中未找到与当前议题相关的内容' })}
+          </div>
+        )}
         {/* Flow picker — Decision edition fixes the 流程 at create time (by department),
             so the runtime picker is hidden there; full/team keep it. */}
         {!IS_DECISION && (
