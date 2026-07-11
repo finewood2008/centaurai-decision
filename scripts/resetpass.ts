@@ -30,7 +30,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { startBackend, stopBackend } from '@aionui/web-host';
 
-const BACKEND_BINARY = process.platform === 'win32' ? 'aioncore.exe' : 'aioncore';
+const BACKEND_BINARY = process.platform === 'win32' ? 'centaurai-core.exe' : 'centaurai-core';
 
 const __filename = fileURLToPath(import.meta.url);
 const repoRoot = path.resolve(path.dirname(__filename), '..');
@@ -80,9 +80,13 @@ function resolveWorkDir(): string {
 }
 
 function resolveBackendBinary(): string {
+  if (process.env.CENTAURAI_CORE_BIN) return process.env.CENTAURAI_CORE_BIN;
   if (process.env.AIONUI_BACKEND_BIN) return process.env.AIONUI_BACKEND_BIN;
 
-  const bundledBase = process.env.AIONUI_BACKEND_BUNDLED_DIR ?? path.join(repoRoot, 'resources', 'bundled-aioncore');
+  const bundledBase =
+    process.env.CENTAURAI_CORE_BUNDLED_DIR ??
+    process.env.AIONUI_BACKEND_BUNDLED_DIR ??
+    path.join(repoRoot, 'resources', 'bundled-centaurai-core');
   const runtimeKey = `${process.platform}-${process.arch}`;
   const bundled = path.join(bundledBase, runtimeKey, BACKEND_BINARY);
   if (fs.existsSync(bundled)) return bundled;
@@ -96,7 +100,7 @@ function resolveBackendBinary(): string {
   }
 
   throw new Error(
-    `Cannot find "${BACKEND_BINARY}". Set AIONUI_BACKEND_BIN, put it on PATH, or place it at ${bundled}.`
+    `Cannot find "${BACKEND_BINARY}". Set CENTAURAI_CORE_BIN, put it on PATH, or place it at ${bundled}.`
   );
 }
 

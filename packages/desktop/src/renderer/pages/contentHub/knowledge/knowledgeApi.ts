@@ -53,7 +53,7 @@ export async function fetchKnowledgeDocs(limit = 300, offset = 0): Promise<{ tot
     : await fetch(`${getBaseUrl()}/api/vector-documents`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ endpoint, limit, offset }),
+        body: JSON.stringify({ limit, offset }),
       });
   if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
   const data = await resp.json();
@@ -65,7 +65,7 @@ function imageUrl(path: string): string {
   const endpoint = vectorEndpoint();
   return isElectronDesktop()
     ? `${endpoint}/api/image?path=${encodeURIComponent(path)}`
-    : `${getBaseUrl()}/api/vector-image?endpoint=${encodeURIComponent(endpoint)}&path=${encodeURIComponent(path)}`;
+    : `${getBaseUrl()}/api/vector-image?path=${encodeURIComponent(path)}`;
 }
 
 /**

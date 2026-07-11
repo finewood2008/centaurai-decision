@@ -1,5 +1,5 @@
 /**
- * Resolve the aioncore binary path.
+ * Resolve the CentaurAI Core binary path.
  *
  * Search order:
  *  1. Bundled with app (production)
@@ -10,14 +10,36 @@ import { existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { execSync } from 'node:child_process';
 
-const BINARY_NAME = 'aioncore';
 const MAX_DIR_ENTRIES = 20;
 const MAX_LOOKUP_TEXT_LENGTH = 1000;
+
+type BackendBinaryVariant = {
+  binaryName: string;
+  bundleDirName: string;
+  displayName: string;
+};
+
+const CENTAUR_CORE: BackendBinaryVariant = {
+  binaryName: 'centaurai-core',
+  bundleDirName: 'bundled-centaurai-core',
+  displayName: 'CentaurAI Core',
+};
+
+const LEGACY_CORE: BackendBinaryVariant = {
+  binaryName: 'aioncore',
+  bundleDirName: 'bundled-aioncore',
+  displayName: 'Legacy AionCore',
+};
+
+type ResolveBinaryOptions = {
+  allowSystemPath?: boolean;
+};
 
 type BackendBinaryResolveDiagnostics = {
   resourcesPath?: string;
   runtimeKey: string;
   binaryName: string;
+  bundleDirName: string;
   checkedBundledPath?: string;
   bundledDirExists?: boolean;
   runtimeDirExists?: boolean;
@@ -38,8 +60,8 @@ class BackendBinaryResolveError extends Error {
   }
 }
 
-function getBinaryName(): string {
-  return process.platform === 'win32' ? `${BINARY_NAME}.exe` : BINARY_NAME;
+function getBinaryName(variant: BackendBinaryVariant): string {
+  return process.platform === 'win32' ? `${variant.binaryName}.exe` : variant.binaryName;
 }
 
 function getRuntimeKey(): string {
@@ -61,35 +83,49 @@ function trimLookupText(text: string): string {
 }
 
 /**
- * Resolve the aioncore binary path.
+ * Resolve the CentaurAI Core binary path.
  * Returns the absolute path to the binary, or throws if not found.
  */
-export function resolveBinaryPath(): string {
+function resolveVariantBinary(variant: BackendBinaryVariant, options: ResolveBinaryOptions = {}): string {
   const runtimeKey = getRuntimeKey();
-  const binaryName = getBinaryName();
+  const binaryName = getBinaryName(variant);
   const diagnostics: BackendBinaryResolveDiagnostics = {
     runtimeKey,
     binaryName,
-    pathLookupCommand: process.platform === 'win32' ? `where ${BINARY_NAME}` : `which ${BINARY_NAME}`,
+    bundleDirName: variant.bundleDirName,
+    pathLookupCommand: process.platform === 'win32' ? `where ${variant.binaryName}` : `which ${variant.binaryName}`,
   };
 
-  const bundled = bundledPath(runtimeKey, binaryName, diagnostics);
+  const bundled = bundledPath(variant.bundleDirName, runtimeKey, binaryName, diagnostics);
   if (bundled) return bundled;
 
-  const fromPath = resolveFromSystemPATH(diagnostics);
-  if (fromPath) return fromPath;
+  if (options.allowSystemPath ?? true) {
+    const fromPath = resolveFromSystemPATH(diagnostics);
+    if (fromPath) return fromPath;
+  }
 
   throw new BackendBinaryResolveError(
-    `Cannot find "${BINARY_NAME}" binary. Checked bundled location and system PATH.`,
+    `Cannot find ${variant.displayName} "${variant.binaryName}" binary. Checked locked bundled location${
+      (options.allowSystemPath ?? true) ? ' and system PATH' : ''
+    }.`,
     diagnostics
   );
 }
 
+export function resolveBinaryPath(options: ResolveBinaryOptions = {}): string {
+  return resolveVariantBinary(CENTAUR_CORE, options);
+}
+
+export function resolveLegacyBinaryPath(options: ResolveBinaryOptions = {}): string {
+  return resolveVariantBinary(LEGACY_CORE, options);
+}
+
 /**
  * Check bundled binary in resources directory.
- * Layout: bundled-aioncore/{platform}-{arch}/aioncore[.exe]
+ * Layout: bundled-centaurai-core/{platform}-{arch}/centaurai-core[.exe]
  */
 function bundledPath(
+  bundleDirName: string,
   runtimeKey: string,
   binaryName: string,
   diagnostics: BackendBinaryResolveDiagnostics
@@ -98,7 +134,7 @@ function bundledPath(
   if (!resourcesPath) return null;
   diagnostics.resourcesPath = resourcesPath;
 
-  const bundledDir = join(resourcesPath, 'bundled-aioncore');
+  const bundledDir = join(resourcesPath, bundleDirName);
   const runtimeDir = join(bundledDir, runtimeKey);
   const candidate = join(runtimeDir, binaryName);
   diagnostics.checkedBundledPath = candidate;
@@ -127,4 +163,4 @@ function resolveFromSystemPATH(diagnostics: BackendBinaryResolveDiagnostics): st
   return null;
 }
 
-export type { BackendBinaryResolveDiagnostics };
+export type { BackendBinaryResolveDiagnostics, ResolveBinaryOptions };

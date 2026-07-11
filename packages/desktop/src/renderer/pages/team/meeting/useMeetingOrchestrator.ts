@@ -795,8 +795,12 @@ class MeetingEngine {
       for (let debateRound = 1; debateRound <= MAX_DEBATE_ROUNDS; debateRound++) {
         if (stale()) return;
         const movePrompt = buildModeratorDebateMovePrompt({
-          topic, form, round: debateRound, fullTranscript: transcriptText(),
-          panelNames, refNote: refNote || undefined,
+          topic,
+          form,
+          round: debateRound,
+          fullTranscript: transcriptText(),
+          panelNames,
+          refNote: refNote || undefined,
         });
         const moveTurnId = this.addTurn(mod, `交锋·第${debateRound}轮`);
         const moveText = await this.askTurn(mod.conversationId, moveTurnId, movePrompt);
@@ -831,16 +835,24 @@ class MeetingEngine {
               ].join('\n');
           await speak(p, isNamed ? '回应主持' : '交锋回应', prompt);
         }
-        await speak(mod, '本轮回应小结', buildRoundPausePrompt({
-          topic, round: debateRound + 1, stage: '交锋', recentContext: transcriptText(),
-        }));
+        await speak(
+          mod,
+          '本轮回应小结',
+          buildRoundPausePrompt({
+            topic,
+            round: debateRound + 1,
+            stage: '交锋',
+            recentContext: transcriptText(),
+          })
+        );
         await this.waitForContinue(myRun);
         if (stale()) return;
       }
 
       // ③ 综合决议
       if (!stale()) {
-        const synthPrompt = buildLocalSynthesisPrompt(topic, transcriptText()) +
+        const synthPrompt =
+          buildLocalSynthesisPrompt(topic, transcriptText()) +
           (refNote ? `\n\n【注意：请综合参考以下背景资料进行最终判断】\n${refNote}` : '');
         const tid = this.addTurn(mod, '综合');
         const synth = await this.askTurn(mod.conversationId, tid, synthPrompt);
@@ -853,9 +865,15 @@ class MeetingEngine {
         if (plan.trim() || options.length > 0) {
           const s = this.state;
           appendHistory(this.team.id, {
-            id: recordId, topic: s.topic, form: s.form, plan, options,
-            transcript: s.transcript, decidedOptionId: s.decidedOptionId,
-            archivedPath: s.archivedPath, ts: Date.now(),
+            id: recordId,
+            topic: s.topic,
+            form: s.form,
+            plan,
+            options,
+            transcript: s.transcript,
+            decidedOptionId: s.decidedOptionId,
+            archivedPath: s.archivedPath,
+            ts: Date.now(),
           });
         }
         if (plan.trim()) {
@@ -1035,18 +1053,35 @@ class MeetingEngine {
   refreshKnowledge = (): void => {
     const topic = this.state.topic;
     if (!topic) return;
-    void retrieveKnowledgeContext(topic).then((result) => {
-      if (!result.context) { Message.info('知识库中未找到相关内容'); return; }
-      const id = `t-${this.state.transcript.length}-system-kb`;
-      this.commit({ transcript: [...this.state.transcript, {
-        id, participantId: 'system-kb', name: '知识库', icon: '📚',
-        agent_type: 'system', isModerator: false, phaseLabel: '参考资料',
-        parallel: false,
-        text: `📚 **知识库检索结果（${result.count} 条）**\n\n${result.context}`,
-        status: 'done',
-      }]});
-      Message.success(`已注入 ${result.count} 条知识库参考资料`);
-    }).catch(() => { Message.warning('知识库检索失败，请确认向量库服务已启动'); });
+    void retrieveKnowledgeContext(topic)
+      .then((result) => {
+        if (!result.context) {
+          Message.info('知识库中未找到相关内容');
+          return;
+        }
+        const id = `t-${this.state.transcript.length}-system-kb`;
+        this.commit({
+          transcript: [
+            ...this.state.transcript,
+            {
+              id,
+              participantId: 'system-kb',
+              name: '知识库',
+              icon: '📚',
+              agent_type: 'system',
+              isModerator: false,
+              phaseLabel: '参考资料',
+              parallel: false,
+              text: `📚 **知识库检索结果（${result.count} 条）**\n\n${result.context}`,
+              status: 'done',
+            },
+          ],
+        });
+        Message.success(`已注入 ${result.count} 条知识库参考资料`);
+      })
+      .catch(() => {
+        Message.warning('知识库检索失败，请确认向量库服务已启动');
+      });
   };
 
   reset = (): void => {

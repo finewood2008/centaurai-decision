@@ -1,0 +1,13 @@
+{
+  "repository": "finewood2008/centaurai-core",
+  "tag": "v0.1.48",
+  "commit": "a072452c76f60aa881d7fe9cecc1999bf552462d",
+  "assets": {
+    "centaurai-core-v0.1.48-aarch64-apple-darwin.tar.gz": "7de4ecf5934efe762434ef1f98a5fdeff27e5c6c24436b40f5ee86e103d1e631",
+    "centaurai-core-v0.1.48-aarch64-pc-windows-msvc.zip": "f6671200c04c4efe723a1fad1f3423fd28ecd4bff361f632905b6aacd0c8da5e",
+    "centaurai-core-v0.1.48-aarch64-unknown-linux-gnu.tar.gz": "959b0ed9122a0bfbeddf5a9cfe15bf25e9d75cc647922974bdeeb41525f769db",
+    "centaurai-core-v0.1.48-x86_64-apple-darwin.tar.gz": "d3123f0d21ed5787cbbe45a957f76230767588bfde35e0011ffffb7add78f4be",
+    "centaurai-core-v0.1.48-x86_64-pc-windows-msvc.zip": "123ea78772def6074d82d052eb803b1dc9da745fffe7461fdb3633da769607b8",
+    "centaurai-core-v0.1.48-x86_64-unknown-linux-gnu.tar.gz": "c788b4ce8150baa74401bb17a3edc2257db7f439b6aa87ad1643e9b43497adc1"
+  }
+}

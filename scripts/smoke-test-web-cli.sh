@@ -34,8 +34,9 @@ cd "$TEMP_DIR/aionui-web"
 #   ├── aionui-web           ← single compiled executable (no bin/, no dist/, no node_modules)
 #   ├── package.json         ← for version lookup
 #   ├── static/              ← SPA assets
+#   ├── bundled-centaurai-core/<plat-arch>/...
 #   └── bundled-aioncore/<plat-arch>/...
-for dir in static bundled-aioncore; do
+for dir in static bundled-centaurai-core bundled-aioncore; do
   if [ ! -d "$dir" ]; then
     echo "❌ Missing $dir directory"
     exit 1
@@ -71,8 +72,8 @@ echo "✓ Version: $VERSION"
 # 5. Test backend binary
 echo ""
 echo "5. Checking backend binary..."
-BACKEND_DIR="bundled-aioncore/$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m | sed 's/aarch64/arm64/; s/x86_64/x64/')"
-BACKEND_BINARY="$BACKEND_DIR/aioncore"
+BACKEND_DIR="bundled-centaurai-core/$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m | sed 's/aarch64/arm64/; s/x86_64/x64/')"
+BACKEND_BINARY="$BACKEND_DIR/centaurai-core"
 if [ ! -x "$BACKEND_BINARY" ]; then
   echo "❌ Backend binary missing or not executable: $BACKEND_BINARY"
   exit 1
@@ -90,6 +91,18 @@ if ! "$BACKEND_BINARY" --help > /dev/null 2>&1; then
   exit 1
 fi
 echo "✓ Backend binary loads on this platform"
+
+LEGACY_BACKEND_DIR="bundled-aioncore/$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m | sed 's/aarch64/arm64/; s/x86_64/x64/')"
+LEGACY_BACKEND_BINARY="$LEGACY_BACKEND_DIR/aioncore"
+if [ ! -x "$LEGACY_BACKEND_BINARY" ] || [ ! -f "$LEGACY_BACKEND_DIR/manifest.json" ]; then
+  echo "❌ Locked rollback Core or manifest is missing: $LEGACY_BACKEND_DIR"
+  exit 1
+fi
+if ! "$LEGACY_BACKEND_BINARY" --help > /dev/null 2>&1; then
+  echo "❌ Rollback Core failed to exec (--help returned non-zero)"
+  exit 1
+fi
+echo "✓ Rollback Core binary and manifest load on this platform"
 
 # 6. HTTP-level smoke: start web-cli, curl the root, check for SPA shell
 echo ""

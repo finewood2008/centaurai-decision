@@ -29,7 +29,12 @@ import { ProcessConfig } from './process/utils/initStorage';
 import type { BackendStartupFailureInfo } from './common/types/platform/electron';
 import { registerWindowMaximizeListeners } from '@process/bridge';
 import { BackendLifecycleManager } from '@aionui/web-host';
-import { resolveBinaryPath } from '@process/backend';
+import { resolveBinaryPath, resolveLegacyBinaryPath } from '@process/backend';
+import { CoreSwitchService } from '@process/services/core-switch';
+import {
+  resolveLegacyDatabasePath,
+  runLegacyDatabaseMigrations,
+} from '@process/services/database/runLegacyDatabaseMigrations';
 import './process/bridge/feedbackBridge';
 import { wasLaunchedAtLogin } from '@process/bridge/applicationBridge';
 import { onLanguageChanged } from './process/bridge/systemSettingsBridge';
@@ -212,15 +217,23 @@ let isExplicitQuit = false;
 let appReadyDone = false;
 
 let mainWindow: BrowserWindow;
-const backendManager = new BackendLifecycleManager(
-  {
-    version: app.getVersion(),
-    isPackaged: app.isPackaged,
-    resourcesPath: process.resourcesPath,
-    userDataPath: app.getPath('userData'),
+const backendAppMetadata = {
+  version: app.getVersion(),
+  isPackaged: app.isPackaged,
+  resourcesPath: process.resourcesPath,
+  userDataPath: app.getPath('userData'),
+};
+const backendManager = new CoreSwitchService({
+  createCentaurCore: () =>
+    new BackendLifecycleManager(backendAppMetadata, () => resolveBinaryPath({ allowSystemPath: !app.isPackaged })),
+  createLegacyCore: () =>
+    new BackendLifecycleManager(backendAppMetadata, () =>
+      resolveLegacyBinaryPath({ allowSystemPath: !app.isPackaged })
+    ),
+  prepareLegacyDatabase: async (dataDir) => {
+    await runLegacyDatabaseMigrations(resolveLegacyDatabasePath(dataDir));
   },
-  resolveBinaryPath
-);
+});
 let disposeCronResumeListener: (() => void) | null = null;
 
 // Flag tracking whether the backend subprocess started successfully. Read by
@@ -559,7 +572,7 @@ const createWindow = ({ showOnReady = true }: { showOnReady?: boolean } = {}): v
     webPreferences: {
       preload: path.join(__dirname, '../preload/index.js'),
       webviewTag: true, // 启用 webview 标签用于 HTML 预览 / Enable webview tag for HTML preview
-      webSecurity: false, // 允许渲染进程跨域直连本地向量库(127.0.0.1:8618)
+      webSecurity: true,
     },
   });
   console.log(`[AionUi] Main window created (id=${mainWindow.id})`);
@@ -806,9 +819,8 @@ const handleAppReady = async (): Promise<void> => {
     return;
   }
 
-  // Start aioncore only after initializeProcess(). initStorage may open
-  // the legacy Electron SQLite catalog for a one-shot v26 migration and must
-  // close it before the backend touches the same file.
+  // Start Core only after initializeProcess(). CoreSwitchService owns the
+  // legacy SQLite preparation, isolated preflight, backup, and rollback order.
   const backendStartup = await startBackendOrExit({
     startBackend: async () => {
       assertStartupArchitectureCompatible({

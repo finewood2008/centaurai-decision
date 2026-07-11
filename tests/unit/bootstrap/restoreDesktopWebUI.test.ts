@@ -129,9 +129,9 @@ describe('restoreDesktopWebUIFromPreferences', () => {
     await done;
 
     // 3 preference reads (2 refused + 1 success) prove the retry-not-disable
-    // behavior; startDesktopWebUI then makes 2 more /api/settings/client reads
-    // (resolveNasRootDir + resolveImageWorkbenchKey) on the start path → 5 total.
-    expect(httpRequestMock).toHaveBeenCalledTimes(5);
+    // behavior; startDesktopWebUI then makes 3 more /api/settings/client reads
+    // (NAS root + image key + trusted knowledge endpoint) → 6 total.
+    expect(httpRequestMock).toHaveBeenCalledTimes(6);
     expect(startWebHostMock).toHaveBeenCalledTimes(1);
     expect(startWebHostMock.mock.calls[0][0]).toMatchObject({ allowRemote: true });
   });

@@ -68,7 +68,8 @@ const BillingDetails: React.FC<BillingDetailsProps> = ({ query }) => {
           { title: t('billing.table.model'), dataIndex: 'model', width: 180 },
           {
             title: t('billing.table.provider'),
-            render: (_: unknown, row: BillingEvent) => row.provider_name || row.provider_platform || row.provider_key_id || '-',
+            render: (_: unknown, row: BillingEvent) =>
+              row.provider_name || row.provider_platform || row.provider_key_id || '-',
           },
           {
             title: t('billing.table.tokens'),
@@ -82,7 +83,9 @@ const BillingDetails: React.FC<BillingDetailsProps> = ({ query }) => {
             title: t('billing.table.status'),
             dataIndex: 'status',
             render: (value: BillingEvent['status']) => (
-              <Tag color={value === 'completed' ? 'green' : 'orangered'}>{t(statusLabelKey[value] ?? statusLabelKey.unknown)}</Tag>
+              <Tag color={value === 'completed' ? 'green' : 'orangered'}>
+                {t(statusLabelKey[value] ?? statusLabelKey.unknown)}
+              </Tag>
             ),
           },
         ]}

@@ -505,6 +505,21 @@ export function wsEmitter<Params = undefined>(eventName: string): EmitterLike<Pa
   };
 }
 
+/** Subscribe one bridge emitter to canonical and legacy wire event names. */
+export function wsEmitterAliases<Params = undefined>(eventNames: readonly string[]): EmitterLike<Params> {
+  const uniqueNames = [...new Set(eventNames)];
+  return {
+    on: (callback: (params: Params) => void) => {
+      const listener = callback as EmitterLike<Params>['on'] extends (callback: infer Callback) => () => void
+        ? Callback
+        : never;
+      const unsubscribers = uniqueNames.map((eventName) => wsEmitter<Params>(eventName).on(listener));
+      return () => unsubscribers.forEach((unsubscribe) => unsubscribe());
+    },
+    emit: (() => {}) as EmitterLike<Params>['emit'],
+  };
+}
+
 export function wsMappedEmitter<Params = undefined>(
   eventName: string,
   transform: (raw: unknown) => Params

@@ -8,7 +8,10 @@ const {
   verifyModuleBinary,
   getModulesToRebuild,
 } = require('./rebuildNativeModules');
-const { verifyBundledAioncoreResources } = require('../packages/shared-scripts/src/verify-bundled-aioncore-resources');
+const {
+  verifyBundledCentauraiCoreResources,
+  verifyBundledLegacyAioncoreResources,
+} = require('../packages/shared-scripts/src/verify-bundled-aioncore-resources');
 
 /**
  * afterPack hook for electron-builder
@@ -23,18 +26,22 @@ function resolveResourcesDir(electronPlatformName, appOutDir, packager) {
 }
 
 function verifyBundledResources(resourcesDir, electronPlatformName, targetArch) {
-  const result = verifyBundledAioncoreResources({
-    resourcesDir,
-    electronPlatformName,
-    targetArch,
-  });
+  if (fs.existsSync(path.join(resourcesDir, 'client-mode.flag'))) {
+    console.log('   ✓ Client-only package: local Core bundle verification skipped');
+    return;
+  }
+  const results = [verifyBundledCentauraiCoreResources, verifyBundledLegacyAioncoreResources].map((verify) =>
+    verify({ resourcesDir, electronPlatformName, targetArch })
+  );
 
-  if (result.missing.length > 0) {
-    console.error(`   Missing bundled resources: ${result.missing.join(', ')}`);
-    throw new Error(`Packaged app is missing required bundled resource(s): ${result.missing.join(', ')}`);
+  const missing = results.flatMap((result) => result.missing);
+  if (missing.length > 0) {
+    console.error(`   Missing bundled resources: ${missing.join(', ')}`);
+    throw new Error(`Packaged app is missing required bundled resource(s): ${missing.join(', ')}`);
   }
 
-  console.log(`   ✓ Bundled resources verified for ${result.runtimeKey} (${result.checked.length} checks)`);
+  const checkedCount = results.reduce((count, result) => count + result.checked.length, 0);
+  console.log(`   ✓ Bundled resources verified for ${results[0].runtimeKey} (${checkedCount} checks)`);
 }
 
 module.exports = async function afterPack(context) {

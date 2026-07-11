@@ -50,12 +50,18 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
     setKbError('');
     try {
       const result = await retrieveKnowledgeContext(q);
-      if (!result.context) { setKbHits([]); return; }
+      if (!result.context) {
+        setKbHits([]);
+        return;
+      }
       // Parse individual hits from the formatted context block
-      const hits = (result.context || '').split('\n\n').filter(Boolean).map((block) => {
-        const m = block.match(/^\[知识库 \d+\] (.+):\n([\s\S]*)/);
-        return m ? { fileName: m[1], text: m[2].trim() } : { fileName: '未知', text: block.trim() };
-      });
+      const hits = (result.context || '')
+        .split('\n\n')
+        .filter(Boolean)
+        .map((block) => {
+          const m = block.match(/^\[知识库 \d+\] (.+):\n([\s\S]*)/);
+          return m ? { fileName: m[1], text: m[2].trim() } : { fileName: '未知', text: block.trim() };
+        });
       setKbHits(hits);
       setKbPreviewOpen(true);
     } catch (e) {
@@ -76,7 +82,10 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
         <div className='flex items-center gap-12px mb-10px'>
           <Checkbox
             checked={useKnowledgeBase}
-            onChange={(v) => { setUseKnowledgeBase(v); if (!v) setKbPreviewOpen(false); }}
+            onChange={(v) => {
+              setUseKnowledgeBase(v);
+              if (!v) setKbPreviewOpen(false);
+            }}
             disabled={!canStart}
             className='text-12px text-[color:var(--color-text-2)] shrink-0'
             data-testid='meeting-kb-toggle'

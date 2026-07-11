@@ -3,8 +3,8 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { execSync } = require('child_process');
-const { prepareAioncore } = require('../packages/shared-scripts/src/prepare-aioncore.js');
-const { resolveAioncoreVersion } = require('./resolveAioncoreVersion.js');
+const { prepareCentauraiCore, prepareLegacyAioncore } = require('../packages/shared-scripts/src/prepare-aioncore.js');
+const { resolveCentauraiCoreRelease, resolveLegacyAioncoreRelease } = require('./resolveAioncoreVersion.js');
 
 const projectRoot = path.resolve(__dirname, '..');
 const platform = process.env.PACK_PLATFORM || process.platform;
@@ -23,13 +23,19 @@ const tarballPath = path.join(distDir, tarballName);
 
 console.log(`Packing web-cli for ${platform}-${arch}...`);
 
-// 1. Prepare bundled-aioncore
-console.log('1. Preparing aioncore...');
-prepareAioncore({
+// 1. Prepare bundled CentaurAI Core
+console.log('1. Preparing CentaurAI Core...');
+prepareCentauraiCore({
   projectRoot,
   platform,
   arch,
-  version: resolveAioncoreVersion(projectRoot),
+  release: resolveCentauraiCoreRelease(projectRoot),
+});
+prepareLegacyAioncore({
+  projectRoot,
+  platform,
+  arch,
+  release: resolveLegacyAioncoreRelease(projectRoot),
 });
 
 // 2. Create staging dir
@@ -77,14 +83,22 @@ if (fs.existsSync(rendererOutDir)) {
   throw new Error(`Desktop renderer output not found at ${rendererOutDir}. Run bunx electron-vite build first.`);
 }
 
-// 7. Copy bundled-aioncore
-const backendSrc = path.join(projectRoot, 'resources/bundled-aioncore', `${platform}-${arch}`);
-const backendDest = path.join(tarballContentDir, 'bundled-aioncore', `${platform}-${arch}`);
+// 7. Copy bundled CentaurAI Core
+const backendSrc = path.join(projectRoot, 'resources/bundled-centaurai-core', `${platform}-${arch}`);
+const backendDest = path.join(tarballContentDir, 'bundled-centaurai-core', `${platform}-${arch}`);
 if (!fs.existsSync(backendSrc)) {
-  throw new Error(`Backend bundle dir missing at ${backendSrc}. Ensure prepareAioncore succeeded.`);
+  throw new Error(`Backend bundle dir missing at ${backendSrc}. Ensure prepareCentauraiCore succeeded.`);
 }
 fs.mkdirSync(path.dirname(backendDest), { recursive: true });
 fs.cpSync(backendSrc, backendDest, { recursive: true });
+
+const legacyBackendSrc = path.join(projectRoot, 'resources/bundled-aioncore', `${platform}-${arch}`);
+const legacyBackendDest = path.join(tarballContentDir, 'bundled-aioncore', `${platform}-${arch}`);
+if (!fs.existsSync(legacyBackendSrc)) {
+  throw new Error(`Rollback Core bundle dir missing at ${legacyBackendSrc}. Ensure prepareLegacyAioncore succeeded.`);
+}
+fs.mkdirSync(path.dirname(legacyBackendDest), { recursive: true });
+fs.cpSync(legacyBackendSrc, legacyBackendDest, { recursive: true });
 
 // 8. Create tarball
 fs.mkdirSync(distDir, { recursive: true });

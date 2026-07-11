@@ -169,11 +169,7 @@ const readRecentJournal = async (count: number): Promise<string> => {
   }
 };
 
-const retrieveLocalVectorContext = async (
-  question: string,
-  mode: LocalVectorMode,
-  query: string
-): Promise<string> => {
+const retrieveLocalVectorContext = async (question: string, mode: LocalVectorMode, query: string): Promise<string> => {
   const searchQuery = String(query || question);
 
   if (mode === 'direct') return question;
@@ -189,21 +185,27 @@ const retrieveLocalVectorContext = async (
   if (mode === 'memory') {
     let results: LocalVectorSearchItem[] = [];
     try {
-      results = (await postJson<{ results?: LocalVectorSearchItem[] }>('/api/memory/search', {
-        query: searchQuery,
-        n_results: 5,
-      })).results || [];
+      results =
+        (
+          await postJson<{ results?: LocalVectorSearchItem[] }>('/api/memory/search', {
+            query: searchQuery,
+            n_results: 5,
+          })
+        ).results || [];
     } catch {}
     return wrapRetrievedContext(question, '最近记忆', [formatItems(results, '记忆检索', 360)]);
   }
   if (mode === 'kb') {
     let results: LocalVectorSearchItem[] = [];
     try {
-      results = (await postJson<{ results?: LocalVectorSearchItem[] }>('/api/search', {
-        query: searchQuery,
-        n_results: 5,
-        mode: 'hybrid',
-      })).results || [];
+      results =
+        (
+          await postJson<{ results?: LocalVectorSearchItem[] }>('/api/search', {
+            query: searchQuery,
+            n_results: 5,
+            mode: 'hybrid',
+          })
+        ).results || [];
     } catch {}
     return wrapRetrievedContext(question, '知识库轻检索', [formatItems(results, '知识库检索', 420)]);
   }
@@ -211,17 +213,23 @@ const retrieveLocalVectorContext = async (
     let memoryResults: LocalVectorSearchItem[] = [];
     let kbResults: LocalVectorSearchItem[] = [];
     try {
-      memoryResults = (await postJson<{ results?: LocalVectorSearchItem[] }>('/api/memory/search', {
-        query: searchQuery,
-        n_results: 7,
-      })).results || [];
+      memoryResults =
+        (
+          await postJson<{ results?: LocalVectorSearchItem[] }>('/api/memory/search', {
+            query: searchQuery,
+            n_results: 7,
+          })
+        ).results || [];
     } catch {}
     try {
-      kbResults = (await postJson<{ results?: LocalVectorSearchItem[] }>('/api/search', {
-        query: searchQuery,
-        n_results: 7,
-        mode: 'hybrid',
-      })).results || [];
+      kbResults =
+        (
+          await postJson<{ results?: LocalVectorSearchItem[] }>('/api/search', {
+            query: searchQuery,
+            n_results: 7,
+            mode: 'hybrid',
+          })
+        ).results || [];
     } catch {}
     return wrapRetrievedContext(question, '深度检索', [
       formatItems(memoryResults, '记忆检索', 380),
@@ -232,17 +240,23 @@ const retrieveLocalVectorContext = async (
   let memoryResults: LocalVectorSearchItem[] = [];
   let kbResults: LocalVectorSearchItem[] = [];
   try {
-    memoryResults = (await postJson<{ results?: LocalVectorSearchItem[] }>('/api/memory/search', {
-      query: searchQuery,
-      n_results: 3,
-    })).results || [];
+    memoryResults =
+      (
+        await postJson<{ results?: LocalVectorSearchItem[] }>('/api/memory/search', {
+          query: searchQuery,
+          n_results: 3,
+        })
+      ).results || [];
   } catch {}
   try {
-    kbResults = (await postJson<{ results?: LocalVectorSearchItem[] }>('/api/search', {
-      query: searchQuery,
-      n_results: 3,
-      mode: 'hybrid',
-    })).results || [];
+    kbResults =
+      (
+        await postJson<{ results?: LocalVectorSearchItem[] }>('/api/search', {
+          query: searchQuery,
+          n_results: 3,
+          mode: 'hybrid',
+        })
+      ).results || [];
   } catch {}
   return wrapRetrievedContext(question, '智能轻检索', [
     formatItems(memoryResults, '记忆检索', 320),
@@ -343,7 +357,6 @@ const showLocalVectorChoice = (question: string): Promise<LocalVectorChoice> =>
         settle('direct', false);
       }
     });
-
   });
 
 export const maybeAttachLocalVectorContext = async (question: string, backend?: string): Promise<string> => {

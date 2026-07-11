@@ -32,7 +32,7 @@ import type {
   UpdateAssistantRequest,
 } from '../types/agent/assistantTypes';
 import type { PreviewHistoryTarget, PreviewSnapshotInfo } from '../types/office/preview';
-import type { AcpModelInfo } from '../types/platform/acpTypes';
+import type { AcpModelInfo, AcpSessionConfigOption } from '../types/platform/acpTypes';
 import type {
   CreateProviderRequest,
   FetchModelsAnonymousRequest,
@@ -98,10 +98,12 @@ import {
   stubProvider,
   withResponseMap,
   wsEmitter,
+  wsEmitterAliases,
   wsMappedEmitter,
 } from './httpBridge';
 import { fromApiSearchResult, type ApiMessageSearchItem } from './searchMapper';
 import type { IAddTeamAgentParams, ICreateTeamParams } from './teamMapper';
+import type { AgentMetadata } from '@/renderer/utils/model/agentTypes';
 import {
   fromBackendAgent,
   fromBackendTeam,
@@ -630,11 +632,21 @@ export const fs = {
       relative_location?: string;
       is_custom: boolean;
       source: 'builtin' | 'custom' | 'extension';
+      is_auto_inject?: boolean;
     }>,
     void
   >('/api/skills'),
-  listBuiltinAutoSkills: httpGet<Array<{ name: string; description: string; location: string }>, void>(
-    '/api/skills/builtin-auto'
+  listBuiltinAutoSkills: withResponseMap(
+    httpGet<
+      Array<{
+        name: string;
+        description: string;
+        location: string;
+        is_auto_inject?: boolean;
+      }>,
+      void
+    >('/api/skills'),
+    (skills) => skills.filter((skill) => skill.is_auto_inject === true)
   ),
   materializeSkillsForAgent: httpPost<
     { skills: Array<{ name: string; source_path: string }> },
@@ -656,7 +668,7 @@ export const fs = {
     void
   >('/api/skills/detect-external'),
   importSkillWithSymlink: httpPost<{ skill_name: string; skill_names?: string[] }, { skill_path: string }>(
-    '/api/skills/import-symlink'
+    '/api/skills/import'
   ),
   deleteSkill: httpDelete<void, { skill_name: string }>((p) => `/api/skills/${p.skill_name}`),
   getSkillPaths: httpGet<{ user_skills_dir: string; builtin_skills_dir: string }, void>('/api/skills/paths'),
@@ -932,11 +944,84 @@ export const mode = {
 // ACP Conversation — routed to /api/agents/* + conversation routes
 // ---------------------------------------------------------------------------
 
+type AgentManagementRow = Omit<AgentMetadata, 'available' | 'handshake'> & {
+  installed: boolean;
+  status: 'missing' | 'online' | 'offline' | 'unchecked';
+  config_options?: unknown;
+  available_modes?: unknown;
+  available_models?: unknown;
+  available_commands?: unknown;
+  last_check_error_message?: string;
+  last_check_latency_ms?: number;
+};
+
+type RuntimeConfigSnapshot = {
+  config_options: AcpSessionConfigOption[];
+};
+
+type SetConfigOptionResult = {
+  confirmation: 'observed' | 'command_ack';
+  config_options?: AcpSessionConfigOption[] | null;
+};
+
+const managementRowToAgent = (row: AgentManagementRow): AgentMetadata => {
+  const {
+    installed,
+    status: _status,
+    config_options,
+    available_modes,
+    available_models,
+    available_commands,
+    last_check_error_message: _lastCheckErrorMessage,
+    last_check_latency_ms: _lastCheckLatency,
+    ...metadata
+  } = row;
+  return {
+    ...metadata,
+    available: installed,
+    handshake: {
+      config_options,
+      available_modes,
+      available_models,
+      available_commands,
+    },
+  };
+};
+
+const findConfigOption = (
+  options: AcpSessionConfigOption[] | null | undefined,
+  category: 'mode' | 'model'
+): AcpSessionConfigOption | undefined => {
+  return options?.find((option) => option.id === category || option.category === category);
+};
+
+const modelInfoFromConfigOptions = (options: AcpSessionConfigOption[] | null | undefined): AcpModelInfo | null => {
+  const model = findConfigOption(options, 'model');
+  if (!model) return null;
+  const currentModelId = model.current_value ?? model.selected_value ?? null;
+  const availableModels = (model.options ?? []).map((option) => ({
+    id: option.value,
+    label: option.label ?? option.name ?? option.value,
+  }));
+  return {
+    current_model_id: currentModelId,
+    current_model_label:
+      (currentModelId && availableModels.find((option) => option.id === currentModelId)?.label) ?? currentModelId,
+    available_models: availableModels,
+  };
+};
+
+const ensureRuntimeConfig = (conversationId: string): Promise<RuntimeConfigSnapshot> => {
+  return httpRequest<RuntimeConfigSnapshot>('POST', `/api/conversations/${conversationId}/runtime/ensure`);
+};
+
 export const acpConversation = {
   sendMessage: conversation.sendMessage,
   responseStream: conversation.responseStream,
-  getAvailableAgents: httpGet<AgentMetadata[], void>('/api/agents'),
-  refreshCustomAgents: httpPost<void, void>('/api/agents/refresh'),
+  getAvailableAgents: withResponseMap(httpGet<AgentManagementRow[], void>('/api/agents/management'), (agents) =>
+    agents.map(managementRowToAgent)
+  ),
+  refreshCustomAgents: httpPost<void, void>('/api/agents/management/refresh'),
   testCustomAgent: httpPost<
     { step: 'success' } | { step: 'fail_cli'; error: string } | { step: 'fail_acp'; error: string },
     { command: string; acp_args?: string[]; env?: Record<string, string>; runtime_scope_id?: string }
@@ -985,33 +1070,73 @@ export const acpConversation = {
     (p) => `/api/agents/${p.id}/enabled`,
     (p) => ({ enabled: p.enabled })
   ),
-  checkAgentHealth: httpPost<{ available: boolean; latency?: number; error?: string }, { backend: string }>(
-    '/api/agents/health-check'
-  ),
+  checkAgentHealth: {
+    provider: () => {},
+    invoke: async (params: { backend: string }) => {
+      const agents = await httpRequest<AgentManagementRow[]>('GET', '/api/agents/management');
+      const agent = agents.find((candidate) => candidate.id === params.backend || candidate.backend === params.backend);
+      if (!agent) return { available: false, error: `Agent not found: ${params.backend}` };
+      const checked = await httpRequest<AgentManagementRow>(
+        'POST',
+        `/api/agents/${encodeURIComponent(agent.id)}/health-check`
+      );
+      return {
+        available: checked.status === 'online',
+        latency: checked.last_check_latency_ms,
+        error: checked.last_check_error_message,
+      };
+    },
+  },
   checkProviderHealth: httpPost<ProviderHealthCheckResponse, ProviderHealthCheckRequest>(
     '/api/agents/provider-health-check'
   ),
-  setMode: httpPut<{ mode: string; initialized: boolean }, { conversation_id: string; mode: string }>(
-    (p) => `/api/conversations/${p.conversation_id}/mode`,
-    (p) => ({ mode: p.mode })
-  ),
-  // 404 is the expected pre-warmup response from `/api/conversations/:id/mode`
-  // and `/api/conversations/:id/model` — the agent has not attached yet, so
-  // we have nothing to read. AcpModeSelector / AcpModelSelector both fall back
-  // to handshake metadata in that case. Silence the bridge log so this
-  // ordinary state doesn't pollute Sentry breadcrumbs (ELECTRON-1BT).
-  getMode: httpGet<{ mode: string; initialized: boolean }, { conversation_id: string }>(
-    (p) => `/api/conversations/${p.conversation_id}/mode`,
-    { silentStatuses: [404] }
-  ),
-  getModel: httpGet<{ model_info: AcpModelInfo | null }, { conversation_id: string }>(
-    (p) => `/api/conversations/${p.conversation_id}/model`,
-    { silentStatuses: [404] }
-  ),
-  setModel: httpPut<{ model_info: AcpModelInfo | null }, { conversation_id: string; model_id: string }>(
-    (p) => `/api/conversations/${p.conversation_id}/model`,
-    (p) => ({ model_id: p.model_id })
-  ),
+  setMode: {
+    provider: () => {},
+    invoke: async (params: { conversation_id: string; mode: string }) => {
+      const result = await httpRequest<SetConfigOptionResult>(
+        'PUT',
+        `/api/conversations/${params.conversation_id}/config-options/mode`,
+        { value: params.mode }
+      );
+      const mode = findConfigOption(result.config_options, 'mode');
+      return { mode: mode?.current_value ?? mode?.selected_value ?? params.mode, initialized: true };
+    },
+  },
+  getMode: {
+    provider: () => {},
+    invoke: async (params: { conversation_id: string }) => {
+      const snapshot = await ensureRuntimeConfig(params.conversation_id);
+      const mode = findConfigOption(snapshot.config_options, 'mode');
+      return {
+        mode: mode?.current_value ?? mode?.selected_value ?? 'default',
+        initialized: Boolean(mode),
+      };
+    },
+  },
+  getModel: {
+    provider: () => {},
+    invoke: async (params: { conversation_id: string }) => {
+      const snapshot = await ensureRuntimeConfig(params.conversation_id);
+      return { model_info: modelInfoFromConfigOptions(snapshot.config_options) };
+    },
+  },
+  setModel: {
+    provider: () => {},
+    invoke: async (params: { conversation_id: string; model_id: string }) => {
+      const result = await httpRequest<SetConfigOptionResult>(
+        'PUT',
+        `/api/conversations/${params.conversation_id}/config-options/model`,
+        { value: params.model_id }
+      );
+      return {
+        model_info: modelInfoFromConfigOptions(result.config_options) ?? {
+          current_model_id: params.model_id,
+          current_model_label: params.model_id,
+          available_models: [],
+        },
+      };
+    },
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -1639,7 +1764,12 @@ async function billingPost<Data, Params extends { upstream: BillingUpstreamAuth 
   path: string,
   params: Params
 ): Promise<Data> {
-  return httpRequest<Data>('POST', path, stripBillingSecrets(omitBillingUpstream(params)), getBillingRequestOptions(params.upstream));
+  return httpRequest<Data>(
+    'POST',
+    path,
+    stripBillingSecrets(omitBillingUpstream(params)),
+    getBillingRequestOptions(params.upstream)
+  );
 }
 
 export const billing = {
@@ -2357,8 +2487,6 @@ export const channel = {
 // ---------------------------------------------------------------------------
 
 import type { HubExtensionStatus, IHubAgentItem } from '@/common/types/agent/hub';
-import type { AgentMetadata } from '@/renderer/utils/model/agentTypes';
-
 export const hub = {
   getExtensionList: httpGet<IHubAgentItem[], void>('/api/hub/extensions'),
   install: httpPost<void, { name: string }>('/api/hub/install'),
@@ -2430,24 +2558,24 @@ export const team = {
     (p) => `/api/teams/${p.team_id}/messages`,
     (p) => ({ content: p.input, files: p.files })
   ),
-  cancelRun: httpDelete<void, { team_id: string; team_run_id: string }>(
+  cancelRun: httpPost<void, { team_id: string; team_run_id: string }>(
     (p) => `/api/teams/${p.team_id}/runs/${p.team_run_id}/cancel`
   ),
-  agentStatusChanged: wsEmitter<ITeamAgentStatusEvent>('team.agent.status'),
-  agentSpawned: wsEmitter<ITeamAgentSpawnedEvent>('team.agent.spawned'),
-  agentRemoved: wsEmitter<ITeamAgentRemovedEvent>('team.agent.removed'),
-  agentRenamed: wsEmitter<ITeamAgentRenamedEvent>('team.agent.renamed'),
-  listChanged: wsEmitter<ITeamListChangedEvent>('team.list-changed'),
+  agentStatusChanged: wsEmitterAliases<ITeamAgentStatusEvent>(['team.agentStatusChanged', 'team.agent.status']),
+  agentSpawned: wsEmitterAliases<ITeamAgentSpawnedEvent>(['team.agentSpawned', 'team.agent.spawned']),
+  agentRemoved: wsEmitterAliases<ITeamAgentRemovedEvent>(['team.agentRemoved', 'team.agent.removed']),
+  agentRenamed: wsEmitterAliases<ITeamAgentRenamedEvent>(['team.agentRenamed', 'team.agent.renamed']),
+  listChanged: wsEmitterAliases<ITeamListChangedEvent>(['team.listChanged', 'team.list-changed']),
   created: wsEmitter<ITeamCreatedEvent>('team.created'),
-  teammateMessage: wsEmitter<ITeamTeammateMessageEvent>('team.teammate.message'),
+  teammateMessage: wsEmitterAliases<ITeamTeammateMessageEvent>(['team.teammateMessage', 'team.teammate.message']),
   // team_run orchestration events (aioncore ≥ 0.1.29 emits these camelCase frames).
-  runAccepted: wsEmitter<ITeamRunEvent>('team.runAccepted'),
-  runStarted: wsEmitter<ITeamRunEvent>('team.runStarted'),
-  runUpdated: wsEmitter<ITeamRunEvent>('team.runUpdated'),
-  runCompleted: wsEmitter<ITeamRunEvent>('team.runCompleted'),
-  runFailed: wsEmitter<ITeamRunEvent>('team.runFailed'),
-  childTurnStarted: wsEmitter<ITeamChildTurnEvent>('team.childTurnStarted'),
-  childTurnCompleted: wsEmitter<ITeamChildTurnEvent>('team.childTurnCompleted'),
+  runAccepted: wsEmitterAliases<ITeamRunEvent>(['team.runAccepted', 'team.run.accepted']),
+  runStarted: wsEmitterAliases<ITeamRunEvent>(['team.runStarted', 'team.run.started']),
+  runUpdated: wsEmitterAliases<ITeamRunEvent>(['team.runUpdated', 'team.run.updated']),
+  runCompleted: wsEmitterAliases<ITeamRunEvent>(['team.runCompleted', 'team.run.completed']),
+  runFailed: wsEmitterAliases<ITeamRunEvent>(['team.runFailed', 'team.run.failed']),
+  childTurnStarted: wsEmitterAliases<ITeamChildTurnEvent>(['team.childTurnStarted', 'team.child-turn.started']),
+  childTurnCompleted: wsEmitterAliases<ITeamChildTurnEvent>(['team.childTurnCompleted', 'team.child-turn.completed']),
   /** Same payload as `teammateMessage` but the correct 0.1.29 frame name. */
   teamMessageProjected: wsEmitter<ITeamTeammateMessageEvent>('team.teammateMessage'),
 };

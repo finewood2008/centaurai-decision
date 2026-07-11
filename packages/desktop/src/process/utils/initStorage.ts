@@ -27,7 +27,6 @@ import {
   hasElectronAppPath,
   verifyDirectoryFiles,
 } from './utils';
-import { runLegacyDatabaseMigrations } from '@process/services/database/runLegacyDatabaseMigrations';
 import { BUILTIN_IMAGE_GEN_ID } from '../resources/builtinMcp/constants';
 // Platform and architecture types (moved from deleted updateConfig)
 type PlatformType = 'win32' | 'darwin' | 'linux';
@@ -401,17 +400,10 @@ const initStorage = async () => {
   cleanupLegacyBuiltinSkillsDir();
   mark('5b. legacyBuiltinSkillsCleanup');
 
-  // 6. Backend only understands the v26-era schema baseline. Older desktop
-  //    users may still have a pre-v26 Electron-managed catalog, so we upgrade
-  //    that file here, close it, and only then allow the backend to start.
-  const legacyDbMigration = await runLegacyDatabaseMigrations();
-  if (legacyDbMigration.skipped) {
-    mark('6. legacyDbMigrations skipped');
-  } else if (legacyDbMigration.migrated) {
-    mark(`6. legacyDbMigrations v${legacyDbMigration.fromVersion}->v${legacyDbMigration.toVersion}`);
-  } else {
-    mark(`6. legacyDbMigrations noop(v${legacyDbMigration.fromVersion})`);
-  }
+  // Legacy SQLite preparation is intentionally deferred to CoreSwitchService.
+  // It first runs against the isolated preflight copy and only touches the live
+  // catalog after a complete rollback backup has been durably written.
+  mark('6. legacyDbMigrations deferred to core switch');
 
   if (hasElectronAppPath()) {
     application.systemInfo.provider(() => {

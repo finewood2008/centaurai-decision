@@ -12,7 +12,8 @@ import { ensureAdminPassword } from './ensureAdminPassword.js';
 //   aionui-web/
 //   ├── aionui-web              ← bun-compiled standalone binary (process.execPath)
 //   ├── package.json             ← for runtime version lookup
-//   ├── bundled-aioncore/<plat-arch>/aioncore[.exe]
+//   ├── bundled-centaurai-core/<plat-arch>/centaurai-core[.exe]
+//   ├── bundled-aioncore/<plat-arch>/aioncore[.exe] (rollback only)
 //   └── static/                  ← SPA assets
 //
 // Under `bun build --compile`, import.meta.url resolves to a virtual /$bunfs/
@@ -49,7 +50,7 @@ const isPackaged = (() => {
   return exeName === 'aionui-web' || exeName === 'aionui-web.exe';
 })();
 
-const BACKEND_BINARY = process.platform === 'win32' ? 'aioncore.exe' : 'aioncore';
+const BACKEND_BINARY = process.platform === 'win32' ? 'centaurai-core.exe' : 'centaurai-core';
 const DEFAULT_PORT = 25808;
 const RESET_COMMAND = isPackaged ? 'aionui-web resetpass' : 'bun run resetpass';
 
@@ -76,10 +77,10 @@ function parseArgs(argv: string[]): { command: string; flags: Map<string, string
 function resolveBackendBinary(flags: Map<string, string | true>): string {
   const override = flags.get('backend-bin');
   if (typeof override === 'string') return path.resolve(override);
-  const envOverride = process.env.AIONUI_BACKEND_BIN;
+  const envOverride = process.env.CENTAURAI_CORE_BIN ?? process.env.AIONUI_BACKEND_BIN;
   if (envOverride) return path.resolve(envOverride);
   const platArch = `${process.platform}-${process.arch}`;
-  const bundled = path.join(cliRoot, 'bundled-aioncore', platArch, BACKEND_BINARY);
+  const bundled = path.join(cliRoot, 'bundled-centaurai-core', platArch, BACKEND_BINARY);
   return bundled;
 }
 
@@ -170,7 +171,7 @@ async function runStart(flags: Map<string, string | true>): Promise<void> {
     console.warn('⚠️  Backend binary not found — starting in FRONTEND-ONLY mode.');
     console.warn(`   Missing: ${backendBin}`);
     console.warn('   The web UI will load but API calls will fail until a backend is available.');
-    console.warn('   To enable backend: download aioncore and set AIONUI_BACKEND_BIN.');
+    console.warn('   To enable backend: download CentaurAI Core and set CENTAURAI_CORE_BIN.');
     console.warn('');
 
     const handle = await startStaticServer({
@@ -178,6 +179,8 @@ async function runStart(flags: Map<string, string | true>): Promise<void> {
       backendPort: 0, // invalid port → API proxy will fail cleanly
       port,
       allowRemote,
+      knowledgeEndpoint: process.env.CENTAURAI_KNOWLEDGE_ENDPOINT ?? 'http://127.0.0.1:8618',
+      knowledgeToken: process.env.CENTAURAI_KNOWLEDGE_TOKEN ?? process.env.AIONUI_KNOWLEDGE_TOKEN,
     });
     currentHandle = handle;
 
@@ -208,6 +211,8 @@ async function runStart(flags: Map<string, string | true>): Promise<void> {
       allowRemote,
       dataDir,
       sharedDriveDir: path.join(dataDir, 'sharedDrive'),
+      knowledgeEndpoint: process.env.CENTAURAI_KNOWLEDGE_ENDPOINT ?? 'http://127.0.0.1:8618',
+      knowledgeToken: process.env.CENTAURAI_KNOWLEDGE_TOKEN ?? process.env.AIONUI_KNOWLEDGE_TOKEN,
       logDir,
       dirs: {
         cacheDir: dataDir,
@@ -280,7 +285,7 @@ async function runResetPassword(flags: Map<string, string | true>): Promise<void
   const backendBin = resolveBackendBinary(flags);
   if (!fs.existsSync(backendBin)) {
     console.error(`[aionui-web] backend binary not found: ${backendBin}`);
-    console.error('  hint: pass --backend-bin <path> or set AIONUI_BACKEND_BIN');
+    console.error('  hint: pass --backend-bin <path> or set CENTAURAI_CORE_BIN');
     process.exit(1);
   }
   const dataDir = resolveDataDir(flags);

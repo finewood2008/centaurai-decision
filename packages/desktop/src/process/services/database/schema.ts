@@ -123,7 +123,6 @@ export function initSchema(db: ISqliteDriver): void {
   )`);
   db.exec('CREATE INDEX IF NOT EXISTS idx_tasks_team ON team_tasks(team_id, status)');
 
-
   console.log('[Database] Schema initialized successfully');
 }
 

@@ -63,6 +63,10 @@ export type StaticServerOptions = {
    * browsed read-only at /api/nas/*. Omit to disable (list returns []).
    */
   nasRootDir?: string;
+  /** Trusted loopback origin for the local knowledge worker. */
+  knowledgeEndpoint?: string;
+  /** Server-held worker token; never accepted from a browser request. */
+  knowledgeToken?: string;
   /**
    * Directory holding the image workbench SPA dist, served to browser/LAN users
    * at /workbench/image/*. Defaults to `<staticDir>/centaur-image-workbench`
@@ -520,20 +524,24 @@ async function readJsonBody(req: IncomingMessage): Promise<Record<string, unknow
  * loopback on the *server* host, so a LAN client's `127.0.0.1:8618` points at
  * the wrong machine. The server runs co-located with the vector DB and can
  * reach it, so the browser POSTs here and we forward the search. The client
- * supplies the endpoint it has configured (default http://127.0.0.1:8618);
- * only http/https URLs are honored.
+ * uses a server-owned endpoint. Browser-supplied endpoints are deliberately
+ * ignored so this route cannot be repurposed as an SSRF proxy.
  */
-async function handleVectorSearch(req: IncomingMessage, res: ServerResponse): Promise<void> {
+async function handleVectorSearch(
+  req: IncomingMessage,
+  res: ServerResponse,
+  endpoint: string | undefined,
+  token: string | undefined
+): Promise<void> {
   const sendJson = (status: number, body: unknown): void => {
     res.writeHead(status, { 'content-type': 'application/json' });
     res.end(JSON.stringify(body));
   };
   try {
     const body = await readJsonBody(req);
-    const endpoint = typeof body.endpoint === 'string' ? body.endpoint.trim().replace(/\/+$/, '') : '';
     const query = typeof body.query === 'string' ? body.query : '';
-    if (!/^https?:\/\//i.test(endpoint)) {
-      sendJson(400, { error: 'INVALID_ENDPOINT' });
+    if (!endpoint) {
+      sendJson(503, { error: 'KNOWLEDGE_UNAVAILABLE' });
       return;
     }
     if (!query.trim()) {
@@ -545,7 +553,7 @@ async function handleVectorSearch(req: IncomingMessage, res: ServerResponse): Pr
 
     const upstream = await fetch(`${endpoint}/api/search`, {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      headers: knowledgeHeaders(token, true),
       body: JSON.stringify({ query, n_results: nResults, mode }),
     });
     const text = await upstream.text();
@@ -557,21 +565,27 @@ async function handleVectorSearch(req: IncomingMessage, res: ServerResponse): Pr
 }
 
 /** Proxy a read-only knowledge-base document list to the local vector DB. */
-async function handleVectorDocuments(req: IncomingMessage, res: ServerResponse): Promise<void> {
+async function handleVectorDocuments(
+  req: IncomingMessage,
+  res: ServerResponse,
+  endpoint: string | undefined,
+  token: string | undefined
+): Promise<void> {
   const sendJson = (status: number, body: unknown): void => {
     res.writeHead(status, { 'content-type': 'application/json' });
     res.end(JSON.stringify(body));
   };
   try {
     const body = await readJsonBody(req);
-    const endpoint = typeof body.endpoint === 'string' ? body.endpoint.trim().replace(/\/+$/, '') : '';
-    if (!/^https?:\/\//i.test(endpoint)) {
-      sendJson(400, { error: 'INVALID_ENDPOINT' });
+    if (!endpoint) {
+      sendJson(503, { error: 'KNOWLEDGE_UNAVAILABLE' });
       return;
     }
     const limit = typeof body.limit === 'number' && body.limit > 0 ? Math.min(body.limit, 500) : 300;
     const offset = typeof body.offset === 'number' && body.offset >= 0 ? body.offset : 0;
-    const upstream = await fetch(`${endpoint}/api/documents?limit=${limit}&offset=${offset}`);
+    const upstream = await fetch(`${endpoint}/api/documents?limit=${limit}&offset=${offset}`, {
+      headers: knowledgeHeaders(token),
+    });
     const text = await upstream.text();
     res.writeHead(upstream.status, { 'content-type': 'application/json' });
     res.end(text);
@@ -581,17 +595,28 @@ async function handleVectorDocuments(req: IncomingMessage, res: ServerResponse):
 }
 
 /** Proxy a knowledge-base image thumbnail to the local vector DB's /api/image. */
-async function handleVectorImage(req: IncomingMessage, res: ServerResponse): Promise<void> {
+async function handleVectorImage(
+  req: IncomingMessage,
+  res: ServerResponse,
+  endpoint: string | undefined,
+  token: string | undefined
+): Promise<void> {
   try {
     const url = new URL(req.url || '', 'http://localhost');
-    const endpoint = (url.searchParams.get('endpoint') || '').trim().replace(/\/+$/, '');
     const path = url.searchParams.get('path') || '';
-    if (!/^https?:\/\//i.test(endpoint) || !path) {
+    if (!endpoint) {
+      res.writeHead(503, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ error: 'KNOWLEDGE_UNAVAILABLE' }));
+      return;
+    }
+    if (!path) {
       res.writeHead(400, { 'content-type': 'application/json' });
       res.end(JSON.stringify({ error: 'INVALID_REQUEST' }));
       return;
     }
-    const upstream = await fetch(`${endpoint}/api/image?path=${encodeURIComponent(path)}`);
+    const upstream = await fetch(`${endpoint}/api/image?path=${encodeURIComponent(path)}`, {
+      headers: knowledgeHeaders(token),
+    });
     if (!upstream.ok || !upstream.body) {
       res.writeHead(upstream.status || 502).end();
       return;
@@ -602,6 +627,31 @@ async function handleVectorImage(req: IncomingMessage, res: ServerResponse): Pro
   } catch {
     res.writeHead(502, { 'content-type': 'application/json' });
     res.end(JSON.stringify({ error: 'VECTOR_DB_UNREACHABLE' }));
+  }
+}
+
+function knowledgeHeaders(token: string | undefined, json = false): Record<string, string> {
+  return {
+    ...(json ? { 'content-type': 'application/json' } : {}),
+    ...(token
+      ? {
+          authorization: `Bearer ${token}`,
+          'x-centaurai-knowledge-token': token,
+        }
+      : {}),
+  };
+}
+
+function normalizeKnowledgeEndpoint(raw: string | undefined): string | undefined {
+  if (!raw?.trim()) return undefined;
+  try {
+    const parsed = new URL(raw.trim());
+    const loopbackHosts = new Set(['127.0.0.1', 'localhost', '[::1]']);
+    if (!['http:', 'https:'].includes(parsed.protocol) || !loopbackHosts.has(parsed.hostname)) return undefined;
+    if (parsed.username || parsed.password || (parsed.pathname !== '/' && parsed.pathname !== '')) return undefined;
+    return parsed.origin;
+  } catch {
+    return undefined;
   }
 }
 
@@ -673,6 +723,9 @@ export async function startStaticServer(opts: StaticServerOptions): Promise<Stat
   // Loopback-only deployments keep the existing (backend-trusted) behavior.
   const requireAuth = allowRemote;
   const gate = createAuthGate();
+  const knowledgeEndpoint = normalizeKnowledgeEndpoint(opts.knowledgeEndpoint);
+  const knowledgeToken = opts.knowledgeToken?.trim() || undefined;
+  const remoteKnowledgeEndpoint = allowRemote && !knowledgeToken ? undefined : knowledgeEndpoint;
 
   // The image workbench SPA dist lives under the served static dir by default
   // (the desktop build copies it to out/renderer/centaur-image-workbench).
@@ -836,21 +889,21 @@ export async function startStaticServer(opts: StaticServerOptions): Promise<Stat
       // on the server host, so we forward on its behalf. Must come before the
       // generic /api/* proxy below.
       if (req.url.startsWith('/api/vector-search') && req.method === 'POST') {
-        await handleVectorSearch(req, res);
+        await handleVectorSearch(req, res, remoteKnowledgeEndpoint, knowledgeToken);
         return;
       }
 
       // /api/vector-documents — read-only knowledge-base document list, proxied
       // to the vector DB the same way as vector-search above.
       if (req.url.startsWith('/api/vector-documents') && req.method === 'POST') {
-        await handleVectorDocuments(req, res);
+        await handleVectorDocuments(req, res, remoteKnowledgeEndpoint, knowledgeToken);
         return;
       }
 
       // /api/vector-image — knowledge-base image thumbnail, proxied to the vector
       // DB's /api/image. Endpoint + path come as query params.
       if (req.url.startsWith('/api/vector-image') && req.method === 'GET') {
-        await handleVectorImage(req, res);
+        await handleVectorImage(req, res, remoteKnowledgeEndpoint, knowledgeToken);
         return;
       }
 

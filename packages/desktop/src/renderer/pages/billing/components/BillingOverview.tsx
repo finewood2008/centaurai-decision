@@ -27,7 +27,11 @@ const TrendBars: React.FC<{ points: BillingTimeseriesPoint[] }> = ({ points }) =
         const height = maxCost > 0 ? Math.max(8, (point.cost_cny / maxCost) * 160) : 8;
         return (
           <div key={point.bucket_start_ms} className='min-w-24px flex-1 flex flex-col items-center justify-end gap-6px'>
-            <div className='w-full rd-4px bg-[rgb(var(--primary-6))]' style={{ height }} title={formatCny(point.cost_cny)} />
+            <div
+              className='w-full rd-4px bg-[rgb(var(--primary-6))]'
+              style={{ height }}
+              title={formatCny(point.cost_cny)}
+            />
           </div>
         );
       })}
@@ -58,7 +62,11 @@ const BillingOverview: React.FC<BillingOverviewProps> = ({ query }) => {
   return (
     <div className='flex flex-col gap-12px'>
       <div className='grid grid-cols-1 gap-12px md:grid-cols-4'>
-        <MetricCard title={t('billing.metric.cost')} value={formatCny(summary.data?.cost_cny ?? 0)} hint={summaryHint(summary.data)} />
+        <MetricCard
+          title={t('billing.metric.cost')}
+          value={formatCny(summary.data?.cost_cny ?? 0)}
+          hint={summaryHint(summary.data)}
+        />
         <MetricCard title={t('billing.metric.tokens')} value={formatTokens(summary.data?.total_tokens ?? 0)} />
         <MetricCard title={t('billing.metric.requests')} value={String(summary.data?.request_count ?? 0)} />
         <MetricCard title={t('billing.metric.output')} value={formatTokens(summary.data?.output_tokens ?? 0)} />

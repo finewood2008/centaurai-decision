@@ -679,8 +679,14 @@ export function parseModeratorMove(text: string, panelNames: string[]): Moderato
   if (!cleaned) return { conclude: true, targetNames: [], challenge: '' };
   if (cleaned.lastIndexOf(CONCLUDE_MARKER) >= 0) return { conclude: true, targetNames: [], challenge: '' };
   const concludePatterns = [
-    /讨论已经?充分/i, /可以综合/i, /进入综合/i, /准备决议/i,
-    /综上所述/i, /最终建议/i, /达成共识/i, /可以拍板/i,
+    /讨论已经?充分/i,
+    /可以综合/i,
+    /进入综合/i,
+    /准备决议/i,
+    /综上所述/i,
+    /最终建议/i,
+    /达成共识/i,
+    /可以拍板/i,
   ];
   if (concludePatterns.some((p) => p.test(cleaned))) return { conclude: true, targetNames: [], challenge: '' };
   const targets: string[] = [];

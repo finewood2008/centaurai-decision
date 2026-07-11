@@ -1,24 +1,29 @@
-/**
- * Prepare aioncore binary for packaging.
- *
- * Resolution order:
- *  1. GitHub release download (requires version or defaults to "latest")
- *
- * Output: {projectRoot}/resources/bundled-aioncore/{platform}-{arch}/
- *   - aioncore[.exe]
- *   - manifest.json
- *   - managed-resources/...
- *
- * @module prepare-aioncore
- */
+/** Prepare the immutable primary and rollback Core bundles. */
 
-const { execSync, execFileSync } = require('child_process');
+const { execFileSync } = require('child_process');
+const crypto = require('crypto');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
-const GITHUB_OWNER = 'iOfficeAI';
-const GITHUB_REPO = 'AionCore';
+const CORE_VARIANTS = {
+  centaur: {
+    assetPrefix: 'centaurai-core',
+    binaryBaseName: 'centaurai-core',
+    bundleDirName: 'bundled-centaurai-core',
+    displayName: 'CentaurAI Core',
+    repository: 'finewood2008/centaurai-core',
+    tempDirName: 'centaurai-core-prepare',
+  },
+  legacy: {
+    assetPrefix: 'aioncore',
+    binaryBaseName: 'aioncore',
+    bundleDirName: 'bundled-aioncore',
+    displayName: 'Legacy AionCore',
+    repository: 'iOfficeAI/AionCore',
+    tempDirName: 'legacy-aioncore-prepare',
+  },
+};
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -50,8 +55,14 @@ function writeJson(filePath, payload) {
   fs.writeFileSync(filePath, JSON.stringify(payload, null, 2) + '\n', 'utf-8');
 }
 
-function getBinaryName(platform) {
-  return platform === 'win32' ? 'aioncore.exe' : 'aioncore';
+function getVariant(variantName) {
+  const variant = CORE_VARIANTS[variantName];
+  if (!variant) throw new Error(`Unknown Core bundle variant: ${variantName}`);
+  return variant;
+}
+
+function getBinaryName(platform, variant) {
+  return platform === 'win32' ? `${variant.binaryBaseName}.exe` : variant.binaryBaseName;
 }
 
 function prepareManagedResources(binaryPath, targetDir) {
@@ -68,6 +79,7 @@ function prepareManagedResources(binaryPath, targetDir) {
     stdio: 'inherit',
     env: {
       ...process.env,
+      CENTAURAI_CORE_BUNDLED_MANAGED_RESOURCES: '',
       AIONUI_BUNDLED_MANAGED_RESOURCES: '',
     },
   });
@@ -81,45 +93,13 @@ function prepareManagedResources(binaryPath, targetDir) {
 // ---------------------------------------------------------------------------
 
 /**
- * Resolve the actual version tag when "latest" is requested.
- * Uses GitHub API via `gh` CLI (needs GH_TOKEN in CI) or falls back to
- * `curl` with an optional Authorization header (GITHUB_TOKEN / GH_TOKEN).
- */
-function resolveLatestTag() {
-  const token = process.env.GH_TOKEN || process.env.GITHUB_TOKEN || '';
-
-  // 1. Try gh CLI (honours GH_TOKEN automatically)
-  try {
-    const out = execSync(`gh api repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest --jq .tag_name`, {
-      encoding: 'utf-8',
-      timeout: 15000,
-    }).trim();
-    if (out) return out;
-  } catch {
-    // gh CLI not available or no token — fall back to curl
-  }
-
-  // 2. Curl with optional token to avoid rate-limit 403
-  try {
-    const authArgs = token ? ['-H', `Authorization: token ${token}`] : [];
-    const args = ['-fsSL', ...authArgs, `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest`];
-    const out = execFileSync('curl', args, { encoding: 'utf-8', timeout: 15000 });
-    const tag = JSON.parse(out).tag_name;
-    if (tag) return tag;
-  } catch {
-    // network issue or rate-limited
-  }
-
-  return null;
-}
-
-/**
  * Build the release asset filename for the given platform/arch/tag.
  *
  * Expected asset naming convention:
- *   aioncore-v0.1.0-aarch64-apple-darwin.tar.gz
+ *   centaurai-core-v0.1.48-aarch64-apple-darwin.tar.gz
  */
-function getAssetName(platform, arch, tag) {
+function getAssetName(platform, arch, tag, variantName = 'centaur') {
+  const variant = getVariant(variantName);
   const archMap = { x64: 'x86_64', arm64: 'aarch64' };
   const platformMap = {
     darwin: 'apple-darwin',
@@ -130,15 +110,18 @@ function getAssetName(platform, arch, tag) {
   const normalizedPlatform = platformMap[platform];
   if (!normalizedArch || !normalizedPlatform) return null;
   const ext = platform === 'win32' ? '.zip' : '.tar.gz';
-  return `aioncore-${tag}-${normalizedArch}-${normalizedPlatform}${ext}`;
+  return `${variant.assetPrefix}-${tag}-${normalizedArch}-${normalizedPlatform}${ext}`;
 }
 
-function getDownloadUrl(assetName, tag) {
-  return `https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/${tag}/${assetName}`;
+function getDownloadUrl(assetName, tag, variant) {
+  return `https://github.com/${variant.repository}/releases/download/${tag}/${assetName}`;
 }
 
-function downloadFile(url, outputPath) {
-  console.log(`  Downloading aioncore from ${url}`);
+function downloadFile(url, outputPath, displayName, authToken) {
+  console.log(`  Downloading ${displayName} from ${url}`);
+  if (authToken) {
+    throw new Error('Authenticated release downloads must use the GitHub asset API');
+  }
   if (process.platform === 'win32') {
     const ps = `$ProgressPreference='SilentlyContinue'; Invoke-WebRequest -Uri '${url}' -OutFile '${outputPath.replace(/'/g, "''")}'`;
     execFileSync('powershell', ['-NoProfile', '-NonInteractive', '-Command', ps], {
@@ -150,6 +133,55 @@ function downloadFile(url, outputPath) {
     execFileSync('curl', ['-L', '--fail', '--silent', '--show-error', '-o', outputPath, url], { timeout: 120000 });
   } catch {
     execFileSync('wget', ['-q', '-O', outputPath, url], { timeout: 120000 });
+  }
+}
+
+function downloadAuthenticatedReleaseAsset(repository, tag, assetName, outputPath, authToken) {
+  const commonHeaders = ['-H', `Authorization: Bearer ${authToken}`, '-H', 'X-GitHub-Api-Version: 2022-11-28'];
+  let release;
+  try {
+    const response = execFileSync(
+      'curl',
+      [
+        '--fail',
+        '--silent',
+        '--show-error',
+        ...commonHeaders,
+        '-H',
+        'Accept: application/vnd.github+json',
+        `https://api.github.com/repos/${repository}/releases/tags/${encodeURIComponent(tag)}`,
+      ],
+      { encoding: 'utf8', timeout: 120000 }
+    );
+    release = JSON.parse(response);
+  } catch {
+    throw new Error(`Unable to resolve authenticated GitHub release ${repository}@${tag}`);
+  }
+  const asset = Array.isArray(release.assets)
+    ? release.assets.find((candidate) => candidate && candidate.name === assetName)
+    : undefined;
+  if (!asset || typeof asset.url !== 'string') {
+    throw new Error(`Release ${repository}@${tag} does not contain ${assetName}`);
+  }
+  try {
+    execFileSync(
+      'curl',
+      [
+        '-L',
+        '--fail',
+        '--silent',
+        '--show-error',
+        ...commonHeaders,
+        '-H',
+        'Accept: application/octet-stream',
+        '-o',
+        outputPath,
+        asset.url,
+      ],
+      { timeout: 120000 }
+    );
+  } catch {
+    throw new Error(`Authenticated download failed for ${assetName}`);
   }
 }
 
@@ -180,30 +212,48 @@ function findBinaryInDir(dir, binaryName) {
   return null;
 }
 
-function downloadAndExtract(platform, arch, tag) {
-  const assetName = getAssetName(platform, arch, tag);
+function sha256File(filePath) {
+  return crypto.createHash('sha256').update(fs.readFileSync(filePath)).digest('hex');
+}
+
+function downloadAndExtract(platform, arch, tag, expectedSha256, variantName) {
+  const variant = getVariant(variantName);
+  const assetName = getAssetName(platform, arch, tag, variantName);
   if (!assetName) {
-    throw new Error(`Unsupported aioncore target: ${platform}-${arch}`);
+    throw new Error(`Unsupported ${variant.displayName} target: ${platform}-${arch}`);
   }
 
-  const url = getDownloadUrl(assetName, tag);
-  const tempDir = path.join(os.tmpdir(), 'aioncore-prepare', tag, `${platform}-${arch}`);
+  const url = getDownloadUrl(assetName, tag, variant);
+  const tempDir = path.join(os.tmpdir(), variant.tempDirName, tag, `${platform}-${arch}`);
   const archivePath = path.join(tempDir, assetName);
   const extractDir = path.join(tempDir, 'extracted');
 
   removeDirectorySafe(tempDir);
   ensureDirectory(tempDir);
 
-  downloadFile(url, archivePath);
+  const authToken =
+    variantName === 'centaur'
+      ? process.env.GH_COMPONENT_TOKEN || process.env.GH_TOKEN || process.env.GITHUB_TOKEN
+      : undefined;
+  if (authToken) {
+    console.log(`  Downloading ${variant.displayName} through the authenticated GitHub asset API`);
+    downloadAuthenticatedReleaseAsset(variant.repository, tag, assetName, archivePath, authToken);
+  } else {
+    downloadFile(url, archivePath, variant.displayName);
+  }
+  const actualSha256 = sha256File(archivePath);
+  if (actualSha256 !== expectedSha256.toLowerCase()) {
+    throw new Error(`SHA-256 mismatch for ${assetName}: expected ${expectedSha256}, received ${actualSha256}`);
+  }
   extractArchive(archivePath, extractDir, platform);
 
-  const binaryName = getBinaryName(platform);
+  const binaryName = getBinaryName(platform, variant);
   const binaryPath = findBinaryInDir(extractDir, binaryName);
   if (!binaryPath) {
     throw new Error(`Binary ${binaryName} not found in downloaded archive`);
   }
 
-  return { binaryPath, tempDir, url };
+  return { assetName, binaryPath, tempDir, url, sha256: actualSha256 };
 }
 
 // ---------------------------------------------------------------------------
@@ -211,37 +261,37 @@ function downloadAndExtract(platform, arch, tag) {
 // ---------------------------------------------------------------------------
 
 /**
- * Prepare aioncore binary for packaging.
+ * Prepare CentaurAI Core binary for packaging.
  *
  * @param {object} options - Configuration options
  * @param {string} options.projectRoot - Project root directory
  * @param {string} options.platform - Target platform (process.platform)
  * @param {string} options.arch - Target architecture (process.arch)
- * @param {string} options.version - Backend version (default: 'latest')
+ * @param {{tag: string; commit: string; assets: Record<string, string>}} options.release
  * @returns {{ prepared: true; dir: string; sourceType: string }}
  */
-function prepareAioncore(options) {
-  const { projectRoot, platform, arch, version = 'latest' } = options;
+function prepareCoreBundle(options, variantName) {
+  const variant = getVariant(variantName);
+  const { projectRoot, platform, arch, release } = options;
   const runtimeKey = `${platform}-${arch}`;
-
-  // Resolve the actual version tag — asset filenames include the tag
-  let tag;
-  if (version === 'latest') {
-    const resolved = resolveLatestTag();
-    if (!resolved) {
-      throw new Error('Failed to resolve latest aioncore release tag from GitHub API');
-    }
-    tag = resolved;
-    console.log(`Resolved aioncore "latest" → ${tag}`);
-  } else {
-    tag = version.startsWith('v') ? version : `v${version}`;
+  if (!release || !release.tag || !release.commit || !release.assets) {
+    throw new Error(`An immutable ${variant.displayName} release lock is required`);
+  }
+  if (release.repository && release.repository !== variant.repository) {
+    throw new Error(`${variant.displayName} release lock has an unexpected repository`);
+  }
+  const tag = release.tag;
+  const assetName = getAssetName(platform, arch, tag, variantName);
+  const expectedSha256 = assetName ? release.assets[assetName] : undefined;
+  if (!assetName || typeof expectedSha256 !== 'string' || !/^[0-9a-f]{64}$/i.test(expectedSha256)) {
+    throw new Error(`${variant.displayName} release lock is missing SHA-256 for ${assetName || runtimeKey}`);
   }
 
-  const targetDir = path.join(projectRoot, 'resources', 'bundled-aioncore', runtimeKey);
-  const binaryName = getBinaryName(platform);
+  const targetDir = path.join(projectRoot, 'resources', variant.bundleDirName, runtimeKey);
+  const binaryName = getBinaryName(platform, variant);
   const targetBinaryPath = path.join(targetDir, binaryName);
 
-  console.log(`Preparing aioncore for ${runtimeKey} (version: ${tag})`);
+  console.log(`Preparing ${variant.displayName} for ${runtimeKey} (version: ${tag}, commit: ${release.commit})`);
 
   removeDirectorySafe(targetDir);
   ensureDirectory(targetDir);
@@ -251,19 +301,12 @@ function prepareAioncore(options) {
   let sourceDetail = {};
   let tempDir = null;
 
-  // 1. Download from GitHub releases
-  if (!sourcePath) {
-    try {
-      const result = downloadAndExtract(platform, arch, tag);
-      sourcePath = result.binaryPath;
-      tempDir = result.tempDir;
-      sourceType = 'download';
-      sourceDetail = { url: result.url };
-      console.log(`  Downloaded from GitHub releases`);
-    } catch (error) {
-      console.warn(`  Download failed: ${error.message}`);
-    }
-  }
+  const result = downloadAndExtract(platform, arch, tag, expectedSha256, variantName);
+  sourcePath = result.binaryPath;
+  tempDir = result.tempDir;
+  sourceType = 'download';
+  sourceDetail = { url: result.url, asset: result.assetName, sha256: result.sha256, commit: release.commit };
+  console.log(`  Downloaded and verified from GitHub releases`);
 
   // Write result
   if (sourcePath) {
@@ -278,6 +321,10 @@ function prepareAioncore(options) {
       platform,
       arch,
       version: tag,
+      commit: release.commit,
+      sha256: expectedSha256,
+      repository: variant.repository,
+      releaseType: variantName,
       generatedAt: new Date().toISOString(),
       sourceType,
       source: sourceDetail,
@@ -286,7 +333,7 @@ function prepareAioncore(options) {
 
     writeJson(path.join(targetDir, 'manifest.json'), manifest);
     console.log(
-      `  Bundled aioncore prepared: resources/bundled-aioncore/${runtimeKey}/${binaryName} [source=${sourceType}]`
+      `  Bundled ${variant.displayName} prepared: resources/${variant.bundleDirName}/${runtimeKey}/${binaryName} [source=${sourceType}]`
     );
     console.log(`  Bundled managed resources prepared: ${bundledManagedResourcesDir}`);
 
@@ -294,7 +341,21 @@ function prepareAioncore(options) {
     return { prepared: true, dir: targetDir, sourceType };
   }
 
-  throw new Error(`aioncore binary not found for ${runtimeKey} (tag: ${tag})`);
+  throw new Error(`${variant.displayName} binary not found for ${runtimeKey} (tag: ${tag})`);
 }
 
-module.exports = { prepareAioncore };
+function prepareCentauraiCore(options) {
+  return prepareCoreBundle(options, 'centaur');
+}
+
+function prepareLegacyAioncore(options) {
+  return prepareCoreBundle(options, 'legacy');
+}
+
+module.exports = {
+  prepareCentauraiCore,
+  prepareLegacyAioncore,
+  // Temporary compatibility export for downstream scripts during the rename.
+  prepareAioncore: prepareCentauraiCore,
+  getAssetName,
+};

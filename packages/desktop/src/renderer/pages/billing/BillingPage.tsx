@@ -86,7 +86,11 @@ const BillingPage: React.FC = () => {
             value={providerKeyId}
             onChange={(value) => setProviderKeyId(value)}
           />
-          <Radio.Group type='button' value={granularity} onChange={(value) => setGranularity(value as BillingGranularity)}>
+          <Radio.Group
+            type='button'
+            value={granularity}
+            onChange={(value) => setGranularity(value as BillingGranularity)}
+          >
             <Radio value='hour'>{t('billing.granularity.hour')}</Radio>
             <Radio value='day'>{t('billing.granularity.day')}</Radio>
             <Radio value='month'>{t('billing.granularity.month')}</Radio>

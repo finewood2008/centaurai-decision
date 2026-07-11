@@ -13,8 +13,12 @@ describe('billing first-use onboarding', () => {
   });
 
   it('ships localized onboarding copy for users who have not configured a relay key yet', () => {
-    const zh = readJson<{ onboarding?: Record<string, unknown> }>('packages/desktop/src/renderer/services/i18n/locales/zh-CN/billing.json');
-    const en = readJson<{ onboarding?: Record<string, unknown> }>('packages/desktop/src/renderer/services/i18n/locales/en-US/billing.json');
+    const zh = readJson<{ onboarding?: Record<string, unknown> }>(
+      'packages/desktop/src/renderer/services/i18n/locales/zh-CN/billing.json'
+    );
+    const en = readJson<{ onboarding?: Record<string, unknown> }>(
+      'packages/desktop/src/renderer/services/i18n/locales/en-US/billing.json'
+    );
 
     expect(zh.onboarding).toMatchObject({
       title: '配置中转站 Key',
@@ -25,8 +29,10 @@ describe('billing first-use onboarding', () => {
     expect(en.onboarding).toMatchObject({
       title: 'Configure relay key',
       stepCreateKey: 'Register or sign in on the relay platform, then create a user API key',
-      stepConfigureProvider: 'Return to CentaurAI, add an upstream service in model settings, and enter Base URL plus API Key',
-      noSession: 'CentaurAI does not store relay account passwords or login sessions; it only uses the configured key for upstream APIs',
+      stepConfigureProvider:
+        'Return to CentaurAI, add an upstream service in model settings, and enter Base URL plus API Key',
+      noSession:
+        'CentaurAI does not store relay account passwords or login sessions; it only uses the configured key for upstream APIs',
     });
   });
 

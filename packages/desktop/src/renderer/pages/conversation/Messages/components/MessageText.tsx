@@ -167,7 +167,9 @@ const parseLocalVectorDisplay = (content: string): LocalVectorDbDisplay | null =
     sources.push(cleanLocalVectorText(match[2]).replace(/\s*·\s*score.*$/, ''));
   }
   for (const match of body.matchAll(/^##\s+(.+)$/gm)) {
-    const source = cleanLocalVectorText(match[1]).replace(/（\d+\s*条）$/, '').trim();
+    const source = cleanLocalVectorText(match[1])
+      .replace(/（\d+\s*条）$/, '')
+      .trim();
     if (isLocalVectorSourceName(source)) {
       sources.push(source);
     }
@@ -293,7 +295,10 @@ const renderLocalVectorUserMessage = (content: string): React.ReactNode => {
 
         {result.snippet && (
           <details className='mt-9px'>
-            <summary className='text-12px cursor-pointer select-none' style={{ color: 'var(--brand)', outline: 'none' }}>
+            <summary
+              className='text-12px cursor-pointer select-none'
+              style={{ color: 'var(--brand)', outline: 'none' }}
+            >
               展开完整检索片段
             </summary>
             <pre

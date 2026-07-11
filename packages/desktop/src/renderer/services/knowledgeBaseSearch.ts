@@ -35,7 +35,7 @@ export async function retrieveKnowledgeContext(query: string): Promise<Knowledge
     : await fetch(`${getBaseUrl()}/api/vector-search`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ endpoint, query: q, n_results: nResults, mode }),
+        body: JSON.stringify({ query: q, n_results: nResults, mode }),
       });
   if (!resp.ok) throw new Error(`知识库检索失败 (HTTP ${resp.status})`);
 

@@ -119,7 +119,23 @@ export function resolveWithinRoot(rootDir: string, relPath: string | null | unde
 
 /** POSIX-style relative path from root, for stable URLs across platforms. */
 function toRelPosix(rootDir: string, full: string): string {
-  const rel = path.relative(path.resolve(rootDir), full);
+  // macOS exposes os.tmpdir() through /var while realpath resolves it through
+  // /private/var. Write helpers intentionally operate on canonical parents, so
+  // compare canonical paths here as well or a contained file is rendered as a
+  // bogus ../../private/var/... URL.
+  let root = path.resolve(rootDir);
+  let target = path.resolve(full);
+  try {
+    root = fs.realpathSync.native(root);
+  } catch {
+    // Missing roots are handled by the caller; retain lexical fallback.
+  }
+  try {
+    target = fs.realpathSync.native(target);
+  } catch {
+    // Some call sites compute the path immediately before creation.
+  }
+  const rel = path.relative(root, target);
   return rel.split(path.sep).join('/');
 }
 

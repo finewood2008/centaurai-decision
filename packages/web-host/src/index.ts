@@ -79,6 +79,8 @@ export async function startWebHost(opts: WebHostOptions): Promise<WebHostHandle>
       installerDir: opts.installerDir,
       sharedDriveDir: opts.sharedDriveDir,
       nasRootDir: opts.nasRootDir,
+      knowledgeEndpoint: opts.knowledgeEndpoint,
+      knowledgeToken: opts.knowledgeToken,
       imageWorkbenchDir: opts.imageWorkbenchDir,
       imageKey: opts.imageKey,
       videoUpstreamUrl: opts.videoUpstreamUrl,

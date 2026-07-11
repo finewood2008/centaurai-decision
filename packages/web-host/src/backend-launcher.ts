@@ -154,6 +154,8 @@ export type BackendStartupErrorDetails = {
 
 export type BackendStartOptions = {
   allowPendingOnHealthTimeout?: boolean;
+  /** Require both the CentaurAI and legacy compatibility listening records. */
+  requireDualListeningHandshake?: boolean;
   onHealthTimeout?: (error: BackendStartupError) => Promise<void> | void;
   onPendingExit?: (error: BackendStartupError) => Promise<void> | void;
   onReady?: (port: number) => Promise<void> | void;
@@ -179,7 +181,8 @@ export class BackendStartupCancelledError extends Error {
 }
 
 export function buildSpawnArgs(config: SpawnConfig): string[] {
-  const logLevel = process.env.AIONUI_LOG_LEVEL || (config.isPackaged ? 'info' : 'debug');
+  const logLevel =
+    process.env.CENTAURAI_CORE_LOG_LEVEL || process.env.AIONUI_LOG_LEVEL || (config.isPackaged ? 'info' : 'debug');
   const args = [
     '--port',
     String(config.port),
@@ -206,6 +209,9 @@ export function buildSpawnArgs(config: SpawnConfig): string[] {
 export function buildSpawnEnv(dirs: BackendDirConfig): NodeJS.ProcessEnv {
   return {
     ...process.env,
+    CENTAURAI_CORE_CACHE_DIR: dirs.cacheDir,
+    CENTAURAI_CORE_WORK_DIR: dirs.workDir,
+    CENTAURAI_CORE_LOG_DIR: dirs.logDir,
     AIONUI_CACHE_DIR: dirs.cacheDir,
     AIONUI_WORK_DIR: dirs.workDir,
     AIONUI_LOG_DIR: dirs.logDir,
@@ -220,7 +226,7 @@ const FETCH_FORBIDDEN_PORTS = new Set([
 ]);
 
 const FETCH_COMPATIBLE_PORT_MAX_ATTEMPTS = 50;
-const AIONCORE_LISTENING_PREFIX = 'AIONCORE_LISTENING ';
+const BACKEND_LISTENING_PREFIXES = ['CENTAURAI_CORE_LISTENING ', 'AIONCORE_LISTENING '] as const;
 const BACKEND_PORT_REPORT_TIMEOUT_MS = 30_000;
 
 function isFetchForbiddenPort(port: number): boolean {
@@ -336,13 +342,19 @@ function clearHealthCheckErrorDiagnostics(diagnostics: HealthCheckDiagnostics): 
   delete diagnostics.healthCheckLastErrorCauseCode;
 }
 
-function parseAioncoreListeningPort(line: string): number | undefined {
-  if (!line.startsWith(AIONCORE_LISTENING_PREFIX)) return undefined;
+type BackendListeningRecord = {
+  port: number;
+  prefix: (typeof BACKEND_LISTENING_PREFIXES)[number];
+};
+
+function parseAioncoreListeningRecord(line: string): BackendListeningRecord | undefined {
+  const prefix = BACKEND_LISTENING_PREFIXES.find((candidate) => line.startsWith(candidate));
+  if (!prefix) return undefined;
   try {
-    const parsed = JSON.parse(line.slice(AIONCORE_LISTENING_PREFIX.length)) as { port?: unknown };
+    const parsed = JSON.parse(line.slice(prefix.length)) as { port?: unknown };
     if (typeof parsed.port !== 'number' || !Number.isInteger(parsed.port)) return undefined;
     if (parsed.port <= 0 || parsed.port > 65535) return undefined;
-    return parsed.port;
+    return { port: parsed.port, prefix };
   } catch {
     return undefined;
   }
@@ -383,6 +395,21 @@ function killBackendProcessTree(childProcess: ChildProcess | null, signal: 'SIGT
       /* already exited */
     }
   }
+}
+
+const spawnedBackends = new Set<ChildProcess>();
+const killSpawnedBackendsOnExit = (): void => {
+  for (const child of spawnedBackends) killBackendProcessTree(child, 'SIGKILL');
+};
+
+function registerSpawnedBackend(child: ChildProcess): void {
+  if (spawnedBackends.size === 0) process.on('exit', killSpawnedBackendsOnExit);
+  spawnedBackends.add(child);
+}
+
+function unregisterSpawnedBackend(child: ChildProcess): void {
+  spawnedBackends.delete(child);
+  if (spawnedBackends.size === 0) process.removeListener('exit', killSpawnedBackendsOnExit);
 }
 
 async function probeHealthCheckTcpConnect(port: number, timeoutMs = 1_000): Promise<Partial<HealthCheckDiagnostics>> {
@@ -499,6 +526,8 @@ export class BackendLifecycleManager {
     let serverListeningObservedAfterMs: number | undefined;
     let serverListeningLine: string | undefined;
     let backendPid: number | undefined;
+    const listeningPrefixes = new Set<(typeof BACKEND_LISTENING_PREFIXES)[number]>();
+    let listeningPort: number | undefined;
     const makeStartupError = (
       stage: BackendStartupStage,
       message: string,
@@ -557,11 +586,8 @@ export class BackendLifecycleManager {
     this.childProcess.stdin?.end();
 
     backendPid = this.childProcess.pid;
-    const pid = backendPid;
-    const killOnExit = () => {
-      if (pid) killBackendProcessTree(this.childProcess, 'SIGKILL');
-    };
-    process.on('exit', killOnExit);
+    const spawnedChild = this.childProcess;
+    registerSpawnedBackend(spawnedChild);
 
     const startupFailure = new Promise<never>((_resolve, reject) => {
       let failureSettled = false;
@@ -586,7 +612,7 @@ export class BackendLifecycleManager {
       });
 
       this.childProcess?.once('exit', (code, signal) => {
-        process.removeListener('exit', killOnExit);
+        unregisterSpawnedBackend(spawnedChild);
         if (this._status === 'running') {
           this.handleCrash(code, signal);
           return;
@@ -662,13 +688,27 @@ export class BackendLifecycleManager {
       stdoutTail = appendOutputTail(stdoutTail, data);
       for (const line of data.toString().split('\n')) {
         const trimmed = line.trim();
-        const port = parseAioncoreListeningPort(trimmed);
-        if (port !== undefined) {
-          this._port = port;
+        const listening = parseAioncoreListeningRecord(trimmed);
+        if (listening) {
+          if (listeningPort !== undefined && listeningPort !== listening.port) {
+            rejectReportedPort(
+              makeStartupError(
+                'listen_timeout',
+                `aioncore reported inconsistent listening ports ${listeningPort} and ${listening.port}`
+              )
+            );
+            continue;
+          }
+          listeningPort = listening.port;
+          listeningPrefixes.add(listening.prefix);
+          this._port = listening.port;
           serverListeningObserved = true;
           serverListeningObservedAfterMs = Date.now() - startupStartedAt;
           serverListeningLine = trimmed;
-          resolveReportedPort(port);
+          const hasRequiredHandshake =
+            !options?.requireDualListeningHandshake ||
+            BACKEND_LISTENING_PREFIXES.every((prefix) => listeningPrefixes.has(prefix));
+          if (hasRequiredHandshake) resolveReportedPort(listening.port);
         } else if (
           !serverListeningObserved &&
           this._port > 0 &&

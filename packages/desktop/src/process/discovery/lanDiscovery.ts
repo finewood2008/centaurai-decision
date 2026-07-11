@@ -16,6 +16,8 @@
 
 import { Bonjour, type Service } from 'bonjour-service';
 
+type BonjourService = InstanceType<typeof Service>;
+
 export const CENTAUR_SERVICE_TYPE = 'centaurai';
 export const CENTAUR_SERVICE_PROTOCOL = 'tcp' as const;
 
@@ -152,7 +154,7 @@ export const filterReachableDiscoveredServers = async (
   return probed.filter((server): server is DiscoveredServer => server !== null);
 };
 
-const serviceToDiscoveredServer = (s: Service): DiscoveredServer => {
+const serviceToDiscoveredServer = (s: BonjourService): DiscoveredServer => {
   const txt = toRecord(s.txt);
   return {
     name: s.name,
@@ -216,15 +218,15 @@ export function discoverServers(onUpdate: (servers: DiscoveredServer[]) => void)
   const instance = new Bonjour();
   const byKey = new Map<string, DiscoveredServer>();
 
-  const keyOf = (s: Service) => `${s.name}:${s.port}`;
+  const keyOf = (s: BonjourService) => `${s.name}:${s.port}`;
   const emit = () => onUpdate([...byKey.values()]);
 
   const browser = instance.find({ type: CENTAUR_SERVICE_TYPE, protocol: CENTAUR_SERVICE_PROTOCOL });
-  browser.on('up', (s: Service) => {
+  browser.on('up', (s: BonjourService) => {
     byKey.set(keyOf(s), serviceToDiscoveredServer(s));
     emit();
   });
-  browser.on('down', (s: Service) => {
+  browser.on('down', (s: BonjourService) => {
     byKey.delete(keyOf(s));
     emit();
   });

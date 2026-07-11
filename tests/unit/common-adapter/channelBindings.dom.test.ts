@@ -53,6 +53,7 @@ vi.mock('@/common/adapter/httpBridge', () => {
       })
     ),
     wsEmitter: vi.fn(() => ({ emit: vi.fn(), on: vi.fn(() => vi.fn()) })),
+    wsEmitterAliases: vi.fn(() => ({ emit: vi.fn(), on: vi.fn(() => vi.fn()) })),
     wsMappedEmitter: vi.fn(() => ({ emit: vi.fn(), on: vi.fn(() => vi.fn()) })),
     getBaseUrl: vi.fn(() => ''),
     getWebuiGateHeaders: vi.fn(() => ({})),

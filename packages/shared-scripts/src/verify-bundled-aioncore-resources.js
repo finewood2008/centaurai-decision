@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
-function backendBinaryName(platform) {
-  return platform === 'win32' ? 'aioncore.exe' : 'aioncore';
+function backendBinaryName(platform, binaryBaseName) {
+  return platform === 'win32' ? `${binaryBaseName}.exe` : binaryBaseName;
 }
 
 function nodeBinaryName(platform) {
@@ -17,12 +17,12 @@ function normalize(relativePath) {
   return relativePath.split(path.sep).join('/');
 }
 
-function bundledPath(runtimeKey, ...parts) {
-  return normalize(path.join('bundled-aioncore', runtimeKey, ...parts));
+function bundledPath(bundleDirName, runtimeKey, ...parts) {
+  return normalize(path.join(bundleDirName, runtimeKey, ...parts));
 }
 
-function requireRelativePath(baseDir, runtimeKey, parts, checked, missing) {
-  const relativePath = bundledPath(runtimeKey, ...parts);
+function requireRelativePath(baseDir, bundleDirName, runtimeKey, parts, checked, missing) {
+  const relativePath = bundledPath(bundleDirName, runtimeKey, ...parts);
   checked.push(relativePath);
 
   if (!fs.existsSync(path.join(baseDir, ...parts))) {
@@ -44,13 +44,13 @@ function isFile(filePath) {
   return fs.existsSync(filePath) && fs.statSync(filePath).isFile();
 }
 
-function requireManagedNode(baseDir, runtimeKey, platform, checked, missing) {
+function requireManagedNode(baseDir, bundleDirName, runtimeKey, platform, checked, missing) {
   const nodeRoot = path.join(baseDir, 'managed-resources', 'node');
   const versions = readDirectories(nodeRoot);
   const executableParts = nodeExecutableParts(platform);
 
   if (versions.length === 0) {
-    const relativePath = bundledPath(runtimeKey, 'managed-resources', 'node', '*', ...executableParts);
+    const relativePath = bundledPath(bundleDirName, runtimeKey, 'managed-resources', 'node', '*', ...executableParts);
     checked.push(relativePath);
     missing.push(relativePath);
     return;
@@ -61,7 +61,7 @@ function requireManagedNode(baseDir, runtimeKey, platform, checked, missing) {
     return isFile(executablePath);
   });
 
-  const relativePath = bundledPath(runtimeKey, 'managed-resources', 'node', '*', ...executableParts);
+  const relativePath = bundledPath(bundleDirName, runtimeKey, 'managed-resources', 'node', '*', ...executableParts);
   checked.push(relativePath);
 
   if (!executableFound) {
@@ -77,12 +77,46 @@ function readManifest(manifestPath) {
   }
 }
 
-function requireManagedAcpTool(baseDir, runtimeKey, toolId, checked, missing) {
+function requireImmutableReleaseManifest(
+  baseDir,
+  bundleDirName,
+  runtimeKey,
+  repository,
+  releaseType,
+  checked,
+  missing
+) {
+  const relativePath = `${bundledPath(bundleDirName, runtimeKey, 'manifest.json')}#immutable-release`;
+  checked.push(relativePath);
+  const manifest = readManifest(path.join(baseDir, 'manifest.json'));
+  const valid =
+    manifest?.repository === repository &&
+    manifest?.releaseType === releaseType &&
+    typeof manifest?.version === 'string' &&
+    /^v\d+\.\d+\.\d+$/.test(manifest.version) &&
+    typeof manifest?.commit === 'string' &&
+    /^[0-9a-f]{40}$/i.test(manifest.commit) &&
+    typeof manifest?.sha256 === 'string' &&
+    /^[0-9a-f]{64}$/i.test(manifest.sha256) &&
+    typeof manifest?.source?.asset === 'string';
+  if (!valid) missing.push(relativePath);
+}
+
+function requireManagedAcpTool(baseDir, bundleDirName, runtimeKey, toolId, checked, missing) {
   const toolRoot = path.join(baseDir, 'managed-resources', 'acp', toolId);
   const versions = readDirectories(toolRoot);
 
   if (versions.length === 0) {
-    const relativePath = bundledPath(runtimeKey, 'managed-resources', 'acp', toolId, '*', runtimeKey, 'manifest.json');
+    const relativePath = bundledPath(
+      bundleDirName,
+      runtimeKey,
+      'managed-resources',
+      'acp',
+      toolId,
+      '*',
+      runtimeKey,
+      'manifest.json'
+    );
     checked.push(relativePath);
     missing.push(relativePath);
     return;
@@ -91,6 +125,7 @@ function requireManagedAcpTool(baseDir, runtimeKey, toolId, checked, missing) {
   for (const version of versions) {
     const platformRoot = path.join(toolRoot, version, runtimeKey);
     const manifestRelativePath = bundledPath(
+      bundleDirName,
       runtimeKey,
       'managed-resources',
       'acp',
@@ -110,11 +145,14 @@ function requireManagedAcpTool(baseDir, runtimeKey, toolId, checked, missing) {
     const manifest = readManifest(manifestPath);
     const entrypoint = typeof manifest?.entrypoint === 'string' ? manifest.entrypoint : null;
     if (!entrypoint) {
-      missing.push(bundledPath(runtimeKey, 'managed-resources', 'acp', toolId, version, runtimeKey, '<entrypoint>'));
+      missing.push(
+        bundledPath(bundleDirName, runtimeKey, 'managed-resources', 'acp', toolId, version, runtimeKey, '<entrypoint>')
+      );
       continue;
     }
 
     const entrypointRelativePath = bundledPath(
+      bundleDirName,
       runtimeKey,
       'managed-resources',
       'acp',
@@ -131,22 +169,60 @@ function requireManagedAcpTool(baseDir, runtimeKey, toolId, checked, missing) {
   }
 }
 
-function verifyBundledAioncoreResources({ resourcesDir, electronPlatformName, targetArch }) {
+function verifyCoreBundle({
+  resourcesDir,
+  electronPlatformName,
+  targetArch,
+  bundleDirName,
+  binaryBaseName,
+  repository,
+  releaseType,
+}) {
   const runtimeKey = `${electronPlatformName}-${targetArch}`;
-  const baseDir = path.join(resourcesDir, 'bundled-aioncore', runtimeKey);
+  const baseDir = path.join(resourcesDir, bundleDirName, runtimeKey);
   const checked = [];
   const missing = [];
 
-  requireRelativePath(baseDir, runtimeKey, [backendBinaryName(electronPlatformName)], checked, missing);
-  requireRelativePath(baseDir, runtimeKey, ['manifest.json'], checked, missing);
-  requireRelativePath(baseDir, runtimeKey, ['managed-resources'], checked, missing);
-  requireManagedNode(baseDir, runtimeKey, electronPlatformName, checked, missing);
-  requireManagedAcpTool(baseDir, runtimeKey, 'codex-acp', checked, missing);
-  requireManagedAcpTool(baseDir, runtimeKey, 'claude-agent-acp', checked, missing);
+  requireRelativePath(
+    baseDir,
+    bundleDirName,
+    runtimeKey,
+    [backendBinaryName(electronPlatformName, binaryBaseName)],
+    checked,
+    missing
+  );
+  requireRelativePath(baseDir, bundleDirName, runtimeKey, ['manifest.json'], checked, missing);
+  requireImmutableReleaseManifest(baseDir, bundleDirName, runtimeKey, repository, releaseType, checked, missing);
+  requireRelativePath(baseDir, bundleDirName, runtimeKey, ['managed-resources'], checked, missing);
+  requireManagedNode(baseDir, bundleDirName, runtimeKey, electronPlatformName, checked, missing);
+  requireManagedAcpTool(baseDir, bundleDirName, runtimeKey, 'codex-acp', checked, missing);
+  requireManagedAcpTool(baseDir, bundleDirName, runtimeKey, 'claude-agent-acp', checked, missing);
 
   return { runtimeKey, checked, missing };
 }
 
+function verifyBundledCentauraiCoreResources(options) {
+  return verifyCoreBundle({
+    ...options,
+    bundleDirName: 'bundled-centaurai-core',
+    binaryBaseName: 'centaurai-core',
+    repository: 'finewood2008/centaurai-core',
+    releaseType: 'centaur',
+  });
+}
+
+function verifyBundledLegacyAioncoreResources(options) {
+  return verifyCoreBundle({
+    ...options,
+    bundleDirName: 'bundled-aioncore',
+    binaryBaseName: 'aioncore',
+    repository: 'iOfficeAI/AionCore',
+    releaseType: 'legacy',
+  });
+}
+
 module.exports = {
-  verifyBundledAioncoreResources,
+  verifyBundledCentauraiCoreResources,
+  verifyBundledLegacyAioncoreResources,
+  verifyBundledAioncoreResources: verifyBundledCentauraiCoreResources,
 };

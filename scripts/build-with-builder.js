@@ -485,15 +485,21 @@ try {
     return;
   }
 
-  // 5. Prepare aioncore binary (for packaged runtime usage)
-  const { prepareAioncore } = require('../packages/shared-scripts/src/prepare-aioncore.js');
-  const { resolveAioncoreVersion } = require('./resolveAioncoreVersion.js');
+  // 5. Prepare immutable primary and rollback Core binaries.
+  const { prepareCentauraiCore, prepareLegacyAioncore } = require('../packages/shared-scripts/src/prepare-aioncore.js');
+  const { resolveCentauraiCoreRelease, resolveLegacyAioncoreRelease } = require('./resolveAioncoreVersion.js');
   const projectRoot = path.resolve(__dirname, '..');
-  prepareAioncore({
+  prepareCentauraiCore({
     projectRoot,
     platform: process.platform,
     arch: targetArch,
-    version: resolveAioncoreVersion(projectRoot),
+    release: resolveCentauraiCoreRelease(projectRoot),
+  });
+  prepareLegacyAioncore({
+    projectRoot,
+    platform: process.platform,
+    arch: targetArch,
+    release: resolveLegacyAioncoreRelease(projectRoot),
   });
 
   // 6. Prepare hub resources (index.json + extension zips for offline fallback)

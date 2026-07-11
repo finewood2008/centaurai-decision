@@ -438,13 +438,15 @@ describe('static-server', () => {
     await h2.stop();
   });
 
-  it('POST /api/vector-search forwards to the configured vector DB endpoint', async () => {
+  it('POST /api/vector-search uses only the server-owned knowledge endpoint and token', async () => {
     const backend = await startMockBackend((_req, res) => res.end('nope'));
     stopBackend = backend.close;
 
     let seenSearchBody: unknown = null;
+    let seenToken: string | undefined;
     const vectorDb = await startMockBackend((req, res) => {
       if (req.method === 'POST' && req.url === '/api/search') {
+        seenToken = req.headers['x-centaurai-knowledge-token'] as string | undefined;
         const chunks: Buffer[] = [];
         req.on('data', (d) => chunks.push(d as Buffer));
         req.on('end', () => {
@@ -457,12 +459,18 @@ describe('static-server', () => {
       res.writeHead(404).end();
     });
 
-    handle = await startStaticServer({ staticDir, backendPort: backend.port, port: 0 });
+    handle = await startStaticServer({
+      staticDir,
+      backendPort: backend.port,
+      port: 0,
+      knowledgeEndpoint: `http://127.0.0.1:${vectorDb.port}`,
+      knowledgeToken: 'worker-secret',
+    });
     const r = await fetch(`${handle.localUrl}/api/vector-search`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
-        endpoint: `http://127.0.0.1:${vectorDb.port}`,
+        endpoint: 'http://169.254.169.254/latest/meta-data',
         query: 'hello',
         n_results: 3,
         mode: 'text',
@@ -472,10 +480,11 @@ describe('static-server', () => {
     const data = await r.json();
     expect(data.results).toHaveLength(1);
     expect(seenSearchBody).toEqual({ query: 'hello', n_results: 3, mode: 'text' });
+    expect(seenToken).toBe('worker-secret');
     await vectorDb.close();
   });
 
-  it('POST /api/vector-search rejects a non-http endpoint with 400', async () => {
+  it('POST /api/vector-search fails closed without a server-owned endpoint', async () => {
     const backend = await startMockBackend((_req, res) => res.end('nope'));
     stopBackend = backend.close;
     handle = await startStaticServer({ staticDir, backendPort: backend.port, port: 0 });
@@ -484,7 +493,7 @@ describe('static-server', () => {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ endpoint: 'file:///etc/passwd', query: 'x' }),
     });
-    expect(r.status).toBe(400);
+    expect(r.status).toBe(503);
   });
 
   it('self-heals a 0-byte index.html: LAN users still get the real page', async () => {

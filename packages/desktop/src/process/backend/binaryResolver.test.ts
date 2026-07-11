@@ -2,7 +2,7 @@ import { execSync } from 'node:child_process';
 import { existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { resolveBinaryPath } from './binaryResolver';
+import { resolveBinaryPath, resolveLegacyBinaryPath } from './binaryResolver';
 
 vi.mock('node:child_process', () => ({
   execSync: vi.fn(),
@@ -38,18 +38,18 @@ describe('resolveBinaryPath', () => {
     setResourcesPath(originalResourcesPath);
   });
 
-  it('attaches bundled path diagnostics when aioncore cannot be resolved', () => {
+  it('attaches bundled path diagnostics when CentaurAI Core cannot be resolved', () => {
     const resourcesPath = '/app/resources';
     const runtimeKey = `${process.platform}-${process.arch}`;
-    const binaryName = process.platform === 'win32' ? 'aioncore.exe' : 'aioncore';
-    const bundledDir = join(resourcesPath, 'bundled-aioncore');
+    const binaryName = process.platform === 'win32' ? 'centaurai-core.exe' : 'centaurai-core';
+    const bundledDir = join(resourcesPath, 'bundled-centaurai-core');
     const runtimeDir = join(bundledDir, runtimeKey);
     const checkedBundledPath = join(runtimeDir, binaryName);
 
     setResourcesPath(resourcesPath);
     vi.mocked(existsSync).mockReturnValue(false);
     vi.mocked(readdirSync).mockImplementation((path) => {
-      if (path === resourcesPath) return [dirEntry('bundled-aioncore', true)];
+      if (path === resourcesPath) return [dirEntry('bundled-centaurai-core', true)];
       if (path === runtimeDir) return [dirEntry('manifest.json')];
       return [] as ReturnType<typeof readdirSync>;
     });
@@ -57,7 +57,7 @@ describe('resolveBinaryPath', () => {
       throw new Error('not found on PATH');
     });
 
-    expect(() => resolveBinaryPath()).toThrow('Cannot find "aioncore" binary');
+    expect(() => resolveBinaryPath()).toThrow('Cannot find CentaurAI Core "centaurai-core" binary');
 
     try {
       resolveBinaryPath();
@@ -71,12 +71,25 @@ describe('resolveBinaryPath', () => {
           checkedBundledPath,
           bundledDirExists: false,
           runtimeDirExists: false,
-          resourcesDirEntries: ['bundled-aioncore/'],
+          resourcesDirEntries: ['bundled-centaurai-core/'],
           runtimeDirEntries: ['manifest.json'],
-          pathLookupCommand: process.platform === 'win32' ? 'where aioncore' : 'which aioncore',
+          pathLookupCommand: process.platform === 'win32' ? 'where centaurai-core' : 'which centaurai-core',
           pathLookupError: expect.stringContaining('not found on PATH'),
         }),
       });
     }
+  });
+
+  it('resolves the locked legacy rollback binary from its isolated bundle', () => {
+    const resourcesPath = '/app/resources';
+    const runtimeKey = `${process.platform}-${process.arch}`;
+    const binaryName = process.platform === 'win32' ? 'aioncore.exe' : 'aioncore';
+    const expected = join(resourcesPath, 'bundled-aioncore', runtimeKey, binaryName);
+
+    setResourcesPath(resourcesPath);
+    vi.mocked(existsSync).mockImplementation((candidate) => candidate === expected);
+
+    expect(resolveLegacyBinaryPath({ allowSystemPath: false })).toBe(expected);
+    expect(execSync).not.toHaveBeenCalled();
   });
 });

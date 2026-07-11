@@ -5,6 +5,8 @@
   "description": "Shared build scripts for AionUi packages",
   "type": "commonjs",
   "exports": {
+    "./prepare-centaurai-core": "./src/prepare-aioncore.js",
+    "./prepare-legacy-aioncore": "./src/prepare-aioncore.js",
     "./prepare-aioncore": "./src/prepare-aioncore.js"
   },
   "scripts": {

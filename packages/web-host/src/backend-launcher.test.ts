@@ -169,7 +169,7 @@ describe('buildSpawnArgs', () => {
 });
 
 describe('buildSpawnEnv', () => {
-  it('merges process.env with AIONUI_* dir vars', () => {
+  it('merges process.env with CentaurAI Core dir vars and legacy aliases', () => {
     const env = buildSpawnEnv({
       cacheDir: '/c',
       workDir: '/w',
@@ -178,6 +178,9 @@ describe('buildSpawnEnv', () => {
     expect(env.AIONUI_CACHE_DIR).toBe('/c');
     expect(env.AIONUI_WORK_DIR).toBe('/w');
     expect(env.AIONUI_LOG_DIR).toBe('/l');
+    expect(env.CENTAURAI_CORE_CACHE_DIR).toBe('/c');
+    expect(env.CENTAURAI_CORE_WORK_DIR).toBe('/w');
+    expect(env.CENTAURAI_CORE_LOG_DIR).toBe('/l');
     expect(env.PATH).toBe(process.env.PATH); // inherits
   });
 });
@@ -249,7 +252,37 @@ describe('findAvailablePort', () => {
 });
 
 describe('BackendLifecycleManager.start (success path)', () => {
-  it('lets aioncore choose the backend port and waits for the reported listening event', async () => {
+  it('waits for both CentaurAI and compatibility listening records when required', async () => {
+    const child = makeFakeChild();
+    vi.mocked(spawn).mockReturnValue(child as unknown as ChildProcess);
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(new Response('ok', { status: 200 }) as unknown as Response);
+    const mgr = new BackendLifecycleManager(APP_META_PACKAGED, () => '/abs/path/centaurai-core');
+    let settled = false;
+
+    try {
+      const startPromise = mgr
+        .start('/preflight-copy', undefined, undefined, { requireDualListeningHandshake: true })
+        .then((port) => {
+          settled = true;
+          return port;
+        });
+      await Promise.resolve();
+      child.stdout?.emit('data', Buffer.from('CENTAURAI_CORE_LISTENING {"host":"127.0.0.1","port":55555}\n'));
+      await Promise.resolve();
+
+      expect(settled).toBe(false);
+      expect(fetchSpy).not.toHaveBeenCalled();
+
+      child.stdout?.emit('data', Buffer.from('AIONCORE_LISTENING {"host":"127.0.0.1","port":55555}\n'));
+      await expect(startPromise).resolves.toBe(55555);
+    } finally {
+      fetchSpy.mockRestore();
+    }
+  });
+
+  it('lets CentaurAI Core choose the backend port and accepts the canonical listening event', async () => {
     vi.mocked(createServer).mockImplementation(() => {
       throw new Error('launcher must not pre-bind backend ports');
     });
@@ -268,7 +301,7 @@ describe('BackendLifecycleManager.start (success path)', () => {
     });
 
     await Promise.resolve();
-    child.stdout?.emit('data', Buffer.from('AIONCORE_LISTENING {"host":"127.0.0.1","port":55555}\n'));
+    child.stdout?.emit('data', Buffer.from('CENTAURAI_CORE_LISTENING {"host":"127.0.0.1","port":55555}\n'));
 
     const port = await startPromise;
 

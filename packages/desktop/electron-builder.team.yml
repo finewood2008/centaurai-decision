@@ -116,7 +116,10 @@ extraResources:
     to: .
   - from: resources/app.png
     to: app.png
-  # aioncore binary (pre-compiled per platform/arch, ships its own bun runtime)
+  # CentaurAI Core binary (pre-compiled per platform/arch)
+  - from: resources/bundled-centaurai-core
+    to: bundled-centaurai-core
+  # Locked v0.1.24 rollback Core; kept isolated from the primary runtime.
   - from: resources/bundled-aioncore
     to: bundled-aioncore
   - from: resources/hub

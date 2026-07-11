@@ -1,1 +1,1 @@
-export { resolveBinaryPath } from './binaryResolver';
+export { resolveBinaryPath, resolveLegacyBinaryPath } from './binaryResolver';

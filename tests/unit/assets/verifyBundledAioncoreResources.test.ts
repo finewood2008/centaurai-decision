@@ -1,26 +1,40 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdirSync, mkdtempSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 const {
-  verifyBundledAioncoreResources,
+  verifyBundledCentauraiCoreResources,
+  verifyBundledLegacyAioncoreResources,
 } = require('../../../packages/shared-scripts/src/verify-bundled-aioncore-resources');
 
-describe('verifyBundledAioncoreResources', () => {
+describe('verifyBundledCentauraiCoreResources', () => {
   let tmp: string;
   let resourcesDir: string;
   let managedResourcesDir: string;
   let codexRoot: string;
 
+  const releaseManifest = (releaseType: 'centaur' | 'legacy') => ({
+    repository: releaseType === 'centaur' ? 'finewood2008/centaurai-core' : 'iOfficeAI/AionCore',
+    releaseType,
+    version: releaseType === 'centaur' ? 'v0.1.48' : 'v0.1.24',
+    commit: 'a'.repeat(40),
+    sha256: 'b'.repeat(64),
+    source: { asset: 'fixture.tar.gz' },
+  });
+
   beforeEach(() => {
     tmp = mkdtempSync(join(tmpdir(), 'aionui-bundled-resources-'));
     resourcesDir = join(tmp, 'resources');
-    managedResourcesDir = join(resourcesDir, 'bundled-aioncore', 'win32-x64', 'managed-resources');
+    managedResourcesDir = join(resourcesDir, 'bundled-centaurai-core', 'win32-x64', 'managed-resources');
 
-    mkdirSync(join(resourcesDir, 'bundled-aioncore', 'win32-x64'), { recursive: true });
-    writeFileSync(join(resourcesDir, 'bundled-aioncore', 'win32-x64', 'aioncore.exe'), '', { flush: true });
-    writeFileSync(join(resourcesDir, 'bundled-aioncore', 'win32-x64', 'manifest.json'), '{}', { flush: true });
+    mkdirSync(join(resourcesDir, 'bundled-centaurai-core', 'win32-x64'), { recursive: true });
+    writeFileSync(join(resourcesDir, 'bundled-centaurai-core', 'win32-x64', 'centaurai-core.exe'), '', { flush: true });
+    writeFileSync(
+      join(resourcesDir, 'bundled-centaurai-core', 'win32-x64', 'manifest.json'),
+      JSON.stringify(releaseManifest('centaur')),
+      { flush: true }
+    );
 
     const nodeRoot = join(managedResourcesDir, 'node', 'node-v24.11.0-win-x64');
     mkdirSync(nodeRoot, { recursive: true });
@@ -48,7 +62,7 @@ describe('verifyBundledAioncoreResources', () => {
   });
 
   it('passes when node and managed ACP entrypoints exist', () => {
-    const result = verifyBundledAioncoreResources({
+    const result = verifyBundledCentauraiCoreResources({
       resourcesDir,
       electronPlatformName: 'win32',
       targetArch: 'x64',
@@ -58,27 +72,64 @@ describe('verifyBundledAioncoreResources', () => {
     expect(result.missing).toEqual([]);
   });
 
-  it('reports missing managed node runtime executable', () => {
-    rmSync(join(managedResourcesDir, 'node', 'node-v24.11.0-win-x64', 'node.exe'));
+  it('verifies the isolated legacy rollback bundle and binary name', () => {
+    const legacyDir = join(resourcesDir, 'bundled-aioncore', 'win32-x64');
+    cpSync(join(resourcesDir, 'bundled-centaurai-core', 'win32-x64'), legacyDir, { recursive: true });
+    renameSync(join(legacyDir, 'centaurai-core.exe'), join(legacyDir, 'aioncore.exe'));
+    writeFileSync(join(legacyDir, 'manifest.json'), JSON.stringify(releaseManifest('legacy')), { flush: true });
 
-    const result = verifyBundledAioncoreResources({
+    const result = verifyBundledLegacyAioncoreResources({
       resourcesDir,
       electronPlatformName: 'win32',
       targetArch: 'x64',
     });
 
-    expect(result.missing).toContain('bundled-aioncore/win32-x64/managed-resources/node/*/node.exe');
+    expect(result.missing).toEqual([]);
+    expect(result.checked).toContain('bundled-aioncore/win32-x64/aioncore.exe');
+  });
+
+  it('reports missing managed node runtime executable', () => {
+    rmSync(join(managedResourcesDir, 'node', 'node-v24.11.0-win-x64', 'node.exe'));
+
+    const result = verifyBundledCentauraiCoreResources({
+      resourcesDir,
+      electronPlatformName: 'win32',
+      targetArch: 'x64',
+    });
+
+    expect(result.missing).toContain('bundled-centaurai-core/win32-x64/managed-resources/node/*/node.exe');
+  });
+
+  it('rejects a bundle manifest without immutable tag, commit, and asset SHA', () => {
+    writeFileSync(join(resourcesDir, 'bundled-centaurai-core', 'win32-x64', 'manifest.json'), '{}');
+
+    const result = verifyBundledCentauraiCoreResources({
+      resourcesDir,
+      electronPlatformName: 'win32',
+      targetArch: 'x64',
+    });
+
+    expect(result.missing).toContain('bundled-centaurai-core/win32-x64/manifest.json#immutable-release');
   });
 
   it('passes for non-Windows node runtime layout', () => {
     const darwinResourcesDir = join(tmp, 'darwin-resources');
-    const darwinManagedResourcesDir = join(darwinResourcesDir, 'bundled-aioncore', 'darwin-arm64', 'managed-resources');
+    const darwinManagedResourcesDir = join(
+      darwinResourcesDir,
+      'bundled-centaurai-core',
+      'darwin-arm64',
+      'managed-resources'
+    );
 
-    mkdirSync(join(darwinResourcesDir, 'bundled-aioncore', 'darwin-arm64'), { recursive: true });
-    writeFileSync(join(darwinResourcesDir, 'bundled-aioncore', 'darwin-arm64', 'aioncore'), '', { flush: true });
-    writeFileSync(join(darwinResourcesDir, 'bundled-aioncore', 'darwin-arm64', 'manifest.json'), '{}', {
+    mkdirSync(join(darwinResourcesDir, 'bundled-centaurai-core', 'darwin-arm64'), { recursive: true });
+    writeFileSync(join(darwinResourcesDir, 'bundled-centaurai-core', 'darwin-arm64', 'centaurai-core'), '', {
       flush: true,
     });
+    writeFileSync(
+      join(darwinResourcesDir, 'bundled-centaurai-core', 'darwin-arm64', 'manifest.json'),
+      JSON.stringify(releaseManifest('centaur')),
+      { flush: true }
+    );
     mkdirSync(join(darwinManagedResourcesDir, 'node', 'node-v24.11.0-darwin-arm64', 'bin'), { recursive: true });
     writeFileSync(join(darwinManagedResourcesDir, 'node', 'node-v24.11.0-darwin-arm64', 'bin', 'node'), '', {
       flush: true,
@@ -98,59 +149,70 @@ describe('verifyBundledAioncoreResources', () => {
     });
     writeFileSync(join(darwinClaudeRoot, 'claude-agent-acp'), '', { flush: true });
 
-    const result = verifyBundledAioncoreResources({
+    const result = verifyBundledCentauraiCoreResources({
       resourcesDir: darwinResourcesDir,
       electronPlatformName: 'darwin',
       targetArch: 'arm64',
     });
 
     expect(result.missing).toEqual([]);
-    expect(result.checked).toContain('bundled-aioncore/darwin-arm64/managed-resources/node/*/bin/node');
+    expect(result.checked).toContain('bundled-centaurai-core/darwin-arm64/managed-resources/node/*/bin/node');
   });
 
   it('reports missing non-Windows managed node runtime executable', () => {
     const linuxResourcesDir = join(tmp, 'linux-resources');
-    const linuxManagedResourcesDir = join(linuxResourcesDir, 'bundled-aioncore', 'linux-x64', 'managed-resources');
+    const linuxManagedResourcesDir = join(
+      linuxResourcesDir,
+      'bundled-centaurai-core',
+      'linux-x64',
+      'managed-resources'
+    );
 
-    mkdirSync(join(linuxResourcesDir, 'bundled-aioncore', 'linux-x64'), { recursive: true });
-    writeFileSync(join(linuxResourcesDir, 'bundled-aioncore', 'linux-x64', 'aioncore'), '', { flush: true });
-    writeFileSync(join(linuxResourcesDir, 'bundled-aioncore', 'linux-x64', 'manifest.json'), '{}', { flush: true });
+    mkdirSync(join(linuxResourcesDir, 'bundled-centaurai-core', 'linux-x64'), { recursive: true });
+    writeFileSync(join(linuxResourcesDir, 'bundled-centaurai-core', 'linux-x64', 'centaurai-core'), '', {
+      flush: true,
+    });
+    writeFileSync(
+      join(linuxResourcesDir, 'bundled-centaurai-core', 'linux-x64', 'manifest.json'),
+      JSON.stringify(releaseManifest('centaur')),
+      { flush: true }
+    );
     mkdirSync(join(linuxManagedResourcesDir, 'node', 'node-v24.11.0-linux-x64'), { recursive: true });
 
-    const result = verifyBundledAioncoreResources({
+    const result = verifyBundledCentauraiCoreResources({
       resourcesDir: linuxResourcesDir,
       electronPlatformName: 'linux',
       targetArch: 'x64',
     });
 
-    expect(result.missing).toContain('bundled-aioncore/linux-x64/managed-resources/node/*/bin/node');
+    expect(result.missing).toContain('bundled-centaurai-core/linux-x64/managed-resources/node/*/bin/node');
   });
 
   it('reports missing managed ACP manifest', () => {
     rmSync(join(codexRoot, 'manifest.json'));
 
-    const result = verifyBundledAioncoreResources({
+    const result = verifyBundledCentauraiCoreResources({
       resourcesDir,
       electronPlatformName: 'win32',
       targetArch: 'x64',
     });
 
     expect(result.missing).toContain(
-      'bundled-aioncore/win32-x64/managed-resources/acp/codex-acp/*/win32-x64/manifest.json'
+      'bundled-centaurai-core/win32-x64/managed-resources/acp/codex-acp/*/win32-x64/manifest.json'
     );
   });
 
   it('reports missing managed ACP entrypoint declared by manifest', () => {
     rmSync(join(codexRoot, 'codex-acp.exe'));
 
-    const result = verifyBundledAioncoreResources({
+    const result = verifyBundledCentauraiCoreResources({
       resourcesDir,
       electronPlatformName: 'win32',
       targetArch: 'x64',
     });
 
     expect(result.missing).toContain(
-      'bundled-aioncore/win32-x64/managed-resources/acp/codex-acp/0.14.0/win32-x64/codex-acp.exe'
+      'bundled-centaurai-core/win32-x64/managed-resources/acp/codex-acp/0.14.0/win32-x64/codex-acp.exe'
     );
   });
 });

@@ -14,8 +14,8 @@
  *   AIONUI_DATA_DIR       : override userData path (default Electron-compatible)
  *   AIONUI_LOG_DIR        : override log dir (default <dataDir>/logs)
  *   AIONUI_STATIC_DIR     : override static dir (default out/renderer)
- *   AIONUI_BACKEND_BIN    : absolute path to aioncore binary (else PATH lookup)
- *   AIONUI_BACKEND_BUNDLED_DIR : dir containing bundled-aioncore/<plat-arch>/binary
+ *   CENTAURAI_CORE_BIN    : absolute path to CentaurAI Core binary (else PATH lookup)
+ *   CENTAURAI_CORE_BUNDLED_DIR : dir containing bundled-centaurai-core/<plat-arch>/binary
  *   AIONUI_OPEN_BROWSER   : "1"/"true" to force open, "0"/"false" to disable
  */
 
@@ -33,7 +33,7 @@ const DEFAULT_PORT = (() => {
   if (process.env.AIONUI_MULTI_INSTANCE === '1') return 25810;
   return 25809;
 })();
-const BACKEND_BINARY = process.platform === 'win32' ? 'aioncore.exe' : 'aioncore';
+const BACKEND_BINARY = process.platform === 'win32' ? 'centaurai-core.exe' : 'centaurai-core';
 
 const __filename = fileURLToPath(import.meta.url);
 const repoRoot = path.resolve(path.dirname(__filename), '..');
@@ -137,9 +137,13 @@ function runPackageIfNeeded(): void {
 }
 
 function resolveBackendBinary(): string {
+  if (process.env.CENTAURAI_CORE_BIN) return process.env.CENTAURAI_CORE_BIN;
   if (process.env.AIONUI_BACKEND_BIN) return process.env.AIONUI_BACKEND_BIN;
 
-  const bundledBase = process.env.AIONUI_BACKEND_BUNDLED_DIR ?? path.join(repoRoot, 'resources', 'bundled-aioncore');
+  const bundledBase =
+    process.env.CENTAURAI_CORE_BUNDLED_DIR ??
+    process.env.AIONUI_BACKEND_BUNDLED_DIR ??
+    path.join(repoRoot, 'resources', 'bundled-centaurai-core');
   const runtimeKey = `${process.platform}-${process.arch}`;
   const bundled = path.join(bundledBase, runtimeKey, BACKEND_BINARY);
   if (fs.existsSync(bundled)) return bundled;
@@ -153,7 +157,7 @@ function resolveBackendBinary(): string {
   }
 
   throw new Error(
-    `Cannot find "${BACKEND_BINARY}". Set AIONUI_BACKEND_BIN, put it on PATH, or place it at ${bundled}.`
+    `Cannot find "${BACKEND_BINARY}". Set CENTAURAI_CORE_BIN, put it on PATH, or place it at ${bundled}.`
   );
 }
 
@@ -235,6 +239,8 @@ async function main(): Promise<void> {
     allowRemote,
     dataDir: workDir,
     sharedDriveDir: path.join(workDir, 'sharedDrive'),
+    knowledgeEndpoint: process.env.CENTAURAI_KNOWLEDGE_ENDPOINT ?? 'http://127.0.0.1:8618',
+    knowledgeToken: process.env.CENTAURAI_KNOWLEDGE_TOKEN ?? process.env.AIONUI_KNOWLEDGE_TOKEN,
     logDir,
     // Surface the same work dir on /api/system/info so the browser UI shows
     // where standalone webui is actually persisting data. Without this the

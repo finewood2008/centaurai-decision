@@ -399,18 +399,18 @@ type BillingSyncJob = {
 
 ## 9. Endpoint Summary
 
-| Method | Path | Required | Purpose |
-| --- | --- | --- | --- |
-| `GET` | `/api/billing/capabilities` | Yes | Return billing feature support and limits. |
-| `GET` | `/api/billing/provider-keys` | Yes | Return provider keys visible to the current user. |
-| `POST` | `/api/billing/summary` | Yes | Return total usage and cost for a time range. |
-| `POST` | `/api/billing/timeseries` | Yes | Return hourly/daily/monthly dashboard series. |
-| `POST` | `/api/billing/breakdown` | Yes | Return grouped usage and cost, for example by model. |
-| `POST` | `/api/billing/events` | Yes | Return paginated usage details. |
-| `POST` | `/api/billing/sync` | Recommended | Trigger upstream provider usage sync. |
-| `GET` | `/api/billing/sync/{sync_id}` | Recommended | Poll sync job status. |
-| `POST` | `/api/billing/export` | Recommended | Create CSV/XLSX export. |
-| `GET` | `/api/billing/export/{export_id}` | Recommended | Download or poll export result. |
+| Method | Path                              | Required    | Purpose                                              |
+| ------ | --------------------------------- | ----------- | ---------------------------------------------------- |
+| `GET`  | `/api/billing/capabilities`       | Yes         | Return billing feature support and limits.           |
+| `GET`  | `/api/billing/provider-keys`      | Yes         | Return provider keys visible to the current user.    |
+| `POST` | `/api/billing/summary`            | Yes         | Return total usage and cost for a time range.        |
+| `POST` | `/api/billing/timeseries`         | Yes         | Return hourly/daily/monthly dashboard series.        |
+| `POST` | `/api/billing/breakdown`          | Yes         | Return grouped usage and cost, for example by model. |
+| `POST` | `/api/billing/events`             | Yes         | Return paginated usage details.                      |
+| `POST` | `/api/billing/sync`               | Recommended | Trigger upstream provider usage sync.                |
+| `GET`  | `/api/billing/sync/{sync_id}`     | Recommended | Poll sync job status.                                |
+| `POST` | `/api/billing/export`             | Recommended | Create CSV/XLSX export.                              |
+| `GET`  | `/api/billing/export/{export_id}` | Recommended | Download or poll export result.                      |
 
 ## 10. APIs
 
@@ -456,10 +456,10 @@ GET /api/billing/provider-keys?scope=mine&provider_platform=openai
 
 Query parameters:
 
-| Name | Type | Required | Notes |
-| --- | --- | --- | --- |
-| `scope` | `mine` or `all` | No | Defaults to `mine`. `all` requires admin permission. |
-| `provider_platform` | string | No | Filter by platform. |
+| Name                | Type            | Required | Notes                                                |
+| ------------------- | --------------- | -------- | ---------------------------------------------------- |
+| `scope`             | `mine` or `all` | No       | Defaults to `mine`. `all` requires admin permission. |
+| `provider_platform` | string          | No       | Filter by platform.                                  |
 
 Response:
 
@@ -946,23 +946,23 @@ If the export is still running:
 
 ## 11. Error Codes
 
-| Code | HTTP | Meaning |
-| --- | --- | --- |
-| `INVALID_ARGUMENT` | 400 | Request body or query parameter is invalid. |
-| `INVALID_PROVIDER_KEY` | 400 | The provider key id is invalid, disabled, expired, or cannot be used. |
-| `PROVIDER_NOT_SUPPORTED` | 400 | Billing is not supported for this provider platform. |
-| `UNSUPPORTED_GRANULARITY` | 400 | Requested granularity is not supported. |
-| `UNSUPPORTED_DIMENSION` | 400 | Requested breakdown dimension is not supported. |
-| `EVENTS_NOT_SUPPORTED` | 400 | Event-level usage is unavailable for this provider. |
-| `TIME_RANGE_TOO_LARGE` | 400 | Requested time range exceeds upstream limits. |
-| `UNAUTHENTICATED` | 401 | The user-created upstream API key is missing or invalid; CentaurAI billing API access must not require an upstream browser login session. |
-| `PERMISSION_DENIED` | 403 | User cannot access this provider key or scope. |
-| `NOT_FOUND` | 404 | Sync job, export, or provider key was not found. |
-| `SYNC_IN_PROGRESS` | 409 | A sync job is already running for the same key/range. |
-| `UPSTREAM_RATE_LIMITED` | 429 | Provider or upstream rate limit was hit. |
-| `UPSTREAM_UNAVAILABLE` | 503 | Provider usage API or upstream billing dependency is unavailable. |
-| `EXPORT_NOT_READY` | 409 | Export exists but is not ready for download. |
-| `UNKNOWN_ERROR` | 500 | Unexpected upstream error. |
+| Code                      | HTTP | Meaning                                                                                                                                   |
+| ------------------------- | ---- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `INVALID_ARGUMENT`        | 400  | Request body or query parameter is invalid.                                                                                               |
+| `INVALID_PROVIDER_KEY`    | 400  | The provider key id is invalid, disabled, expired, or cannot be used.                                                                     |
+| `PROVIDER_NOT_SUPPORTED`  | 400  | Billing is not supported for this provider platform.                                                                                      |
+| `UNSUPPORTED_GRANULARITY` | 400  | Requested granularity is not supported.                                                                                                   |
+| `UNSUPPORTED_DIMENSION`   | 400  | Requested breakdown dimension is not supported.                                                                                           |
+| `EVENTS_NOT_SUPPORTED`    | 400  | Event-level usage is unavailable for this provider.                                                                                       |
+| `TIME_RANGE_TOO_LARGE`    | 400  | Requested time range exceeds upstream limits.                                                                                             |
+| `UNAUTHENTICATED`         | 401  | The user-created upstream API key is missing or invalid; CentaurAI billing API access must not require an upstream browser login session. |
+| `PERMISSION_DENIED`       | 403  | User cannot access this provider key or scope.                                                                                            |
+| `NOT_FOUND`               | 404  | Sync job, export, or provider key was not found.                                                                                          |
+| `SYNC_IN_PROGRESS`        | 409  | A sync job is already running for the same key/range.                                                                                     |
+| `UPSTREAM_RATE_LIMITED`   | 429  | Provider or upstream rate limit was hit.                                                                                                  |
+| `UPSTREAM_UNAVAILABLE`    | 503  | Provider usage API or upstream billing dependency is unavailable.                                                                         |
+| `EXPORT_NOT_READY`        | 409  | Export exists but is not ready for download.                                                                                              |
+| `UNKNOWN_ERROR`           | 500  | Unexpected upstream error.                                                                                                                |
 
 ## 12. Permission Requirements
 
@@ -1016,18 +1016,18 @@ The client must not own that price table.
 
 The CentaurAI dashboard should call endpoints as follows:
 
-| UI Area | Endpoint |
-| --- | --- |
-| Provider key selector | `GET /api/billing/provider-keys` |
-| Total cost KPI | `POST /api/billing/summary` |
-| Current token usage KPI | `POST /api/billing/summary` |
-| Hour/day/month chart | `POST /api/billing/timeseries` |
-| Usage by model | `POST /api/billing/breakdown` with `dimension = model` |
-| Usage by key/provider | `POST /api/billing/breakdown` with `dimension = provider_key` or `provider_platform` |
-| Usage by user | `POST /api/billing/breakdown` with `dimension = user` |
-| Detail table | `POST /api/billing/events` |
-| Manual refresh | `POST /api/billing/sync` then `GET /api/billing/sync/{sync_id}` |
-| Export | `POST /api/billing/export` then `GET /api/billing/export/{export_id}` |
+| UI Area                 | Endpoint                                                                             |
+| ----------------------- | ------------------------------------------------------------------------------------ |
+| Provider key selector   | `GET /api/billing/provider-keys`                                                     |
+| Total cost KPI          | `POST /api/billing/summary`                                                          |
+| Current token usage KPI | `POST /api/billing/summary`                                                          |
+| Hour/day/month chart    | `POST /api/billing/timeseries`                                                       |
+| Usage by model          | `POST /api/billing/breakdown` with `dimension = model`                               |
+| Usage by key/provider   | `POST /api/billing/breakdown` with `dimension = provider_key` or `provider_platform` |
+| Usage by user           | `POST /api/billing/breakdown` with `dimension = user`                                |
+| Detail table            | `POST /api/billing/events`                                                           |
+| Manual refresh          | `POST /api/billing/sync` then `GET /api/billing/sync/{sync_id}`                      |
+| Export                  | `POST /api/billing/export` then `GET /api/billing/export/{export_id}`                |
 
 ## 15. Acceptance Criteria For Upstream
 

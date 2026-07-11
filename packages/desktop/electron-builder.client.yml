@@ -91,7 +91,7 @@ files:
   - from: out/main/static
     to: static
 
-# Client variant: NO bundled-aioncore / hub (saves ~157MB); ship the client marker.
+# Client variant: NO bundled-centaurai-core, bundled-aioncore, or hub; ship the client marker.
 extraResources:
   - from: public
     to: .

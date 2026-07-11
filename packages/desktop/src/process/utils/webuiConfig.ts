@@ -87,6 +87,23 @@ async function resolveImageWorkbenchKey(): Promise<string | undefined> {
   return undefined;
 }
 
+async function resolveKnowledgeProxyConfig(): Promise<{ endpoint: string; token?: string }> {
+  const envEndpoint = process.env.CENTAURAI_KNOWLEDGE_ENDPOINT?.trim();
+  let endpoint = envEndpoint || 'http://127.0.0.1:8618';
+  if (!envEndpoint) {
+    try {
+      const settings = await httpRequest<Record<string, unknown>>('GET', '/api/settings/client');
+      const configured = settings?.['vectorDB.endpoint'];
+      if (typeof configured === 'string' && configured.trim()) endpoint = configured.trim();
+    } catch (error) {
+      console.error('[WebUI] Failed to read knowledge endpoint from backend:', error);
+    }
+  }
+  const token =
+    process.env.CENTAURAI_KNOWLEDGE_TOKEN?.trim() || process.env.AIONUI_KNOWLEDGE_TOKEN?.trim() || undefined;
+  return { endpoint, token };
+}
+
 type WebUIDesktopPreferences = {
   enabled: boolean;
   allowRemote: boolean;
@@ -508,6 +525,7 @@ export async function startDesktopWebUI(opts: { port?: number; allowRemote?: boo
   const allowRemote = REMOTE_ACCESS_ENABLED && opts.allowRemote === true;
   const preferredPort = parsePortValue(opts.port) ?? DEFAULT_WEBUI_PORT;
   const sysDir = getSystemDir();
+  const knowledgeProxy = await resolveKnowledgeProxyConfig();
 
   // Reuse the backend already spawned by backendManager.start() in src/index.ts.
   // Spawning a second backend here would race the first on the same SQLite file.
@@ -543,6 +561,8 @@ export async function startDesktopWebUI(opts: { port?: number; allowRemote?: boo
     // Enterprise LAN network drive (the company's large shared disk), browsed
     // read-only at /api/nas/*. Undefined when unconfigured → endpoints disabled.
     nasRootDir: await resolveNasRootDir(),
+    knowledgeEndpoint: knowledgeProxy.endpoint,
+    knowledgeToken: knowledgeProxy.token,
     // Image workbench for browser/LAN users. Mirror the desktop custom-protocol
     // root (getImageWorkbenchRoot in index.ts): packaged → bundled under the
     // renderer output; dev → the live public/ dist (out/renderer isn't copied

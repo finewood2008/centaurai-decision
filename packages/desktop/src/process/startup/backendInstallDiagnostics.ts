@@ -35,6 +35,7 @@ export type BackendInstallDiagnostics = {
   execPath: string;
   isPackaged: boolean;
   manifestExists?: boolean;
+  manifestCommit?: string;
   manifestFiles?: string[];
   manifestGeneratedAt?: string;
   manifestMtimeMs?: number;
@@ -42,6 +43,7 @@ export type BackendInstallDiagnostics = {
   manifestPath?: string;
   manifestSize?: number;
   manifestSourceType?: string;
+  manifestSha256?: string;
   manifestVersion?: string;
   platform: NodeJS.Platform;
   resourcesDirMtimeMs?: number;
@@ -52,7 +54,7 @@ export type BackendInstallDiagnostics = {
 };
 
 const MANIFEST_FILE_NAME = 'manifest.json';
-const BUNDLED_AIONCORE_DIR = 'bundled-aioncore';
+const BUNDLED_CENTAURAI_CORE_DIR = 'bundled-centaurai-core';
 
 function getString(value: unknown): string | undefined {
   return typeof value === 'string' && value.length > 0 ? value : undefined;
@@ -120,10 +122,14 @@ function applyManifest(diagnostics: BackendInstallDiagnostics, manifestText: str
   try {
     const manifest = JSON.parse(manifestText) as Record<string, unknown>;
     const version = getString(manifest.version);
+    const commit = getString(manifest.commit);
+    const sha256 = getString(manifest.sha256);
     const generatedAt = getString(manifest.generatedAt);
     const sourceType = getString(manifest.sourceType);
     const files = getStringArray(manifest.files);
     if (version) diagnostics.manifestVersion = version;
+    if (commit) diagnostics.manifestCommit = commit;
+    if (sha256) diagnostics.manifestSha256 = sha256;
     if (generatedAt) diagnostics.manifestGeneratedAt = generatedAt;
     if (sourceType) diagnostics.manifestSourceType = sourceType;
     if (files) diagnostics.manifestFiles = files;
@@ -143,9 +149,9 @@ export function collectBackendInstallDiagnostics(
   const resourcesPath = getString(details?.resourcesPath) ?? env.resourcesPath;
   const runtimeKey = getString(details?.runtimeKey);
   const binaryName = getString(details?.binaryName);
-  const bundledDirPath = resourcesPath ? pathApi.join(resourcesPath, BUNDLED_AIONCORE_DIR) : undefined;
+  const bundledDirPath = resourcesPath ? pathApi.join(resourcesPath, BUNDLED_CENTAURAI_CORE_DIR) : undefined;
   const runtimeDirPath =
-    resourcesPath && runtimeKey ? pathApi.join(resourcesPath, BUNDLED_AIONCORE_DIR, runtimeKey) : undefined;
+    resourcesPath && runtimeKey ? pathApi.join(resourcesPath, BUNDLED_CENTAURAI_CORE_DIR, runtimeKey) : undefined;
   const binaryPath =
     getString(details?.checkedBundledPath) ??
     (runtimeDirPath && binaryName ? pathApi.join(runtimeDirPath, binaryName) : undefined);

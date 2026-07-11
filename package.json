@@ -1,6 +1,6 @@
 {
   "name": "centaurai-aistation",
-  "version": "2.5.0",
+  "version": "2.5.1",
   "private": true,
   "description": "半人马AI-超级参谋团 — 老板的AI超级参谋团，内置多Agent协作、专家顾问团和局域网分布式客户端。基于 AionUi (Apache-2.0)。",
   "keywords": [],
@@ -56,7 +56,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:contract": "vitest run tests/contract --passWithNoTests",
+    "test:contract": "vitest run tests/contract",
     "test:integration": "vitest run tests/integration",
     "test:packaged:i18n": "vitest run tests/integration/i18n-packaged.test.ts",
     "bench": "vitest bench",
@@ -209,7 +209,7 @@
     "builder-util": "^26.8.1",
     "cross-env": "^7.0.3",
     "dotenv": "^17.2.1",
-    "electron": "^37.10.3",
+    "electron": "37.10.3",
     "electron-builder": "^26.6.0",
     "electron-devtools-installer": "^4.0.0",
     "electron-vite": "^5.0.0",
@@ -238,7 +238,6 @@
     "electron-winstaller": "^5.4.0"
   },
   "resolutions": {
-    "@codemirror/language": "6.12.3",
     "body-parser": "^2.2.1",
     "hono": "^4.11.7",
     "jws": "4.0.1",
@@ -249,7 +248,6 @@
     "tmp": "^0.2.5"
   },
   "overrides": {
-    "@codemirror/language": "6.12.3",
     "body-parser": "^2.2.1",
     "hono": "^4.11.7",
     "jws@<4": "3.2.3",
@@ -272,10 +270,11 @@
   "engines": {
     "node": ">=22 <25"
   },
-  "aioncoreVersion": "v0.1.24",
+  "centauraiCoreVersion": "v0.1.48",
   "electronRebuild": {
     "electronVersion": "^37.3.1"
   },
+  "legacyAioncoreVersion": "v0.1.24",
   "patchedDependencies": {
     "7zip-bin@5.2.0": "patches/7zip-bin@5.2.0.patch"
   },

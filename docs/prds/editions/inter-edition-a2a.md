@@ -81,7 +81,7 @@
 | **Remote Agent 协议**：WS + Ed25519 签名 + 配对 + 设备 token + 指数退避重连 + 心跳 | `OpenClawGatewayConnection`、`remoteAgentBridge.ts`、`RemoteAgentCore`/`RemoteAgentManager`、`remoteAgentTypes.ts`，DB `remote_agents` 表 | **配对 / 签名 / 持久连接 / 重连的轮子已造好**，直接改造为 A2A 客户端           |
 | **Cron 定时任务**（能让 agent 定时产「日报 / 巡检 / 汇总」）                       | `packages/desktop/src/renderer/pages/cron/`，`/api/cron/jobs`（`ipcBridge.ts` cron 段），`ICronJob`                                       | 「定时自动日报」直接挂 cron 触发对外联络 agent                                 |
 | **共享盘 / NAS API**（list/upload/download/preview）                               | `static-server.ts` 的 `/api/shared-drive/*`、`/api/nas/*`                                                                                 | 大附件落共享盘，信封只带引用                                                   |
-| **超级参谋团 intel 板块**（UI 占位 + i18n 已就位，目前 `<Empty>`）                     | `packages/desktop/src/renderer/pages/decision/DecisionHome.tsx`（intel 段）、`locales/*/decision.json` 的 `intel.*`                       | 替换 `<Empty>` 为真实收件箱                                                    |
+| **超级参谋团 intel 板块**（UI 占位 + i18n 已就位，目前 `<Empty>`）                 | `packages/desktop/src/renderer/pages/decision/DecisionHome.tsx`（intel 段）、`locales/*/decision.json` 的 `intel.*`                       | 替换 `<Empty>` 为真实收件箱                                                    |
 | **edition 标志**                                                                   | `packages/desktop/src/common/config/constants.ts`                                                                                         | `IS_DECISION`/`IS_TEAM` 门控两侧代码                                           |
 
 ### 4.2 缺口（本期要补）

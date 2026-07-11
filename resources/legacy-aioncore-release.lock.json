@@ -1,0 +1,13 @@
+{
+  "repository": "iOfficeAI/AionCore",
+  "tag": "v0.1.24",
+  "commit": "f09d94989d2b01a891fbb5e7efcc65b568f290e1",
+  "assets": {
+    "aioncore-v0.1.24-aarch64-apple-darwin.tar.gz": "fed0035930ff9b01b4534b9c57694bee0386946c8009174f27a2f96388d29642",
+    "aioncore-v0.1.24-aarch64-pc-windows-msvc.zip": "953592f176252da29259ceebf4175e44a491b2fcc76b9303b6a060d55b0a63d6",
+    "aioncore-v0.1.24-aarch64-unknown-linux-gnu.tar.gz": "66950846363572e6a2aa340209a9faeeb861b6a8278d74f4c8c619a4ccb4723b",
+    "aioncore-v0.1.24-x86_64-apple-darwin.tar.gz": "db006322a6530f52e39cf1dfc5142e94e4526c7c0d406153f089e28c83b21e53",
+    "aioncore-v0.1.24-x86_64-pc-windows-msvc.zip": "cf088e9b70d03478773342d8e51a914a09da7e510f7c46854f7617b3194e0f84",
+    "aioncore-v0.1.24-x86_64-unknown-linux-gnu.tar.gz": "94d624fc354b16a18654249580c6da732e2da0acc7f2325c53095d951ad1296f"
+  }
+}
