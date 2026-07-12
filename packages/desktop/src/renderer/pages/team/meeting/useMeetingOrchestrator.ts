@@ -35,6 +35,8 @@ import {
 import { resolveDepartment } from './presetDepartments';
 import {
   PANEL_LENSES,
+  MAX_DEBATE_ROUNDS,
+  buildAdaptivePanelistResponses,
   buildClusterPrompt,
   buildConvergePrompt,
   buildDeepDiveAnswerPrompt,
@@ -277,6 +279,8 @@ class MeetingEngine {
   private activeTeardown: ((stop: boolean) => void) | null = null;
   /** Resolves the between-round PAUSE when the boss clicks 继续讨论 (or the run is torn down). */
   private continueGate: (() => void) | null = null;
+  /** Reference material available to every subsequent moderator and panelist turn. */
+  private referenceContext = '';
 
   constructor(team: TTeam) {
     this.team = team;
@@ -772,18 +776,20 @@ class MeetingEngine {
         }
       };
 
-      const refNote = reference ? `\n\n${reference}\n\n请充分参考上述背景资料。` : '';
+      const referenceNote = () =>
+        this.referenceContext ? `\n\n${this.referenceContext}\n\n请充分参考上述背景资料。` : '';
       const framingNote = dept?.framing ? `\n\n${dept.framing}` : '';
       // The leader opens the chamber, decomposes the boss's question, and throws
       // those questions to all experts. The leader does not join the first parallel wall.
-      await speak(mod, '开场', buildModeratorOpeningPrompt(topic, briefs) + framingNote + refNote);
+      await speak(mod, '开场', buildModeratorOpeningPrompt(topic, briefs) + framingNote + referenceNote());
       if (stale()) return;
       // ① 并行立场 — experts answer simultaneously; the leader waits to summarize.
       const openingPosition = (p: Participant): string => {
         const lens = lensByPanel.get(p.id);
-        if (form === 'tournament') return buildProposalPrompt({ topic, persona: p.name, lens, reference }) + refNote;
-        if (form === 'diverge') return buildDivergePrompt({ topic, persona: p.name, lens }) + refNote;
-        return buildPanelistPositionPrompt({ topic, persona: p.name, lens, priorContext: '' }) + refNote;
+        if (form === 'tournament')
+          return buildProposalPrompt({ topic, persona: p.name, lens, reference }) + referenceNote();
+        if (form === 'diverge') return buildDivergePrompt({ topic, persona: p.name, lens }) + referenceNote();
+        return buildPanelistPositionPrompt({ topic, persona: p.name, lens, priorContext: '' }) + referenceNote();
       };
       // Fire every opening turn up-front (all appear at once), then stream concurrently.
       await Promise.all(panel.map((p) => speak(p, '并行立场', openingPosition(p), true)));
@@ -791,7 +797,6 @@ class MeetingEngine {
 
       // ② Adaptive debate — moderator dynamically drives the discussion.
       const panelNames = panel.map((p) => p.name);
-      const MAX_DEBATE_ROUNDS = 5;
       for (let debateRound = 1; debateRound <= MAX_DEBATE_ROUNDS; debateRound++) {
         if (stale()) return;
         const movePrompt = buildModeratorDebateMovePrompt({
@@ -800,7 +805,7 @@ class MeetingEngine {
           round: debateRound,
           fullTranscript: transcriptText(),
           panelNames,
-          refNote: refNote || undefined,
+          refNote: this.referenceContext || undefined,
         });
         const moveTurnId = this.addTurn(mod, `交锋·第${debateRound}轮`);
         const moveText = await this.askTurn(mod.conversationId, moveTurnId, movePrompt);
@@ -808,33 +813,19 @@ class MeetingEngine {
         this.updateTurn(moveTurnId, { text: moveText, status: moveText ? 'done' : 'error' });
         const move = parseModeratorMove(moveText, panelNames);
         if (move.conclude) break;
-        // Drive ALL panelists every round — @mentions are additive signals, not exclusive.
-        // Named experts get a targeted prompt; everyone else gets the general challenge.
-        const named = new Set(move.targetNames);
-        for (const p of panel) {
-          if (stale()) return;
-          const isNamed = named.has(p.name);
-          const prompt = isNamed
-            ? [
-                `你是专家「${p.name}」。主持人点名向你追问，请直面回答，不要回避或打太极：`,
-                `议题：${topic}`,
-                refNote ? `\n【背景参考资料】：\n${refNote}` : '',
-                '',
-                `主持人的追问：\n${move.challenge}`,
-                '',
-                '直接回应，有锋芒。如果你之前的观点确实有漏洞，坦然承认并调整。',
-              ].join('\n')
-            : [
-                `你是专家「${p.name}」。主持人正在推动新一轮讨论，请从你的视角回应：`,
-                `议题：${topic}`,
-                refNote ? `\n【背景参考资料】：\n${refNote}` : '',
-                '',
-                `主持人的追问（${named.size > 0 ? `点名了 ${Array.from(named).join('、')}` : '面向全体'}）：\n${move.challenge || '请各位专家基于前面的讨论继续深入发表观点。'}`,
-                '',
-                '直接回应。可以反驳主持人、可以回应被点名专家的观点、也可以提出完全不同的视角。',
-              ].join('\n');
-          await speak(p, isNamed ? '回应主持' : '交锋回应', prompt);
-        }
+        // All experts respond concurrently. @mentions specialize prompts without muting anyone.
+        const responses = buildAdaptivePanelistResponses({
+          topic,
+          panelNames,
+          targetNames: move.targetNames,
+          challenge: move.challenge,
+          referenceContext: this.referenceContext || undefined,
+        });
+        await Promise.all(
+          panel.map((p, index) =>
+            speak(p, responses[index]?.phaseLabel ?? '交锋回应', responses[index]?.prompt ?? '', true)
+          )
+        );
         await speak(
           mod,
           '本轮回应小结',
@@ -853,7 +844,7 @@ class MeetingEngine {
       if (!stale()) {
         const synthPrompt =
           buildLocalSynthesisPrompt(topic, transcriptText()) +
-          (refNote ? `\n\n【注意：请综合参考以下背景资料进行最终判断】\n${refNote}` : '');
+          (this.referenceContext ? `\n\n【注意：请综合参考以下背景资料进行最终判断】\n${this.referenceContext}` : '');
         const tid = this.addTurn(mod, '综合');
         const synth = await this.askTurn(mod.conversationId, tid, synthPrompt);
         if (stale()) return;
@@ -917,6 +908,7 @@ class MeetingEngine {
     this.activeTeardown = null;
     this.turnConv.clear();
     this.turnText.clear();
+    this.referenceContext = '';
     this.commit({
       phase: 'running',
       runState: 'running',
@@ -949,6 +941,7 @@ class MeetingEngine {
         }
         if (this.runSeq !== myRun) return;
         const reference = buildReferenceContext(knowledgeContext, attachments) || undefined;
+        this.referenceContext = [reference, this.referenceContext].filter(Boolean).join('\n\n');
         return this.runLocalMeeting(myRun, trimmed, form, reference);
       })
       .catch(() => {
@@ -995,6 +988,7 @@ class MeetingEngine {
     this.activeTeardown?.(true); // stop + remove this run's conversations
     this.activeTeardown = null;
     this.running = false;
+    this.referenceContext = '';
     // Settle any turn still showing the "speaking" spinner (its streamed partial text
     // is kept; empty → 未发言), so the transcript doesn't spin forever after cancel.
     const transcript: MeetingTurn[] = this.state.transcript.map((t) =>
@@ -1060,6 +1054,8 @@ class MeetingEngine {
           return;
         }
         const id = `t-${this.state.transcript.length}-system-kb`;
+        const refreshedReference = buildReferenceContext(result.context, []);
+        this.referenceContext = [this.referenceContext, refreshedReference].filter(Boolean).join('\n\n');
         this.commit({
           transcript: [
             ...this.state.transcript,
@@ -1093,6 +1089,7 @@ class MeetingEngine {
     this.activeTeardown = null;
     this.turnConv.clear();
     this.turnText.clear();
+    this.referenceContext = '';
     this.running = false;
     this.commit({ ...EMPTY_MEETING_STATE, form: this.state.form });
   };

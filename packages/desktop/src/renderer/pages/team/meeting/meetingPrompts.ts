@@ -622,6 +622,50 @@ export type ModeratorMove = {
   challenge: string;
 };
 
+export type AdaptivePanelistResponse = {
+  name: string;
+  phaseLabel: '回应主持' | '交锋回应';
+  prompt: string;
+};
+
+export const MAX_DEBATE_ROUNDS = 5;
+
+/** Build one response prompt per panelist; @mentions specialize a prompt without muting anyone. */
+export function buildAdaptivePanelistResponses(params: {
+  topic: string;
+  panelNames: string[];
+  targetNames: string[];
+  challenge: string;
+  referenceContext?: string;
+}): AdaptivePanelistResponse[] {
+  const { topic, panelNames, targetNames, challenge, referenceContext } = params;
+  const named = new Set(targetNames);
+  const targetLabel = named.size > 0 ? `点名了 ${Array.from(named).join('、')}` : '面向全体';
+  return panelNames.map((name) => {
+    const isNamed = named.has(name);
+    const prompt = isNamed
+      ? [
+          `你是专家「${name}」。主持人点名向你追问，请直面回答，不要回避或打太极：`,
+          `议题：${topic}`,
+          referenceContext ? `\n【背景参考资料】：\n${referenceContext}` : '',
+          '',
+          `主持人的追问：\n${challenge}`,
+          '',
+          '直接回应，有锋芒。如果你之前的观点确实有漏洞，坦然承认并调整。',
+        ].join('\n')
+      : [
+          `你是专家「${name}」。主持人正在推动新一轮讨论，请从你的视角回应：`,
+          `议题：${topic}`,
+          referenceContext ? `\n【背景参考资料】：\n${referenceContext}` : '',
+          '',
+          `主持人的追问（${targetLabel}）：\n${challenge || '请各位专家基于前面的讨论继续深入发表观点。'}`,
+          '',
+          '直接回应。可以反驳主持人、可以回应被点名专家的观点、也可以提出完全不同的视角。',
+        ].join('\n');
+    return { name, phaseLabel: isNamed ? '回应主持' : '交锋回应', prompt };
+  });
+}
+
 export function buildModeratorDebateMovePrompt(params: {
   topic: string;
   form: import('./meetingTypes').MeetingForm;
@@ -677,18 +721,8 @@ const CONCLUDE_MARKER = '@@CONCLUDE@@';
 export function parseModeratorMove(text: string, panelNames: string[]): ModeratorMove {
   const cleaned = text.trim();
   if (!cleaned) return { conclude: true, targetNames: [], challenge: '' };
-  if (cleaned.lastIndexOf(CONCLUDE_MARKER) >= 0) return { conclude: true, targetNames: [], challenge: '' };
-  const concludePatterns = [
-    /讨论已经?充分/i,
-    /可以综合/i,
-    /进入综合/i,
-    /准备决议/i,
-    /综上所述/i,
-    /最终建议/i,
-    /达成共识/i,
-    /可以拍板/i,
-  ];
-  if (concludePatterns.some((p) => p.test(cleaned))) return { conclude: true, targetNames: [], challenge: '' };
+  const explicitlyConcluded = cleaned.split(/\r?\n/).some((line) => line.trim() === CONCLUDE_MARKER);
+  if (explicitlyConcluded) return { conclude: true, targetNames: [], challenge: '' };
   const targets: string[] = [];
   for (const name of panelNames) {
     if (cleaned.includes(`@${name}`)) targets.push(name);

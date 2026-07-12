@@ -7,15 +7,19 @@
 import { describe, expect, it } from 'vitest';
 import {
   MEETING_FORMS,
+  MAX_DEBATE_ROUNDS,
+  buildAdaptivePanelistResponses,
   buildClusterPrompt,
   buildConvergePrompt,
   buildDivergePrompt,
   buildDraftPrompt,
   buildProposalPrompt,
+  buildModeratorDebateMovePrompt,
   buildRedTeamPrompt,
   buildRevisePrompt,
   hasResolutionOptions,
   matchSpeakerName,
+  parseModeratorMove,
   parsePlan,
   parseResolutionOptions,
   parseScribe,
@@ -60,6 +64,56 @@ describe('meeting resolution parsing', () => {
   it('returns no options for empty / unmarked text', () => {
     expect(parseResolutionOptions('')).toEqual([]);
     expect(parseResolutionOptions('just prose')).toEqual([]);
+  });
+});
+
+describe('adaptive meeting strategy', () => {
+  it('caps moderator-driven debate at five rounds', () => {
+    expect(MAX_DEBATE_ROUNDS).toBe(5);
+  });
+
+  it('continues when ordinary summary language appears without the explicit marker', () => {
+    const move = parseModeratorMove('综上所述，已经达成部分共识，但 @风险官 还需要核算最坏情况。', [
+      '增长官',
+      '风险官',
+    ]);
+
+    expect(move.conclude).toBe(false);
+    expect(move.targetNames).toEqual(['风险官']);
+  });
+
+  it('concludes only on a standalone marker or an empty moderator reply', () => {
+    expect(parseModeratorMove('态势已经清楚。\n@@CONCLUDE@@', ['增长官']).conclude).toBe(true);
+    expect(parseModeratorMove('', ['增长官']).conclude).toBe(true);
+  });
+
+  it('builds a response for every expert while specializing only named experts', () => {
+    const responses = buildAdaptivePanelistResponses({
+      topic: '是否进入新市场',
+      panelNames: ['增长官', '风险官', '财务官'],
+      targetNames: ['风险官'],
+      challenge: '@风险官 请重算最坏情况',
+      referenceContext: '最新资料：市场规模 20 亿元',
+    });
+
+    expect(responses).toHaveLength(3);
+    expect(responses.find((response) => response.name === '风险官')?.phaseLabel).toBe('回应主持');
+    expect(responses.find((response) => response.name === '增长官')?.phaseLabel).toBe('交锋回应');
+    expect(responses.every((response) => response.prompt.includes('市场规模 20 亿元'))).toBe(true);
+  });
+
+  it('keeps the selected meeting form and reference material in the moderator prompt', () => {
+    const prompt = buildModeratorDebateMovePrompt({
+      topic: '是否进入新市场',
+      form: 'redteam',
+      round: 2,
+      fullTranscript: '增长官：建议进入',
+      panelNames: ['增长官', '风险官'],
+      refNote: '最新资料：获客成本上涨',
+    });
+
+    expect(prompt).toContain('红蓝对抗模式');
+    expect(prompt).toContain('获客成本上涨');
   });
 });
 
