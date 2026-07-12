@@ -962,6 +962,7 @@ export type I18nKey =
   | 'decision.deptFlow'
   | 'decision.deptLabel'
   | 'decision.deptPlaceholder'
+  | 'decision.developmentBadge'
   | 'decision.emptyHint'
   | 'decision.emptyTitle'
   | 'decision.enter'
