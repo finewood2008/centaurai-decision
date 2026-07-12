@@ -15,9 +15,9 @@
   "main": "./out/main/index.js",
   "scripts": {
     "dev": "electron-vite dev --config packages/desktop/electron.vite.config.ts",
-    "start": "electron-vite dev --config packages/desktop/electron.vite.config.ts",
-    "start:multi": "cross-env AIONUI_MULTI_INSTANCE=1 electron-vite dev --config packages/desktop/electron.vite.config.ts",
-    "cli": "electron-vite dev --config packages/desktop/electron.vite.config.ts",
+    "start": "cross-env AIONUI_EDITION=decision electron-vite dev --config packages/desktop/electron.vite.config.ts",
+    "start:multi": "cross-env AIONUI_EDITION=decision AIONUI_MULTI_INSTANCE=1 electron-vite dev --config packages/desktop/electron.vite.config.ts",
+    "cli": "cross-env AIONUI_EDITION=decision electron-vite dev --config packages/desktop/electron.vite.config.ts",
     "webui": "tsx scripts/webui.ts",
     "webui:remote": "tsx scripts/webui.ts --remote",
     "webui:prod": "cross-env NODE_ENV=production tsx scripts/webui.ts",
