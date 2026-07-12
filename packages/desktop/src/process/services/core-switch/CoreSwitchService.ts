@@ -61,7 +61,7 @@ export class CoreSwitchService {
   private readonly verifyForwardMigrations: (dataDir: string) => Promise<void>;
 
   constructor(private readonly dependencies: CoreSwitchServiceDependencies) {
-    this.coreVersion = dependencies.coreVersion ?? 'v0.1.48';
+    this.coreVersion = dependencies.coreVersion ?? 'v0.2.2';
     this.legacyVersion = dependencies.legacyVersion ?? 'v0.1.24';
     this.now = dependencies.now ?? (() => new Date());
     this.prepareLegacyDatabase = dependencies.prepareLegacyDatabase ?? (async () => {});
@@ -93,6 +93,10 @@ export class CoreSwitchService {
     try {
       const completion = await this.storage.readCompletionMarker(dataDir);
       if (completion) {
+        if (completion.coreVersion !== this.coreVersion || completion.legacyVersion !== this.legacyVersion) {
+          await this.storage.clearCompletionMarker(dataDir);
+          return await this.runFirstSwitch(dataDir, logDir, dirs, preferredPort);
+        }
         return await this.startCompletedCore(dataDir, logDir, dirs, options, preferredPort, completion);
       }
 

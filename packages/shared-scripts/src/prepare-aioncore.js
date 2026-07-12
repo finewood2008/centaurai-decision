@@ -96,7 +96,7 @@ function prepareManagedResources(binaryPath, targetDir) {
  * Build the release asset filename for the given platform/arch/tag.
  *
  * Expected asset naming convention:
- *   centaurai-core-v0.1.48-aarch64-apple-darwin.tar.gz
+ *   centaurai-core-v0.2.2-aarch64-apple-darwin.tar.gz
  */
 function getAssetName(platform, arch, tag, variantName = 'centaur') {
   const variant = getVariant(variantName);

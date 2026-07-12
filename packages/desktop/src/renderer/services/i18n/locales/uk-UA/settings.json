@@ -842,7 +842,12 @@
     "custom": "Власний",
     "addCustomAgent": "Додати власного агента",
     "customEmpty": "Власні агенти не налаштовані. Натисніть «Додати власного агента» для створення.",
-    "disabled": "Вимкнено"
+    "disabled": "Вимкнено",
+    "statusOnline": "Онлайн",
+    "statusUnchecked": "Встановлено · Не перевірено",
+    "statusOffline": "Офлайн",
+    "statusMissing": "Не встановлено",
+    "testConnection": "Перевірити з’єднання"
   },
   "remoteAgent": {
     "title": "Віддалені агенти",

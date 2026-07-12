@@ -36,7 +36,7 @@ const MeetingGuestPanel: React.FC<Props> = ({ guests, onAdd, onRemove, variant =
   //  • 直连模型专家: each configured provider model (incl. SiliconFlow 国产模型)
   // All are renderer-driven, equal experts in the debate.
   const guestCandidates = useMemo<TeamAgentOption[]>(() => {
-    const backendExtras = cliAgents.map(cliAgentToOption).filter((a) => !a.team_capable);
+    const backendExtras = cliAgents.map((agent) => cliAgentToOption(agent)).filter((a) => !a.team_capable);
     const modelExperts = buildModelExpertOptions(providers, getAvailableModels);
     return [...backendExtras, ...modelExperts];
   }, [cliAgents, providers, getAvailableModels]);

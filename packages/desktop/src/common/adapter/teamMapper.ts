@@ -69,7 +69,7 @@ export function fromBackendAgent(raw: unknown): TeamAgent {
     conversation_type: conversationType,
     status: toStatus(r.status as string | undefined),
     cli_path: r.cli_path as string | undefined,
-    custom_agent_id: r.custom_agent_id as string | undefined,
+    custom_agent_id: (r.assistant_id ?? r.custom_agent_id) as string | undefined,
     model: r.model as string | undefined,
     pending_confirmations: (r.pending_confirmations ?? r.pendingConfirmations ?? 0) as number,
   };
@@ -77,14 +77,15 @@ export function fromBackendAgent(raw: unknown): TeamAgent {
 
 export function fromBackendTeam(raw: unknown): TTeam {
   const r = (raw ?? {}) as Record<string, unknown>;
-  const agents = Array.isArray(r.agents) ? (r.agents as unknown[]).map(fromBackendAgent) : [];
+  const rawAgents = Array.isArray(r.assistants) ? r.assistants : r.agents;
+  const agents = Array.isArray(rawAgents) ? (rawAgents as unknown[]).map(fromBackendAgent) : [];
   return {
     id: (r.id as string | undefined) ?? '',
     user_id: (r.user_id as string | undefined) ?? '',
     name: (r.name as string | undefined) ?? '',
     workspace: (r.workspace as string | undefined) ?? '',
     workspace_mode: toWorkspaceMode(r.workspace_mode as string | undefined),
-    leader_agent_id: (r.leader_agent_id as string | undefined) ?? '',
+    leader_agent_id: (r.leader_assistant_id as string | undefined) ?? (r.leader_agent_id as string | undefined) ?? '',
     agents,
     session_mode: r.session_mode as string | undefined,
     created_at: (r.created_at as number | undefined) ?? 0,
@@ -106,8 +107,7 @@ export function toBackendAgent(a: Omit<TeamAgent, 'slot_id' | 'conversation_id'>
   return {
     name: a.agent_name,
     role: a.role === 'leader' ? 'lead' : a.role,
-    backend: a.agent_type,
     model: a.model || 'default',
-    ...(a.custom_agent_id ? { custom_agent_id: a.custom_agent_id } : {}),
+    ...(a.custom_agent_id ? { assistant_id: a.custom_agent_id } : {}),
   };
 }

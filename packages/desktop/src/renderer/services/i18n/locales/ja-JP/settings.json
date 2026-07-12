@@ -926,7 +926,12 @@
     "custom": "カスタム",
     "addCustomAgent": "カスタムエージェントを追加",
     "customEmpty": "カスタムエージェントが設定されていません。「カスタムエージェントを追加」をクリックして作成してください。",
-    "disabled": "無効"
+    "disabled": "無効",
+    "statusOnline": "オンライン",
+    "statusUnchecked": "インストール済み · 未確認",
+    "statusOffline": "オフライン",
+    "statusMissing": "未インストール",
+    "testConnection": "接続テスト"
   },
   "remoteAgent": {
     "title": "リモートエージェント",

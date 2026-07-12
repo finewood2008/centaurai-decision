@@ -48,6 +48,7 @@ type ButlerManifest = {
   skills: string[];
   assistant: CreateAssistantRequest & { id: string };
 };
+type SeedAgent = { id: string; agent_type: string; backend?: string };
 
 /**
  * Locate the bundled butler directory. In production electron-builder copies
@@ -166,7 +167,19 @@ export async function seedBundledButler(configFile: ConfigFile): Promise<boolean
 
   // Phase 1: import the assistant row (insert-only — never clobbers user edits).
   try {
-    const result = await ipcBridge.assistants.import.invoke({ assistants: [manifest.assistant] });
+    const agents = await ipcBridge.acpConversation.getAvailableAgents.invoke();
+    const preset = manifest.assistant.preset_agent_type?.trim().toLowerCase();
+    const agentId =
+      manifest.assistant.agent_id ??
+      agents.find(
+        (agent: SeedAgent) => agent.backend?.toLowerCase() === preset || agent.agent_type.toLowerCase() === preset
+      )?.id;
+    if (!agentId) {
+      console.error(`[CentaurAI] Butler seed has no matching Core agent for '${preset || '<missing>'}'`);
+      return false;
+    }
+    const { preset_agent_type: _presetAgentType, ...assistant } = manifest.assistant;
+    const result = await ipcBridge.assistants.import.invoke({ assistants: [{ ...assistant, agent_id: agentId }] });
     if (result.failed !== 0) {
       console.error('[CentaurAI] Butler assistant import failed', result.errors);
       return false;

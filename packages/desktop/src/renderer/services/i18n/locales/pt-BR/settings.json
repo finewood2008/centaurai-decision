@@ -936,7 +936,12 @@
     "custom": "Personalizado",
     "addCustomAgent": "Adicionar Agente Personalizado",
     "customEmpty": "Nenhum agente personalizado configurado. Clique em \"Adicionar Agente Personalizado\" para criar um.",
-    "disabled": "Desativado"
+    "disabled": "Desativado",
+    "statusOnline": "Online",
+    "statusUnchecked": "Instalado · Não verificado",
+    "statusOffline": "Offline",
+    "statusMissing": "Não instalado",
+    "testConnection": "Testar conexão"
   },
   "remoteAgent": {
     "title": "Agentes Remotos",

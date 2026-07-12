@@ -957,7 +957,7 @@
   "agentManagement": {
     "localAgents": "Local Agents",
     "remoteAgents": "Remote Agents",
-    "localAgentsDescription": "直连模型 is the built-in agent and ships with the app — no install needed. Other agents are detected only after their CLI is installed locally.",
+    "localAgentsDescription": "Agent state is managed by CentaurAI Core. Missing, unchecked, and offline agents remain in the catalog with diagnostics.",
     "localAgentsSetupLink": "Setup guide",
     "goToChat": "Start Chat",
     "remoteAgentsDescription": "Only remote OpenClaw connections are supported for now. Other agents are in development.",
@@ -977,12 +977,17 @@
     "detectCustomAgent": "Detect Custom Agent",
     "editCustomAgent": "Edit Custom Agent",
     "localAgentsEmpty": "No local agents detected",
-    "detected": "Detected",
+    "detected": "Agent Catalog",
     "customAgents": "Custom Agents",
     "custom": "Custom",
     "addCustomAgent": "Add Custom Agent",
     "customEmpty": "No custom agents configured. Click \"Add Custom Agent\" to create one.",
-    "disabled": "Disabled"
+    "disabled": "Disabled",
+    "statusOnline": "Online",
+    "statusUnchecked": "Installed · Not checked",
+    "statusOffline": "Offline",
+    "statusMissing": "Not installed",
+    "testConnection": "Test Connection"
   },
   "remoteAgent": {
     "title": "Remote Agents",

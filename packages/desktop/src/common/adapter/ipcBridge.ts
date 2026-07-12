@@ -946,7 +946,6 @@ export const mode = {
 
 type AgentManagementRow = Omit<AgentMetadata, 'available' | 'handshake'> & {
   installed: boolean;
-  status: 'missing' | 'online' | 'offline' | 'unchecked';
   config_options?: unknown;
   available_modes?: unknown;
   available_models?: unknown;
@@ -965,20 +964,12 @@ type SetConfigOptionResult = {
 };
 
 const managementRowToAgent = (row: AgentManagementRow): AgentMetadata => {
-  const {
-    installed,
-    status: _status,
-    config_options,
-    available_modes,
-    available_models,
-    available_commands,
-    last_check_error_message: _lastCheckErrorMessage,
-    last_check_latency_ms: _lastCheckLatency,
-    ...metadata
-  } = row;
+  const { installed, status, config_options, available_modes, available_models, available_commands, ...metadata } = row;
   return {
     ...metadata,
-    available: installed,
+    installed,
+    status,
+    available: metadata.enabled && installed && (status === 'online' || status === 'unchecked'),
     handshake: {
       config_options,
       available_modes,

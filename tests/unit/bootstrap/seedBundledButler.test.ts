@@ -5,7 +5,8 @@ import { promises as fs } from 'fs';
 
 import { seedBundledButler } from '@/process/utils/seedBundledButler';
 
-const { importAssistantMock, importSkillMock, readRuleMock, writeRuleMock } = vi.hoisted(() => ({
+const { agentsMock, importAssistantMock, importSkillMock, readRuleMock, writeRuleMock } = vi.hoisted(() => ({
+  agentsMock: vi.fn(),
   importAssistantMock: vi.fn(),
   importSkillMock: vi.fn(),
   readRuleMock: vi.fn(),
@@ -14,6 +15,7 @@ const { importAssistantMock, importSkillMock, readRuleMock, writeRuleMock } = vi
 
 vi.mock('@/common', () => ({
   ipcBridge: {
+    acpConversation: { getAvailableAgents: { invoke: agentsMock } },
     assistants: { import: { invoke: importAssistantMock } },
     fs: {
       importSkill: { invoke: importSkillMock },
@@ -68,6 +70,9 @@ async function makeFixture(): Promise<string> {
 
 describe('seedBundledButler', () => {
   beforeEach(() => {
+    agentsMock
+      .mockReset()
+      .mockResolvedValue([{ id: '632f31d2', name: 'CentaurAI Core', agent_type: 'aionrs', agent_source: 'internal' }]);
     importAssistantMock.mockReset().mockResolvedValue({ imported: 1, skipped: 0, failed: 0, errors: [] });
     importSkillMock.mockReset().mockImplementation(async ({ skill_path }: { skill_path: string }) => ({
       skill_name: path.basename(skill_path),
@@ -88,6 +93,8 @@ describe('seedBundledButler', () => {
     const payload = importAssistantMock.mock.calls[0][0] as { assistants: Array<Record<string, unknown>> };
     expect(payload.assistants).toHaveLength(1);
     expect(payload.assistants[0].id).toBe(BUTLER_ID);
+    expect(payload.assistants[0]).not.toHaveProperty('preset_agent_type');
+    expect(payload.assistants[0]).toHaveProperty('agent_id', '632f31d2');
     expect(writeRuleMock).toHaveBeenCalledTimes(2);
     expect(config.store.get('migration.bundledButlerSeeded')).toBe(1);
   });
@@ -152,6 +159,18 @@ describe('seedBundledButler', () => {
     const ok = await seedBundledButler(config as never);
 
     expect(ok).toBe(false);
+    expect(config.store.has('migration.bundledButlerSeeded')).toBe(false);
+  });
+
+  it('defers without importing when the Core agent cannot be resolved', async () => {
+    await makeFixture();
+    agentsMock.mockResolvedValue([]);
+    const config = makeConfig();
+
+    const ok = await seedBundledButler(config as never);
+
+    expect(ok).toBe(false);
+    expect(importAssistantMock).not.toHaveBeenCalled();
     expect(config.store.has('migration.bundledButlerSeeded')).toBe(false);
   });
 });

@@ -926,7 +926,12 @@
     "custom": "사용자 정의",
     "addCustomAgent": "사용자 정의 에이전트 추가",
     "customEmpty": "구성된 사용자 정의 에이전트가 없습니다. \"사용자 정의 에이전트 추가\"를 클릭하여 생성하세요.",
-    "disabled": "비활성화됨"
+    "disabled": "비활성화됨",
+    "statusOnline": "온라인",
+    "statusUnchecked": "설치됨 · 확인 안 됨",
+    "statusOffline": "오프라인",
+    "statusMissing": "설치되지 않음",
+    "testConnection": "연결 테스트"
   },
   "remoteAgent": {
     "title": "원격 에이전트",

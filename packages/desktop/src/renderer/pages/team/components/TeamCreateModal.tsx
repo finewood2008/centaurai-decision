@@ -115,7 +115,7 @@ const AgentMultiSelectRow: React.FC<{
 const TeamCreateModal: React.FC<Props> = ({ visible, initialName = '', onClose, onCreated }) => {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { cliAgents } = useConversationAgents();
+  const { cliAgents, presetAssistants } = useConversationAgents();
   const { providers, getAvailableModels } = useModelProviderList();
   // The 智囊团's name (a team, not a single discussion — the topic is set later in the room).
   const [name, setName] = useState('');
@@ -150,10 +150,13 @@ const TeamCreateModal: React.FC<Props> = ({ visible, initialName = '', onClose, 
   // On submit, team-capable backends form the aioncore team (first = moderator); the
   // rest (openclaw/hermes + every 直连模型专家) join via the renderer-orchestrated extras.
   const allAgents = useMemo(() => {
-    const backends = cliAgents.map(cliAgentToOption);
+    const assistantsByAgentId = new Map(
+      presetAssistants.filter((assistant) => assistant.agent_id).map((assistant) => [assistant.agent_id, assistant])
+    );
+    const backends = cliAgents.map((agent) => cliAgentToOption(agent, assistantsByAgentId.get(agent.id) ?? null));
     const modelExperts = buildModelExpertOptions(providers, getAvailableModels);
     return [...backends, ...modelExperts];
-  }, [cliAgents, providers, getAvailableModels]);
+  }, [cliAgents, presetAssistants, providers, getAvailableModels]);
 
   const filteredAgents = useMemo(() => {
     const q = search.trim().toLowerCase();

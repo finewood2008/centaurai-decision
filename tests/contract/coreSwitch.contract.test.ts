@@ -37,13 +37,23 @@ describe('Decision 2.5.1 CentaurAI Core REST consumer contract', () => {
       config_options: [{ id: 'mode', type: 'select', current_value: 'default' }],
       last_check_latency_ms: 12,
     };
+    const missingRow = {
+      ...row,
+      id: 'gemini-acp',
+      backend: 'gemini',
+      name: 'Gemini',
+      installed: false,
+      status: 'missing',
+    };
+    const offlineRow = { ...row, id: 'offline-acp', backend: 'offline', installed: true, status: 'offline' };
+    const disabledRow = { ...row, id: 'disabled-acp', backend: 'disabled', enabled: false };
     const calls: Array<{ method: string; path: string }> = [];
     vi.stubGlobal(
       'fetch',
       vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
         const path = requestPath(input);
         calls.push({ method: init?.method ?? 'GET', path });
-        if (path === '/api/agents/management') return ok([row]);
+        if (path === '/api/agents/management') return ok([row, missingRow, offlineRow, disabledRow]);
         if (path === '/api/agents/management/refresh') return ok([row]);
         if (path === '/api/agents/claude-acp/health-check') return ok(row);
         return new Response('not found', { status: 404 });
@@ -51,8 +61,15 @@ describe('Decision 2.5.1 CentaurAI Core REST consumer contract', () => {
     );
 
     const agents = await acpConversation.getAvailableAgents.invoke();
-    expect(agents[0]).toMatchObject({ id: 'claude-acp', available: true });
+    expect(agents[0]).toMatchObject({
+      id: 'claude-acp',
+      installed: true,
+      status: 'online',
+      available: true,
+      last_check_latency_ms: 12,
+    });
     expect(agents[0].handshake?.config_options).toEqual(row.config_options);
+    expect(agents.slice(1).map((agent) => agent.available)).toEqual([false, false, false]);
 
     await acpConversation.refreshCustomAgents.invoke();
     const health = await acpConversation.checkAgentHealth.invoke({ backend: 'claude' });
@@ -225,8 +242,8 @@ describe('CentaurAI Core immutable release lock contract', () => {
     const published = resolveCentauraiCoreRelease(process.cwd());
     expect(published).toMatchObject({
       repository: 'finewood2008/centaurai-core',
-      tag: 'v0.1.48',
-      commit: 'a072452c76f60aa881d7fe9cecc1999bf552462d',
+      tag: 'v0.2.2',
+      commit: 'd667ae51520795d550e0b6a14d7cbddb967f68ec',
     });
     expect(Object.keys(published.assets)).toHaveLength(6);
   });

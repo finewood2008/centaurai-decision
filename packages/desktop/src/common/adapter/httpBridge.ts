@@ -254,7 +254,12 @@ export async function httpRequest<T>(
   const response = await fetch(url, {
     method,
     headers,
-    credentials: 'include',
+    // Electron talks to the local Core on a different port. Core v0.2.x
+    // deliberately serves local-mode CORS as `Access-Control-Allow-Origin: *`,
+    // which browsers reject when credentials are included. Same-origin WebUI
+    // requests still send their cookies, while local/remote cross-origin
+    // bridges authenticate through their explicit gate header instead.
+    credentials: 'same-origin',
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
 

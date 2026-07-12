@@ -1,19 +1,29 @@
 import path from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 
-export const EXPECTED_CORE_MIGRATION_COUNT = 23;
+export const EXPECTED_CORE_MIGRATION_COUNT = 26;
 
 const REQUIRED_FEATURES = [
   'agent_management',
   'agent_management_refresh',
   'centaurai_environment_aliases',
   'centaurai_proxy_identity_headers',
+  'decision_per_brain_knowledge_egress',
+  'decisions',
+  'idempotent_resource_creation',
+  'knowledge_dispatch_egress_gate',
+  'knowledge_gateway',
   'provider_secret_redaction',
+  'provider_ssrf_pinned_dns',
   'teams',
 ] as const;
 
 const REQUIRED_WS_EVENTS = [
   'conversation.listChanged',
+  'decision.completed',
+  'decision.evidenceAdded',
+  'decision.sessionChanged',
+  'decision.turnDelta',
   'message.stream',
   'team.agentStatusChanged',
   'team.runCancelled',
@@ -57,16 +67,16 @@ function assertArray(value: unknown, route: string): void {
 function assertCapabilities(value: unknown): void {
   assert(isRecord(value), '/api/capabilities data must be an object');
   assert(isRecord(value.contract), '/api/capabilities contract must be an object');
-  assert(value.contract.rest === '1', 'unsupported REST contract version');
-  assert(value.contract.websocket === '1', 'unsupported WebSocket contract version');
+  assert(value.contract.rest === '2', 'unsupported REST contract version');
+  assert(value.contract.websocket === '2', 'unsupported WebSocket contract version');
   assert(value.contract.startup === '2', 'CentaurAI dual startup contract is required');
-  assert(value.feature_version === '1', 'unsupported feature contract version');
+  assert(value.feature_version === '2', 'unsupported feature contract version');
   assert(isRecord(value.features), '/api/capabilities features must be an object');
   for (const feature of REQUIRED_FEATURES) {
     assert(value.features[feature] === true, `required Core feature is unavailable: ${feature}`);
   }
   assert(isRecord(value.websocket), '/api/capabilities websocket must be an object');
-  assert(value.websocket.version === '1', 'unsupported WebSocket event version');
+  assert(value.websocket.version === '2', 'unsupported WebSocket event version');
   assert(Array.isArray(value.websocket.events), '/api/capabilities websocket.events must be an array');
   for (const eventName of REQUIRED_WS_EVENTS) {
     assert(value.websocket.events.includes(eventName), `required WebSocket event is unavailable: ${eventName}`);
@@ -101,7 +111,7 @@ export async function runCentaurConsumerContract(port: number, fetchImpl: FetchL
   assert(isRecord(settings), '/api/settings/client data must be an object');
 }
 
-/** Verify that startup applied the exact v0.1.48 migration set. */
+/** Verify that startup applied the exact v0.2.2 migration set. */
 export async function verifyCoreMigrationCount(
   dataDir: string,
   expectedCount = EXPECTED_CORE_MIGRATION_COUNT

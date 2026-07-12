@@ -42,7 +42,7 @@ class FakeCore implements ManagedCoreProcess {
     this.harness.maxActiveCount = Math.max(this.harness.maxActiveCount, this.harness.activeCount);
     this.status = 'running';
     this.port = this.name.includes('legacy') ? 42000 : 41000 + this.harness.centaurManagers.length;
-    this.harness.migrationCounts.set(dataDir, 23);
+    this.harness.migrationCounts.set(dataDir, 26);
     return this.port;
   }
 
@@ -144,14 +144,14 @@ function createService(
     runConsumerContract,
     storage: harness.storage,
     verifyForwardMigrations: async (dataDir) => {
-      expect(harness.migrationCounts.get(dataDir)).toBe(23);
+      expect(harness.migrationCounts.get(dataDir)).toBe(26);
       harness.events.push(`verify-migrations:${dataDir}`);
     },
   });
 }
 
 describe('CoreSwitchService', () => {
-  it('uses startup to apply all 23 migrations on a copy before the formal switch', async () => {
+  it('uses startup to apply all 26 migrations on a copy before the formal switch', async () => {
     const harness = createHarness();
     const service = createService(harness);
 
@@ -382,7 +382,7 @@ describe('CoreSwitchService', () => {
     vi.mocked(harness.storage.readCompletionMarker).mockResolvedValueOnce({
       schemaVersion: 1,
       completedAt: '2026-07-12T00:00:00.000Z',
-      coreVersion: 'v0.1.48',
+      coreVersion: 'v0.2.2',
       legacyVersion: 'v0.1.24',
       backup: BACKUP,
     });
@@ -402,7 +402,7 @@ describe('CoreSwitchService', () => {
     vi.mocked(harness.storage.readCompletionMarker).mockResolvedValueOnce({
       schemaVersion: 1,
       completedAt: '2026-07-12T00:00:00.000Z',
-      coreVersion: 'v0.1.48',
+      coreVersion: 'v0.2.2',
       legacyVersion: 'v0.1.24',
       backup: BACKUP,
     });
@@ -416,13 +416,32 @@ describe('CoreSwitchService', () => {
     expect(harness.storage.restoreBackup).not.toHaveBeenCalled();
   });
 
+  it('runs a new preflight and backup when the completed Core version is outdated', async () => {
+    const harness = createHarness();
+    vi.mocked(harness.storage.readCompletionMarker).mockResolvedValueOnce({
+      schemaVersion: 1,
+      completedAt: '2026-07-12T00:00:00.000Z',
+      coreVersion: 'v0.1.48',
+      legacyVersion: 'v0.1.24',
+      backup: BACKUP,
+    });
+    const service = createService(harness);
+
+    await expect(service.start('/live-data')).resolves.toBe(41002);
+
+    expect(harness.storage.clearCompletionMarker).toHaveBeenCalledWith('/live-data');
+    expect(harness.storage.createPreflightCopy).toHaveBeenCalledWith('/live-data');
+    expect(harness.storage.createBackup).toHaveBeenCalledWith('/live-data');
+    expect(harness.storage.completionWritten).toBe(true);
+  });
+
   it('fails closed when a completed Core cannot be stopped before recovery', async () => {
     const harness = createHarness({ centaurStartFailures: [new Error('completed Core failed')] });
     harness.centaurStopFailures.push(new Error('completed Core kill failed'));
     vi.mocked(harness.storage.readCompletionMarker).mockResolvedValueOnce({
       schemaVersion: 1,
       completedAt: '2026-07-12T00:00:00.000Z',
-      coreVersion: 'v0.1.48',
+      coreVersion: 'v0.2.2',
       legacyVersion: 'v0.1.24',
       backup: BACKUP,
     });
@@ -438,7 +457,7 @@ describe('CoreSwitchService', () => {
     vi.mocked(harness.storage.readCompletionMarker).mockResolvedValueOnce({
       schemaVersion: 1,
       completedAt: '2026-07-12T00:00:00.000Z',
-      coreVersion: 'v0.1.48',
+      coreVersion: 'v0.2.2',
       legacyVersion: 'v0.1.24',
       backup: BACKUP,
     });

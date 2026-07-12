@@ -924,7 +924,12 @@
     "custom": "Özel",
     "addCustomAgent": "Özel Ajan Ekle",
     "customEmpty": "Yapılandırılmış özel ajan yok. Oluşturmak için \"Özel Ajan Ekle\"ye tıklayın.",
-    "disabled": "Devre dışı"
+    "disabled": "Devre dışı",
+    "statusOnline": "Çevrimiçi",
+    "statusUnchecked": "Yüklü · Kontrol edilmedi",
+    "statusOffline": "Çevrimdışı",
+    "statusMissing": "Yüklü değil",
+    "testConnection": "Bağlantıyı test et"
   },
   "remoteAgent": {
     "title": "Uzak Ajanlar",

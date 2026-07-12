@@ -1005,7 +1005,7 @@
       "en-US": "WeChat Mini Program Developer"
     },
     "description_i18n": {
-      "zh-CN": "Expert WeChat Mini Program developer specializing in 小程序 development with WXML/WXSS/WXS, WeChat API integration, payment systems, subscription messaging, and the full WeChat ecosystem.",
+      "zh-CN": "微信小程序开发专家，擅长 WXML/WXSS/WXS、微信 API 集成、支付系统、订阅消息及微信生态全链路开发。",
       "en-US": "Expert WeChat Mini Program developer specializing in 小程序 development with WXML/WXSS/WXS, WeChat API integration, payment systems, subscription messaging, and the full WeChat ecosystem."
     },
     "prompts_i18n": {},
@@ -1687,7 +1687,7 @@
       "en-US": "Bilibili Content Strategist"
     },
     "description_i18n": {
-      "zh-CN": "Expert Bilibili marketing specialist focused on UP主 growth, danmaku culture mastery, B站 algorithm optimization, community building, and branded content strategy for China's leading video community platform.",
+      "zh-CN": "B站营销专家，专注 UP 主增长、弹幕文化、平台算法优化、社区运营与品牌内容策略。",
       "en-US": "Expert Bilibili marketing specialist focused on UP主 growth, danmaku culture mastery, B站 algorithm optimization, community building, and branded content strategy for China's leading video community platform."
     },
     "prompts_i18n": {},
@@ -1951,7 +1951,7 @@
       "en-US": "Kuaishou Strategist"
     },
     "description_i18n": {
-      "zh-CN": "Expert Kuaishou marketing strategist specializing in short-video content for China's lower-tier city markets, live commerce operations, community trust building, and grassroots audience growth on 快手.",
+      "zh-CN": "快手营销策略专家，专注下沉市场短视频、直播电商、社区信任建设与用户增长。",
       "en-US": "Expert Kuaishou marketing strategist specializing in short-video content for China's lower-tier city markets, live commerce operations, community trust building, and grassroots audience growth on 快手."
     },
     "prompts_i18n": {},
@@ -2017,7 +2017,7 @@
       "en-US": "Multi-Platform Publisher"
     },
     "description_i18n": {
-      "zh-CN": "Expert orchestrator for one-click Chinese blog publishing. Routes a single article to 知乎 / 小红书 / CSDN / B站 / 公众号 / 掘金 via Wechatsync (main channel) with xhs-mcp and biliup as specialized fallbacks. Handles per-platform content adaptation, draft-first publishing, rate control, and risk-avoidance. Does NOT auto-publish — always stops at draft for human review.",
+      "zh-CN": "中文内容多平台发布编排专家，可将文章适配并分发至知乎、小红书、CSDN、B站、公众号和掘金；支持草稿优先、频率控制和风险规避，始终保留人工审核环节。",
       "en-US": "Expert orchestrator for one-click Chinese blog publishing. Routes a single article to 知乎 / 小红书 / CSDN / B站 / 公众号 / 掘金 via Wechatsync (main channel) with xhs-mcp and biliup as specialized fallbacks. Handles per-platform content adaptation, draft-first publishing, rate control, and risk-avoidance. Does NOT auto-publish — always stops at draft for human review."
     },
     "prompts_i18n": {},

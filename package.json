@@ -270,7 +270,7 @@
   "engines": {
     "node": ">=22 <25"
   },
-  "centauraiCoreVersion": "v0.1.48",
+  "centauraiCoreVersion": "v0.2.2",
   "electronRebuild": {
     "electronVersion": "^37.3.1"
   },

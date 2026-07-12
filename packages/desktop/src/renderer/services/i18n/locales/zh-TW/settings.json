@@ -930,7 +930,7 @@
   "agentManagement": {
     "localAgents": "本機 Agents",
     "remoteAgents": "遠端 Agents",
-    "localAgentsDescription": "直连模型 為內建 Agent，App 自帶無需安裝；其他 Agent 需先在本機安裝對應 CLI 才能被辨識。",
+    "localAgentsDescription": "Agent 狀態由 CentaurAI Core 統一管理；未安裝、待檢測和離線 Agent 會保留在目錄中並顯示診斷資訊。",
     "localAgentsSetupLink": "查看安裝指南",
     "goToChat": "開始對話",
     "remoteAgentsDescription": "目前僅支援遠端連接 OpenClaw，其他 Agent 正在開發中。",
@@ -950,12 +950,17 @@
     "detectCustomAgent": "識別自訂 Agent",
     "editCustomAgent": "編輯自訂 Agent",
     "localAgentsEmpty": "未檢測到本機 Agent",
-    "detected": "已偵測",
+    "detected": "Agent 目錄",
     "customAgents": "自訂 Agents",
     "custom": "自訂",
     "addCustomAgent": "新增自訂 Agent",
     "customEmpty": "尚無自訂 Agent，點擊「新增自訂 Agent」建立。",
-    "disabled": "已停用"
+    "disabled": "已停用",
+    "statusOnline": "在線",
+    "statusUnchecked": "已安裝 · 待檢測",
+    "statusOffline": "離線",
+    "statusMissing": "未安裝",
+    "testConnection": "測試連線"
   },
   "remoteAgent": {
     "title": "遠端 Agent",
