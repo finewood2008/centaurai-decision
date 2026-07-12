@@ -189,6 +189,7 @@
   },
   "stage": {
     "parallel": "各陈主张",
+    "position": "顾问立场",
     "debate": "观点交锋",
     "redteamAttack": "红队猛攻",
     "crossreview": "互相评案",

@@ -153,6 +153,7 @@
   },
   "stage": {
     "parallel": "Opening positions",
+    "position": "Posições dos consultores",
     "debate": "Cross-examination",
     "redteamAttack": "Red-team assault",
     "crossreview": "Plan review",

@@ -3,6 +3,7 @@ import { mutate as globalMutate } from 'swr';
 import { Message } from '@arco-design/web-react';
 import { ipcBridge } from '@/common';
 import { retrieveKnowledgeContext } from '@/renderer/services/knowledgeBaseSearch';
+import i18n from '@/renderer/services/i18n';
 import { emitter } from '@/renderer/utils/emitter';
 import type { IConversationTurnCompletedEvent, IResponseMessage } from '@/common/adapter/ipcBridge';
 import { joinPath, transformMessage } from '@/common/chat/chatLib';
@@ -53,6 +54,7 @@ import {
   buildRedTeamPrompt,
   buildReferenceContext,
   buildRoundPausePrompt,
+  hasValidMeetingSpeech,
   parseModeratorMove,
   parsePlan,
   parseResolutionOptions,
@@ -750,18 +752,28 @@ class MeetingEngine {
           .filter((t) => t.text.trim())
           .map((t) => `${t.name}（${t.phaseLabel}）：${t.text}`)
           .join('\n\n');
-      const speak = async (p: Participant, label: string, prompt: string, parallel = false): Promise<void> => {
-        if (stale()) return;
+      const speak = async (p: Participant, label: string, prompt: string, parallel = false): Promise<string> => {
+        if (stale()) return '';
         const tid = this.addTurn(p, label, parallel);
         const text = await this.askTurn(p.conversationId, tid, prompt);
-        if (stale()) return;
-        this.updateTurn(tid, { text, status: text ? 'done' : 'error' });
+        if (stale()) return text;
+        this.updateTurn(tid, { text, status: hasValidMeetingSpeech(text) ? 'done' : 'error' });
         this.commit({ turnsCompleted: this.state.turnsCompleted + 1, activeSlotId: null });
+        return text;
+      };
+      const stopForNoSpeech = (message: string): void => {
+        Message.warning(message);
+        this.commit({
+          phase: 'idle',
+          runState: 'stopped',
+          activeSlotId: null,
+          awaitingContinue: false,
+        });
       };
 
       // The backbone reuses speak / transcriptText / the moderator recap + PAUSE
       // (boss reads, optionally interjects, clicks 继续讨论), so every form is paced
-      // like a real meeting: ① 并行立场 → ② 交锋讨论(form-specific) → ③ 综合决议.
+      // like a real meeting: ① 顾问逐席立场 → ② 交锋讨论(form-specific) → ③ 综合决议.
       const pauseAndWait = async (round: number, stage: string): Promise<boolean> => {
         if (!stale()) {
           await speak(mod, '阶段小结', buildRoundPausePrompt({ topic, round, stage, recentContext: transcriptText() }));
@@ -769,31 +781,58 @@ class MeetingEngine {
         await this.waitForContinue(myRun);
         return !stale();
       };
-      const eachPanelist = async (label: string, prompt: (p: Participant) => string): Promise<void> => {
+      const eachPanelist = async (label: string, prompt: (p: Participant) => string): Promise<number> => {
+        let spoken = 0;
         for (const p of panel) {
           if (stale()) break;
-          await speak(p, label, prompt(p));
+          const text = await speak(p, label, prompt(p));
+          if (hasValidMeetingSpeech(text)) spoken += 1;
         }
+        return spoken;
       };
 
       const referenceNote = () =>
         this.referenceContext ? `\n\n${this.referenceContext}\n\n请充分参考上述背景资料。` : '';
       const framingNote = dept?.framing ? `\n\n${dept.framing}` : '';
-      // The leader opens the chamber, decomposes the boss's question, and throws
-      // those questions to all experts. The leader does not join the first parallel wall.
-      await speak(mod, '开场', buildModeratorOpeningPrompt(topic, briefs) + framingNote + referenceNote());
+      // The moderator opens first. Without a real opening, stop instead of showing
+      // a fake meeting made of empty advisor cards.
+      const openingText = await speak(
+        mod,
+        '主持开场',
+        buildModeratorOpeningPrompt(topic, briefs) + framingNote + referenceNote()
+      );
       if (stale()) return;
-      // ① 并行立场 — experts answer simultaneously; the leader waits to summarize.
+      if (!hasValidMeetingSpeech(openingText)) {
+        stopForNoSpeech(
+          i18n.t('team.meeting.errors.hostNoSpeech', {
+            defaultValue: '主持人未能完成开场，会议已暂停。请更换主持人/模型，或检查该模型授权后重新开始。',
+          })
+        );
+        return;
+      }
+      // ① 顾问立场 — advisors speak in panel order. The prompt is built immediately
+      // before each turn, so every advisor sees and can challenge prior speeches.
       const openingPosition = (p: Participant): string => {
         const lens = lensByPanel.get(p.id);
+        const priorContext = transcriptText();
+        const priorNote = priorContext ? `\n\n【前序会议发言】\n${priorContext}` : '';
         if (form === 'tournament')
-          return buildProposalPrompt({ topic, persona: p.name, lens, reference }) + referenceNote();
-        if (form === 'diverge') return buildDivergePrompt({ topic, persona: p.name, lens }) + referenceNote();
-        return buildPanelistPositionPrompt({ topic, persona: p.name, lens, priorContext: '' }) + referenceNote();
+          return buildProposalPrompt({ topic, persona: p.name, lens, reference }) + priorNote + referenceNote();
+        if (form === 'diverge')
+          return buildDivergePrompt({ topic, persona: p.name, lens }) + priorNote + referenceNote();
+        return buildPanelistPositionPrompt({ topic, persona: p.name, lens, priorContext }) + referenceNote();
       };
-      // Fire every opening turn up-front (all appear at once), then stream concurrently.
-      await Promise.all(panel.map((p) => speak(p, '并行立场', openingPosition(p), true)));
-      if (!(await pauseAndWait(1, '并行立场'))) return;
+      const advisorSpeechCount = await eachPanelist('顾问立场', openingPosition);
+      if (stale()) return;
+      if (advisorSpeechCount === 0) {
+        stopForNoSpeech(
+          i18n.t('team.meeting.errors.advisorsNoSpeech', {
+            defaultValue: '参会顾问没有返回有效发言，会议已暂停。请更换顾问背后的模型后重新开始。',
+          })
+        );
+        return;
+      }
+      if (!(await pauseAndWait(1, '顾问立场'))) return;
 
       // ② Adaptive debate — moderator dynamically drives the discussion.
       const panelNames = panel.map((p) => p.name);
@@ -813,19 +852,30 @@ class MeetingEngine {
         this.updateTurn(moveTurnId, { text: moveText, status: moveText ? 'done' : 'error' });
         const move = parseModeratorMove(moveText, panelNames);
         if (move.conclude) break;
-        // All experts respond concurrently. @mentions specialize prompts without muting anyone.
-        const responses = buildAdaptivePanelistResponses({
-          topic,
-          panelNames,
-          targetNames: move.targetNames,
-          challenge: move.challenge,
-          referenceContext: this.referenceContext || undefined,
-        });
-        await Promise.all(
-          panel.map((p, index) =>
-            speak(p, responses[index]?.phaseLabel ?? '交锋回应', responses[index]?.prompt ?? '', true)
-          )
-        );
+        // Every expert responds in seat order. @mentions specialize prompts without
+        // muting anyone, and later speakers receive the live transcript from this round.
+        let responseSpeechCount = 0;
+        for (const p of panel) {
+          if (stale()) return;
+          const response = buildAdaptivePanelistResponses({
+            topic,
+            panelNames: [p.name],
+            targetNames: move.targetNames,
+            challenge: move.challenge,
+            referenceContext: this.referenceContext || undefined,
+            priorContext: transcriptText(),
+          })[0];
+          const text = await speak(p, response?.phaseLabel ?? '交锋回应', response?.prompt ?? '');
+          if (hasValidMeetingSpeech(text)) responseSpeechCount += 1;
+        }
+        if (responseSpeechCount === 0) {
+          stopForNoSpeech(
+            i18n.t('team.meeting.errors.advisorsNoSpeech', {
+              defaultValue: '参会顾问没有返回有效发言，会议已暂停。请更换顾问背后的模型后重新开始。',
+            })
+          );
+          return;
+        }
         await speak(
           mod,
           '本轮回应小结',

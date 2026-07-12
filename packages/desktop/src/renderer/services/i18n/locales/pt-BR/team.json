@@ -87,5 +87,12 @@
       "interview": "Planejar uma entrevista aprofundada entre os agentes",
       "expert_review": "Ter vários especialistas analisando o mesmo problema"
     }
+  },
+  "meeting": {
+    "stage": { "position": "Posições dos consultores" },
+    "errors": {
+      "hostNoSpeech": "O moderador não conseguiu abrir a reunião, por isso ela foi pausada. Troque o moderador/modelo ou verifique a autorização e reinicie.",
+      "advisorsNoSpeech": "Nenhum consultor retornou uma resposta válida, por isso a reunião foi pausada. Troque os modelos dos consultores e reinicie."
+    }
   }
 }

@@ -17,6 +17,7 @@ import {
   buildModeratorDebateMovePrompt,
   buildRedTeamPrompt,
   buildRevisePrompt,
+  hasValidMeetingSpeech,
   hasResolutionOptions,
   matchSpeakerName,
   parseModeratorMove,
@@ -94,12 +95,26 @@ describe('adaptive meeting strategy', () => {
       targetNames: ['风险官'],
       challenge: '@风险官 请重算最坏情况',
       referenceContext: '最新资料：市场规模 20 亿元',
+      priorContext: '增长官：建议先做小规模试点',
     });
 
     expect(responses).toHaveLength(3);
     expect(responses.find((response) => response.name === '风险官')?.phaseLabel).toBe('回应主持');
     expect(responses.find((response) => response.name === '增长官')?.phaseLabel).toBe('交锋回应');
     expect(responses.every((response) => response.prompt.includes('市场规模 20 亿元'))).toBe(true);
+    expect(responses.every((response) => response.prompt.includes('增长官：建议先做小规模试点'))).toBe(true);
+  });
+
+  it('pauses when the host opening is blank', () => {
+    expect(hasValidMeetingSpeech('  \n')).toBe(false);
+  });
+
+  it('continues after one advisor fails when another advisor speaks', () => {
+    expect(['', '财务官：可以继续'].some(hasValidMeetingSpeech)).toBe(true);
+  });
+
+  it('pauses when every advisor reply is blank', () => {
+    expect(['', '   '].some(hasValidMeetingSpeech)).toBe(false);
   });
 
   it('keeps the selected meeting form and reference material in the moderator prompt', () => {

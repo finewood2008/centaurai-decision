@@ -34,11 +34,11 @@ export const PANEL_LENSES: string[] = [
 
 /** UI metadata for the discussion-format picker. */
 export const MEETING_FORMS: { id: MeetingForm; label: string; hint: string }[] = [
-  { id: 'roundtable', label: '圆桌共识', hint: '并行立场 → 交锋质询 → 综合，通用、平衡' },
-  { id: 'redteam', label: '红蓝对抗', hint: '并行立场 → 红队猛攻找漏洞 → 综合，压力测试' },
-  { id: 'tournament', label: '方案竞标', hint: '并行各出完整方案 → 互评 → 嫁接综合，适合解法空间大' },
-  { id: 'diverge', label: '发散收敛', hint: '并行发散 → 聚类 → 收敛，适合创意探索' },
-  { id: 'deepdive', label: '逐层深挖', hint: '并行初判 → 主持人多轮追问 → 综合，把复杂难题挖到底' },
+  { id: 'roundtable', label: '圆桌共识', hint: '主持开场 → 顾问逐席立场 → 交锋质询 → 综合' },
+  { id: 'redteam', label: '红蓝对抗', hint: '主持开场 → 顾问逐席立场 → 红队猛攻 → 综合' },
+  { id: 'tournament', label: '方案竞标', hint: '主持开场 → 顾问逐席出方案 → 互评 → 嫁接综合' },
+  { id: 'diverge', label: '发散收敛', hint: '主持开场 → 顾问逐席发散 → 聚类 → 收敛' },
+  { id: 'deepdive', label: '逐层深挖', hint: '主持开场 → 顾问逐席初判 → 多轮追问 → 综合' },
 ];
 
 /**
@@ -77,23 +77,21 @@ export function buildModeratorOpeningPrompt(topic: string, panelists: PanelistBr
     '请完成开场（务实有力，可稍长，不要套话）：',
     '1）一两句话点破这个决策【真正的核心张力】是什么（不是泛泛重述题目，而是说清"难就难在哪")；',
     '2）把老板的问题拆成 2-4 个必须回答清楚的关键问题，并明确这些问题分别要抛给哪些专家视角去判断；',
-    '3）说明你不会在第一轮并行发言里抢专家席，你的核心工作是主持、追问、提炼精华，并帮老板看见真正有价值的观点；',
-    '4）明确告诉老板：专家会先并行给出立场，之后你会逐一提炼重点、综合分歧，再邀请老板补充倾向或约束；',
+    '3）说明你不会在第一轮抢顾问席，你的核心工作是主持、追问、提炼精华，并帮老板看见真正有价值的观点；',
+    '4）明确告诉老板：顾问会按席位顺序逐一发言，并承接、引用或反驳前序观点；之后你会提炼重点、综合分歧，再邀请老板补充倾向或约束；',
     '5）邀请老板：如果有特别看重的约束（预算 / 时间 / 风险偏好 / 已定的红线），随时插话，我们会据此调整。',
     '最后把拆解后的问题抛给全体专家开始第一轮。只输出开场词本身。',
   ].join('\n');
 }
 
 /**
- * Moderator's step-① turn. The moderator is an equal contributor: it briefly frames
- * the core tension, then gives its OWN substantive initial judgment (runs after
- * the opening, in parallel with the panel). Optional `framing` injects the chosen
- * department's context.
+ * Optional moderator advisory turn retained for alternate flows. The current
+ * advisor-meeting flow keeps the moderator in the host seat during 顾问立场.
  */
 export function buildModeratorPositionPrompt(topic: string, panelists: PanelistBrief[], framing?: string): string {
   return [
     framing ? framing : '',
-    '你是这场决策会议的主持人，也是首席顾问；开场主持已经完成，现在进入【并行立场】。请你暂时以专家身份发表首席判断，但不要丢掉主持人的全局视角。',
+    '你是这场决策会议的主持人，也是首席顾问；开场主持已经完成，现在进入【顾问立场】。请你暂时以专家身份发表首席判断，但不要丢掉主持人的全局视角。',
     `决策议题：${topic}`,
     `与会专家及其主攻视角：${lensRoster(panelists)}`,
     '',
@@ -630,6 +628,11 @@ export type AdaptivePanelistResponse = {
 
 export const MAX_DEBATE_ROUNDS = 5;
 
+/** Whitespace-only replies count as no speech throughout the meeting loop. */
+export function hasValidMeetingSpeech(text: string): boolean {
+  return text.trim().length > 0;
+}
+
 /** Build one response prompt per panelist; @mentions specialize a prompt without muting anyone. */
 export function buildAdaptivePanelistResponses(params: {
   topic: string;
@@ -637,8 +640,9 @@ export function buildAdaptivePanelistResponses(params: {
   targetNames: string[];
   challenge: string;
   referenceContext?: string;
+  priorContext?: string;
 }): AdaptivePanelistResponse[] {
-  const { topic, panelNames, targetNames, challenge, referenceContext } = params;
+  const { topic, panelNames, targetNames, challenge, referenceContext, priorContext } = params;
   const named = new Set(targetNames);
   const targetLabel = named.size > 0 ? `点名了 ${Array.from(named).join('、')}` : '面向全体';
   return panelNames.map((name) => {
@@ -648,6 +652,7 @@ export function buildAdaptivePanelistResponses(params: {
           `你是专家「${name}」。主持人点名向你追问，请直面回答，不要回避或打太极：`,
           `议题：${topic}`,
           referenceContext ? `\n【背景参考资料】：\n${referenceContext}` : '',
+          priorContext ? `\n【截至你发言前的会议记录】：\n${priorContext}` : '',
           '',
           `主持人的追问：\n${challenge}`,
           '',
@@ -657,6 +662,7 @@ export function buildAdaptivePanelistResponses(params: {
           `你是专家「${name}」。主持人正在推动新一轮讨论，请从你的视角回应：`,
           `议题：${topic}`,
           referenceContext ? `\n【背景参考资料】：\n${referenceContext}` : '',
+          priorContext ? `\n【截至你发言前的会议记录】：\n${priorContext}` : '',
           '',
           `主持人的追问（${targetLabel}）：\n${challenge || '请各位专家基于前面的讨论继续深入发表观点。'}`,
           '',

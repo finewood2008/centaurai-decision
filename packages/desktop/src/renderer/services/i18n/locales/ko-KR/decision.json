@@ -153,6 +153,7 @@
   },
   "stage": {
     "parallel": "Opening positions",
+    "position": "고문 입장",
     "debate": "Cross-examination",
     "redteamAttack": "Red-team assault",
     "crossreview": "Plan review",

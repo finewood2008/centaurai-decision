@@ -88,5 +88,12 @@
       "write_report": "Bir konuyu araştır ve ayrıntılı rapor yaz",
       "fix_bug": "Projemizdeki hataları bul ve düzelt"
     }
+  },
+  "meeting": {
+    "stage": { "position": "Danışman görüşleri" },
+    "errors": {
+      "hostNoSpeech": "Moderatör açılışı tamamlayamadığı için toplantı duraklatıldı. Moderatörü/modeli değiştirin veya yetkilendirmeyi kontrol edip yeniden başlatın.",
+      "advisorsNoSpeech": "Hiçbir danışman geçerli bir yanıt vermediği için toplantı duraklatıldı. Danışman modellerini değiştirip yeniden başlatın."
+    }
   }
 }

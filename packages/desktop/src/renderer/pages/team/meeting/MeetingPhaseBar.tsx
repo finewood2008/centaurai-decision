@@ -13,18 +13,19 @@ import { IS_DECISION } from '@/common/config/constants';
 type Stage = { key: string; i18nKey: string; zh: string };
 const S = (key: string, i18nKey: string, zh: string): Stage => ({ key, i18nKey, zh });
 
-// Universal backbone: every form is ① 并行立场 → ② 交锋讨论(form-specific) → ③ 综合 → 拍板.
-const PARALLEL = S('并行立场', 'team.meeting.stage.parallel', '并行立场');
+// New meetings use sequential advisor positions. Historical `并行立场` turns remain
+// renderable in MeetingRoomView; the phase bar describes the current meeting strategy.
+const POSITION = S('顾问立场', 'team.meeting.stage.position', '顾问立场');
 const SYNTH = S('综合', 'team.meeting.stage.synthesis', '综合');
 const DECISION = S('__decision__', 'team.meeting.stage.decision', '拍板');
 
 /** The user-facing milestones per discussion format (mirrors runMeeting's phases). */
 const STAGES_BY_FORM: Record<MeetingForm, Stage[]> = {
-  roundtable: [PARALLEL, S('交锋', 'team.meeting.stage.debate', '交锋'), SYNTH, DECISION],
-  redteam: [PARALLEL, S('红队猛攻', 'team.meeting.stage.redteamAttack', '红队猛攻'), SYNTH, DECISION],
-  tournament: [PARALLEL, S('互评', 'team.meeting.stage.crossreview', '互评'), SYNTH, DECISION],
-  diverge: [PARALLEL, S('收敛', 'team.meeting.stage.converge', '收敛'), SYNTH, DECISION],
-  deepdive: [PARALLEL, S('追问', 'team.meeting.stage.probe', '追问'), SYNTH, DECISION],
+  roundtable: [POSITION, S('交锋', 'team.meeting.stage.debate', '交锋'), SYNTH, DECISION],
+  redteam: [POSITION, S('红队猛攻', 'team.meeting.stage.redteamAttack', '红队猛攻'), SYNTH, DECISION],
+  tournament: [POSITION, S('互评', 'team.meeting.stage.crossreview', '互评'), SYNTH, DECISION],
+  diverge: [POSITION, S('收敛', 'team.meeting.stage.converge', '收敛'), SYNTH, DECISION],
+  deepdive: [POSITION, S('追问', 'team.meeting.stage.probe', '追问'), SYNTH, DECISION],
 };
 
 type Props = {
@@ -37,13 +38,15 @@ type Props = {
 
 /**
  * Compact one-row stage tracker: shows where the meeting IS and what's NEXT
- * (并行立场 → 交锋 → 综合 → 拍板), so the boss can read the room at a glance.
+ * (顾问立场 → 交锋 → 综合 → 拍板), so the boss can read the room at a glance.
  * Deliberately slim — the transcript below is the hero.
  */
 const MeetingPhaseBar: React.FC<Props> = ({ phase, form, reachedLabels, turnsCompleted }) => {
   const { t } = useTranslation();
   const stages = STAGES_BY_FORM[form] ?? STAGES_BY_FORM.roundtable;
   const reached = new Set(reachedLabels);
+  // Old persisted meetings used `并行立场`; map it to the new first milestone.
+  if (reached.has('并行立场')) reached.add('顾问立场');
 
   let current = 0;
   stages.forEach((s, i) => {

@@ -189,6 +189,7 @@
   },
   "stage": {
     "parallel": "Opening positions",
+    "position": "Advisor positions",
     "debate": "Cross-examination",
     "redteamAttack": "Red-team assault",
     "crossreview": "Plan review",

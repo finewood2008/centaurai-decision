@@ -55,10 +55,10 @@ const TurnAvatar: React.FC<{ icon?: string; agentType: string; name: string }> =
 };
 
 /**
- * Step-① 并行立场 presentation: the 专家墙 — panel experts answer at once, filling the
- * view as a dense grid of LIVE-streaming cards (each glowing while speaking), so the
+ * Legacy 并行立场 presentation: historical parallel turns still render as a dense
+ * grid of LIVE-streaming cards (each glowing while speaking), so the
  * boss can scan the expert field while the leader later summarizes the useful parts.
- * Only this first round is parallel; later rounds render one-by-one as full cards.
+ * old first round remains readable; current meetings render sequential full cards.
  */
 const ParallelTurnWall: React.FC<{ turns: MeetingTurn[] }> = ({ turns }) => {
   const { t } = useTranslation();

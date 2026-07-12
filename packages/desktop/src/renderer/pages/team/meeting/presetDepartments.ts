@@ -13,7 +13,7 @@
  * The boss can also just pick a discussion method manually with no department.
  *
  * Departments do NOT define their own phase sequence — every meeting runs the
- * universal backbone (① 并行立场 → ② 交锋讨论 → ③ 综合决议). The department only
+ * universal backbone (① 顾问立场 → ② 交锋讨论 → ③ 综合决议). The department only
  * changes the flavor, not the structure.
  */
 import type { MeetingForm } from './meetingTypes';

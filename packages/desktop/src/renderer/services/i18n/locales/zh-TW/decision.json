@@ -216,6 +216,7 @@
   },
   "stage": {
     "parallel": "各陳主張",
+    "position": "顧問立場",
     "debate": "觀點交鋒",
     "redteamAttack": "紅隊猛攻",
     "crossreview": "互相評案",

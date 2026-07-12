@@ -87,5 +87,12 @@
       "interview": "策劃一場深度訪談",
       "expert_review": "多位專家會診同一個問題"
     }
+  },
+  "meeting": {
+    "stage": { "position": "顧問立場" },
+    "errors": {
+      "hostNoSpeech": "主持人未能完成開場，會議已暫停。請更換主持人／模型，或檢查該模型授權後重新開始。",
+      "advisorsNoSpeech": "參會顧問沒有返回有效發言，會議已暫停。請更換顧問使用的模型後重新開始。"
+    }
   }
 }

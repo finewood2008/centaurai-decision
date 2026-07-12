@@ -147,10 +147,14 @@
     "turn": {
       "failed": "No response"
     },
+    "errors": {
+      "hostNoSpeech": "The host could not open the meeting, so it has been paused. Change the host/model or check its authorization, then restart.",
+      "advisorsNoSpeech": "No advisor returned a valid response, so the meeting has been paused. Change the advisors' models, then restart."
+    },
     "boardSubtitle": "AI Roundtable",
     "stage": {
       "opening": "Opening",
-      "position": "Positions",
+      "position": "Advisor positions",
       "debate": "Debate",
       "synthesis": "Synthesis",
       "decision": "Decision",
