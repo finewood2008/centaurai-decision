@@ -13,6 +13,7 @@ import ToolboxPage from '@/renderer/pages/toolbox/ToolboxPage';
 import { Layout as ArcoLayout } from '@arco-design/web-react';
 import classNames from 'classnames';
 import React, { Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutContext } from '@renderer/hooks/context/LayoutContext';
 import { NavigationHistoryProvider } from '@renderer/hooks/context/NavigationHistoryContext';
@@ -106,6 +107,7 @@ const Layout: React.FC<{
   sider: React.ReactNode;
   onSessionClick?: () => void;
 }> = ({ sider, onSessionClick: _onSessionClick }) => {
+  const { t } = useTranslation();
   const [collapsed, setCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [viewportWidth, setViewportWidth] = useState<number>(() =>
@@ -355,9 +357,16 @@ const Layout: React.FC<{
                 </div>
                 <div className='collapsed-hidden flex flex-col justify-center leading-tight'>
                   <span className='text-12px text-t-secondary'>半人马AI{IS_TEAM ? '-团队版' : ''}</span>
-                  <span className='text-16px text-t-primary font-semibold'>
-                    {IS_DECISION ? '超级参谋团' : 'CentaurAI'}
-                  </span>
+                  <div className='flex items-center gap-6px'>
+                    <span className='text-16px text-t-primary font-semibold'>
+                      {IS_DECISION ? '超级参谋团' : 'CentaurAI'}
+                    </span>
+                    {IS_DECISION && process.env.NODE_ENV === 'development' && (
+                      <span className='shrink-0 whitespace-nowrap rd-4px border border-warning-3 bg-warning-1 px-5px py-1px text-10px font-medium leading-none text-warning-7'>
+                        {t('decision.developmentBadge')}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 {isMobile && !collapsed && (
                   <button

@@ -1,6 +1,7 @@
 {
   "subtitle": "あなたの意思決定ウォールーム —— いつでも諮問団を招集し、多角的な意見を聞いて即断できます。",
   "startMeeting": "意思決定会議を始める",
+  "developmentBadge": "開発版",
   "greeting": {
     "morning": "おはようございます、社長",
     "afternoon": "こんにちは、社長",

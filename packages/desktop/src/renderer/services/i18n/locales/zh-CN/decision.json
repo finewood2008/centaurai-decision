@@ -1,6 +1,7 @@
 {
   "subtitle": "随时召集顾问开决策会议室，听取多方意见、快速拍板。",
   "startMeeting": "发起决策会议",
+  "developmentBadge": "开发版",
   "greeting": {
     "morning": "早上好，老板",
     "afternoon": "下午好，老板",

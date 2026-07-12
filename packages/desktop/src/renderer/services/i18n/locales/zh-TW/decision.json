@@ -1,6 +1,7 @@
 {
   "subtitle": "隨時召集顧問開決策會議室，聽取多方意見、快速拍板。",
   "startMeeting": "發起決策會議",
+  "developmentBadge": "開發版",
   "greeting": {
     "morning": "早安，老闆",
     "afternoon": "午安，老闆",
