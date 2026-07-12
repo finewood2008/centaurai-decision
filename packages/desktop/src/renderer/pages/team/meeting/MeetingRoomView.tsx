@@ -1,19 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Button, Message, Popover, Spin } from '@arco-design/web-react';
-import {
-  Checklist,
-  Copy,
-  Crown,
-  Download,
-  Notes,
-  PeoplePlus,
-  Plus,
-  RightOne,
-  Scale,
-  VideoConference,
-} from '@icon-park/react';
+import { Button, Input, Message, Popover, Radio, Spin } from '@arco-design/web-react';
+import { Checklist, Copy, Crown, Download, Notes, PeoplePlus, Plus, Scale, VideoConference } from '@icon-park/react';
 import type { TTeam } from '@/common/types/team/teamTypes';
 import MarkdownView from '@/renderer/components/Markdown';
 import { emitter } from '@/renderer/utils/emitter';
@@ -26,11 +15,64 @@ import MeetingResolutionCard from './MeetingResolutionCard';
 import MeetingGuestPanel from './MeetingGuestPanel';
 import { stripResolutionMarkers } from './meetingPrompts';
 import { useMeetingOrchestrator } from './useMeetingOrchestrator';
-import type { MeetingTurn } from './meetingTypes';
+import type { MeetingQuestion, MeetingTurn } from './meetingTypes';
 import { IS_DECISION } from '@/common/config/constants';
 
 type Props = {
   team: TTeam;
+};
+
+export const MeetingQuestionCard: React.FC<{
+  question: MeetingQuestion;
+  onAnswer: (answer: { optionId?: string; text?: string }) => void;
+}> = ({ question, onAnswer }) => {
+  const { t } = useTranslation();
+  const [selected, setSelected] = useState<string>();
+  const [text, setText] = useState('');
+
+  useEffect(() => {
+    setSelected(undefined);
+    setText('');
+  }, [question.id]);
+
+  return (
+    <div
+      data-testid='meeting-question-card'
+      className='mx-18px mb-14px rd-14px border border-solid border-[color:var(--color-primary-light-3)] bg-[var(--color-primary-light-1)] p-14px'
+    >
+      <div className='text-14px font-semibold text-[color:var(--text-primary)] mb-10px'>{question.prompt}</div>
+      <Radio.Group value={selected} onChange={setSelected} className='w-full flex flex-col gap-7px'>
+        {question.options.map((option) => (
+          <Radio key={option.id} value={option.id} className='w-full'>
+            <span className='text-13px text-[color:var(--text-primary)]'>{option.label}</span>
+            {option.description && (
+              <span className='block ml-22px mt-2px text-12px text-[color:var(--bg-6)]'>{option.description}</span>
+            )}
+          </Radio>
+        ))}
+      </Radio.Group>
+      <Input.TextArea
+        className='mt-10px'
+        value={text}
+        onChange={setText}
+        autoSize={{ minRows: 2, maxRows: 5 }}
+        placeholder={t('team.meeting.deepDiscussion.answerPlaceholder', {
+          defaultValue: '也可以直接输入你的想法，或在选择后补充…',
+        })}
+      />
+      <div className='mt-10px flex justify-end'>
+        <Button
+          type='primary'
+          shape='round'
+          disabled={!selected && !text.trim()}
+          onClick={() => onAnswer({ optionId: selected, text })}
+          data-testid='meeting-question-confirm'
+        >
+          {t('team.meeting.deepDiscussion.confirmAnswer', { defaultValue: '确认并继续' })}
+        </Button>
+      </div>
+    </div>
+  );
 };
 
 /**
@@ -247,9 +289,9 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
   const isIdle = state.phase === 'idle';
   const isDecisionFocus = IS_DECISION && !isIdle;
   const atResolution = state.phase === 'resolution' || state.phase === 'decided';
-  const showPlan = atResolution && state.plan.trim().length > 0;
+  const showPlan = (atResolution || state.phase === 'completed') && state.plan.trim().length > 0;
   const showResolution = state.options.length > 0 && atResolution;
-  const statusKey = state.awaitingContinue && state.phase === 'running' ? 'awaiting' : state.phase;
+  const statusKey = state.pendingQuestion && state.phase === 'running' ? 'awaiting' : state.phase;
   const decisionStatus = t(`decision.room.status.${statusKey}`, {
     defaultValue:
       statusKey === 'idle'
@@ -260,7 +302,11 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
             ? '等待你的方向'
             : statusKey === 'resolution'
               ? '待拍板'
-              : '已拍板',
+              : statusKey === 'paused'
+                ? '已暂停'
+                : statusKey === 'completed'
+                  ? '讨论已完成'
+                  : '已拍板',
   });
   const advisorCount = (rosterModerator ? 1 : 0) + rosterPanelists.length + guests.length;
 
@@ -287,12 +333,19 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
         key: 'verdict',
         icon: <Checklist theme='outline' size={compact ? '15' : '17'} fill='currentColor' />,
         iconClass: 'bg-[var(--accent-green-tint)] text-[color:var(--success)]',
-        title: t('decision.authority.verdictTitle', { defaultValue: '决策台' }),
-        desc: t('decision.authority.verdictDesc', {
-          count: state.options.length,
-          defaultValue:
-            state.options.length > 0 ? `${state.options.length} 个候选方案待拍板` : '等待主持人形成候选方案',
-        }),
+        title: atResolution
+          ? t('decision.authority.verdictTitle', { defaultValue: '决策台' })
+          : t('team.meeting.deepDiscussion.openQuestions', { defaultValue: '未决问题' }),
+        desc: atResolution
+          ? t('decision.authority.verdictDesc', {
+              count: state.options.length,
+              defaultValue:
+                state.options.length > 0 ? `${state.options.length} 个候选方案待拍板` : '等待主持人形成候选方案',
+            })
+          : t('team.meeting.deepDiscussion.openQuestionCount', {
+              count: state.discussionState.openQuestions.length,
+              defaultValue: `${state.discussionState.openQuestions.length} 个问题仍待深入`,
+            }),
       },
     ];
 
@@ -362,6 +415,7 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
           form={state.form}
           reachedLabels={reachedLabels}
           turnsCompleted={state.turnsCompleted}
+          activity={state.activity}
         />
       </div>
       {renderDecisionAuthorityCards(true)}
@@ -538,8 +592,7 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
             </span>
             <span className='text-14px leading-relaxed max-w-420px text-[color:var(--text-secondary)]'>
               {t(IS_DECISION ? 'decision.emptyHint' : 'team.meeting.emptyHint', {
-                defaultValue:
-                  '让不同模型的 AI 专家围绕你的议题结构化研讨、互相博弈，最后合成一份比单个 AI 更高质量的《方案书》。',
+                defaultValue: '由主持人根据现场内容动态追问、调度顾问并与你持续互动，逐步把问题讨论到更深处。',
               })}
             </span>
             <div className='flex items-center gap-10px text-12px text-[color:var(--bg-6)] mt-2px'>
@@ -574,9 +627,11 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
                 <div className='flex items-center gap-8px px-20px h-52px border-b border-solid border-[color:var(--border-light)]'>
                   <Notes theme='outline' size='18' fill='var(--primary)' />
                   <span className='centaur-title centaur-title-md'>
-                    {t(IS_DECISION ? 'decision.room.planTitle' : 'team.meeting.planTitle', {
-                      defaultValue: '本场方案书',
-                    })}
+                    {state.phase === 'completed'
+                      ? t('team.meeting.deepDiscussion.notesTitle', { defaultValue: '本场讨论纪要' })
+                      : t(IS_DECISION ? 'decision.room.planTitle' : 'team.meeting.planTitle', {
+                          defaultValue: '本场方案书',
+                        })}
                   </span>
                   <div className='ml-auto flex items-center gap-8px'>
                     <Button
@@ -645,23 +700,8 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
                 onDecide={orchestrator.decide}
               />
             )}
-            {/* Between-round CTA lives INSIDE the conversation, right under the
-                moderator's recap, so the boss continues from where they're reading. */}
-            {state.awaitingContinue && state.phase === 'running' && (
-              <div className='flex justify-center py-6px'>
-                <Button
-                  type='primary'
-                  shape='round'
-                  size='large'
-                  icon={<RightOne theme='filled' size='15' fill='currentColor' />}
-                  onClick={orchestrator.continueMeeting}
-                  data-testid='meeting-continue'
-                >
-                  {t(IS_DECISION ? 'decision.room.continue' : 'team.meeting.continue', {
-                    defaultValue: '继续讨论 →',
-                  })}
-                </Button>
-              </div>
+            {state.pendingQuestion && state.phase === 'running' && (
+              <MeetingQuestionCard question={state.pendingQuestion} onAnswer={orchestrator.answerQuestion} />
             )}
           </div>
         )}
@@ -673,6 +713,7 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
           form={state.form}
           reachedLabels={reachedLabels}
           turnsCompleted={state.turnsCompleted}
+          activity={state.activity}
         />
       )}
       <MeetingControlBar orchestrator={orchestrator} topic={topicDraft} onTopicChange={setTopicDraft} />

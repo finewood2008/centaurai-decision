@@ -93,6 +93,46 @@
     "errors": {
       "hostNoSpeech": "진행자가 개회 발언을 완료하지 못해 회의를 일시 중지했습니다. 진행자나 모델을 변경하거나 인증을 확인한 후 다시 시작하세요.",
       "advisorsNoSpeech": "고문들이 유효한 답변을 반환하지 않아 회의를 일시 중지했습니다. 고문의 모델을 변경한 후 다시 시작하세요."
+    },
+    "deepDiscussion": {
+      "answerPlaceholder": "Enter your own view, or add detail after choosing…",
+      "confirmAnswer": "Confirm and continue",
+      "resume": "Continue this discussion",
+      "pause": "Pause and save",
+      "finish": "End discussion",
+      "notesTitle": "Discussion notes",
+      "openQuestions": "Open questions",
+      "openQuestionCount": "{{count}} questions still need exploration",
+      "turnCount": "{{count}} discussion turns recorded",
+      "resumeUnavailable": "The original participants cannot be restored. Check the host, advisors, models, and provider settings.",
+      "fallbackPrompt": "The host needs you to choose the next direction.",
+      "fallbackQuestion": "Which direction should we explore next?",
+      "fallbackOptions": {
+        "clarify": "Clarify goals and success criteria",
+        "risk": "Identify key risks and constraints",
+        "paths": "Compare possible paths",
+        "context": "I want to add more context"
+      },
+      "closeOptions": {
+        "continue": "Keep digging",
+        "shift": "Explore another angle",
+        "pause": "Pause and save",
+        "finish": "End and prepare notes"
+      },
+      "researchLabel": "Research",
+      "researchEmpty": "No relevant material was found.",
+      "researchFailed": "Research failed. The host will continue with the available information.",
+      "activity": {
+        "aligning": "Goal alignment",
+        "moderating": "Host assessment",
+        "consulting": "Advisor discussion",
+        "awaitingUser": "Waiting for your direction",
+        "researching": "Researching",
+        "pausing": "Saving",
+        "paused": "Paused",
+        "finishing": "Preparing notes",
+        "completed": "Discussion completed"
+      }
     }
   }
 }

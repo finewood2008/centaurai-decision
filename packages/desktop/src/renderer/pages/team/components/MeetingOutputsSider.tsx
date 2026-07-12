@@ -1,8 +1,8 @@
 /**
  * MeetingOutputsSider — a "会议产出" section that lives at the top of the team's
  * right-hand workspace sider (merged into the existing panel, not a separate one).
- * Lists this roundtable's synthesized 方案书 outputs; clicking one asks the
- * meeting room to reopen it (via the `meeting.open.record` event).
+ * Lists active, paused, and completed discussions; clicking one asks the meeting
+ * room to reopen it (via the `meeting.open.record` event).
  */
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -41,7 +41,7 @@ const MeetingOutputsSider: React.FC<{ teamId: string }> = ({ teamId }) => {
       >
         <Notes theme='outline' size='14' fill='var(--primary)' />
         <span className='text-13px font-semibold text-t-primary'>
-          {t('team.meeting.outputs.section', { defaultValue: '会议产出' })}
+          {t('team.meeting.outputs.section', { defaultValue: '会议记录' })}
         </span>
         <span className='text-11px text-t-tertiary'>（{outputs.length}）</span>
         <div className='flex-1' />
@@ -66,7 +66,16 @@ const MeetingOutputsSider: React.FC<{ teamId: string }> = ({ teamId }) => {
                 <div className='text-13px text-t-primary truncate leading-tight'>
                   {rec.topic || t('team.meeting.history.untitled', { defaultValue: '未命名议题' })}
                 </div>
-                <div className='mt-2px text-10px text-t-tertiary'>{new Date(rec.ts).toLocaleString('zh-CN')}</div>
+                <div className='mt-2px flex items-center gap-6px text-10px text-t-tertiary'>
+                  <span>{new Date(rec.ts).toLocaleString('zh-CN')}</span>
+                  <span>
+                    {rec.status === 'paused'
+                      ? t('team.meeting.deepDiscussion.activity.paused', { defaultValue: '已暂停 · 可继续' })
+                      : rec.status === 'active'
+                        ? t('team.meeting.status.running', { defaultValue: '进行中' })
+                        : t('team.meeting.deepDiscussion.activity.completed', { defaultValue: '已完成' })}
+                  </span>
+                </div>
               </div>
             </div>
           ))}

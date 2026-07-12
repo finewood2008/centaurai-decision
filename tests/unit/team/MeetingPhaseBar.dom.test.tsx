@@ -31,4 +31,20 @@ describe('MeetingPhaseBar', () => {
     expect(screen.getByText('顾问立场')).toBeInTheDocument();
     expect(screen.getByText('交锋')).toBeInTheDocument();
   });
+
+  it('shows the current host-driven activity instead of a scripted progression', () => {
+    render(
+      <MeetingPhaseBar
+        phase='running'
+        form='roundtable'
+        reachedLabels={[]}
+        turnsCompleted={4}
+        activity='awaiting_user'
+      />
+    );
+
+    expect(screen.getByTestId('meeting-phase-bar')).toHaveAttribute('data-activity', 'awaiting_user');
+    expect(screen.getByText('等待你的方向')).toBeInTheDocument();
+    expect(screen.queryByText('交锋')).not.toBeInTheDocument();
+  });
 });

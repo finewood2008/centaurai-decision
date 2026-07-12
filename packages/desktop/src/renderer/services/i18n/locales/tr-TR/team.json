@@ -94,6 +94,46 @@
     "errors": {
       "hostNoSpeech": "Moderatör açılışı tamamlayamadığı için toplantı duraklatıldı. Moderatörü/modeli değiştirin veya yetkilendirmeyi kontrol edip yeniden başlatın.",
       "advisorsNoSpeech": "Hiçbir danışman geçerli bir yanıt vermediği için toplantı duraklatıldı. Danışman modellerini değiştirip yeniden başlatın."
+    },
+    "deepDiscussion": {
+      "answerPlaceholder": "Enter your own view, or add detail after choosing…",
+      "confirmAnswer": "Confirm and continue",
+      "resume": "Continue this discussion",
+      "pause": "Pause and save",
+      "finish": "End discussion",
+      "notesTitle": "Discussion notes",
+      "openQuestions": "Open questions",
+      "openQuestionCount": "{{count}} questions still need exploration",
+      "turnCount": "{{count}} discussion turns recorded",
+      "resumeUnavailable": "The original participants cannot be restored. Check the host, advisors, models, and provider settings.",
+      "fallbackPrompt": "The host needs you to choose the next direction.",
+      "fallbackQuestion": "Which direction should we explore next?",
+      "fallbackOptions": {
+        "clarify": "Clarify goals and success criteria",
+        "risk": "Identify key risks and constraints",
+        "paths": "Compare possible paths",
+        "context": "I want to add more context"
+      },
+      "closeOptions": {
+        "continue": "Keep digging",
+        "shift": "Explore another angle",
+        "pause": "Pause and save",
+        "finish": "End and prepare notes"
+      },
+      "researchLabel": "Research",
+      "researchEmpty": "No relevant material was found.",
+      "researchFailed": "Research failed. The host will continue with the available information.",
+      "activity": {
+        "aligning": "Goal alignment",
+        "moderating": "Host assessment",
+        "consulting": "Advisor discussion",
+        "awaitingUser": "Waiting for your direction",
+        "researching": "Researching",
+        "pausing": "Saving",
+        "paused": "Paused",
+        "finishing": "Preparing notes",
+        "completed": "Discussion completed"
+      }
     }
   }
 }

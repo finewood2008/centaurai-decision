@@ -89,6 +89,46 @@
     "errors": {
       "hostNoSpeech": "Ведучий не зміг відкрити зустріч, тому її призупинено. Змініть ведучого чи модель або перевірте авторизацію й запустіть знову.",
       "advisorsNoSpeech": "Жоден радник не надав змістовної відповіді, тому зустріч призупинено. Змініть моделі радників і запустіть знову."
+    },
+    "deepDiscussion": {
+      "answerPlaceholder": "Enter your own view, or add detail after choosing…",
+      "confirmAnswer": "Confirm and continue",
+      "resume": "Continue this discussion",
+      "pause": "Pause and save",
+      "finish": "End discussion",
+      "notesTitle": "Discussion notes",
+      "openQuestions": "Open questions",
+      "openQuestionCount": "{{count}} questions still need exploration",
+      "turnCount": "{{count}} discussion turns recorded",
+      "resumeUnavailable": "The original participants cannot be restored. Check the host, advisors, models, and provider settings.",
+      "fallbackPrompt": "The host needs you to choose the next direction.",
+      "fallbackQuestion": "Which direction should we explore next?",
+      "fallbackOptions": {
+        "clarify": "Clarify goals and success criteria",
+        "risk": "Identify key risks and constraints",
+        "paths": "Compare possible paths",
+        "context": "I want to add more context"
+      },
+      "closeOptions": {
+        "continue": "Keep digging",
+        "shift": "Explore another angle",
+        "pause": "Pause and save",
+        "finish": "End and prepare notes"
+      },
+      "researchLabel": "Research",
+      "researchEmpty": "No relevant material was found.",
+      "researchFailed": "Research failed. The host will continue with the available information.",
+      "activity": {
+        "aligning": "Goal alignment",
+        "moderating": "Host assessment",
+        "consulting": "Advisor discussion",
+        "awaitingUser": "Waiting for your direction",
+        "researching": "Researching",
+        "pausing": "Saving",
+        "paused": "Paused",
+        "finishing": "Preparing notes",
+        "completed": "Discussion completed"
+      }
     }
   }
 }

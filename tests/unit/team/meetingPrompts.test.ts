@@ -7,25 +7,27 @@
 import { describe, expect, it } from 'vitest';
 import {
   MEETING_FORMS,
-  MAX_DEBATE_ROUNDS,
-  buildAdaptivePanelistResponses,
   buildClusterPrompt,
   buildConvergePrompt,
   buildDivergePrompt,
+  buildDiscussionNotesPrompt,
+  buildDynamicModeratorPrompt,
   buildDraftPrompt,
   buildProposalPrompt,
-  buildModeratorDebateMovePrompt,
   buildRedTeamPrompt,
   buildRevisePrompt,
   hasValidMeetingSpeech,
   hasResolutionOptions,
   matchSpeakerName,
-  parseModeratorMove,
+  parseDynamicModeratorAction,
   parsePlan,
   parseResolutionOptions,
   parseScribe,
   stripResolutionMarkers,
 } from '@/renderer/pages/team/meeting/meetingPrompts';
+
+const wrapModeratorAction = (action: object, display = '我们需要先明确方向。') =>
+  `${display}\n@@MEETING_ACTION@@\n${JSON.stringify(action)}\n@@END_MEETING_ACTION@@`;
 
 describe('meeting resolution parsing', () => {
   const synth = [
@@ -68,43 +70,7 @@ describe('meeting resolution parsing', () => {
   });
 });
 
-describe('adaptive meeting strategy', () => {
-  it('caps moderator-driven debate at five rounds', () => {
-    expect(MAX_DEBATE_ROUNDS).toBe(5);
-  });
-
-  it('continues when ordinary summary language appears without the explicit marker', () => {
-    const move = parseModeratorMove('综上所述，已经达成部分共识，但 @风险官 还需要核算最坏情况。', [
-      '增长官',
-      '风险官',
-    ]);
-
-    expect(move.conclude).toBe(false);
-    expect(move.targetNames).toEqual(['风险官']);
-  });
-
-  it('concludes only on a standalone marker or an empty moderator reply', () => {
-    expect(parseModeratorMove('态势已经清楚。\n@@CONCLUDE@@', ['增长官']).conclude).toBe(true);
-    expect(parseModeratorMove('', ['增长官']).conclude).toBe(true);
-  });
-
-  it('builds a response for every expert while specializing only named experts', () => {
-    const responses = buildAdaptivePanelistResponses({
-      topic: '是否进入新市场',
-      panelNames: ['增长官', '风险官', '财务官'],
-      targetNames: ['风险官'],
-      challenge: '@风险官 请重算最坏情况',
-      referenceContext: '最新资料：市场规模 20 亿元',
-      priorContext: '增长官：建议先做小规模试点',
-    });
-
-    expect(responses).toHaveLength(3);
-    expect(responses.find((response) => response.name === '风险官')?.phaseLabel).toBe('回应主持');
-    expect(responses.find((response) => response.name === '增长官')?.phaseLabel).toBe('交锋回应');
-    expect(responses.every((response) => response.prompt.includes('市场规模 20 亿元'))).toBe(true);
-    expect(responses.every((response) => response.prompt.includes('增长官：建议先做小规模试点'))).toBe(true);
-  });
-
+describe('meeting speech validation', () => {
   it('pauses when the host opening is blank', () => {
     expect(hasValidMeetingSpeech('  \n')).toBe(false);
   });
@@ -116,19 +82,99 @@ describe('adaptive meeting strategy', () => {
   it('pauses when every advisor reply is blank', () => {
     expect(['', '   '].some(hasValidMeetingSpeech)).toBe(false);
   });
+});
 
-  it('keeps the selected meeting form and reference material in the moderator prompt', () => {
-    const prompt = buildModeratorDebateMovePrompt({
+describe('host-driven deep discussion', () => {
+  it('requires the opening action to align with the user before consulting advisors', () => {
+    const prompt = buildDynamicModeratorPrompt({
       topic: '是否进入新市场',
-      form: 'redteam',
-      round: 2,
-      fullTranscript: '增长官：建议进入',
-      panelNames: ['增长官', '风险官'],
-      refNote: '最新资料：获客成本上涨',
+      form: 'roundtable',
+      panelNames: ['增长官'],
+      transcript: '',
+      opening: true,
     });
 
-    expect(prompt).toContain('红蓝对抗模式');
-    expect(prompt).toContain('获客成本上涨');
+    expect(prompt).toContain('必须用 ask_user');
+    expect(prompt).toContain('不得先调度顾问');
+  });
+
+  it('parses a user question only when it has three or four choices', () => {
+    const parsed = parseDynamicModeratorAction(
+      wrapModeratorAction({
+        type: 'ask_user',
+        question: '你最看重什么？',
+        options: [{ label: '增长' }, { label: '风险' }, { label: '现金流' }],
+        stateSummary: '目标尚未对齐',
+        openQuestions: ['成功标准'],
+      }),
+      ['增长官'],
+      'q-1'
+    );
+
+    expect(parsed?.action.type).toBe('ask_user');
+    expect(parsed?.action.type === 'ask_user' ? parsed.action.question.options : []).toHaveLength(3);
+  });
+
+  it('rejects malformed question and unknown advisor targets for repair', () => {
+    const shortQuestion = wrapModeratorAction({
+      type: 'ask_user',
+      question: '选哪个？',
+      options: [{ label: 'A' }, { label: 'B' }],
+    });
+    const unknownAdvisor = wrapModeratorAction({
+      type: 'consult_advisors',
+      targetNames: ['不存在'],
+      instruction: '分析',
+    });
+
+    expect(parseDynamicModeratorAction(shortQuestion, ['增长官'], 'q-2')).toBeNull();
+    expect(parseDynamicModeratorAction(unknownAdvisor, ['增长官'], 'q-3')).toBeNull();
+  });
+
+  it('dispatches only the advisors selected by the moderator', () => {
+    const parsed = parseDynamicModeratorAction(
+      wrapModeratorAction({
+        type: 'consult_advisors',
+        targetNames: ['风险官'],
+        instruction: '验证最坏情况',
+        stateSummary: '增长路径已有雏形',
+        openQuestions: ['极端损失'],
+      }),
+      ['增长官', '风险官'],
+      'q-4'
+    );
+
+    expect(parsed?.action).toMatchObject({ type: 'consult_advisors', targetNames: ['风险官'] });
+  });
+
+  it('does not treat the legacy conclude marker as authority to end a meeting', () => {
+    expect(parseDynamicModeratorAction('@@CONCLUDE@@', ['增长官'], 'q-5')).toBeNull();
+  });
+
+  it('parses a close suggestion as a user-controlled action rather than completion', () => {
+    const parsed = parseDynamicModeratorAction(
+      wrapModeratorAction({ type: 'suggest_close', reason: '新增信息的边际价值已经较低' }),
+      ['增长官'],
+      'q-6'
+    );
+
+    expect(parsed?.action).toEqual({ type: 'suggest_close', reason: '新增信息的边际价值已经较低' });
+  });
+
+  it('allows the host to request targeted knowledge research', () => {
+    const parsed = parseDynamicModeratorAction(
+      wrapModeratorAction({ type: 'research', query: '2026 年市场获客成本', openQuestions: ['成本是否持续上涨'] }),
+      ['增长官'],
+      'q-7'
+    );
+
+    expect(parsed?.action).toEqual({ type: 'research', query: '2026 年市场获客成本' });
+  });
+
+  it('produces discussion notes without forcing a recommendation', () => {
+    const prompt = buildDiscussionNotesPrompt('新市场', '老板：继续验证');
+    expect(prompt).toContain('不要强行形成结论');
+    expect(prompt).toContain('尚未解决的问题');
   });
 });
 

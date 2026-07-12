@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, Loading } from '@icon-park/react';
-import type { MeetingForm, MeetingPhase } from './meetingTypes';
+import type { MeetingActivity, MeetingForm, MeetingPhase } from './meetingTypes';
 import { IS_DECISION } from '@/common/config/constants';
 
 /**
@@ -34,6 +34,7 @@ type Props = {
   /** Distinct phaseLabels seen in the transcript so far (drives stage progress). */
   reachedLabels: string[];
   turnsCompleted: number;
+  activity?: MeetingActivity | null;
 };
 
 /**
@@ -41,8 +42,43 @@ type Props = {
  * (顾问立场 → 交锋 → 综合 → 拍板), so the boss can read the room at a glance.
  * Deliberately slim — the transcript below is the hero.
  */
-const MeetingPhaseBar: React.FC<Props> = ({ phase, form, reachedLabels, turnsCompleted }) => {
+const MeetingPhaseBar: React.FC<Props> = ({ phase, form, reachedLabels, turnsCompleted, activity }) => {
   const { t } = useTranslation();
+  if (activity) {
+    const labels: Record<MeetingActivity, string> = {
+      aligning: t('team.meeting.deepDiscussion.activity.aligning', { defaultValue: '目标对齐' }),
+      moderating: t('team.meeting.deepDiscussion.activity.moderating', { defaultValue: '主持研判' }),
+      consulting: t('team.meeting.deepDiscussion.activity.consulting', { defaultValue: '顾问讨论' }),
+      awaiting_user: t('team.meeting.deepDiscussion.activity.awaitingUser', { defaultValue: '等待你的方向' }),
+      researching: t('team.meeting.deepDiscussion.activity.researching', { defaultValue: '资料调查' }),
+      pausing: t('team.meeting.deepDiscussion.activity.pausing', { defaultValue: '正在保存' }),
+      paused: t('team.meeting.deepDiscussion.activity.paused', { defaultValue: '已暂停' }),
+      finishing: t('team.meeting.deepDiscussion.activity.finishing', { defaultValue: '整理纪要' }),
+      completed: t('team.meeting.deepDiscussion.activity.completed', { defaultValue: '讨论已完成' }),
+    };
+    return (
+      <div
+        data-testid='meeting-phase-bar'
+        data-activity={activity}
+        className='shrink-0 flex items-center gap-8px px-20px h-44px border-t border-solid border-[color:var(--border-light)]'
+      >
+        <span className='w-18px h-18px rd-full flex items-center justify-center bg-[var(--color-primary-light-1)] text-[color:var(--primary)]'>
+          {phase === 'running' ? (
+            <Loading theme='outline' size='11' fill='currentColor' className='animate-spin' />
+          ) : (
+            <Check theme='outline' size='11' fill='currentColor' />
+          )}
+        </span>
+        <span className='text-12px font-medium text-[color:var(--primary)]'>{labels[activity]}</span>
+        <span className='text-11px text-[color:var(--bg-6)]'>
+          {t('team.meeting.deepDiscussion.turnCount', {
+            count: turnsCompleted,
+            defaultValue: `已记录 ${turnsCompleted} 段讨论`,
+          })}
+        </span>
+      </div>
+    );
+  }
   const stages = STAGES_BY_FORM[form] ?? STAGES_BY_FORM.roundtable;
   const reached = new Set(reachedLabels);
   // Old persisted meetings used `并行立场`; map it to the new first milestone.

@@ -10,6 +10,8 @@
 export type MeetingPhase =
   | 'idle' // no run; boss picks a topic
   | 'running' // team_run in progress (agents debating)
+  | 'paused' // resumable discussion snapshot
+  | 'completed' // user ended the discussion; notes are available
   | 'resolution' // run finished; options on the table for the boss
   | 'decided'; // boss picked an option
 
@@ -36,7 +38,53 @@ export type MeetingResolutionOption = {
   body: string;
 };
 
-export type MeetingRunState = 'stopped' | 'running' | 'awaiting_decision';
+export type MeetingQuestionOption = {
+  id: string;
+  label: string;
+  description?: string;
+  action?: 'pause' | 'finish';
+};
+
+export type MeetingQuestion = {
+  id: string;
+  prompt: string;
+  options: MeetingQuestionOption[];
+};
+
+export type MeetingDiscussionState = {
+  summary: string;
+  openQuestions: string[];
+};
+
+export type MeetingModeratorAction =
+  | { type: 'ask_user'; question: MeetingQuestion }
+  | { type: 'consult_advisors'; targetNames: string[]; instruction: string }
+  | { type: 'research'; query: string }
+  | { type: 'suggest_close'; reason: string };
+
+export type MeetingParticipantSnapshot = {
+  id: string;
+  name: string;
+  icon?: string;
+  agent_type: string;
+  isModerator: boolean;
+  model?: string;
+  provider_id?: string;
+  model_name?: string;
+};
+
+export type MeetingActivity =
+  | 'aligning'
+  | 'moderating'
+  | 'consulting'
+  | 'awaiting_user'
+  | 'researching'
+  | 'pausing'
+  | 'paused'
+  | 'finishing'
+  | 'completed';
+
+export type MeetingRunState = 'stopped' | 'running' | 'awaiting_user' | 'awaiting_decision';
 
 /** Live status of a participant's turn in the debate. */
 export type MeetingTurnStatus = 'speaking' | 'done' | 'error';
@@ -63,6 +111,9 @@ export type MeetingTurn = {
   /** Streamed reply text so far. */
   text: string;
   status: MeetingTurnStatus;
+  /** Optional richer rendering for dynamic discussions; absent on legacy turns. */
+  kind?: 'moderator_action' | 'advisor_response' | 'user_answer' | 'research' | 'notes';
+  question?: MeetingQuestion;
 };
 
 /** Live + persisted meeting state for one team. */
@@ -94,6 +145,11 @@ export type MeetingState = {
    * waiting for the boss to read / interject and click 继续讨论. Live-only (not persisted).
    */
   awaitingContinue: boolean;
+  pendingQuestion: MeetingQuestion | null;
+  discussionState: MeetingDiscussionState;
+  activity: MeetingActivity | null;
+  activeRecordId: string | null;
+  participantSnapshot: MeetingParticipantSnapshot[];
   /**
    * Workspace path of the auto-archived 方案书 (.md) once the meeting concludes.
    * The file lands in the team's 临时空间 file tree and syncs to the Content Hub.
@@ -115,6 +171,10 @@ export type MeetingRecord = {
   archivedPath: string | null;
   /** epoch ms */
   ts: number;
+  /** Missing on legacy records, which are treated as completed. */
+  status?: 'active' | 'paused' | 'completed';
+  discussionState?: MeetingDiscussionState;
+  participantSnapshot?: MeetingParticipantSnapshot[];
 };
 
 export const EMPTY_MEETING_STATE: MeetingState = {
@@ -130,6 +190,11 @@ export const EMPTY_MEETING_STATE: MeetingState = {
   decidedOptionId: null,
   transcript: [],
   awaitingContinue: false,
+  pendingQuestion: null,
+  discussionState: { summary: '', openQuestions: [] },
+  activity: null,
+  activeRecordId: null,
+  participantSnapshot: [],
   archivedPath: null,
   revision: 0,
 };

@@ -158,7 +158,7 @@
       }
     }
   },
-  "emptyHint": "把一個決策擺上桌面。顧問會從不同席位各持立場、互相攻防，最後把真正需要你拍板的取捨擺出來。",
+  "emptyHint": "主持人會根據現場持續追問、調度顧問並與你確認方向，把問題一步步討論到根處，不強求結論。",
   "createSubtitle": "先定議題，再安排不同立場的 AI 顧問入席。",
   "createConfirm": "發起會議",
   "createNameLabel": "決策標題",
@@ -175,6 +175,8 @@
   },
   "room": {
     "status": {
+      "paused": "已暫停",
+      "completed": "討論已完成",
       "idle": "待發起",
       "running": "交鋒中",
       "awaiting": "等待你的方向",

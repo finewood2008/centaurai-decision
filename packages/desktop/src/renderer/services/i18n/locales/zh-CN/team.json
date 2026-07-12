@@ -128,7 +128,7 @@
       "untitled": "未命名议题"
     },
     "outputs": {
-      "section": "会议产出"
+      "section": "会议记录"
     },
     "resolution": {
       "pick": "就选这个",
@@ -150,6 +150,46 @@
     "errors": {
       "hostNoSpeech": "主持人未能完成开场，会议已暂停。请更换主持人/模型，或检查该模型授权后重新开始。",
       "advisorsNoSpeech": "参会顾问没有返回有效发言，会议已暂停。请更换顾问背后的模型后重新开始。"
+    },
+    "deepDiscussion": {
+      "answerPlaceholder": "也可以直接输入你的想法，或在选择后补充…",
+      "confirmAnswer": "确认并继续",
+      "resume": "继续这场讨论",
+      "pause": "暂停保存",
+      "finish": "结束讨论",
+      "notesTitle": "本场讨论纪要",
+      "openQuestions": "未决问题",
+      "openQuestionCount": "还有 {{count}} 个问题待深入",
+      "turnCount": "已记录 {{count}} 段讨论",
+      "resumeUnavailable": "无法恢复原参会阵容，请检查主持人、顾问、模型和 Provider 配置。",
+      "fallbackPrompt": "主持人需要你确认接下来的讨论方向。",
+      "fallbackQuestion": "你希望接下来从哪个方向继续？",
+      "fallbackOptions": {
+        "clarify": "先澄清目标与成功标准",
+        "risk": "先识别关键风险和约束",
+        "paths": "先比较可能的路径",
+        "context": "我想补充更多背景"
+      },
+      "closeOptions": {
+        "continue": "继续深挖",
+        "shift": "换一个角度讨论",
+        "pause": "暂停并保存",
+        "finish": "结束并生成纪要"
+      },
+      "researchLabel": "资料调查",
+      "researchEmpty": "未检索到相关资料。",
+      "researchFailed": "资料检索失败，主持人将基于现有信息继续。",
+      "activity": {
+        "aligning": "目标对齐",
+        "moderating": "主持研判",
+        "consulting": "顾问讨论",
+        "awaitingUser": "等待你的方向",
+        "researching": "资料调查",
+        "pausing": "正在保存",
+        "paused": "已暂停",
+        "finishing": "整理纪要",
+        "completed": "讨论已完成"
+      }
     },
     "boardSubtitle": "AI 圆桌会议",
     "stage": {
