@@ -17,6 +17,7 @@ import type { TChatConversation } from '@/common/config/storage';
 import { getCurrentFrontendUserId } from '@/common/utils/frontendUserScope';
 import { filterConversationsWithChannelScope } from '@/renderer/utils/user/conversationVisibility';
 import { useGeneratedFilesAutoRefresh } from '@/renderer/hooks/workspace/useGeneratedFilesAutoRefresh';
+import { loadStandaloneGeneratedArtifactFiles } from '@/renderer/utils/file/generatedArtifacts';
 import styles from '../index.module.css';
 
 export interface FileEntry {
@@ -222,12 +223,14 @@ async function fetchTeamNames(): Promise<Map<string, string>> {
  * (relabeled with the team name). Files come back newest-first.
  */
 export async function fetchRecentFiles(conversations: TChatConversation[]): Promise<FileEntry[]> {
-  if (!conversations.length) return [];
+  const standalonePromise = loadStandaloneGeneratedArtifactFiles();
+  if (!conversations.length) return standalonePromise;
   const teamNames = await fetchTeamNames();
-  const perConversation = await Promise.all(
-    conversations.map((conversation) => collectConversationFiles(conversation, teamNames))
-  );
-  return perConversation.flat().toSorted((a, b) => b.mtime - a.mtime);
+  const [standalone, perConversation] = await Promise.all([
+    standalonePromise,
+    Promise.all(conversations.map((conversation) => collectConversationFiles(conversation, teamNames))),
+  ]);
+  return [...perConversation.flat(), ...standalone].toSorted((a, b) => b.mtime - a.mtime);
 }
 
 interface RecentFilesProps {

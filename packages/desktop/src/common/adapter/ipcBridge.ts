@@ -1520,6 +1520,10 @@ export interface IWebUIStatus {
   initialPassword?: string;
   /** Present only while the server is running; null when health is unknown. */
   entryHealth?: IWebUIEntryHealth | null;
+  /** Tailscale node — reachable "from anywhere" on the tailnet. */
+  tailscale: { detected: boolean; ip: string | null; accessUrl: string | null };
+  /** The URL to recommend FIRST: Tailscale if present, else LAN. */
+  primaryAccessUrl: string | null;
 }
 
 /** Live network reachability for the remote-access panel (from "repair connection"). */
@@ -1557,6 +1561,8 @@ export interface IWebUIStartResult {
   networkUrl?: string;
   lanIP?: string;
   initialPassword?: string;
+  tailscale: { detected: boolean; ip: string | null; accessUrl: string | null };
+  primaryAccessUrl: string | null;
 }
 
 export const webui = {
@@ -1574,6 +1580,8 @@ export const webui = {
     networkUrl?: string;
     lanIP?: string;
     initialPassword?: string;
+    tailscale?: { detected: boolean; ip: string | null; accessUrl: string | null };
+    primaryAccessUrl?: string | null;
   }>('webui.status-changed'),
   changePassword: httpPost<void, { newPassword: string }>('/api/webui/change-password', (p) => ({
     new_password: p.newPassword,

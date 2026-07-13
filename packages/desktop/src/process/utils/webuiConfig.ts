@@ -289,6 +289,8 @@ export type DesktopWebUIHandle = {
   networkUrl?: string;
   lanIP?: string;
   initialPassword?: string;
+  tailscale: { detected: boolean; ip: string | null; accessUrl: string | null };
+  primaryAccessUrl: string | null;
 };
 
 type DesktopWebUIRuntimeOptions = {
@@ -396,6 +398,10 @@ const isClashTunAddr = (addr: string): boolean => /^198\.1[89]\./.test(addr);
  * This host's Tailscale node IP (100.64/10), if it is on the tailnet. When the
  * WebUI is bound to 0.0.0.0 this address is reachable from ANY tailnet device —
  * "from anywhere" — so we surface it as the PRIMARY remote-access URL.
+ *
+ * Detection strategy:
+ * 1. Scan os.networkInterfaces() for a 100.64/10 address (kernel TUN mode).
+ * 2. Fall back to `tailscale status --json` (userspace-networking mode, no TUN).
  */
 const getTailscaleIP = (): string | null => {
   const nets = networkInterfaces();
@@ -406,6 +412,35 @@ const getTailscaleIP = (): string | null => {
       const isIPv4 = net.family === 'IPv4' || (net.family as unknown) === 4;
       if (isIPv4 && !net.internal && isTailscaleAddr(net.address)) return net.address;
     }
+  }
+  // Fallback: userspace-networking mode — no TUN interface, parse tailscale CLI.
+  try {
+    const { execSync } = require('node:child_process');
+    const home = require('node:os').homedir();
+    const sock = `${home}/.local/share/tailscale/tailscaled.sock`;
+    const cmd = `/home/user/.local/bin/tailscale --socket=${sock} status --json`;
+    console.log('[WebUI] Querying Tailscale IP via:', cmd);
+    const out = execSync(cmd, {
+      timeout: 3000,
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+    const status = JSON.parse(out.toString()) as {
+      Self?: { TailscaleIPs?: string[] };
+    };
+    console.log('[WebUI] Tailscale status JSON parsed, Self.TailscaleIPs:', ips);
+    const ips = status.Self?.TailscaleIPs;
+    if (ips && ips.length > 0) {
+      for (const ip of ips) {
+        if (isTailscaleAddr(ip)) {
+          console.log('[WebUI] Found Tailscale IP:', ip);
+          return ip;
+        }
+      }
+    }
+    console.log('[WebUI] No Tailscale IP found in status output');
+  } catch (e) {
+    console.error('[WebUI] Tailscale CLI query failed:', e);
+    // tailscale CLI not available or not logged in — no Tailscale IP.
   }
   return null;
 };
@@ -432,14 +467,21 @@ const detectProxyInterference = (): { detected: boolean; interfaces: string[] } 
   return { detected: hits.length > 0, interfaces: hits };
 };
 
-const toDesktopHandle = (handle: WebHostHandle, allowRemote: boolean): DesktopWebUIHandle => ({
-  port: handle.port,
-  allowRemote,
-  localUrl: handle.localUrl,
-  networkUrl: handle.networkUrl,
-  lanIP: handle.lanIP,
-  initialPassword: currentInitialPassword,
-});
+const toDesktopHandle = (handle: WebHostHandle, allowRemote: boolean): DesktopWebUIHandle => {
+  const tsIP = getTailscaleIP();
+  const tsAccessUrl = allowRemote && tsIP ? `http://${tsIP}:${handle.port}` : null;
+  const lanUrl = allowRemote && handle.lanIP ? `http://${handle.lanIP}:${handle.port}` : null;
+  return {
+    port: handle.port,
+    allowRemote,
+    localUrl: handle.localUrl,
+    networkUrl: handle.networkUrl,
+    lanIP: handle.lanIP,
+    initialPassword: currentInitialPassword,
+    tailscale: { detected: tsIP !== null, ip: tsIP, accessUrl: tsAccessUrl },
+    primaryAccessUrl: tsAccessUrl ?? lanUrl,
+  };
+};
 
 const activeBackendPort = (): number | undefined =>
   (globalThis as typeof globalThis & { __backendPort?: number }).__backendPort;
@@ -612,6 +654,27 @@ export async function stopDesktopWebUI(): Promise<void> {
  * Snapshot of the currently running WebUI. Returns a stopped-state descriptor
  * when nothing is running, so callers don't need to branch on null.
  */
+
+/** Compute tailscale info from the running handle (or live query). */
+const computeTailscaleInfo = (
+  allowRemote: boolean,
+  port: number,
+): { detected: boolean; ip: string | null; accessUrl: string | null } => {
+  const tsIP = getTailscaleIP();
+  const tsAccessUrl = allowRemote && tsIP ? `http://${tsIP}:${port}` : null;
+  return { detected: tsIP !== null, ip: tsIP, accessUrl: tsAccessUrl };
+};
+
+/** Compute the primary access URL: Tailscale first if available, else LAN. */
+const computePrimaryAccessUrl = (
+  handle: { allowRemote: boolean; port: number; lanIP?: string },
+): string | null => {
+  const tsIP = getTailscaleIP();
+  if (handle.allowRemote && tsIP) return `http://${tsIP}:${handle.port}`;
+  if (handle.allowRemote && handle.lanIP) return `http://${handle.lanIP}:${handle.port}`;
+  return null;
+};
+
 export function getDesktopWebUIStatus(): {
   running: boolean;
   port: number;
@@ -620,15 +683,20 @@ export function getDesktopWebUIStatus(): {
   networkUrl?: string;
   lanIP?: string;
   initialPassword?: string;
+  tailscale: { detected: boolean; ip: string | null; accessUrl: string | null };
+  primaryAccessUrl: string | null;
 } {
   if (!currentHandle) {
     const lanIP = getLanIP();
+    const tsIP = getTailscaleIP();
     return {
       running: false,
       port: DEFAULT_WEBUI_PORT,
       allowRemote: false,
       localUrl: `http://localhost:${DEFAULT_WEBUI_PORT}`,
       lanIP: lanIP ?? undefined,
+      tailscale: { detected: tsIP !== null, ip: tsIP, accessUrl: null },
+      primaryAccessUrl: null,
     };
   }
   return {
@@ -639,6 +707,8 @@ export function getDesktopWebUIStatus(): {
     networkUrl: currentHandle.networkUrl,
     lanIP: currentHandle.lanIP,
     initialPassword: currentInitialPassword,
+    tailscale: computeTailscaleInfo(currentHandle.allowRemote, currentHandle.port),
+    primaryAccessUrl: computePrimaryAccessUrl(currentHandle),
   };
 }
 

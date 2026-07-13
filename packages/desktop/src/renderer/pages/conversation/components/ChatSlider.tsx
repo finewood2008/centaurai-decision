@@ -51,11 +51,7 @@ const ChatSlider: React.FC<{
         messageApi={messageApi}
       ></ChatWorkspace>
     );
-  } else if ((conversation?.type === 'nanobot' || conversation?.type === 'remote') && conversation.extra?.workspace) {
-    // 圆桌会议(nanobot)/远程(remote) conversations also produce deliverables in
-    // their workspace; show the temp-file panel so they're visible there too.
-    // They share the unified response stream, so the 'acp' eventPrefix's
-    // auto-refresh applies.
+  } else if (conversation?.type === 'openclaw-gateway' && conversation.extra?.workspace) {
     workspaceNode = (
       <ChatWorkspace
         conversation_id={conversation.id}
@@ -63,7 +59,31 @@ const ChatSlider: React.FC<{
         isTemporaryWorkspace={
           (conversation.extra as { is_temporary_workspace?: boolean } | undefined)?.is_temporary_workspace
         }
-        eventPrefix='acp'
+        eventPrefix='openclaw-gateway'
+        messageApi={messageApi}
+      ></ChatWorkspace>
+    );
+  } else if (conversation?.type === 'nanobot' && conversation.extra?.workspace) {
+    workspaceNode = (
+      <ChatWorkspace
+        conversation_id={conversation.id}
+        workspace={conversation.extra.workspace}
+        isTemporaryWorkspace={
+          (conversation.extra as { is_temporary_workspace?: boolean } | undefined)?.is_temporary_workspace
+        }
+        eventPrefix='nanobot'
+        messageApi={messageApi}
+      ></ChatWorkspace>
+    );
+  } else if (conversation?.type === 'remote' && conversation.extra?.workspace) {
+    workspaceNode = (
+      <ChatWorkspace
+        conversation_id={conversation.id}
+        workspace={conversation.extra.workspace}
+        isTemporaryWorkspace={
+          (conversation.extra as { is_temporary_workspace?: boolean } | undefined)?.is_temporary_workspace
+        }
+        eventPrefix='remote'
         messageApi={messageApi}
       ></ChatWorkspace>
     );

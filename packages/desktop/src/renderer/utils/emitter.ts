@@ -41,6 +41,7 @@ interface EventTypes {
   'remote.selected.file.append': [Array<string | FileOrFolderItem>];
   'remote.selected.file.clear': void;
   'remote.workspace.refresh': void;
+  'generated-files.changed': void;
   'chat.history.refresh': void;
   // 智囊团产出列表变化（新增一份方案书）/ Meeting outputs list changed
   'meeting.outputs.changed': void;

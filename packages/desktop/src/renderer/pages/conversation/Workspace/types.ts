@@ -9,6 +9,7 @@ import type { NodeInstance } from '@arco-design/web-react/es/Tree/interface';
 import type { Message } from '@arco-design/web-react';
 
 export type MessageApi = ReturnType<typeof Message.useMessage>[0];
+export type WorkspaceEventPrefix = 'acp' | 'codex' | 'aionrs' | 'openclaw-gateway' | 'nanobot' | 'remote';
 
 /**
  * Workspace 组件的 Props 定义
@@ -24,7 +25,7 @@ export interface WorkspaceProps {
    * Renamed here to camelCase per the frontend prop convention.
    */
   isTemporaryWorkspace?: boolean;
-  eventPrefix?: 'acp' | 'codex' | 'aionrs';
+  eventPrefix?: WorkspaceEventPrefix;
   messageApi?: MessageApi;
 }
 

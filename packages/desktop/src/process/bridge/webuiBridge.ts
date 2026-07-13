@@ -48,6 +48,8 @@ export async function announceDesktopWebUIStarted(handle: {
   networkUrl?: string;
   lanIP?: string;
   initialPassword?: string;
+  tailscale?: { detected: boolean; ip: string | null; accessUrl: string | null };
+  primaryAccessUrl?: string | null;
 }): Promise<void> {
   ipcBridge.webui.statusChanged.emit({
     running: true,
@@ -57,6 +59,8 @@ export async function announceDesktopWebUIStarted(handle: {
     networkUrl: handle.networkUrl,
     lanIP: handle.lanIP,
     initialPassword: handle.initialPassword,
+    tailscale: handle.tailscale,
+    primaryAccessUrl: handle.primaryAccessUrl,
   });
 
   await stopAdvertising();

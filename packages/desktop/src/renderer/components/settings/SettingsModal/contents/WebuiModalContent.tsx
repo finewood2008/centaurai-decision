@@ -192,6 +192,8 @@ const WebuiModalContent: React.FC = () => {
           networkUrl: data.networkUrl,
           lanIP: data.lanIP ?? prev?.lanIP,
           initialPassword: prev?.initialPassword,
+          tailscale: data.tailscale ?? prev?.tailscale ?? { detected: false, ip: null, accessUrl: null },
+          primaryAccessUrl: data.primaryAccessUrl ?? prev?.primaryAccessUrl ?? null,
         }));
         if (data.networkUrl) {
           const match = data.networkUrl.match(/http:\/\/([^:]+):/);
@@ -229,16 +231,31 @@ const WebuiModalContent: React.FC = () => {
     return null;
   }, [status?.lanIP, cachedIP, status?.networkUrl]);
 
-  // 获取显示的 URL / Get display URL
-  const getDisplayUrl = useCallback(() => {
+  // 获取 Tailscale 访问地址 / Get Tailscale access URL
+  const getTailscaleUrl = useCallback(() => {
+    const ts = status?.tailscale;
+    if (ts?.accessUrl) return ts.accessUrl;
+    // Fall back to primaryAccessUrl if it's a tailscale address
+    const primary = status?.primaryAccessUrl;
+    if (primary && status?.tailscale?.detected) return primary;
+    return null;
+  }, [status?.tailscale, status?.primaryAccessUrl]);
+
+  // 获取局域网访问地址 / Get LAN access URL
+  const getLanUrl = useCallback(() => {
     const currentIP = getLocalIP();
     const currentPort = status?.port || port;
     const useRemote = status?.running ? status.allowRemote : allowRemotePreference;
     if (useRemote && currentIP) {
       return `http://${currentIP}:${currentPort}`;
     }
-    return `http://localhost:${currentPort}`;
+    return null;
   }, [allowRemotePreference, getLocalIP, status?.allowRemote, status?.port, status?.running, port]);
+
+  // 获取显示的 URL（向后兼容）/ Get display URL (backward-compatible)
+  const getDisplayUrl = useCallback(() => {
+    return getTailscaleUrl() || getLanUrl() || `http://localhost:${status?.port || port}`;
+  }, [getTailscaleUrl, getLanUrl, status?.port, port]);
 
   // 启动/停止 WebUI / Start/Stop WebUI
   const handleToggle = async (enabled: boolean) => {
@@ -279,6 +296,8 @@ const WebuiModalContent: React.FC = () => {
           networkUrl: allowRemotePreference && responseIP ? `http://${responseIP}:${port}` : undefined,
           lanIP: responseIP,
           initialPassword: responsePassword || cachedPassword || prev?.initialPassword,
+          tailscale: startResult.tailscale ?? { detected: false, ip: null, accessUrl: null },
+          primaryAccessUrl: startResult.primaryAccessUrl ?? null,
         }));
 
         await configService.set(DESKTOP_WEBUI_ENABLED_KEY, true);
@@ -340,6 +359,8 @@ const WebuiModalContent: React.FC = () => {
           networkUrl: checked && responseIP ? `http://${responseIP}:${port}` : undefined,
           lanIP: responseIP,
           initialPassword: responsePassword || cachedPassword || prev?.initialPassword,
+          tailscale: startResult.tailscale ?? { detected: false, ip: null, accessUrl: null },
+          primaryAccessUrl: startResult.primaryAccessUrl ?? null,
         }));
 
         await configService.set(DESKTOP_WEBUI_ALLOW_REMOTE_KEY, checked);
@@ -718,8 +739,66 @@ const WebuiModalContent: React.FC = () => {
             <Switch checked={webuiEnabled} loading={startLoading} onChange={handleToggle} />
           </PreferenceRow>
 
-          {/* 访问地址（启用 WebUI 后即显示，不依赖后端 running 状态）/ Access URL (shown whenever WebUI is enabled, not tied to backend running state) */}
-          {webuiEnabled && (
+          {/* Tailscale 地址（优先显示）/ Tailscale address (preferred path) */}
+          {webuiEnabled && getTailscaleUrl() && (
+            <PreferenceRow
+              label={t('settings.webui.accessUrl')}
+              extra={
+                <span className='inline-flex items-center gap-4px px-6px py-1px rd-4px text-11px font-600 bg-[rgba(var(--primary-6),0.12)] text-[rgb(var(--primary-6))]'>
+                  Tailscale
+                </span>
+              }
+            >
+              <div className='flex items-center gap-8px min-w-0'>
+                <button
+                  className='text-14px text-primary font-mono hover:underline cursor-pointer bg-transparent border-none p-0 truncate'
+                  onClick={() => shell.openExternal.invoke(getTailscaleUrl()!).catch(console.error)}
+                >
+                  {getTailscaleUrl()}
+                </button>
+                <Tooltip content={t('common.copy')}>
+                  <button
+                    className='p-4px text-t-tertiary hover:text-t-primary cursor-pointer bg-transparent border-none'
+                    onClick={() => handleCopy(getTailscaleUrl()!)}
+                  >
+                    <Copy size={16} />
+                  </button>
+                </Tooltip>
+              </div>
+            </PreferenceRow>
+          )}
+
+          {/* 局域网地址 / LAN address */}
+          {webuiEnabled && getLanUrl() && (
+            <PreferenceRow
+              label=''
+              extra={
+                <span className='inline-flex items-center gap-4px px-6px py-1px rd-4px text-11px font-600 bg-[rgba(var(--warning-6),0.12)] text-[rgb(var(--warning-6))]'>
+                  LAN
+                </span>
+              }
+            >
+              <div className='flex items-center gap-8px min-w-0'>
+                <button
+                  className='text-13px text-t-secondary font-mono hover:underline cursor-pointer bg-transparent border-none p-0 truncate'
+                  onClick={() => shell.openExternal.invoke(getLanUrl()!).catch(console.error)}
+                >
+                  {getLanUrl()}
+                </button>
+                <Tooltip content={t('common.copy')}>
+                  <button
+                    className='p-4px text-t-tertiary hover:text-t-primary cursor-pointer bg-transparent border-none'
+                    onClick={() => handleCopy(getLanUrl()!)}
+                  >
+                    <Copy size={16} />
+                  </button>
+                </Tooltip>
+              </div>
+            </PreferenceRow>
+          )}
+
+          {/* 本地地址（无远程访问时显示）/ Localhost URL (shown when no remote access) */}
+          {webuiEnabled && !getTailscaleUrl() && !getLanUrl() && (
             <PreferenceRow label={t('settings.webui.accessUrl')}>
               <div className='flex items-center gap-8px min-w-0'>
                 <button

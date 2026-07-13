@@ -17,13 +17,13 @@ import {
 import { classifyPreviewError, previewErrorToI18nKey } from '@/renderer/utils/previewError';
 import { removeWorkspaceEntry, renameWorkspaceEntry } from '@/renderer/utils/file/workspaceFs';
 import { useCallback } from 'react';
-import type { MessageApi, RenameModalState, DeleteModalState } from '../types';
+import type { MessageApi, RenameModalState, DeleteModalState, WorkspaceEventPrefix } from '../types';
 import type { FileOrFolderItem } from '@/renderer/utils/file/fileTypes';
 import { getPathSeparator, replacePathInList, updateTreeForRename } from '../utils/treeHelpers';
 
 interface UseWorkspaceFileOpsOptions {
   workspace: string;
-  eventPrefix: 'acp' | 'codex' | 'aionrs';
+  eventPrefix: WorkspaceEventPrefix;
   messageApi: MessageApi;
   t: (key: string) => string;
 

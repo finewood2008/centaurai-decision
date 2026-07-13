@@ -5,14 +5,16 @@
  */
 
 import { ipcBridge } from '@/common';
-import type { IDirOrFile } from '@/common/adapter/ipcBridge';
+import type { IConversationTurnCompletedEvent, IDirOrFile } from '@/common/adapter/ipcBridge';
+import { registerGeneratedArtifactsFromPayload } from '@/renderer/utils/file/generatedArtifacts';
 import { emitter, useAddEventListener } from '@/renderer/utils/emitter';
 import { useCallback, useEffect, useRef } from 'react';
-import type { ContextMenuState } from '../types';
+import type { ContextMenuState, WorkspaceEventPrefix } from '../types';
 
 interface UseWorkspaceEventsOptions {
   conversation_id: string;
-  eventPrefix: 'acp' | 'codex' | 'aionrs';
+  workspace: string;
+  eventPrefix: WorkspaceEventPrefix;
 
   // Dependencies from useWorkspaceTree
   refreshWorkspace: () => void;
@@ -41,6 +43,7 @@ interface UseWorkspaceEventsOptions {
 export function useWorkspaceEvents(options: UseWorkspaceEventsOptions) {
   const {
     conversation_id,
+    workspace,
     eventPrefix,
     refreshWorkspace,
     clearSelection,
@@ -107,6 +110,19 @@ export function useWorkspaceEvents(options: UseWorkspaceEventsOptions) {
       }
     }, 2000);
   }, [refreshWorkspace]);
+  const streamTextRef = useRef(new Map<string, string>());
+  const registerGeneratedPayload = useCallback(
+    (payload: unknown) => {
+      void registerGeneratedArtifactsFromPayload(payload, {
+        workspace,
+        conversationId: conversation_id,
+        source: 'conversation',
+      }).then((registered) => {
+        if (registered.length > 0) throttledRefresh();
+      });
+    },
+    [conversation_id, throttledRefresh, workspace]
+  );
 
   // Cleanup throttle timer on unmount
   useEffect(() => {
@@ -122,8 +138,41 @@ export function useWorkspaceEvents(options: UseWorkspaceEventsOptions) {
   useEffect(() => {
     const isNonFileSystemTool = (name: string) => /^mcp__aionui-team-|^team_/.test(name);
 
-    const handleResponse = (data: { type: string; data?: unknown; conversation_id?: string }) => {
+    const handleResponse = (data: {
+      type: string;
+      data?: unknown;
+      conversation_id?: string;
+      msg_id?: string;
+      replace?: boolean;
+    }) => {
       if (data.conversation_id && data.conversation_id !== conversation_id) return;
+
+      if (data.type === 'content' || data.type === 'text') {
+        const payload = data.data;
+        const chunk =
+          typeof payload === 'string'
+            ? payload
+            : typeof payload === 'object' &&
+                payload !== null &&
+                'content' in payload &&
+                typeof (payload as { content?: unknown }).content === 'string'
+              ? ((payload as { content: string }).content ?? '')
+              : typeof payload === 'object' &&
+                  payload !== null &&
+                  'text' in payload &&
+                  typeof (payload as { text?: unknown }).text === 'string'
+                ? ((payload as { text: string }).text ?? '')
+                : '';
+        if (chunk) {
+          const key = data.msg_id || conversation_id;
+          const previous = streamTextRef.current.get(key) ?? '';
+          const next = data.replace ? chunk : previous + chunk;
+          streamTextRef.current.set(key, next);
+          registerGeneratedPayload(next);
+        }
+      } else {
+        registerGeneratedPayload(data.data);
+      }
 
       if (data.type === 'acp_tool_call') {
         const acpData = data.data as { update?: { kind?: string; status?: string; title?: string } } | undefined;
@@ -149,7 +198,29 @@ export function useWorkspaceEvents(options: UseWorkspaceEventsOptions) {
     return () => {
       unsubscribe();
     };
-  }, [conversation_id, eventPrefix, throttledRefresh]);
+  }, [conversation_id, eventPrefix, registerGeneratedPayload, throttledRefresh]);
+
+  /**
+   * Some generators report saved files in the final assistant message instead
+   * of through a file-tool event. Copy external generated artifacts into this
+   * workspace so the temporary-space tree and Content Hub can see them.
+   */
+  useEffect(() => {
+    const unsubscribe = ipcBridge.conversation.turnCompleted.on((event: IConversationTurnCompletedEvent) => {
+      if (event.session_id !== conversation_id) return;
+      streamTextRef.current.clear();
+      void registerGeneratedArtifactsFromPayload(event.last_message?.content, {
+        workspace: event.workspace || workspace,
+        conversationId: conversation_id,
+        source: 'conversation',
+      }).then((registered) => {
+        if (registered.length > 0) throttledRefresh();
+      });
+    });
+    return () => {
+      unsubscribe();
+    };
+  }, [conversation_id, throttledRefresh, workspace]);
 
   /**
    * 监听手动刷新工作空间事件
