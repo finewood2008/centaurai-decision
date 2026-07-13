@@ -361,7 +361,7 @@ const Layout: React.FC<{
                     <span className='text-16px text-t-primary font-semibold'>
                       {IS_DECISION ? '超级参谋团' : 'CentaurAI'}
                     </span>
-                    {IS_DECISION && process.env.NODE_ENV === 'development' && (
+                    {IS_DECISION && (
                       <span className='shrink-0 whitespace-nowrap rd-4px border border-warning-3 bg-warning-1 px-5px py-1px text-10px font-medium leading-none text-warning-7'>
                         {t('decision.developmentBadge')}
                       </span>
