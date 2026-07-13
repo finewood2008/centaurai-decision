@@ -46,7 +46,7 @@ const MeetingResolutionCard: React.FC<Props> = ({ options, decidedOptionId, onDe
             <div
               key={opt.id}
               data-testid={`meeting-option-${opt.id}`}
-              className={`flex flex-col gap-14px p-20px rd-16px border border-solid shrink-0 w-340px ${styles.card} ${decided ? styles.selected : ''} ${dimmed ? styles.dimmed : ''} ${
+              className={`flex flex-col gap-14px p-20px rd-8px border border-solid shrink-0 w-340px ${styles.card} ${decided ? styles.selected : ''} ${dimmed ? styles.dimmed : ''} ${
                 decided
                   ? 'bg-[color:var(--color-primary-light-1)]'
                   : 'border-[color:var(--border-light)] bg-[var(--bg-1)]'
@@ -63,7 +63,7 @@ const MeetingResolutionCard: React.FC<Props> = ({ options, decidedOptionId, onDe
                   })}
                 </div>
               )}
-              <div className='flex-1 min-h-0 max-h-300px overflow-y-auto text-14px text-[color:var(--text-secondary)] whitespace-pre-wrap leading-[1.7] [scrollbar-width:thin]'>
+              <div className='flex-1 min-h-0 max-h-300px overflow-y-auto text-15px text-[color:var(--text-secondary)] whitespace-pre-wrap leading-[1.7] [scrollbar-width:thin]'>
                 {opt.body}
               </div>
               {decided ? (

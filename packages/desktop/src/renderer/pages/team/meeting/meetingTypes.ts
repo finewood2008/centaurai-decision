@@ -45,10 +45,26 @@ export type MeetingQuestionOption = {
   action?: 'pause' | 'finish';
 };
 
-export type MeetingQuestion = {
+export type MeetingQuestionItem = {
   id: string;
   prompt: string;
   options: MeetingQuestionOption[];
+};
+
+export type MeetingQuestion = {
+  id: string;
+  prompt: string;
+  /** High-leverage questions collected into one user turn instead of serial interrogation. */
+  questions?: string[];
+  /** Structured batch questions, each with an independent choice. */
+  items?: MeetingQuestionItem[];
+  options: MeetingQuestionOption[];
+};
+
+export type MeetingQuestionAnswer = {
+  optionId?: string;
+  selections?: Array<{ questionId: string; optionId: string }>;
+  text?: string;
 };
 
 export type MeetingDiscussionState = {
@@ -113,6 +129,8 @@ export type MeetingTurn = {
   status: MeetingTurnStatus;
   /** Optional richer rendering for dynamic discussions; absent on legacy turns. */
   kind?: 'moderator_action' | 'advisor_response' | 'user_answer' | 'research' | 'notes';
+  /** The moderator's current high-value conclusion, rendered as a prominent takeaway. */
+  insightSummary?: string;
   question?: MeetingQuestion;
 };
 

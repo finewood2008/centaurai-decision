@@ -18,6 +18,7 @@ import {
   type MeetingForm,
   type MeetingParticipantSnapshot,
   type MeetingQuestion,
+  type MeetingQuestionAnswer,
   type MeetingRecord,
   type MeetingResolutionOption,
   type MeetingState,
@@ -42,7 +43,6 @@ import {
   buildDynamicAdvisorPrompt,
   buildDynamicModeratorPrompt,
   buildExportTask,
-  buildFallbackMeetingQuestion,
   buildModeratorActionRepairPrompt,
   buildReferenceContext,
   hasValidMeetingSpeech,
@@ -92,7 +92,7 @@ export type MeetingOrchestrator = {
   startMeeting: (topic: string, opts?: StartMeetingOptions) => void;
   /** Boss interjects mid-run; surfaced as a transcript turn the moderator will see. */
   interject: (text: string) => void;
-  answerQuestion: (answer: { optionId?: string; text?: string }) => void;
+  answerQuestion: (answer: MeetingQuestionAnswer) => void;
   pauseMeeting: () => void;
   finishMeeting: () => void;
   resumeMeeting: (recordId: string) => void;
@@ -813,6 +813,9 @@ class MeetingEngine {
       const lenses = resolveDepartment(this.state.departmentId)?.lenses ?? PANEL_LENSES;
       const lensByPanel = new Map(panel.map((participant, index) => [participant.id, lenses[index % lenses.length]]));
       const panelNames = panel.map((participant) => participant.name);
+      const minimumAdvisorContributions = Math.min(1, panel.length);
+      let advisorContributionsSinceUser = 0;
+      const consultedSinceUser = new Set<string>();
       const transcriptText = () =>
         this.state.transcript
           .filter((turn) => turn.text.trim())
@@ -936,6 +939,8 @@ class MeetingEngine {
           opening: firstAction && !resumeRecord,
           resumed: firstAction && Boolean(resumeRecord),
           discussionState: this.state.discussionState,
+          advisorContributionsSinceUser,
+          minimumAdvisorContributions,
         });
         let raw = await this.askTurn(mod.conversationId, turnId, prompt);
         if (stale()) return;
@@ -946,49 +951,44 @@ class MeetingEngine {
           parsed = parseDynamicModeratorAction(raw, panelNames, `q-${Date.now()}`);
         }
         if (!parsed) {
-          const question = buildFallbackMeetingQuestion(
-            `q-${Date.now()}`,
-            i18n.t('team.meeting.deepDiscussion.fallbackQuestion', {
-              defaultValue: '你希望接下来从哪个方向继续？',
-            }),
-            [
-              {
-                id: 'clarify',
-                label: i18n.t('team.meeting.deepDiscussion.fallbackOptions.clarify', {
-                  defaultValue: '先澄清目标与成功标准',
-                }),
-              },
-              {
-                id: 'risk',
-                label: i18n.t('team.meeting.deepDiscussion.fallbackOptions.risk', {
-                  defaultValue: '先识别关键风险和约束',
-                }),
-              },
-              {
-                id: 'paths',
-                label: i18n.t('team.meeting.deepDiscussion.fallbackOptions.paths', {
-                  defaultValue: '先比较可能的路径',
-                }),
-              },
-              {
-                id: 'context',
-                label: i18n.t('team.meeting.deepDiscussion.fallbackOptions.context', {
-                  defaultValue: '我想补充更多背景',
-                }),
-              },
-            ]
-          );
           parsed = {
             displayText: i18n.t('team.meeting.deepDiscussion.fallbackPrompt', {
-              defaultValue: '主持人需要你确认接下来的讨论方向。',
+              defaultValue:
+                '### 核心判断\n当前信息仍有分歧，不宜把分析责任交还给你。\n\n### 判断依据\n先让不同视角交叉验证，能更快暴露关键假设。\n\n### 下一步\n我先组织相关顾问会商，再给出可判断的结论。',
             }),
             discussionState: this.state.discussionState,
-            action: { type: 'ask_user', question },
+            action: {
+              type: 'consult_advisors',
+              targetNames: panelNames.slice(0, Math.max(minimumAdvisorContributions, 1)),
+              instruction: '围绕当前未决问题交叉分析；后发言者必须回应前序观点，并形成可执行建议。',
+            },
+          };
+        }
+        if (
+          parsed.action.type === 'ask_user' &&
+          !firstAction &&
+          advisorContributionsSinceUser < minimumAdvisorContributions
+        ) {
+          const freshTargets = panelNames.filter((name) => !consultedSinceUser.has(name));
+          const targetNames = [...freshTargets, ...panelNames.filter((name) => consultedSinceUser.has(name))].slice(
+            0,
+            Math.max(minimumAdvisorContributions, 1)
+          );
+          parsed = {
+            ...parsed,
+            displayText: `${parsed.displayText}\n\n在请你补充之前，我先让不同视角把这个判断交叉验证清楚。`,
+            action: {
+              type: 'consult_advisors',
+              targetNames,
+              instruction:
+                '针对主持人的核心判断进行交叉验证。请明确赞同或反驳前序观点，补充证据、风险边界和可执行建议。',
+            },
           };
         }
         this.updateTurn(turnId, {
           text: parsed.displayText,
           status: 'done',
+          insightSummary: parsed.discussionState.summary,
           question: parsed.action.type === 'ask_user' ? parsed.action.question : undefined,
         });
         this.commit({
@@ -1001,6 +1001,8 @@ class MeetingEngine {
 
         if (parsed.action.type === 'ask_user') {
           await this.waitForQuestion(parsed.action.question);
+          advisorContributionsSinceUser = 0;
+          consultedSinceUser.clear();
           continue;
         }
         if (parsed.action.type === 'suggest_close') {
@@ -1071,7 +1073,7 @@ class MeetingEngine {
           if (stale() || this.pauseRequested || this.finishRequested) break;
           const advisor = panel.find((participant) => participant.name === name);
           if (!advisor) continue;
-          await speak(
+          const response = await speak(
             advisor,
             i18n.t('team.meeting.deepDiscussion.activity.consulting', { defaultValue: '顾问讨论' }),
             buildDynamicAdvisorPrompt({
@@ -1084,6 +1086,10 @@ class MeetingEngine {
             }),
             'advisor_response'
           );
+          if (hasValidMeetingSpeech(response)) {
+            advisorContributionsSinceUser += 1;
+            consultedSinceUser.add(advisor.name);
+          }
         }
       }
     } finally {
@@ -1186,13 +1192,21 @@ class MeetingEngine {
     });
   };
 
-  answerQuestion = (answer: { optionId?: string; text?: string }): void => {
+  answerQuestion = (answer: MeetingQuestionAnswer): void => {
     const question = this.state.pendingQuestion;
     if (!question || !this.questionGate) return;
     const option = question.options.find((item) => item.id === answer.optionId);
+    const selectedAnswers = (answer.selections ?? [])
+      .map((selection, index) => {
+        const item = question.items?.find((candidate) => candidate.id === selection.questionId);
+        const selectedOption = item?.options.find((candidate) => candidate.id === selection.optionId);
+        if (!item || !selectedOption) return null;
+        return `${index + 1}. ${item.prompt}：${selectedOption.label}`;
+      })
+      .filter((item): item is string => Boolean(item));
     const note = answer.text?.trim() ?? '';
-    if (!option && !note) return;
-    const response = [option?.label, note].filter(Boolean).join(' — ');
+    if (!option && selectedAnswers.length === 0 && !note) return;
+    const response = [selectedAnswers.join('\n'), option?.label, note].filter(Boolean).join('\n\n');
     this.commit({
       transcript: [
         ...this.state.transcript,

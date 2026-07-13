@@ -162,7 +162,7 @@
       "openQuestionCount": "还有 {{count}} 个问题待深入",
       "turnCount": "已记录 {{count}} 段讨论",
       "resumeUnavailable": "无法恢复原参会阵容，请检查主持人、顾问、模型和 Provider 配置。",
-      "fallbackPrompt": "主持人需要你确认接下来的讨论方向。",
+      "fallbackPrompt": "### 核心判断\n当前信息仍有分歧，不宜把分析责任交还给你。\n\n### 判断依据\n先让不同视角交叉验证，能更快暴露关键假设。\n\n### 下一步\n我先组织相关顾问会商，再给出可判断的结论。",
       "fallbackQuestion": "你希望接下来从哪个方向继续？",
       "fallbackOptions": {
         "clarify": "先澄清目标与成功标准",

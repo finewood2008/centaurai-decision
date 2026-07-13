@@ -34,6 +34,13 @@ export type ParsedModeratorAction = {
 type RawModeratorAction = {
   type?: string;
   question?: string;
+  questions?: Array<
+    | string
+    | {
+        prompt?: string;
+        options?: Array<{ label?: string; description?: string }>;
+      }
+  >;
   options?: Array<{ label?: string; description?: string }>;
   targetNames?: string[];
   instruction?: string;
@@ -73,6 +80,37 @@ export function parseDynamicModeratorAction(
       ? raw.openQuestions.filter((item): item is string => typeof item === 'string' && Boolean(item.trim())).map(String)
       : [],
   };
+  if (raw.type === 'ask_user' && raw.question?.trim() && Array.isArray(raw.questions)) {
+    const items = raw.questions
+      .filter(
+        (item): item is Exclude<NonNullable<RawModeratorAction['questions']>[number], string> =>
+          typeof item === 'object' && item !== null && Boolean(item.prompt?.trim()) && Array.isArray(item.options)
+      )
+      .slice(0, 3)
+      .map((item, questionIndex) => ({
+        id: `${actionId}-question-${questionIndex + 1}`,
+        prompt: item.prompt!.trim(),
+        options: item
+          .options!.filter((option) => option?.label?.trim())
+          .slice(0, 4)
+          .map((option, optionIndex) => ({
+            id: `${actionId}-question-${questionIndex + 1}-option-${optionIndex + 1}`,
+            label: option.label!.trim(),
+            description: option.description?.trim() || undefined,
+          })),
+      }))
+      .filter((item) => item.options.length >= 2);
+    if (items.length > 0) {
+      return {
+        displayText,
+        discussionState,
+        action: {
+          type: 'ask_user',
+          question: { id: actionId, prompt: raw.question.trim(), items, options: [] },
+        },
+      };
+    }
+  }
   if (raw.type === 'ask_user' && raw.question?.trim() && Array.isArray(raw.options)) {
     const options = raw.options
       .filter((option) => option?.label?.trim())
@@ -83,14 +121,29 @@ export function parseDynamicModeratorAction(
         description: option.description?.trim() || undefined,
       }));
     if (options.length < 3) return null;
+    const questions = Array.isArray(raw.questions)
+      ? raw.questions
+          .filter((item): item is string => typeof item === 'string' && Boolean(item.trim()))
+          .map((item) => item.trim())
+          .slice(0, 3)
+      : [];
+    if (questions.length < 1) return null;
     return {
       displayText,
       discussionState,
-      action: { type: 'ask_user', question: { id: actionId, prompt: raw.question.trim(), options } },
+      action: {
+        type: 'ask_user',
+        question: {
+          id: actionId,
+          prompt: raw.question.trim(),
+          questions: questions.length > 0 ? questions : undefined,
+          options,
+        },
+      },
     };
   }
   if (raw.type === 'consult_advisors' && raw.instruction?.trim() && Array.isArray(raw.targetNames)) {
-    const targetNames = panelNames.filter((name) => raw.targetNames?.includes(name));
+    const targetNames = panelNames.filter((name) => raw.targetNames?.includes(name)).slice(0, 2);
     if (targetNames.length === 0) return null;
     return {
       displayText,
@@ -117,7 +170,7 @@ function actionProtocol(panelNames: string[]): string {
     ACTION_OPEN,
     '{"type":"ask_user | consult_advisors | research | suggest_close","stateSummary":"当前认识","openQuestions":["未决问题"], ...动作字段}',
     ACTION_CLOSE,
-    'ask_user 字段：question、options（3-4项，每项含 label，可选 description）。',
+    'ask_user 字段：question（批量问题标题）、questions（1-3项，绝不能超过 3 项）。questions 每项格式为 {"prompt":"具体问题","options":[{"label":"选项","description":"可选说明"}]}，每题提供 2-4 个独立选项。不要使用所有问题共用一组选项的旧格式。',
     `consult_advisors 字段：targetNames（只能取 ${panelNames.join('、')}）、instruction。`,
     'research 字段：query。suggest_close 字段：reason；它只会询问用户，不能自行结束会议。',
   ].join('\n');
@@ -132,23 +185,47 @@ export function buildDynamicModeratorPrompt(params: {
   opening?: boolean;
   resumed?: boolean;
   discussionState?: MeetingDiscussionState;
+  advisorContributionsSinceUser?: number;
+  minimumAdvisorContributions?: number;
 }): string {
-  const { topic, form, panelNames, transcript, referenceContext, opening, resumed, discussionState } = params;
+  const {
+    topic,
+    form,
+    panelNames,
+    transcript,
+    referenceContext,
+    opening,
+    resumed,
+    discussionState,
+    advisorContributionsSinceUser = 0,
+    minimumAdvisorContributions = Math.min(1, panelNames.length),
+  } = params;
   return [
-    '你是深度讨论的核心主持人。会议不是固定剧本，也不要求一定得出结论。你的职责是识别真正值得深挖的根问题，并决定下一步最有信息价值的动作。',
+    '你是深度讨论的核心主持人，同时也是能独立判断的首席参谋。会议不是采访用户，也不是固定剧本；你的职责是识别根问题、提出有依据的判断、组织顾问交叉讨论，再决定下一步最有信息价值的动作。',
     `议题：${topic}`,
     `主持风格：${form}（它只是风格偏好，不是固定流程）`,
     `可调度顾问：${panelNames.join('、')}`,
     referenceContext ? `背景资料：\n${referenceContext}` : '',
     discussionState?.summary ? `上次主持判断：${discussionState.summary}` : '',
     discussionState?.openQuestions?.length ? `尚未解决：${discussionState.openQuestions.join('；')}` : '',
+    opening || resumed
+      ? '当前处于开场或恢复节点；如果用户意图存在关键缺口，可以直接 ask_user。'
+      : `自用户上次回应后，顾问已贡献 ${advisorContributionsSinceUser} 次；达到 ${minimumAdvisorContributions} 次后才可再次 ask_user。`,
     transcript ? `完整会议记录：\n${transcript}` : '',
-    opening ? '这是开场。先简要拆题，然后必须用 ask_user 向用户提出一次目标对齐问题，不得先调度顾问。' : '',
-    resumed ? '这是恢复的会议。先说明你理解的进展，然后必须用 ask_user 询问用户从哪里继续。' : '',
-    !opening && !resumed
-      ? '评估最新内容后选择一个最有价值的下一步：向用户确认关键取舍、点名最相关顾问深入、检索资料，或建议用户考虑收束。不要机械轮询全员。'
+    opening
+      ? `这是开场。先判断议题是否已经包含明确的决策目标、成功标准和关键约束。只要其中存在会影响分析方向的缺口，就先用 ask_user 集中询问 1-3 个最关键问题；如果信息已经足够明确，再用 consult_advisors 点名 ${Math.min(2, panelNames.length)} 位最相关顾问展开首轮讨论。不要为了走流程而提问。`
       : '',
-    '动作块之前输出给用户看的主持话语；不要暴露协议或 JSON。',
+    resumed
+      ? '这是恢复的会议。先说明你理解的进展和当前判断；如果用户接下来想解决的重点不明确，可以先用 ask_user 集中确认 1-3 个问题，否则继续调度顾问。'
+      : '',
+    !opening && !resumed
+      ? `评估最新内容后选择一个最有价值的下一步。通常每轮点名 1-2 位相关顾问，并要求后发言者明确回应前序观点；顾问带来信息增量后，应主动寻找用户参与节点，让用户确认目标、取舍、事实或风险偏好。不要连续多轮只让顾问说，也不要连续追问用户或把分析责任推给用户。`
+      : '',
+    !opening && !resumed && advisorContributionsSinceUser >= 2
+      ? '自用户上次回应后已经连续完成至少两次顾问贡献。本轮必须优先用 ask_user 邀请用户确认关键取舍、事实或风险偏好；只有当前确实没有任何需要用户确认的信息时，才可继续调度顾问。'
+      : '',
+    '动作块之前必须输出有信息增量的主持话语，使用 Markdown，依次包含“### 核心判断”“### 判断依据”“### 下一步”。核心判断要亮明倾向，依据要提炼顾问共识、分歧或证据，不能只复述流程。不要暴露协议或 JSON。',
+    '需要 ask_user 时，优先一次询问 2-3 个相互关联的高价值问题，简单场景可只问 1 个，绝不能超过 3 个；每个问题都要有自己的清晰选项，并在 description 中标出你的推荐及理由。用户回答后应先推进分析，不要立刻再次追问。',
     actionProtocol(panelNames),
   ]
     .filter(Boolean)
@@ -175,7 +252,7 @@ export function buildDynamicAdvisorPrompt(params: {
     `主持任务：${params.instruction}`,
     params.referenceContext ? `背景资料：\n${params.referenceContext}` : '',
     `截至你发言前的会议记录：\n${params.transcript}`,
-    '回应前序观点，指出依据、不确定性和仍需验证之处。直接发言。',
+    '必须明确引用至少一个前序观点并选择：赞同并补强、反驳并给证据、或指出其遗漏。随后给出你的独立判断、关键依据、风险边界和一条可执行建议；不要只做泛泛总结。直接发言。',
   ]
     .filter(Boolean)
     .join('\n\n');

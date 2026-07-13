@@ -162,7 +162,7 @@
       "openQuestionCount": "{{count}} questions still need exploration",
       "turnCount": "{{count}} discussion turns recorded",
       "resumeUnavailable": "The original participants cannot be restored. Check the host, advisors, models, and provider settings.",
-      "fallbackPrompt": "The host needs you to choose the next direction.",
+      "fallbackPrompt": "### Core assessment\nThe available evidence is still contested, so the panel should not hand the analysis back to you.\n\n### Why\nCross-checking different perspectives will expose the key assumptions faster.\n\n### Next step\nI will convene the relevant advisors first, then return with a decision-ready assessment.",
       "fallbackQuestion": "Which direction should we explore next?",
       "fallbackOptions": {
         "clarify": "Clarify goals and success criteria",
