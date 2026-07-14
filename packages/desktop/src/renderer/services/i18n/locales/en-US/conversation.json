@@ -25,6 +25,7 @@
     "deleteTitle": "Delete",
     "deleteConfirm": "Are you sure you want to delete this chat?",
     "confirmDelete": "Delete",
+    "deleting": "Deleting...",
     "cancelDelete": "Cancel",
     "editName": "Edit Name",
     "saveName": "Save",

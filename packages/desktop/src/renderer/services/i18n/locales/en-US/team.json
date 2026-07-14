@@ -19,6 +19,8 @@
   },
   "newAgent": "New Agent",
   "noMessages": "No messages yet.",
+  "noAgents": "No members",
+  "moreAgents": "{{count}} more",
   "agentNotConfigured": "Agent not configured yet.",
   "sendBox": {
     "placeholder": "Message dispatch agent..."
@@ -74,6 +76,11 @@
     "selectFolder": "Select folder",
     "recentLabel": "Recent",
     "chooseDifferentFolder": "Choose a different folder",
+    "needTeamCapable": "Select at least one team-capable model as the host, such as CentaurAI or Claude.",
+    "nameLabel": "Think tank name",
+    "searchPlaceholder": "Search agents...",
+    "noSearchResults": "No results found",
+    "modelExpertTag": "Direct model",
     "error": "Failed to create team"
   },
   "removeAgent": {
@@ -89,6 +96,11 @@
     }
   },
   "meeting": {
+    "connecting": "Connecting...",
+    "emptyHint": "Bring together AI experts from different models for a structured debate and a higher-quality final proposal.",
+    "parallelWall": "AI advisors are speaking in parallel",
+    "pausedHint": "The host is waiting while you review. Add a thought below, then continue the discussion.",
+    "thinking": "Thinking...",
     "attachShared": "Reference shared library",
     "boardTitle": "Think Tank",
     "cancel": "Cancel meeting",
@@ -113,6 +125,8 @@
     "interjectPlaceholder": "✋ Raise your hand: add thoughts or course-correct anytime…",
     "export": {
       "archive": "Export & archive",
+      "archiving": "The host is exporting Word/PPT files and archiving them to your personal workspace.",
+      "archivedToWorkspace": "Saved to the temporary project and copied to your personal workspace",
       "copied": "Plan copied",
       "copy": "Copy",
       "copyFailed": "Copy failed",
@@ -122,7 +136,8 @@
       "title": "Add more experts (domestic models / OpenClaw / Hermes …)",
       "titleShort": "Add more experts",
       "groupBackends": "Other backends",
-      "groupModels": "Direct models"
+      "groupModels": "Direct models",
+      "none": "No other experts are available to join, such as OpenClaw or Hermes."
     },
     "history": {
       "untitled": "Untitled topic"
@@ -142,7 +157,8 @@
     "status": {
       "decided": "Decided",
       "resolution": "Discussion done — please decide",
-      "running": "Meeting in progress"
+      "running": "Meeting in progress",
+      "turns": "{{count}} contributions completed"
     },
     "turn": {
       "failed": "No response"

@@ -11,6 +11,17 @@
 
 const splitPathSegments = (targetPath: string): string[] => targetPath.split(/[\\/]+/).filter(Boolean);
 
+const normalizeWorkspacePathForSafety = (workspacePath: string): string =>
+  workspacePath.trim().replace(/\\/g, '/').replace(/\/+$/, '');
+
+/** Reject broad roots that must never be enumerated as temporary workspaces. */
+export const isUnsafeTemporaryWorkspacePath = (workspacePath: string): boolean => {
+  const path = normalizeWorkspacePathForSafety(workspacePath);
+  if (!path || path === '/' || path === '~' || path === '/home' || path === '/Users') return true;
+  if (/^\/(?:home|Users)\/[^/]+$/i.test(path)) return true;
+  return /^[A-Za-z]:\/?$/.test(path) || /^[A-Za-z]:\/Users\/[^/]+$/i.test(path);
+};
+
 /**
  * Get the display name for a workspace path.
  *

@@ -5,6 +5,12 @@
  */
 
 import { ipcBridge } from '@/common';
+import type { IConversationTurnCompletedEvent } from '@/common/adapter/ipcBridge';
+import {
+  registerGeneratedArtifacts,
+  registerGeneratedArtifactsFromPayload,
+  registerGeneratedArtifactsFromToolPayload,
+} from '@/renderer/utils/file/generatedArtifacts';
 import { useCallback, useEffect, useRef } from 'react';
 
 /**
@@ -29,7 +35,7 @@ const REFRESH_THROTTLE_MS = 3000;
  * non-read / non-team tool, lands. That covers files written by any agent type
  * (办公助理/专家/工具箱/圆桌会议) regardless of which conversation is active.
  */
-export function useGeneratedFilesAutoRefresh(onChange: () => void): void {
+export function useGeneratedFilesAutoRefresh(onChange: () => void, throttleMs = REFRESH_THROTTLE_MS): void {
   const throttleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingRef = useRef(false);
 
@@ -45,25 +51,58 @@ export function useGeneratedFilesAutoRefresh(onChange: () => void): void {
         pendingRef.current = false;
         onChange();
       }
-    }, REFRESH_THROTTLE_MS);
-  }, [onChange]);
+    }, throttleMs);
+  }, [onChange, throttleMs]);
 
   useEffect(() => {
-    const handleResponse = (data: { type: string; data?: unknown }) => {
+    const handleResponse = (data: { type: string; data?: unknown; conversation_id?: string }) => {
       if (data.type === 'acp_tool_call') {
         const acpData = data.data as { update?: { kind?: string; status?: string; title?: string } } | undefined;
         const kind = acpData?.update?.kind;
         const status = acpData?.update?.status;
         const shouldRefresh = kind === 'edit' || kind === 'execute' || (status === 'completed' && kind !== 'read');
-        if (shouldRefresh && !isNonFileSystemTool(acpData?.update?.title)) throttled();
+        if (shouldRefresh && !isNonFileSystemTool(acpData?.update?.title)) {
+          void registerGeneratedArtifactsFromToolPayload(data.data, {
+            conversationId: data.conversation_id,
+            source: 'conversation',
+          }).finally(throttled);
+        }
       } else if (data.type === 'tool_call') {
         const toolData = data.data as { status?: string; name?: string } | undefined;
-        if (toolData?.status === 'completed' && !isNonFileSystemTool(toolData?.name)) throttled();
+        if (toolData?.status === 'completed' && !isNonFileSystemTool(toolData?.name)) {
+          void registerGeneratedArtifactsFromToolPayload(data.data, {
+            conversationId: data.conversation_id,
+            source: 'conversation',
+          }).finally(throttled);
+        }
       }
     };
+    const handleTurnCompleted = (event: IConversationTurnCompletedEvent) => {
+      void registerGeneratedArtifactsFromPayload(event.last_message?.content, {
+        workspace: event.workspace,
+        conversationId: event.session_id,
+        source: 'conversation',
+      }).finally(throttled);
+    };
+    const handleFileWrite = (event: { file_path?: string; workspace?: string; operation?: string }) => {
+      if (!event.file_path || event.operation === 'delete') return;
+      void registerGeneratedArtifacts({
+        paths: [event.file_path],
+        workspace: event.workspace,
+        source: 'conversation',
+      }).finally(throttled);
+    };
     const unsubscribe = ipcBridge.acpConversation.responseStream.on(handleResponse);
+    const unsubscribeTurn = ipcBridge.conversation.turnCompleted.on(handleTurnCompleted);
+    const unsubscribeStream = ipcBridge.fileStream.contentUpdate.on(handleFileWrite);
+    const unsubscribeOffice = ipcBridge.workspaceOfficeWatch.fileAdded.on((event) =>
+      handleFileWrite({ file_path: event.file_path, workspace: event.workspace, operation: 'write' })
+    );
     return () => {
       unsubscribe();
+      unsubscribeTurn();
+      unsubscribeStream();
+      unsubscribeOffice();
       if (throttleTimerRef.current) clearTimeout(throttleTimerRef.current);
     };
   }, [throttled]);

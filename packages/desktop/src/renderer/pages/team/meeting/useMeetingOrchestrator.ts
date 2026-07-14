@@ -5,6 +5,7 @@ import { ipcBridge } from '@/common';
 import { retrieveKnowledgeContext } from '@/renderer/services/knowledgeBaseSearch';
 import i18n from '@/renderer/services/i18n';
 import { emitter } from '@/renderer/utils/emitter';
+import { registerGeneratedArtifacts } from '@/renderer/utils/file/generatedArtifacts';
 import type { IConversationTurnCompletedEvent, IResponseMessage } from '@/common/adapter/ipcBridge';
 import { joinPath, transformMessage } from '@/common/chat/chatLib';
 import type { TMessage, IMessageText } from '@/common/chat/chatLib';
@@ -410,6 +411,12 @@ class MeetingEngine {
       emitter.emit('acp.workspace.refresh');
       emitter.emit('codex.workspace.refresh');
       emitter.emit('aionrs.workspace.refresh');
+      await registerGeneratedArtifacts({
+        paths: [path],
+        conversationId: moderator.conversation_id,
+        source: 'meeting',
+        standaloneLabel: this.team.name,
+      });
       return path;
     } catch {
       return null;
@@ -465,7 +472,6 @@ class MeetingEngine {
         Message.error('生成决策方案文档失败：未找到保存位置');
         return;
       }
-
       const mdPath = joinPath(dir, decisionMarkdownFileName(topic, this.team.name));
       const mdOk = await ipcBridge.fs.writeFile.invoke({ path: mdPath, data: mdContent });
       const docxFileName = decisionFileName(topic, this.team.name);
@@ -476,6 +482,12 @@ class MeetingEngine {
       });
 
       if (mdOk && docxRes?.success && docxRes.data?.path) {
+        await registerGeneratedArtifacts({
+          paths: [mdPath, docxRes.data.path],
+          conversationId: this.moderator?.conversation_id,
+          source: 'meeting',
+          standaloneLabel: this.team.name,
+        });
         emitter.emit('acp.workspace.refresh');
         emitter.emit('codex.workspace.refresh');
         emitter.emit('aionrs.workspace.refresh');

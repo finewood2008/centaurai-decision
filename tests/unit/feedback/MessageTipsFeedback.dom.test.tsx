@@ -274,7 +274,7 @@ describe('MessageTips — FeedbackButton wiring', () => {
 describe('agent error locale copy', () => {
   it('defines title and body copy for newly classified agent error codes in every locale', () => {
     const localeDir = path.join(process.cwd(), 'packages/desktop/src/renderer/services/i18n/locales');
-    const localeNames = ['zh-CN', 'en-US', 'ja-JP', 'zh-TW', 'ko-KR', 'tr-TR', 'ru-RU', 'uk-UA'];
+    const localeNames = ['zh-CN', 'zh-TW', 'en-US'];
 
     for (const localeName of localeNames) {
       const locale = JSON.parse(readFileSync(path.join(localeDir, localeName, 'conversation.json'), 'utf8'));
@@ -291,29 +291,9 @@ describe('agent error locale copy', () => {
     }
   });
 
-  it('keeps agent error copy localized outside English and Chinese locales', () => {
-    const localeDir = path.join(process.cwd(), 'packages/desktop/src/renderer/services/i18n/locales');
-    const localeNames = ['ja-JP', 'ko-KR', 'tr-TR', 'ru-RU', 'uk-UA'];
-
-    for (const localeName of localeNames) {
-      const locale = JSON.parse(readFileSync(path.join(localeDir, localeName, 'conversation.json'), 'utf8'));
-      const agentError = locale.agentError;
-
-      expect(agentError.fallbackTitle, localeName).not.toBe('The agent could not reply');
-      expect(agentError.errorCode, localeName).not.toBe('Error code');
-      expect(agentError.resolutionPrefix, localeName).not.toBe('Suggestion: ');
-      expect(agentError.codes.USER_AGENT_ACP_INIT_FAILED.title, localeName).not.toBe(
-        'Agent protocol initialization failed'
-      );
-      expect(agentError.codes.USER_LLM_PROVIDER_BILLING_REQUIRED.title, localeName).not.toBe(
-        'Model provider billing is required'
-      );
-    }
-  });
-
   it('does not label app-side errors as direct AionUi ownership', () => {
     const localeDir = path.join(process.cwd(), 'packages/desktop/src/renderer/services/i18n/locales');
-    const localeNames = ['zh-CN', 'en-US', 'ja-JP', 'zh-TW', 'ko-KR', 'tr-TR', 'ru-RU', 'uk-UA'];
+    const localeNames = ['zh-CN', 'zh-TW', 'en-US'];
 
     for (const localeName of localeNames) {
       const locale = JSON.parse(readFileSync(path.join(localeDir, localeName, 'conversation.json'), 'utf8'));

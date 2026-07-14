@@ -21,6 +21,10 @@ type SharedLibraryPanelProps = {
   search?: string;
 };
 
+const onDragOver = (event: React.DragEvent) => {
+  if (event.dataTransfer.types.includes('Files')) event.preventDefault();
+};
+
 const SharedLibraryPanel: React.FC<SharedLibraryPanelProps> = ({ search = '' }) => {
   const { t } = useTranslation();
   const { files, categories, category, setCategory, loading, unavailable, remove, addFiles } = useSharedDrive();
@@ -37,9 +41,6 @@ const SharedLibraryPanel: React.FC<SharedLibraryPanelProps> = ({ search = '' }) 
     e.preventDefault();
     dragDepth.current += 1;
     setDragging(true);
-  };
-  const onDragOver = (e: React.DragEvent) => {
-    if (e.dataTransfer.types.includes('Files')) e.preventDefault();
   };
   const onDragLeave = () => {
     dragDepth.current -= 1;

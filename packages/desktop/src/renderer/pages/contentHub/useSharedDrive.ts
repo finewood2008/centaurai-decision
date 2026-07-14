@@ -60,12 +60,10 @@ export function useSharedDrive() {
   // Upload OS files dropped directly onto the shared library. Uses the current
   // category filter as the default tag so drops land where the user is looking.
   const addFiles = useCallback(
-    async (files: File[]) => {
+    async (selectedFiles: File[]) => {
       const uploaderId = getCurrentFrontendUserId();
       const label = categories.find((c) => c.key === category)?.label;
-      for (const file of files) {
-        await shareFileToTeam(file, label, uploaderId);
-      }
+      await Promise.all(selectedFiles.map((file) => shareFileToTeam(file, label, uploaderId)));
       await reload();
     },
     [reload, categories, category]

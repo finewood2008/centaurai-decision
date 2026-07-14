@@ -29,6 +29,7 @@
     "deleteTitle": "刪除",
     "deleteConfirm": "確定要刪除此對話嗎？",
     "confirmDelete": "刪除",
+    "deleting": "刪除中...",
     "cancelDelete": "取消",
     "editName": "編輯名稱",
     "saveName": "儲存",

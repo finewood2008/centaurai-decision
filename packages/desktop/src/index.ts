@@ -951,6 +951,7 @@ const handleAppReady = async (): Promise<void> => {
         allowRemote,
         rendererDevUrl: app.isPackaged ? undefined : process.env.ELECTRON_RENDERER_URL,
         dataDir: getDataPath(),
+        contentAssetsDir: path.join(getDataPath(), 'contentAssets'),
         logDir: sysDirWebUI.logDir,
         // Expose the same AIONUI_{CACHE,WORK,LOG}_DIR env the desktop IPC path
         // passes at line 493, so /api/system/info reports the symlink workDir
