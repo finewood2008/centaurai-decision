@@ -3,7 +3,9 @@ import { mutate as globalMutate } from 'swr';
 import { Message } from '@arco-design/web-react';
 import { ipcBridge } from '@/common';
 import { retrieveKnowledgeContext } from '@/renderer/services/knowledgeBaseSearch';
+import i18n from '@/renderer/services/i18n';
 import { emitter } from '@/renderer/utils/emitter';
+import { registerGeneratedArtifacts } from '@/renderer/utils/file/generatedArtifacts';
 import type { IConversationTurnCompletedEvent, IResponseMessage } from '@/common/adapter/ipcBridge';
 import { joinPath, transformMessage } from '@/common/chat/chatLib';
 import type { TMessage, IMessageText } from '@/common/chat/chatLib';
@@ -15,6 +17,9 @@ import type { IProvider, TProviderWithModel } from '@/common/config/storage';
 import {
   EMPTY_MEETING_STATE,
   type MeetingForm,
+  type MeetingParticipantSnapshot,
+  type MeetingQuestion,
+  type MeetingQuestionAnswer,
   type MeetingRecord,
   type MeetingResolutionOption,
   type MeetingState,
@@ -35,27 +40,14 @@ import {
 import { resolveDepartment } from './presetDepartments';
 import {
   PANEL_LENSES,
-  buildClusterPrompt,
-  buildConvergePrompt,
-  buildDeepDiveAnswerPrompt,
-  buildDeepDiveProbePrompt,
-  buildDivergePrompt,
+  buildDiscussionNotesPrompt,
+  buildDynamicAdvisorPrompt,
+  buildDynamicModeratorPrompt,
   buildExportTask,
-  buildLocalSynthesisPrompt,
-  buildModeratorDebateMovePrompt,
-  buildModeratorDebatePrompt,
-  buildModeratorOpeningPrompt,
-  buildPanelistDebatePrompt,
-  buildPanelistPositionPrompt,
-  buildProposalPrompt,
-  buildRedTeamPrompt,
+  buildModeratorActionRepairPrompt,
   buildReferenceContext,
-  buildRoundPausePrompt,
-  parseModeratorMove,
-  parsePlan,
-  parseResolutionOptions,
-  stripResolutionMarkers,
-  type PanelistBrief,
+  hasValidMeetingSpeech,
+  parseDynamicModeratorAction,
 } from './meetingPrompts';
 
 const STORAGE_KEY = 'team-meeting-state';
@@ -101,8 +93,10 @@ export type MeetingOrchestrator = {
   startMeeting: (topic: string, opts?: StartMeetingOptions) => void;
   /** Boss interjects mid-run; surfaced as a transcript turn the moderator will see. */
   interject: (text: string) => void;
-  /** Resume the next round after a between-round pause (boss clicks 继续讨论). */
-  continueMeeting: () => void;
+  answerQuestion: (answer: MeetingQuestionAnswer) => void;
+  pauseMeeting: () => void;
+  finishMeeting: () => void;
+  resumeMeeting: (recordId: string) => void;
   /** Re-query the knowledge base mid-meeting and inject results as a transcript turn. */
   refreshKnowledge: () => void;
   /** Cancel the in-flight debate. */
@@ -212,6 +206,8 @@ function hydrate(team_id: string, teamName: string): MeetingState {
   const stored = readStore()[team_id];
   const base: MeetingState = stored ? { ...EMPTY_MEETING_STATE, ...stored, revision: 0 } : { ...EMPTY_MEETING_STATE };
   if (base.phase === 'running') {
+    const resumable = Boolean(base.activeRecordId && base.participantSnapshot.length > 0);
+    const legacyResolution = !resumable && (base.plan.trim() || base.options.length > 0);
     const transcript: MeetingTurn[] = base.transcript.map((turn) =>
       turn.status === 'speaking'
         ? { ...turn, status: (turn.text.trim() ? 'done' : 'error') as MeetingTurn['status'] }
@@ -219,12 +215,14 @@ function hydrate(team_id: string, teamName: string): MeetingState {
     );
     return {
       ...base,
-      phase: base.plan.trim() || base.options.length > 0 ? 'resolution' : 'idle',
-      runState: base.plan.trim() || base.options.length > 0 ? 'awaiting_decision' : 'stopped',
+      phase: resumable ? 'paused' : legacyResolution ? 'resolution' : 'idle',
+      runState: legacyResolution ? 'awaiting_decision' : 'stopped',
       activeSlotId: null,
       runId: null,
       transcript,
       awaitingContinue: false,
+      pendingQuestion: null,
+      activity: resumable ? 'paused' : null,
     };
   }
   if (!base.topic) base.topic = teamName;
@@ -275,13 +273,24 @@ class MeetingEngine {
   private running = false;
   /** Tear down the ACTIVE run's fresh conversations (set while a run is live). */
   private activeTeardown: ((stop: boolean) => void) | null = null;
-  /** Resolves the between-round PAUSE when the boss clicks 继续讨论 (or the run is torn down). */
-  private continueGate: (() => void) | null = null;
+  private questionGate: ((answer: string) => void) | null = null;
+  private pauseRequested = false;
+  private finishRequested = false;
+  /** Reference material available to every subsequent moderator and panelist turn. */
+  private referenceContext = '';
 
   constructor(team: TTeam) {
     this.team = team;
     this.state = hydrate(team.id, team.name);
     this.extras = readGuests(team.id);
+    if (this.state.phase === 'paused' && this.state.activeRecordId) {
+      patchHistoryRecord(team.id, this.state.activeRecordId, {
+        status: 'paused',
+        transcript: this.state.transcript,
+        discussionState: this.state.discussionState,
+        participantSnapshot: this.state.participantSnapshot,
+      });
+    }
     ensureStreamListener();
   }
 
@@ -340,6 +349,11 @@ class MeetingEngine {
       decidedOptionId: next.decidedOptionId,
       transcript: next.transcript,
       archivedPath: next.archivedPath,
+      pendingQuestion: next.pendingQuestion,
+      discussionState: next.discussionState,
+      activity: next.activity,
+      activeRecordId: next.activeRecordId,
+      participantSnapshot: next.participantSnapshot,
     };
     writeStore(store);
     this.notify();
@@ -397,6 +411,12 @@ class MeetingEngine {
       emitter.emit('acp.workspace.refresh');
       emitter.emit('codex.workspace.refresh');
       emitter.emit('aionrs.workspace.refresh');
+      await registerGeneratedArtifacts({
+        paths: [path],
+        conversationId: moderator.conversation_id,
+        source: 'meeting',
+        standaloneLabel: this.team.name,
+      });
       return path;
     } catch {
       return null;
@@ -452,7 +472,6 @@ class MeetingEngine {
         Message.error('生成决策方案文档失败：未找到保存位置');
         return;
       }
-
       const mdPath = joinPath(dir, decisionMarkdownFileName(topic, this.team.name));
       const mdOk = await ipcBridge.fs.writeFile.invoke({ path: mdPath, data: mdContent });
       const docxFileName = decisionFileName(topic, this.team.name);
@@ -463,6 +482,12 @@ class MeetingEngine {
       });
 
       if (mdOk && docxRes?.success && docxRes.data?.path) {
+        await registerGeneratedArtifacts({
+          paths: [mdPath, docxRes.data.path],
+          conversationId: this.moderator?.conversation_id,
+          source: 'meeting',
+          standaloneLabel: this.team.name,
+        });
         emitter.emit('acp.workspace.refresh');
         emitter.emit('codex.workspace.refresh');
         emitter.emit('aionrs.workspace.refresh');
@@ -499,7 +524,7 @@ class MeetingEngine {
   }
 
   /** Append a fresh "speaking" turn for a participant; returns its id. */
-  private addTurn(p: Participant, phaseLabel: string, parallel = false): string {
+  private addTurn(p: Participant, phaseLabel: string, parallel = false, kind?: MeetingTurn['kind']): string {
     const id = `t-${this.state.transcript.length}-${p.id}`;
     const turn: MeetingTurn = {
       id,
@@ -512,6 +537,7 @@ class MeetingEngine {
       parallel,
       text: '',
       status: 'speaking',
+      kind,
     };
     this.commit({ transcript: [...this.state.transcript, turn], activeSlotId: p.id });
     return id;
@@ -540,6 +566,7 @@ class MeetingEngine {
   private askTurn(conversationId: string, turnId: string, prompt: string): Promise<string> {
     return new Promise<string>((resolve) => {
       let settled = false;
+      let cleanup = (): void => {};
       this.turnConv.set(conversationId, turnId);
       this.turnText.set(turnId, '');
       STREAM_ROUTES.set(conversationId, this);
@@ -548,6 +575,8 @@ class MeetingEngine {
         settled = true;
         off();
         clearTimeout(timer);
+        const cleanupIndex = this.loopUnsubs.indexOf(cleanup);
+        if (cleanupIndex >= 0) this.loopUnsubs.splice(cleanupIndex, 1);
         this.turnConv.delete(conversationId);
         STREAM_ROUTES.delete(conversationId);
         resolve(text.trim());
@@ -562,7 +591,8 @@ class MeetingEngine {
       // A single cleanup that SETTLES the promise (finish also removes the listener +
       // timer + route), so cancel()/reset() can't orphan a pending turn — the awaiting
       // runLocalMeeting frame unwinds and hits its staleness guard.
-      this.loopUnsubs.push(() => finish(this.turnText.get(turnId) ?? ''));
+      cleanup = () => finish(this.turnText.get(turnId) ?? '');
+      this.loopUnsubs.push(cleanup);
       void ipcBridge.conversation.sendMessage
         .invoke({ conversation_id: conversationId, input: prompt })
         .catch(() => finish(this.turnText.get(turnId) ?? ''));
@@ -586,10 +616,11 @@ class MeetingEngine {
    */
   private async buildParticipants(
     myRun: number,
-    convs: Map<string, string>
+    convs: Map<string, string>,
+    savedSnapshot?: MeetingParticipantSnapshot[]
   ): Promise<{ mod: Participant; panel: Participant[] } | null> {
     const moderator = this.moderator;
-    if (!moderator) return null;
+    if (!moderator && !savedSnapshot?.some((participant) => participant.isModerator)) return null;
     const stale = () => this.runSeq !== myRun;
     let metas: AgentMetadata[] = [];
     try {
@@ -600,7 +631,7 @@ class MeetingEngine {
     // 直连模型专家 (e.g. SiliconFlow 国产模型) pin a specific provider model, so we
     // need the live provider list to rebuild the aionrs model descriptor.
     let providers: IProvider[] = [];
-    if (this.extras.some((e) => e.provider_id)) {
+    if (this.extras.some((e) => e.provider_id) || savedSnapshot?.some((participant) => participant.provider_id)) {
       try {
         providers = (await ipcBridge.mode.listProviders.invoke()) ?? [];
       } catch {
@@ -632,9 +663,8 @@ class MeetingEngine {
         params.extra = { ...params.extra, team_id: this.team.id };
         if (src.provider_id && src.model_name) {
           const provider = providers.find((p) => p.id === src.provider_id);
-          if (provider) {
-            params.model = { ...provider, use_model: src.model_name } as TProviderWithModel;
-          }
+          if (!provider) return null;
+          params.model = { ...provider, use_model: src.model_name } as TProviderWithModel;
         } else if (src.model && src.model !== 'default') {
           params.extra.current_model_id = src.model;
         }
@@ -654,43 +684,52 @@ class MeetingEngine {
       }
     };
 
-    const mod = await make({
-      id: moderator.slot_id,
-      name: moderator.agent_name,
-      icon: moderator.icon,
-      agent_type: moderator.agent_type,
-      model: moderator.model,
-      isModerator: true,
-    });
+    const currentSources: MeetingParticipantSnapshot[] = moderator
+      ? [
+          {
+            id: moderator.slot_id,
+            name: moderator.agent_name,
+            icon: moderator.icon,
+            agent_type: moderator.agent_type,
+            model: moderator.model,
+            isModerator: true,
+          },
+          ...this.teamPanelists.map((agent) => ({
+            id: agent.slot_id,
+            name: agent.agent_name,
+            icon: agent.icon,
+            agent_type: agent.agent_type,
+            model: agent.model,
+            isModerator: false,
+          })),
+          ...this.extras.map((guest) => ({
+            id: guest.id,
+            name: guest.agent_name,
+            icon: guest.icon,
+            agent_type: guest.agent_type,
+            provider_id: guest.provider_id,
+            model_name: guest.model_name,
+            isModerator: false,
+          })),
+        ]
+      : [];
+    const sources = savedSnapshot?.length ? savedSnapshot : currentSources;
+    const moderatorSource = sources.find((source) => source.isModerator);
+    if (!moderatorSource) return null;
+    const mod = await make(moderatorSource);
     if (!mod || stale()) {
       this.releaseConvs(convs, true);
       return null;
     }
     const panel: Participant[] = [];
-    for (const a of this.teamPanelists) {
+    for (const source of sources.filter((participant) => !participant.isModerator)) {
       if (stale()) break;
-      const p = await make({
-        id: a.slot_id,
-        name: a.agent_name,
-        icon: a.icon,
-        agent_type: a.agent_type,
-        model: a.model,
-        isModerator: false,
-      });
+      const p = await make(source);
       if (p) panel.push(p);
     }
-    for (const ex of this.extras) {
-      if (stale()) break;
-      const p = await make({
-        id: ex.id,
-        name: ex.agent_name,
-        icon: ex.icon,
-        agent_type: ex.agent_type,
-        provider_id: ex.provider_id,
-        model_name: ex.model_name,
-        isModerator: false,
-      });
-      if (p) panel.push(p);
+    if (panel.length !== sources.filter((participant) => !participant.isModerator).length) {
+      this.releaseConvs(convs, true);
+      return null;
     }
     if (stale()) {
       this.releaseConvs(convs, true);
@@ -699,199 +738,378 @@ class MeetingEngine {
     return { mod, panel };
   }
 
-  /**
-   * Pause the debate after a round: mark `awaitingContinue` and resolve only when the
-   * boss clicks 继续讨论 (continueMeeting) OR the run is torn down (cancel/reset/start,
-   * which drains loopUnsubs). Lets the boss read at their own pace and feel involved.
-   */
-  private waitForContinue(myRun: number): Promise<void> {
-    if (this.runSeq !== myRun) return Promise.resolve();
-    this.commit({ awaitingContinue: true, activeSlotId: null });
-    return new Promise<void>((resolve) => {
-      this.continueGate = resolve;
-      // cancel()/reset()/startMeeting() drain loopUnsubs → resolve() (idempotent) so the
-      // paused frame unwinds and hits its stale() guard.
-      this.loopUnsubs.push(resolve);
+  private currentParticipantSnapshot(): MeetingParticipantSnapshot[] {
+    const moderator = this.moderator;
+    return [
+      ...(moderator
+        ? [
+            {
+              id: moderator.slot_id,
+              name: moderator.agent_name,
+              icon: moderator.icon,
+              agent_type: moderator.agent_type,
+              model: moderator.model,
+              isModerator: true,
+            },
+          ]
+        : []),
+      ...this.teamPanelists.map((agent) => ({
+        id: agent.slot_id,
+        name: agent.agent_name,
+        icon: agent.icon,
+        agent_type: agent.agent_type,
+        model: agent.model,
+        isModerator: false,
+      })),
+      ...this.extras.map((guest) => ({
+        id: guest.id,
+        name: guest.agent_name,
+        icon: guest.icon,
+        agent_type: guest.agent_type,
+        provider_id: guest.provider_id,
+        model_name: guest.model_name,
+        isModerator: false,
+      })),
+    ];
+  }
+
+  private waitForQuestion(question: MeetingQuestion): Promise<string> {
+    this.commit({
+      pendingQuestion: question,
+      runState: 'awaiting_user',
+      activity: 'awaiting_user',
+      activeSlotId: null,
+    });
+    return new Promise<string>((resolve) => {
+      let settled = false;
+      const cleanup = (): void => settle('');
+      const settle = (answer: string): void => {
+        if (settled) return;
+        settled = true;
+        const cleanupIndex = this.loopUnsubs.indexOf(cleanup);
+        if (cleanupIndex >= 0) this.loopUnsubs.splice(cleanupIndex, 1);
+        resolve(answer);
+      };
+      this.questionGate = settle;
+      this.loopUnsubs.push(cleanup);
     });
   }
 
-  /**
-   * The renderer-side moderated debate. Drives moderator + all panelists as equal
-   * single-turn experts: opening → round 1 (立论) → PAUSE → round 2 (交锋) → PAUSE →
-   * synthesis. Every turn streams into the transcript; the boss reads + continues
-   * between rounds. Cancellable between turns and during pauses.
-   */
-  private async runLocalMeeting(myRun: number, topic: string, form: MeetingForm, reference?: string): Promise<void> {
+  /** Host-driven discussion loop. Every iteration produces exactly one meaningful next action. */
+  private async runDynamicMeeting(
+    myRun: number,
+    topic: string,
+    form: MeetingForm,
+    reference?: string,
+    resumeRecord?: MeetingRecord
+  ): Promise<void> {
     const stale = () => this.runSeq !== myRun;
-    // A run that was already superseded must not touch shared state — nothing is
-    // created yet, so just bail (otherwise it would clobber the live run's teardown).
     if (stale()) return;
-    // This run's own conversation map. Wire teardown to it BEFORE the build so a
-    // cancel during the build window can still stop+remove whatever's created so far.
     const convs = new Map<string, string>();
     this.activeTeardown = (stop: boolean) => this.releaseConvs(convs, stop);
     try {
-      const parts = await this.buildParticipants(myRun, convs);
-      if (!parts || stale()) return;
-      const { mod, panel } = parts;
-      // Assign each panelist a DISTINCT angle (round-robin) so the debate has real
-      // perspective diversity instead of everyone saying the same thing.
-      // Optional department template: overrides the lens set + frames the opening.
-      const dept = resolveDepartment(this.state.departmentId);
-      const lenses = dept && dept.lenses.length > 0 ? dept.lenses : PANEL_LENSES;
-      const lensByPanel = new Map(panel.map((p, i) => [p.id, lenses[i % lenses.length]]));
-      const briefs: PanelistBrief[] = panel.map((p) => ({ name: p.name, lens: lensByPanel.get(p.id) }));
-      const transcriptText = () =>
-        this.state.transcript
-          .filter((t) => t.text.trim())
-          .map((t) => `${t.name}（${t.phaseLabel}）：${t.text}`)
-          .join('\n\n');
-      const speak = async (p: Participant, label: string, prompt: string, parallel = false): Promise<void> => {
-        if (stale()) return;
-        const tid = this.addTurn(p, label, parallel);
-        const text = await this.askTurn(p.conversationId, tid, prompt);
-        if (stale()) return;
-        this.updateTurn(tid, { text, status: text ? 'done' : 'error' });
-        this.commit({ turnsCompleted: this.state.turnsCompleted + 1, activeSlotId: null });
-      };
-
-      // The backbone reuses speak / transcriptText / the moderator recap + PAUSE
-      // (boss reads, optionally interjects, clicks 继续讨论), so every form is paced
-      // like a real meeting: ① 并行立场 → ② 交锋讨论(form-specific) → ③ 综合决议.
-      const pauseAndWait = async (round: number, stage: string): Promise<boolean> => {
-        if (!stale()) {
-          await speak(mod, '阶段小结', buildRoundPausePrompt({ topic, round, stage, recentContext: transcriptText() }));
-        }
-        await this.waitForContinue(myRun);
-        return !stale();
-      };
-      const eachPanelist = async (label: string, prompt: (p: Participant) => string): Promise<void> => {
-        for (const p of panel) {
-          if (stale()) break;
-          await speak(p, label, prompt(p));
-        }
-      };
-
-      const refNote = reference ? `\n\n${reference}\n\n请充分参考上述背景资料。` : '';
-      const framingNote = dept?.framing ? `\n\n${dept.framing}` : '';
-      // The leader opens the chamber, decomposes the boss's question, and throws
-      // those questions to all experts. The leader does not join the first parallel wall.
-      await speak(mod, '开场', buildModeratorOpeningPrompt(topic, briefs) + framingNote + refNote);
-      if (stale()) return;
-      // ① 并行立场 — experts answer simultaneously; the leader waits to summarize.
-      const openingPosition = (p: Participant): string => {
-        const lens = lensByPanel.get(p.id);
-        if (form === 'tournament') return buildProposalPrompt({ topic, persona: p.name, lens, reference }) + refNote;
-        if (form === 'diverge') return buildDivergePrompt({ topic, persona: p.name, lens }) + refNote;
-        return buildPanelistPositionPrompt({ topic, persona: p.name, lens, priorContext: '' }) + refNote;
-      };
-      // Fire every opening turn up-front (all appear at once), then stream concurrently.
-      await Promise.all(panel.map((p) => speak(p, '并行立场', openingPosition(p), true)));
-      if (!(await pauseAndWait(1, '并行立场'))) return;
-
-      // ② Adaptive debate — moderator dynamically drives the discussion.
-      const panelNames = panel.map((p) => p.name);
-      const MAX_DEBATE_ROUNDS = 5;
-      for (let debateRound = 1; debateRound <= MAX_DEBATE_ROUNDS; debateRound++) {
-        if (stale()) return;
-        const movePrompt = buildModeratorDebateMovePrompt({
-          topic,
-          form,
-          round: debateRound,
-          fullTranscript: transcriptText(),
-          panelNames,
-          refNote: refNote || undefined,
-        });
-        const moveTurnId = this.addTurn(mod, `交锋·第${debateRound}轮`);
-        const moveText = await this.askTurn(mod.conversationId, moveTurnId, movePrompt);
-        if (stale()) return;
-        this.updateTurn(moveTurnId, { text: moveText, status: moveText ? 'done' : 'error' });
-        const move = parseModeratorMove(moveText, panelNames);
-        if (move.conclude) break;
-        // Drive ALL panelists every round — @mentions are additive signals, not exclusive.
-        // Named experts get a targeted prompt; everyone else gets the general challenge.
-        const named = new Set(move.targetNames);
-        for (const p of panel) {
-          if (stale()) return;
-          const isNamed = named.has(p.name);
-          const prompt = isNamed
-            ? [
-                `你是专家「${p.name}」。主持人点名向你追问，请直面回答，不要回避或打太极：`,
-                `议题：${topic}`,
-                refNote ? `\n【背景参考资料】：\n${refNote}` : '',
-                '',
-                `主持人的追问：\n${move.challenge}`,
-                '',
-                '直接回应，有锋芒。如果你之前的观点确实有漏洞，坦然承认并调整。',
-              ].join('\n')
-            : [
-                `你是专家「${p.name}」。主持人正在推动新一轮讨论，请从你的视角回应：`,
-                `议题：${topic}`,
-                refNote ? `\n【背景参考资料】：\n${refNote}` : '',
-                '',
-                `主持人的追问（${named.size > 0 ? `点名了 ${Array.from(named).join('、')}` : '面向全体'}）：\n${move.challenge || '请各位专家基于前面的讨论继续深入发表观点。'}`,
-                '',
-                '直接回应。可以反驳主持人、可以回应被点名专家的观点、也可以提出完全不同的视角。',
-              ].join('\n');
-          await speak(p, isNamed ? '回应主持' : '交锋回应', prompt);
-        }
-        await speak(
-          mod,
-          '本轮回应小结',
-          buildRoundPausePrompt({
-            topic,
-            round: debateRound + 1,
-            stage: '交锋',
-            recentContext: transcriptText(),
+      const snapshot = resumeRecord?.participantSnapshot?.length
+        ? resumeRecord.participantSnapshot
+        : this.currentParticipantSnapshot();
+      const parts = await this.buildParticipants(myRun, convs, snapshot);
+      if (!parts || stale()) {
+        Message.error(
+          i18n.t('team.meeting.deepDiscussion.resumeUnavailable', {
+            defaultValue: '无法恢复原参会阵容，请检查主持人、顾问、模型和 Provider 配置。',
           })
         );
-        await this.waitForContinue(myRun);
-        if (stale()) return;
+        if (!stale()) this.commit({ phase: resumeRecord ? 'paused' : 'idle', runState: 'stopped', activity: 'paused' });
+        return;
       }
+      const { mod, panel } = parts;
+      const lenses = resolveDepartment(this.state.departmentId)?.lenses ?? PANEL_LENSES;
+      const lensByPanel = new Map(panel.map((participant, index) => [participant.id, lenses[index % lenses.length]]));
+      const panelNames = panel.map((participant) => participant.name);
+      const minimumAdvisorContributions = Math.min(1, panel.length);
+      let advisorContributionsSinceUser = 0;
+      const consultedSinceUser = new Set<string>();
+      const transcriptText = () =>
+        this.state.transcript
+          .filter((turn) => turn.text.trim())
+          .map((turn) => `${turn.name}（${turn.phaseLabel}）：${turn.text}`)
+          .join('\n\n');
+      const recordId = resumeRecord?.id ?? this.state.activeRecordId ?? `m-${Date.now()}`;
+      const recordTs = resumeRecord?.ts ?? Date.now();
 
-      // ③ 综合决议
-      if (!stale()) {
-        const synthPrompt =
-          buildLocalSynthesisPrompt(topic, transcriptText()) +
-          (refNote ? `\n\n【注意：请综合参考以下背景资料进行最终判断】\n${refNote}` : '');
-        const tid = this.addTurn(mod, '综合');
-        const synth = await this.askTurn(mod.conversationId, tid, synthPrompt);
-        if (stale()) return;
-        this.updateTurn(tid, { text: synth, status: synth ? 'done' : 'error' });
-        const options = parseResolutionOptions(synth);
-        const plan = parsePlan(synth) || stripResolutionMarkers(synth);
-        this.commit({ phase: 'resolution', runState: 'awaiting_decision', activeSlotId: null, options, plan });
-        const recordId = `m-${Date.now()}`;
-        if (plan.trim() || options.length > 0) {
-          const s = this.state;
-          appendHistory(this.team.id, {
-            id: recordId,
-            topic: s.topic,
-            form: s.form,
-            plan,
-            options,
-            transcript: s.transcript,
-            decidedOptionId: s.decidedOptionId,
-            archivedPath: s.archivedPath,
-            ts: Date.now(),
+      const persistRecord = (status: 'active' | 'paused' | 'completed'): void => {
+        const state = this.state;
+        const record: MeetingRecord = {
+          id: recordId,
+          topic: state.topic,
+          form: state.form,
+          plan: state.plan,
+          options: state.options,
+          transcript: state.transcript,
+          decidedOptionId: state.decidedOptionId,
+          archivedPath: state.archivedPath,
+          ts: recordTs,
+          status,
+          discussionState: state.discussionState,
+          participantSnapshot: snapshot,
+        };
+        const existing = readHistory(this.team.id).some((item) => item.id === recordId);
+        if (existing) patchHistoryRecord(this.team.id, recordId, record);
+        else appendHistory(this.team.id, record);
+      };
+      const speak = async (
+        participant: Participant,
+        label: string,
+        prompt: string,
+        kind: MeetingTurn['kind']
+      ): Promise<string> => {
+        const turnId = this.addTurn(participant, label, false, kind);
+        const text = await this.askTurn(participant.conversationId, turnId, prompt);
+        if (stale()) return text;
+        this.updateTurn(turnId, { text, status: hasValidMeetingSpeech(text) ? 'done' : 'error' });
+        this.commit({ turnsCompleted: this.state.turnsCompleted + 1, activeSlotId: null });
+        persistRecord('active');
+        return text;
+      };
+      const appendSystemTurn = (label: string, text: string, kind: MeetingTurn['kind']): void => {
+        this.commit({
+          transcript: [
+            ...this.state.transcript,
+            {
+              id: `t-${this.state.transcript.length}-system`,
+              participantId: 'system',
+              name: label,
+              agent_type: 'system',
+              isModerator: false,
+              phaseLabel: label,
+              text,
+              status: 'done',
+              kind,
+            },
+          ],
+        });
+        persistRecord('active');
+      };
+
+      this.commit({
+        activeRecordId: recordId,
+        participantSnapshot: snapshot,
+        phase: 'running',
+        runState: 'running',
+        activity: resumeRecord ? 'aligning' : 'aligning',
+      });
+      persistRecord('active');
+      let firstAction = true;
+      while (!stale()) {
+        if (this.pauseRequested) {
+          this.commit({
+            phase: 'paused',
+            runState: 'stopped',
+            activity: 'paused',
+            pendingQuestion: null,
+            activeSlotId: null,
           });
+          persistRecord('paused');
+          return;
         }
-        if (plan.trim()) {
-          void this.archivePlan(plan, this.state.topic).then((archivedPath) => {
-            if (!stale() && archivedPath) {
-              this.commit({ archivedPath });
-              patchHistoryRecord(this.team.id, recordId, { archivedPath });
-            }
+        if (this.finishRequested) {
+          this.commit({ activity: 'finishing', runState: 'running', pendingQuestion: null });
+          const notes = await speak(
+            mod,
+            i18n.t('team.meeting.deepDiscussion.notesTitle', { defaultValue: '讨论纪要' }),
+            buildDiscussionNotesPrompt(topic, transcriptText()),
+            'notes'
+          );
+          if (stale()) return;
+          const notesText = hasValidMeetingSpeech(notes) ? notes : transcriptText();
+          this.commit({
+            phase: 'completed',
+            runState: 'stopped',
+            activity: 'completed',
+            plan: notesText,
+            pendingQuestion: null,
+            activeSlotId: null,
           });
+          persistRecord('completed');
+          return;
+        }
+
+        this.commit({ activity: firstAction ? 'aligning' : 'moderating', runState: 'running' });
+        const turnId = this.addTurn(
+          mod,
+          firstAction
+            ? i18n.t('team.meeting.deepDiscussion.activity.aligning', { defaultValue: '目标对齐' })
+            : i18n.t('team.meeting.deepDiscussion.activity.moderating', { defaultValue: '主持研判' }),
+          false,
+          'moderator_action'
+        );
+        const prompt = buildDynamicModeratorPrompt({
+          topic,
+          form,
+          panelNames,
+          transcript: transcriptText(),
+          referenceContext: this.referenceContext || reference,
+          opening: firstAction && !resumeRecord,
+          resumed: firstAction && Boolean(resumeRecord),
+          discussionState: this.state.discussionState,
+          advisorContributionsSinceUser,
+          minimumAdvisorContributions,
+        });
+        let raw = await this.askTurn(mod.conversationId, turnId, prompt);
+        if (stale()) return;
+        let parsed = parseDynamicModeratorAction(raw, panelNames, `q-${Date.now()}`);
+        if (!parsed) {
+          raw = await this.askTurn(mod.conversationId, turnId, buildModeratorActionRepairPrompt(panelNames));
+          if (stale()) return;
+          parsed = parseDynamicModeratorAction(raw, panelNames, `q-${Date.now()}`);
+        }
+        if (!parsed) {
+          parsed = {
+            displayText: i18n.t('team.meeting.deepDiscussion.fallbackPrompt', {
+              defaultValue:
+                '### 核心判断\n当前信息仍有分歧，不宜把分析责任交还给你。\n\n### 判断依据\n先让不同视角交叉验证，能更快暴露关键假设。\n\n### 下一步\n我先组织相关顾问会商，再给出可判断的结论。',
+            }),
+            discussionState: this.state.discussionState,
+            action: {
+              type: 'consult_advisors',
+              targetNames: panelNames.slice(0, Math.max(minimumAdvisorContributions, 1)),
+              instruction: '围绕当前未决问题交叉分析；后发言者必须回应前序观点，并形成可执行建议。',
+            },
+          };
+        }
+        if (
+          parsed.action.type === 'ask_user' &&
+          !firstAction &&
+          advisorContributionsSinceUser < minimumAdvisorContributions
+        ) {
+          const freshTargets = panelNames.filter((name) => !consultedSinceUser.has(name));
+          const targetNames = [...freshTargets, ...panelNames.filter((name) => consultedSinceUser.has(name))].slice(
+            0,
+            Math.max(minimumAdvisorContributions, 1)
+          );
+          parsed = {
+            ...parsed,
+            displayText: `${parsed.displayText}\n\n在请你补充之前，我先让不同视角把这个判断交叉验证清楚。`,
+            action: {
+              type: 'consult_advisors',
+              targetNames,
+              instruction:
+                '针对主持人的核心判断进行交叉验证。请明确赞同或反驳前序观点，补充证据、风险边界和可执行建议。',
+            },
+          };
+        }
+        this.updateTurn(turnId, {
+          text: parsed.displayText,
+          status: 'done',
+          insightSummary: parsed.discussionState.summary,
+          question: parsed.action.type === 'ask_user' ? parsed.action.question : undefined,
+        });
+        this.commit({
+          discussionState: parsed.discussionState,
+          turnsCompleted: this.state.turnsCompleted + 1,
+          activeSlotId: null,
+        });
+        persistRecord('active');
+        firstAction = false;
+
+        if (parsed.action.type === 'ask_user') {
+          await this.waitForQuestion(parsed.action.question);
+          advisorContributionsSinceUser = 0;
+          consultedSinceUser.clear();
+          continue;
+        }
+        if (parsed.action.type === 'suggest_close') {
+          const question: MeetingQuestion = {
+            id: `q-close-${Date.now()}`,
+            prompt: parsed.action.reason || parsed.displayText,
+            options: [
+              {
+                id: 'continue',
+                label: i18n.t('team.meeting.deepDiscussion.closeOptions.continue', { defaultValue: '继续深挖' }),
+              },
+              {
+                id: 'shift',
+                label: i18n.t('team.meeting.deepDiscussion.closeOptions.shift', {
+                  defaultValue: '换一个角度讨论',
+                }),
+              },
+              {
+                id: 'pause',
+                label: i18n.t('team.meeting.deepDiscussion.closeOptions.pause', { defaultValue: '暂停并保存' }),
+                action: 'pause',
+              },
+              {
+                id: 'finish',
+                label: i18n.t('team.meeting.deepDiscussion.closeOptions.finish', {
+                  defaultValue: '结束并生成纪要',
+                }),
+                action: 'finish',
+              },
+            ],
+          };
+          this.updateTurn(turnId, { question });
+          await this.waitForQuestion(question);
+          continue;
+        }
+        if (parsed.action.type === 'research') {
+          this.commit({ activity: 'researching' });
+          try {
+            const result = await retrieveKnowledgeContext(parsed.action.query);
+            if (result.context) {
+              const refreshedReference = buildReferenceContext(result.context, []);
+              this.referenceContext = [this.referenceContext, refreshedReference].filter(Boolean).join('\n\n');
+              appendSystemTurn(
+                i18n.t('team.meeting.deepDiscussion.researchLabel', { defaultValue: '资料调查' }),
+                result.context,
+                'research'
+              );
+            } else {
+              appendSystemTurn(
+                i18n.t('team.meeting.deepDiscussion.researchLabel', { defaultValue: '资料调查' }),
+                i18n.t('team.meeting.deepDiscussion.researchEmpty', { defaultValue: '未检索到相关资料。' }),
+                'research'
+              );
+            }
+          } catch {
+            appendSystemTurn(
+              i18n.t('team.meeting.deepDiscussion.researchLabel', { defaultValue: '资料调查' }),
+              i18n.t('team.meeting.deepDiscussion.researchFailed', {
+                defaultValue: '资料检索失败，主持人将基于现有信息继续。',
+              }),
+              'research'
+            );
+          }
+          continue;
+        }
+        this.commit({ activity: 'consulting' });
+        for (const name of parsed.action.targetNames) {
+          if (stale() || this.pauseRequested || this.finishRequested) break;
+          const advisor = panel.find((participant) => participant.name === name);
+          if (!advisor) continue;
+          const response = await speak(
+            advisor,
+            i18n.t('team.meeting.deepDiscussion.activity.consulting', { defaultValue: '顾问讨论' }),
+            buildDynamicAdvisorPrompt({
+              topic,
+              persona: advisor.name,
+              lens: lensByPanel.get(advisor.id),
+              instruction: parsed.action.instruction,
+              transcript: transcriptText(),
+              referenceContext: this.referenceContext || undefined,
+            }),
+            'advisor_response'
+          );
+          if (hasValidMeetingSpeech(response)) {
+            advisorContributionsSinceUser += 1;
+            consultedSinceUser.add(advisor.name);
+          }
         }
       }
     } finally {
-      // Only the CURRENT run owns these flags; a superseded stale run must not touch them.
       if (!stale()) {
         this.running = false;
         this.activeTeardown = null;
+        this.questionGate = null;
       }
-      // Release this run's own conversations (idempotent; cancel may have already).
       this.releaseConvs(convs, false);
     }
   }
@@ -901,22 +1119,23 @@ class MeetingEngine {
   startMeeting = (topic: string, opts?: StartMeetingOptions): void => {
     const trimmed = topic.trim();
     if (!trimmed || !this.moderator || this.running) return;
-    // Claim the run SYNCHRONOUSLY (running is otherwise set deep inside the async
-    // runLocalMeeting, so two starts could slip through the guard before it flips).
+    // Claim the run synchronously so two starts cannot race before participant setup.
     this.running = true;
-    // Bump + capture the generation HERE so a later start makes this run stale, and so
-    // every runLocalMeeting frame carries its own distinct id.
+    // Every dynamic loop carries its own generation id; a later start makes it stale.
     const myRun = ++this.runSeq;
     const form = opts?.form ?? this.state.form;
     const attachments = opts?.attachments ?? [];
     // Settle any pending turn/pause + reclaim leftover conversations, then start the debate.
     this.loopUnsubs.forEach((o) => o());
     this.loopUnsubs.length = 0;
-    this.continueGate = null;
+    this.questionGate = null;
     this.activeTeardown?.(false);
     this.activeTeardown = null;
     this.turnConv.clear();
     this.turnText.clear();
+    this.referenceContext = '';
+    this.pauseRequested = false;
+    this.finishRequested = false;
     this.commit({
       phase: 'running',
       runState: 'running',
@@ -931,6 +1150,11 @@ class MeetingEngine {
       transcript: [],
       awaitingContinue: false,
       archivedPath: null,
+      pendingQuestion: null,
+      discussionState: { summary: '', openQuestions: [] },
+      activity: 'aligning',
+      activeRecordId: null,
+      participantSnapshot: [],
     });
     void this.ensureWarm()
       .then(async () => {
@@ -949,7 +1173,8 @@ class MeetingEngine {
         }
         if (this.runSeq !== myRun) return;
         const reference = buildReferenceContext(knowledgeContext, attachments) || undefined;
-        return this.runLocalMeeting(myRun, trimmed, form, reference);
+        this.referenceContext = [reference, this.referenceContext].filter(Boolean).join('\n\n');
+        return this.runDynamicMeeting(myRun, trimmed, form, reference);
       })
       .catch(() => {
         // Only clear the flag if THIS run is still current (don't clobber a newer run).
@@ -973,28 +1198,110 @@ class MeetingEngine {
           phaseLabel: '插话',
           text: trimmed,
           status: 'done',
+          kind: 'user_answer',
         },
       ],
     });
   };
 
-  /** Boss clicks 继续讨论 during a between-round pause → resume the next round. */
-  continueMeeting = (): void => {
-    const gate = this.continueGate;
-    if (!gate) return;
-    this.continueGate = null;
-    this.commit({ awaitingContinue: false });
-    gate();
+  answerQuestion = (answer: MeetingQuestionAnswer): void => {
+    const question = this.state.pendingQuestion;
+    if (!question || !this.questionGate) return;
+    const option = question.options.find((item) => item.id === answer.optionId);
+    const selectedAnswers = (answer.selections ?? [])
+      .map((selection, index) => {
+        const item = question.items?.find((candidate) => candidate.id === selection.questionId);
+        const selectedOption = item?.options.find((candidate) => candidate.id === selection.optionId);
+        if (!item || !selectedOption) return null;
+        return `${index + 1}. ${item.prompt}：${selectedOption.label}`;
+      })
+      .filter((item): item is string => Boolean(item));
+    const note = answer.text?.trim() ?? '';
+    if (!option && selectedAnswers.length === 0 && !note) return;
+    const response = [selectedAnswers.join('\n'), option?.label, note].filter(Boolean).join('\n\n');
+    this.commit({
+      transcript: [
+        ...this.state.transcript,
+        {
+          id: `t-${this.state.transcript.length}-boss-answer`,
+          participantId: 'boss',
+          name: '老板',
+          agent_type: 'boss',
+          isModerator: false,
+          phaseLabel: '老板回应',
+          text: response,
+          status: 'done',
+          kind: 'user_answer',
+        },
+      ],
+      pendingQuestion: null,
+      runState: 'running',
+      activity: 'moderating',
+    });
+    if (option?.action === 'pause') this.pauseRequested = true;
+    if (option?.action === 'finish') this.finishRequested = true;
+    const gate = this.questionGate;
+    this.questionGate = null;
+    gate(response);
+  };
+
+  pauseMeeting = (): void => {
+    if (!this.running) return;
+    this.pauseRequested = true;
+    this.commit({ activity: 'pausing', pendingQuestion: null });
+    this.questionGate?.('');
+    this.questionGate = null;
+    this.loopUnsubs.forEach((resolve) => resolve());
+    this.loopUnsubs.length = 0;
+  };
+
+  finishMeeting = (): void => {
+    if (!this.running) return;
+    this.finishRequested = true;
+    this.commit({ activity: 'finishing', pendingQuestion: null });
+    this.questionGate?.('');
+    this.questionGate = null;
+    this.loopUnsubs.forEach((resolve) => resolve());
+    this.loopUnsubs.length = 0;
+  };
+
+  resumeMeeting = (recordId: string): void => {
+    const record = readHistory(this.team.id).find((item) => item.id === recordId);
+    if (!record || record.status !== 'paused' || !record.participantSnapshot?.length || this.running) return;
+    this.running = true;
+    this.pauseRequested = false;
+    this.finishRequested = false;
+    const myRun = ++this.runSeq;
+    this.turnConv.clear();
+    this.turnText.clear();
+    this.commit({
+      phase: 'running',
+      runState: 'running',
+      topic: record.topic,
+      form: record.form,
+      plan: '',
+      options: [],
+      transcript: record.transcript,
+      pendingQuestion: null,
+      discussionState: record.discussionState ?? { summary: '', openQuestions: [] },
+      participantSnapshot: record.participantSnapshot,
+      activeRecordId: record.id,
+      activity: 'aligning',
+    });
+    void this.runDynamicMeeting(myRun, record.topic, record.form, undefined, record);
   };
 
   cancel = (): void => {
     this.runSeq++; // invalidate the active run; the awaiting frame unwinds via loopUnsubs
     this.loopUnsubs.forEach((o) => o());
     this.loopUnsubs.length = 0;
-    this.continueGate = null;
+    this.questionGate = null;
     this.activeTeardown?.(true); // stop + remove this run's conversations
     this.activeTeardown = null;
     this.running = false;
+    this.pauseRequested = false;
+    this.finishRequested = false;
+    this.referenceContext = '';
     // Settle any turn still showing the "speaking" spinner (its streamed partial text
     // is kept; empty → 未发言), so the transcript doesn't spin forever after cancel.
     const transcript: MeetingTurn[] = this.state.transcript.map((t) =>
@@ -1007,6 +1314,8 @@ class MeetingEngine {
       runId: null,
       transcript,
       awaitingContinue: false,
+      pendingQuestion: null,
+      activity: null,
     });
   };
 
@@ -1025,9 +1334,10 @@ class MeetingEngine {
   };
 
   openRecord = (rec: MeetingRecord): void => {
+    if (this.running) return;
     this.commit({
-      phase: 'resolution',
-      runState: 'awaiting_decision',
+      phase: rec.status === 'paused' ? 'paused' : rec.status === 'completed' ? 'completed' : 'resolution',
+      runState: 'stopped',
       topic: rec.topic,
       form: rec.form,
       plan: rec.plan,
@@ -1037,6 +1347,11 @@ class MeetingEngine {
       activeSlotId: null,
       runId: null,
       archivedPath: rec.archivedPath ?? null,
+      discussionState: rec.discussionState ?? { summary: '', openQuestions: [] },
+      participantSnapshot: rec.participantSnapshot ?? [],
+      activeRecordId: rec.id,
+      pendingQuestion: null,
+      activity: rec.status === 'paused' ? 'paused' : rec.status === 'completed' ? 'completed' : null,
     });
   };
 
@@ -1060,6 +1375,8 @@ class MeetingEngine {
           return;
         }
         const id = `t-${this.state.transcript.length}-system-kb`;
+        const refreshedReference = buildReferenceContext(result.context, []);
+        this.referenceContext = [this.referenceContext, refreshedReference].filter(Boolean).join('\n\n');
         this.commit({
           transcript: [
             ...this.state.transcript,
@@ -1088,12 +1405,15 @@ class MeetingEngine {
     this.runSeq++; // invalidate the active run; the awaiting frame unwinds via loopUnsubs
     this.loopUnsubs.forEach((o) => o());
     this.loopUnsubs.length = 0;
-    this.continueGate = null;
+    this.questionGate = null;
     this.activeTeardown?.(false); // remove this run's conversations (reset = remove only)
     this.activeTeardown = null;
     this.turnConv.clear();
     this.turnText.clear();
+    this.referenceContext = '';
     this.running = false;
+    this.pauseRequested = false;
+    this.finishRequested = false;
     this.commit({ ...EMPTY_MEETING_STATE, form: this.state.form });
   };
 
@@ -1107,7 +1427,10 @@ class MeetingEngine {
       history: readHistory(this.team.id),
       startMeeting: this.startMeeting,
       interject: this.interject,
-      continueMeeting: this.continueMeeting,
+      answerQuestion: this.answerQuestion,
+      pauseMeeting: this.pauseMeeting,
+      finishMeeting: this.finishMeeting,
+      resumeMeeting: this.resumeMeeting,
       cancel: this.cancel,
       decide: this.decide,
       exportPlan: this.exportPlan,

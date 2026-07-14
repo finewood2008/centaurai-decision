@@ -17,7 +17,7 @@ describe('verifyBundledCentauraiCoreResources', () => {
   const releaseManifest = (releaseType: 'centaur' | 'legacy') => ({
     repository: releaseType === 'centaur' ? 'finewood2008/centaurai-core' : 'iOfficeAI/AionCore',
     releaseType,
-    version: releaseType === 'centaur' ? 'v0.1.48' : 'v0.1.24',
+    version: releaseType === 'centaur' ? 'v0.2.2' : 'v0.1.24',
     commit: 'a'.repeat(40),
     sha256: 'b'.repeat(64),
     source: { asset: 'fixture.tar.gz' },

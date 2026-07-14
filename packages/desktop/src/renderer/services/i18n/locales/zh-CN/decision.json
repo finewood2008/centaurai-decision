@@ -1,6 +1,7 @@
 {
   "subtitle": "随时召集顾问开决策会议室，听取多方意见、快速拍板。",
   "startMeeting": "发起决策会议",
+  "developmentBadge": "开发版",
   "greeting": {
     "morning": "早上好，老板",
     "afternoon": "下午好，老板",
@@ -116,7 +117,7 @@
   "roomTitle": "决策会议室",
   "roomSubtitle": "AI 顾问交锋，你来拍板",
   "emptyTitle": "决策会议室 · 召集顾问开会",
-  "emptyHint": "把一个决策摆上桌面。顾问会从不同席位各持立场、互相攻防，最后把真正需要你拍板的取舍摆出来。",
+  "emptyHint": "主持人会先确认你的真实意图，再组织多位顾问交叉讨论；过程中会在关键节点邀请你集中确认不超过 3 个问题。",
   "createTitle": "发起一场决策会议",
   "createSubtitle": "先定议题，再安排不同立场的 AI 顾问入席。",
   "createConfirm": "发起会议",
@@ -147,6 +148,8 @@
   "deptDecide": "决议",
   "room": {
     "status": {
+      "paused": "已暂停",
+      "completed": "讨论已完成",
       "idle": "待发起",
       "running": "交锋中",
       "awaiting": "等待你的方向",
@@ -188,6 +191,7 @@
   },
   "stage": {
     "parallel": "各陈主张",
+    "position": "顾问立场",
     "debate": "观点交锋",
     "redteamAttack": "红队猛攻",
     "crossreview": "互相评案",

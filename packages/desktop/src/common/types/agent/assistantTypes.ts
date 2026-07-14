@@ -7,7 +7,7 @@
 // Mirror of aionui-api-types/src/assistant.rs.
 // Any shape change on either side requires a same-PR update on the other.
 
-export type AssistantSource = 'builtin' | 'user' | 'extension';
+export type AssistantSource = 'builtin' | 'generated' | 'user' | 'extension';
 
 export interface Assistant {
   id: string;
@@ -19,6 +19,10 @@ export interface Assistant {
   avatar?: string;
   enabled: boolean;
   sort_order: number;
+  /** Core v2 execution-agent identity used by team creation. */
+  agent_id?: string;
+  /** Core v2's authoritative team-mode availability decision. */
+  team_selectable?: boolean;
   preset_agent_type: string;
   enabled_skills: string[];
   custom_skill_names: string[];
@@ -36,6 +40,8 @@ export interface CreateAssistantRequest {
   name: string;
   description?: string;
   avatar?: string;
+  agent_id?: string;
+  /** Legacy manifest hint; convert to agent_id before sending to Core v2. */
   preset_agent_type?: string;
   enabled_skills?: string[];
   custom_skill_names?: string[];

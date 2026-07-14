@@ -122,6 +122,7 @@
   "no_presets": "No custom presets generated yet.",
   "edit_preset": "Edit Preset",
   "agent_name": "Agent Name",
+  "agent_namePlaceholder": "Enter agent name",
   "rule_content": "Rule Content / Instructions",
   "delete_preset_confirm": "Are you sure you want to delete this preset?",
   "cssTheme": {
@@ -922,6 +923,12 @@
     "loginRequired": "Please login with WeChat QR code first"
   },
   "wecom": {
+    "wsTitle": "WeCom WebSocket connection",
+    "wsHint": "Use the WeCom Intelligent Bot long-connection (WebSocket) mode. No callback URL, domain, or public IP is required.",
+    "botId": "Bot ID",
+    "botIdDesc": "Bot ID from WeCom Intelligent Bot long-connection mode",
+    "secret": "Secret",
+    "secretDesc": "Secret from WeCom Intelligent Bot long-connection mode",
     "callbackTitle": "WeCom callback URL",
     "callbackLocal": "Local",
     "callbackLan": "LAN",
@@ -954,10 +961,12 @@
     "agentDesc": "Used for WeCom conversations"
   },
   "extensionAssistantReadonly": "Extension assistants are read-only. You can duplicate it and edit the copy.",
+  "extensionSkills": "Extension Skills",
+  "extensionSkillsBadge": "Extension",
   "agentManagement": {
     "localAgents": "Local Agents",
     "remoteAgents": "Remote Agents",
-    "localAgentsDescription": "直连模型 is the built-in agent and ships with the app — no install needed. Other agents are detected only after their CLI is installed locally.",
+    "localAgentsDescription": "Agent state is managed by CentaurAI Core. Missing, unchecked, and offline agents remain in the catalog with diagnostics.",
     "localAgentsSetupLink": "Setup guide",
     "goToChat": "Start Chat",
     "remoteAgentsDescription": "Only remote OpenClaw connections are supported for now. Other agents are in development.",
@@ -977,12 +986,17 @@
     "detectCustomAgent": "Detect Custom Agent",
     "editCustomAgent": "Edit Custom Agent",
     "localAgentsEmpty": "No local agents detected",
-    "detected": "Detected",
+    "detected": "Agent Catalog",
     "customAgents": "Custom Agents",
     "custom": "Custom",
     "addCustomAgent": "Add Custom Agent",
     "customEmpty": "No custom agents configured. Click \"Add Custom Agent\" to create one.",
-    "disabled": "Disabled"
+    "disabled": "Disabled",
+    "statusOnline": "Online",
+    "statusUnchecked": "Installed · Not checked",
+    "statusOffline": "Offline",
+    "statusMissing": "Not installed",
+    "testConnection": "Test Connection"
   },
   "remoteAgent": {
     "title": "Remote Agents",

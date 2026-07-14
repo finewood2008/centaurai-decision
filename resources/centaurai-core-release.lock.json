@@ -1,13 +1,13 @@
 {
   "repository": "finewood2008/centaurai-core",
-  "tag": "v0.1.48",
-  "commit": "a072452c76f60aa881d7fe9cecc1999bf552462d",
+  "tag": "v0.2.2",
+  "commit": "d667ae51520795d550e0b6a14d7cbddb967f68ec",
   "assets": {
-    "centaurai-core-v0.1.48-aarch64-apple-darwin.tar.gz": "7de4ecf5934efe762434ef1f98a5fdeff27e5c6c24436b40f5ee86e103d1e631",
-    "centaurai-core-v0.1.48-aarch64-pc-windows-msvc.zip": "f6671200c04c4efe723a1fad1f3423fd28ecd4bff361f632905b6aacd0c8da5e",
-    "centaurai-core-v0.1.48-aarch64-unknown-linux-gnu.tar.gz": "959b0ed9122a0bfbeddf5a9cfe15bf25e9d75cc647922974bdeeb41525f769db",
-    "centaurai-core-v0.1.48-x86_64-apple-darwin.tar.gz": "d3123f0d21ed5787cbbe45a957f76230767588bfde35e0011ffffb7add78f4be",
-    "centaurai-core-v0.1.48-x86_64-pc-windows-msvc.zip": "123ea78772def6074d82d052eb803b1dc9da745fffe7461fdb3633da769607b8",
-    "centaurai-core-v0.1.48-x86_64-unknown-linux-gnu.tar.gz": "c788b4ce8150baa74401bb17a3edc2257db7f439b6aa87ad1643e9b43497adc1"
+    "centaurai-core-v0.2.2-aarch64-apple-darwin.tar.gz": "d282e21b13a86c7cb0d44a6c70ca72fdaf7db004c58252b078c9909b52b5730d",
+    "centaurai-core-v0.2.2-aarch64-pc-windows-msvc.zip": "2b620affbcfc40bc75079e8a49dceb70700d7e163b360292c683ea6ee17e809e",
+    "centaurai-core-v0.2.2-aarch64-unknown-linux-gnu.tar.gz": "51d72d31741cd2ff51256e9d069b4abdd43a0c66e99249d7c12ad9bd54df05f1",
+    "centaurai-core-v0.2.2-x86_64-apple-darwin.tar.gz": "a8ae7c2a017bdaf3343132a0da64e7607218533ba8e5f2ea8c7caaf7412722de",
+    "centaurai-core-v0.2.2-x86_64-pc-windows-msvc.zip": "5dbb54de4eb15b8e4ee4d088c1a0b5a56218642f15a7678f0ef7e6970652333c",
+    "centaurai-core-v0.2.2-x86_64-unknown-linux-gnu.tar.gz": "562555ee1a7bacf10bb73d8cc1b16ac24aa0d2665725d36773b332b6755853db"
   }
 }

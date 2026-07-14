@@ -1,4 +1,5 @@
 import { ipcBridge } from '@/common';
+import { getProviderModelFetchStrategy } from '@/common/types/provider/providerApi';
 import useSWR from 'swr';
 
 // Gemini 模型排序函数：Pro 优先，版本号降序
@@ -41,26 +42,31 @@ const useModeModeList = (
     access_key_id?: string;
     secret_access_key?: string;
     profile?: string;
-  }
+  },
+  providerId?: string
 ) => {
   return useSWR(
-    [platform + '/models', { platform, base_url, api_key, try_fix, bedrock_config }],
-    async ([_url, { platform, base_url, api_key, try_fix, bedrock_config }]): Promise<{
+    [platform + '/models', { platform, base_url, api_key, try_fix, bedrock_config, providerId }],
+    async ([_url, { platform, base_url, api_key, try_fix, bedrock_config, providerId: storedProviderId }]): Promise<{
       models: { label: string; value: string }[];
       fix_base_url?: string;
     }> => {
-      // Only call the backend when we have credentials it can actually use:
-      // - bedrock: bedrock_config carries the credentials (api_key not required)
-      // - everything else: api_key is mandatory per backend validator
-      const hasUsableCredentials = platform === 'bedrock' ? !!bedrock_config : !!api_key;
-      if (hasUsableCredentials) {
-        const res = await ipcBridge.mode.fetchModelList.invoke({
-          base_url,
-          api_key: api_key ?? '',
-          try_fix,
-          platform,
-          bedrock_config,
-        });
+      const strategy = getProviderModelFetchStrategy(
+        api_key,
+        storedProviderId,
+        platform === 'bedrock' && !!bedrock_config
+      );
+      if (strategy !== 'none') {
+        const res =
+          strategy === 'stored-provider'
+            ? await ipcBridge.mode.fetchProviderModels.invoke({ id: storedProviderId!, try_fix })
+            : await ipcBridge.mode.fetchModelList.invoke({
+                base_url,
+                api_key: api_key ?? '',
+                try_fix,
+                platform,
+                bedrock_config,
+              });
         let modelList = res.models.map((v) => {
           // Handle both string and object formats (Bedrock returns objects with id and name)
           if (typeof v === 'string') {

@@ -25,6 +25,7 @@
     "deleteTitle": "删除",
     "deleteConfirm": "确定删除该对话吗？",
     "confirmDelete": "删除",
+    "deleting": "删除中...",
     "cancelDelete": "取消",
     "editName": "编辑名称",
     "saveName": "保存",

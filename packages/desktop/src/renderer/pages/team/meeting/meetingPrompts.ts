@@ -5,7 +5,13 @@
 // team leader; panelists are the teammates. Prompts are intentionally short to
 // keep the meeting snappy and the token cost bounded.
 
-import type { MeetingForm, MeetingResolutionOption } from './meetingTypes';
+import type {
+  MeetingDiscussionState,
+  MeetingForm,
+  MeetingModeratorAction,
+  MeetingQuestion,
+  MeetingResolutionOption,
+} from './meetingTypes';
 
 /** Machine markers the moderator must use when emitting resolution options. */
 const OPTION_OPEN = '@@OPTION@@';
@@ -13,9 +19,253 @@ const OPTION_CLOSE = '@@END@@';
 /** Machine markers wrapping the final synthesized 方案书 (markdown). */
 const PLAN_OPEN = '@@PLAN@@';
 const PLAN_CLOSE = '@@END_PLAN@@';
+const ACTION_OPEN = '@@MEETING_ACTION@@';
+const ACTION_CLOSE = '@@END_MEETING_ACTION@@';
 
 /** A panelist descriptor used to build the roster line in prompts. */
 export type PanelistBrief = { name: string; expertise?: string; lens?: string };
+
+export type ParsedModeratorAction = {
+  displayText: string;
+  action: MeetingModeratorAction;
+  discussionState: MeetingDiscussionState;
+};
+
+type RawModeratorAction = {
+  type?: string;
+  question?: string;
+  questions?: Array<
+    | string
+    | {
+        prompt?: string;
+        options?: Array<{ label?: string; description?: string }>;
+      }
+  >;
+  options?: Array<{ label?: string; description?: string }>;
+  targetNames?: string[];
+  instruction?: string;
+  query?: string;
+  reason?: string;
+  stateSummary?: string;
+  openQuestions?: string[];
+};
+
+export function buildFallbackMeetingQuestion(
+  id: string,
+  prompt: string,
+  options: MeetingQuestion['options']
+): MeetingQuestion {
+  return { id, prompt, options };
+}
+
+/** Parse the moderator's visible narrative plus one machine-readable next action. */
+export function parseDynamicModeratorAction(
+  text: string,
+  panelNames: string[],
+  actionId: string
+): ParsedModeratorAction | null {
+  const start = text.indexOf(ACTION_OPEN);
+  const end = text.indexOf(ACTION_CLOSE, start + ACTION_OPEN.length);
+  if (start < 0 || end < 0) return null;
+  let raw: RawModeratorAction;
+  try {
+    raw = JSON.parse(text.slice(start + ACTION_OPEN.length, end).trim()) as RawModeratorAction;
+  } catch {
+    return null;
+  }
+  const displayText = text.slice(0, start).trim();
+  const discussionState: MeetingDiscussionState = {
+    summary: raw.stateSummary?.trim() || displayText,
+    openQuestions: Array.isArray(raw.openQuestions)
+      ? raw.openQuestions.filter((item): item is string => typeof item === 'string' && Boolean(item.trim())).map(String)
+      : [],
+  };
+  if (raw.type === 'ask_user' && raw.question?.trim() && Array.isArray(raw.questions)) {
+    const items = raw.questions
+      .filter(
+        (item): item is Exclude<NonNullable<RawModeratorAction['questions']>[number], string> =>
+          typeof item === 'object' && item !== null && Boolean(item.prompt?.trim()) && Array.isArray(item.options)
+      )
+      .slice(0, 3)
+      .map((item, questionIndex) => ({
+        id: `${actionId}-question-${questionIndex + 1}`,
+        prompt: item.prompt!.trim(),
+        options: item
+          .options!.filter((option) => option?.label?.trim())
+          .slice(0, 4)
+          .map((option, optionIndex) => ({
+            id: `${actionId}-question-${questionIndex + 1}-option-${optionIndex + 1}`,
+            label: option.label!.trim(),
+            description: option.description?.trim() || undefined,
+          })),
+      }))
+      .filter((item) => item.options.length >= 2);
+    if (items.length > 0) {
+      return {
+        displayText,
+        discussionState,
+        action: {
+          type: 'ask_user',
+          question: { id: actionId, prompt: raw.question.trim(), items, options: [] },
+        },
+      };
+    }
+  }
+  if (raw.type === 'ask_user' && raw.question?.trim() && Array.isArray(raw.options)) {
+    const options = raw.options
+      .filter((option) => option?.label?.trim())
+      .slice(0, 4)
+      .map((option, index) => ({
+        id: `${actionId}-${index + 1}`,
+        label: option.label!.trim(),
+        description: option.description?.trim() || undefined,
+      }));
+    if (options.length < 3) return null;
+    const questions = Array.isArray(raw.questions)
+      ? raw.questions
+          .filter((item): item is string => typeof item === 'string' && Boolean(item.trim()))
+          .map((item) => item.trim())
+          .slice(0, 3)
+      : [];
+    if (questions.length < 1) return null;
+    return {
+      displayText,
+      discussionState,
+      action: {
+        type: 'ask_user',
+        question: {
+          id: actionId,
+          prompt: raw.question.trim(),
+          questions: questions.length > 0 ? questions : undefined,
+          options,
+        },
+      },
+    };
+  }
+  if (raw.type === 'consult_advisors' && raw.instruction?.trim() && Array.isArray(raw.targetNames)) {
+    const targetNames = panelNames.filter((name) => raw.targetNames?.includes(name)).slice(0, 2);
+    if (targetNames.length === 0) return null;
+    return {
+      displayText,
+      discussionState,
+      action: { type: 'consult_advisors', targetNames, instruction: raw.instruction.trim() },
+    };
+  }
+  if (raw.type === 'research' && raw.query?.trim()) {
+    return { displayText, discussionState, action: { type: 'research', query: raw.query.trim() } };
+  }
+  if (raw.type === 'suggest_close') {
+    return {
+      displayText,
+      discussionState,
+      action: { type: 'suggest_close', reason: raw.reason?.trim() || displayText },
+    };
+  }
+  return null;
+}
+
+function actionProtocol(panelNames: string[]): string {
+  return [
+    '回复末尾必须输出且只输出一个动作块：',
+    ACTION_OPEN,
+    '{"type":"ask_user | consult_advisors | research | suggest_close","stateSummary":"当前认识","openQuestions":["未决问题"], ...动作字段}',
+    ACTION_CLOSE,
+    'ask_user 字段：question（批量问题标题）、questions（1-3项，绝不能超过 3 项）。questions 每项格式为 {"prompt":"具体问题","options":[{"label":"选项","description":"可选说明"}]}，每题提供 2-4 个独立选项。不要使用所有问题共用一组选项的旧格式。',
+    `consult_advisors 字段：targetNames（只能取 ${panelNames.join('、')}）、instruction。`,
+    'research 字段：query。suggest_close 字段：reason；它只会询问用户，不能自行结束会议。',
+  ].join('\n');
+}
+
+export function buildDynamicModeratorPrompt(params: {
+  topic: string;
+  form: MeetingForm;
+  panelNames: string[];
+  transcript: string;
+  referenceContext?: string;
+  opening?: boolean;
+  resumed?: boolean;
+  discussionState?: MeetingDiscussionState;
+  advisorContributionsSinceUser?: number;
+  minimumAdvisorContributions?: number;
+}): string {
+  const {
+    topic,
+    form,
+    panelNames,
+    transcript,
+    referenceContext,
+    opening,
+    resumed,
+    discussionState,
+    advisorContributionsSinceUser = 0,
+    minimumAdvisorContributions = Math.min(1, panelNames.length),
+  } = params;
+  return [
+    '你是深度讨论的核心主持人，同时也是能独立判断的首席参谋。会议不是采访用户，也不是固定剧本；你的职责是识别根问题、提出有依据的判断、组织顾问交叉讨论，再决定下一步最有信息价值的动作。',
+    `议题：${topic}`,
+    `主持风格：${form}（它只是风格偏好，不是固定流程）`,
+    `可调度顾问：${panelNames.join('、')}`,
+    referenceContext ? `背景资料：\n${referenceContext}` : '',
+    discussionState?.summary ? `上次主持判断：${discussionState.summary}` : '',
+    discussionState?.openQuestions?.length ? `尚未解决：${discussionState.openQuestions.join('；')}` : '',
+    opening || resumed
+      ? '当前处于开场或恢复节点；如果用户意图存在关键缺口，可以直接 ask_user。'
+      : `自用户上次回应后，顾问已贡献 ${advisorContributionsSinceUser} 次；达到 ${minimumAdvisorContributions} 次后才可再次 ask_user。`,
+    transcript ? `完整会议记录：\n${transcript}` : '',
+    opening
+      ? `这是开场。先判断议题是否已经包含明确的决策目标、成功标准和关键约束。只要其中存在会影响分析方向的缺口，就先用 ask_user 集中询问 1-3 个最关键问题；如果信息已经足够明确，再用 consult_advisors 点名 ${Math.min(2, panelNames.length)} 位最相关顾问展开首轮讨论。不要为了走流程而提问。`
+      : '',
+    resumed
+      ? '这是恢复的会议。先说明你理解的进展和当前判断；如果用户接下来想解决的重点不明确，可以先用 ask_user 集中确认 1-3 个问题，否则继续调度顾问。'
+      : '',
+    !opening && !resumed
+      ? `评估最新内容后选择一个最有价值的下一步。通常每轮点名 1-2 位相关顾问，并要求后发言者明确回应前序观点；顾问带来信息增量后，应主动寻找用户参与节点，让用户确认目标、取舍、事实或风险偏好。不要连续多轮只让顾问说，也不要连续追问用户或把分析责任推给用户。`
+      : '',
+    !opening && !resumed && advisorContributionsSinceUser >= 2
+      ? '自用户上次回应后已经连续完成至少两次顾问贡献。本轮必须优先用 ask_user 邀请用户确认关键取舍、事实或风险偏好；只有当前确实没有任何需要用户确认的信息时，才可继续调度顾问。'
+      : '',
+    '动作块之前必须输出有信息增量的主持话语，使用 Markdown，依次包含“### 核心判断”“### 判断依据”“### 下一步”。核心判断要亮明倾向，依据要提炼顾问共识、分歧或证据，不能只复述流程。不要暴露协议或 JSON。',
+    '需要 ask_user 时，优先一次询问 2-3 个相互关联的高价值问题，简单场景可只问 1 个，绝不能超过 3 个；每个问题都要有自己的清晰选项，并在 description 中标出你的推荐及理由。用户回答后应先推进分析，不要立刻再次追问。',
+    actionProtocol(panelNames),
+  ]
+    .filter(Boolean)
+    .join('\n\n');
+}
+
+export function buildModeratorActionRepairPrompt(panelNames: string[]): string {
+  return ['你刚才的动作块无效。不要重复长篇内容，请按协议重新输出一个有效动作。', actionProtocol(panelNames)].join(
+    '\n\n'
+  );
+}
+
+export function buildDynamicAdvisorPrompt(params: {
+  topic: string;
+  persona: string;
+  lens?: string;
+  instruction: string;
+  transcript: string;
+  referenceContext?: string;
+}): string {
+  return [
+    `你是顾问「${params.persona}」（主攻：${params.lens ?? '综合'}）。主持人只在当前问题需要你时点名，请正面完成任务，不要自行扩展会议流程。`,
+    `议题：${params.topic}`,
+    `主持任务：${params.instruction}`,
+    params.referenceContext ? `背景资料：\n${params.referenceContext}` : '',
+    `截至你发言前的会议记录：\n${params.transcript}`,
+    '必须明确引用至少一个前序观点并选择：赞同并补强、反驳并给证据、或指出其遗漏。随后给出你的独立判断、关键依据、风险边界和一条可执行建议；不要只做泛泛总结。直接发言。',
+  ]
+    .filter(Boolean)
+    .join('\n\n');
+}
+
+export function buildDiscussionNotesPrompt(topic: string, transcript: string): string {
+  return [
+    '你是会议主持人。用户主动结束了讨论。请生成讨论纪要，不要强行形成结论、推荐方案或候选拍板卡。',
+    `议题：${topic}`,
+    `会议记录：\n${transcript}`,
+    '使用 Markdown，依次整理：已确认的认识、关键分歧及依据、用户偏好与约束、尚未解决的问题、可选的下一步探索。只输出纪要正文。',
+  ].join('\n\n');
+}
 
 /**
  * Distinct angles assigned (round-robin) to panelists so the debate has REAL
@@ -34,11 +284,11 @@ export const PANEL_LENSES: string[] = [
 
 /** UI metadata for the discussion-format picker. */
 export const MEETING_FORMS: { id: MeetingForm; label: string; hint: string }[] = [
-  { id: 'roundtable', label: '圆桌共识', hint: '并行立场 → 交锋质询 → 综合，通用、平衡' },
-  { id: 'redteam', label: '红蓝对抗', hint: '并行立场 → 红队猛攻找漏洞 → 综合，压力测试' },
-  { id: 'tournament', label: '方案竞标', hint: '并行各出完整方案 → 互评 → 嫁接综合，适合解法空间大' },
-  { id: 'diverge', label: '发散收敛', hint: '并行发散 → 聚类 → 收敛，适合创意探索' },
-  { id: 'deepdive', label: '逐层深挖', hint: '并行初判 → 主持人多轮追问 → 综合，把复杂难题挖到底' },
+  { id: 'roundtable', label: '圆桌共识', hint: '主持倾向平衡各方观点、识别共识与真实分歧' },
+  { id: 'redteam', label: '红蓝对抗', hint: '主持倾向主动攻击假设、暴露风险与论证漏洞' },
+  { id: 'tournament', label: '方案竞标', hint: '主持倾向比较不同路径的机制、代价与适用条件' },
+  { id: 'diverge', label: '发散收敛', hint: '主持倾向探索更多可能性，再帮助用户选择深挖方向' },
+  { id: 'deepdive', label: '逐层深挖', hint: '主持倾向连续追问根因、证据与边界条件' },
 ];
 
 /**
@@ -77,23 +327,21 @@ export function buildModeratorOpeningPrompt(topic: string, panelists: PanelistBr
     '请完成开场（务实有力，可稍长，不要套话）：',
     '1）一两句话点破这个决策【真正的核心张力】是什么（不是泛泛重述题目，而是说清"难就难在哪")；',
     '2）把老板的问题拆成 2-4 个必须回答清楚的关键问题，并明确这些问题分别要抛给哪些专家视角去判断；',
-    '3）说明你不会在第一轮并行发言里抢专家席，你的核心工作是主持、追问、提炼精华，并帮老板看见真正有价值的观点；',
-    '4）明确告诉老板：专家会先并行给出立场，之后你会逐一提炼重点、综合分歧，再邀请老板补充倾向或约束；',
+    '3）说明你不会在第一轮抢顾问席，你的核心工作是主持、追问、提炼精华，并帮老板看见真正有价值的观点；',
+    '4）明确告诉老板：顾问会按席位顺序逐一发言，并承接、引用或反驳前序观点；之后你会提炼重点、综合分歧，再邀请老板补充倾向或约束；',
     '5）邀请老板：如果有特别看重的约束（预算 / 时间 / 风险偏好 / 已定的红线），随时插话，我们会据此调整。',
     '最后把拆解后的问题抛给全体专家开始第一轮。只输出开场词本身。',
   ].join('\n');
 }
 
 /**
- * Moderator's step-① turn. The moderator is an equal contributor: it briefly frames
- * the core tension, then gives its OWN substantive initial judgment (runs after
- * the opening, in parallel with the panel). Optional `framing` injects the chosen
- * department's context.
+ * Optional moderator advisory turn retained for alternate flows. The current
+ * advisor-meeting flow keeps the moderator in the host seat during 顾问立场.
  */
 export function buildModeratorPositionPrompt(topic: string, panelists: PanelistBrief[], framing?: string): string {
   return [
     framing ? framing : '',
-    '你是这场决策会议的主持人，也是首席顾问；开场主持已经完成，现在进入【并行立场】。请你暂时以专家身份发表首席判断，但不要丢掉主持人的全局视角。',
+    '你是这场决策会议的主持人，也是首席顾问；开场主持已经完成，现在进入【顾问立场】。请你暂时以专家身份发表首席判断，但不要丢掉主持人的全局视角。',
     `决策议题：${topic}`,
     `与会专家及其主攻视角：${lensRoster(panelists)}`,
     '',
@@ -614,84 +862,7 @@ export function matchSpeakerName(answer: string, names: string[]): string | null
   return contained ?? null;
 }
 
-// --- Adaptive debate: moderator-driven dynamic rounds -----------------------
-
-export type ModeratorMove = {
-  conclude: boolean;
-  targetNames: string[];
-  challenge: string;
-};
-
-export function buildModeratorDebateMovePrompt(params: {
-  topic: string;
-  form: import('./meetingTypes').MeetingForm;
-  round: number;
-  fullTranscript: string;
-  panelNames: string[];
-  refNote?: string;
-}): string {
-  const { topic, form, round, fullTranscript, panelNames, refNote } = params;
-  const formHints: Record<string, string> = {
-    roundtable: '圆桌共识模式：推动交锋质询，暴露各自论据的强弱，促成共识。',
-    redteam: '红蓝对抗模式：继续猛攻已有方案的漏洞和盲区，不要手下留情。',
-    tournament: '方案竞标模式：对各方案交叉打分、挑战弱项，看哪个方案经得起拷打。',
-    diverge: '发散收敛模式：推动聚类和提炼，把散点想法收拢成可执行的路径。',
-    deepdive: '逐层深挖模式：追问不够深入的点，把模糊的论断挖到具体机制和数字。',
-  };
-  return [
-    '你是这场决策会议的主持人。现在需要你**主动驱动辩论**，而不是被动做小结。',
-    `议题：${topic}`,
-    `当前是第 ${round} 轮交锋。会议模式：${formHints[form] ?? formHints.roundtable}`,
-    `专家名单：${panelNames.join('、')}（你可以 @名字 点名指定谁来回应）`,
-    refNote ? `\n【背景参考资料，请持续参考】：\n${refNote}` : '',
-    '',
-    '== 完整讨论记录 ==',
-    fullTranscript || '（尚未有发言）',
-    '',
-    '请完成两件事（简洁、有力）：',
-    '',
-    '**1) 态势评估（1-3 句话，让老板看懂现状）：**',
-    '- 哪些观点已经站得住脚 / 形成共识？',
-    '- 哪些点还在对撞、论据不足、或存在盲区？',
-    '- 讨论是否可以收束了？',
-    '',
-    '**2) 下一步行动（二选一）：**',
-    '',
-    '**如果还需要继续讨论：**',
-    '- 明确指出你要追问哪位/哪些专家（用 @专家名），追问什么具体问题',
-    '- 不要泛泛说"大家再讨论一下"，要说"@张三，你刚才说 ROI 能做到 3 倍，但你的计算忽略了获客成本的递增加速——请回应"',
-    '- 可以是点名互怼（"@李四，@王五 刚才的观点互相矛盾，请各自回应对方"）',
-    '- 可以是红队攻击（"我要求所有人用最悲观假设重算一遍"）',
-    '- 可以是推动收敛（"现在大家把各自方案精简到一句话，然后投票"）',
-    '',
-    '**如果讨论已经充分：**',
-    '- 在回复末尾单独一行写上 @@CONCLUDE@@',
-    '- 前面的内容仍要包含态势评估（总结共识、分歧、结论方向），这会直接给老板看',
-    '',
-    '记住：你是辩论主持人，不是会议记录员。你要把讨论**推向深处**，不要放任专家自说自话。',
-  ].join('\n');
-}
-
-const CONCLUDE_MARKER = '@@CONCLUDE@@';
-
-export function parseModeratorMove(text: string, panelNames: string[]): ModeratorMove {
-  const cleaned = text.trim();
-  if (!cleaned) return { conclude: true, targetNames: [], challenge: '' };
-  if (cleaned.lastIndexOf(CONCLUDE_MARKER) >= 0) return { conclude: true, targetNames: [], challenge: '' };
-  const concludePatterns = [
-    /讨论已经?充分/i,
-    /可以综合/i,
-    /进入综合/i,
-    /准备决议/i,
-    /综上所述/i,
-    /最终建议/i,
-    /达成共识/i,
-    /可以拍板/i,
-  ];
-  if (concludePatterns.some((p) => p.test(cleaned))) return { conclude: true, targetNames: [], challenge: '' };
-  const targets: string[] = [];
-  for (const name of panelNames) {
-    if (cleaned.includes(`@${name}`)) targets.push(name);
-  }
-  return { conclude: false, targetNames: targets.length > 0 ? targets : [], challenge: cleaned };
+/** Whitespace-only replies count as no speech throughout the meeting loop. */
+export function hasValidMeetingSpeech(text: string): boolean {
+  return text.trim().length > 0;
 }

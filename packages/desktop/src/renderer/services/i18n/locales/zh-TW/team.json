@@ -19,6 +19,8 @@
   },
   "newAgent": "New Agent",
   "noMessages": "No messages yet.",
+  "noAgents": "尚無成員",
+  "moreAgents": "還有 {{count}} 位",
   "agentNotConfigured": "Agent 尚未設定。",
   "sendBox": {
     "placeholder": "向調度 Agent 發訊息..."
@@ -74,6 +76,11 @@
     "selectFolder": "選擇專案資料夾",
     "recentLabel": "最近使用",
     "chooseDifferentFolder": "選擇其他目錄",
+    "needTeamCapable": "請至少選擇一個支援團隊的模型作為主持人（如 CentaurAI / Claude）。",
+    "nameLabel": "智囊團名稱",
+    "searchPlaceholder": "搜尋 Agent...",
+    "noSearchResults": "找不到結果",
+    "modelExpertTag": "直連模型",
     "error": "建立團隊失敗"
   },
   "removeAgent": {
@@ -86,6 +93,133 @@
       "debate": "組織一場辯論賽，讓 Agent 各持立場",
       "interview": "策劃一場深度訪談",
       "expert_review": "多位專家會診同一個問題"
+    }
+  },
+  "meeting": {
+    "connecting": "連線中…",
+    "emptyHint": "讓不同模型的 AI 專家圍繞你的議題進行結構化研討與交鋒，最後整合成一份高品質方案書。",
+    "parallelWall": "位 AI 顧問同時發言中，集思廣益",
+    "pausedHint": "⏸ 主持人等你看完；可在下方補充想法，準備好後繼續討論。",
+    "thinking": "思考中…",
+    "attachShared": "引用共享庫",
+    "boardTitle": "智囊團",
+    "cancel": "取消會議",
+    "continue": "繼續討論 →",
+    "emptyTitle": "智囊團 · 召集 AI 專家開會",
+    "extraExpertLabel": "加專家",
+    "needAgents": "需要 1 位主持人（隊長）和至少 1 位專家才能開會。",
+    "newMeeting": "開一場新會議",
+    "newShort": "新會議",
+    "pickHint": "請在上方選擇一個方案拍板",
+    "planTitle": "本場方案書",
+    "reset": "重開",
+    "runningHint": "主持人正在帶領專家討論…可隨時舉手插話",
+    "searchKnowledgeBase": "檢索知識庫",
+    "speaking": "發言中",
+    "start": "開會",
+    "step1": "① 在下方輸入主題",
+    "step3": "② 開始討論",
+    "topicLabel": "議題：",
+    "topicPlaceholder": "拋出一個議題，讓一群 AI 專家幫你開會論證…",
+    "interjectPausePlaceholder": "💡 想補充什麼？說給主持人和專家們…",
+    "interjectPlaceholder": "✋ 舉手插話：隨時補充想法或糾偏…",
+    "export": {
+      "archive": "匯出歸檔",
+      "archiving": "主持人正在匯出 Word/PPT，並歸檔到個人工作空間。",
+      "archivedToWorkspace": "已存入臨時專案，並同步到個人工作空間",
+      "copied": "已複製方案書",
+      "copy": "複製",
+      "copyFailed": "複製失敗",
+      "openHub": "在個人工作空間查看"
+    },
+    "extraExpert": {
+      "title": "加入更多專家（本地模型 / OpenClaw / Hermes 等）",
+      "titleShort": "加入更多專家",
+      "groupBackends": "其他後端",
+      "groupModels": "直連模型",
+      "none": "沒有可加入的其他專家（如 OpenClaw / Hermes）。"
+    },
+    "history": {
+      "untitled": "未命名議題"
+    },
+    "outputs": {
+      "section": "會議產出"
+    },
+    "resolution": {
+      "pick": "就選這個",
+      "picked": "已拍板",
+      "title": "候選方案 — 請拍板"
+    },
+    "role": {
+      "moderator": "主持人",
+      "panelist": "專家"
+    },
+    "status": {
+      "decided": "已拍板",
+      "resolution": "討論結束，請拍板",
+      "running": "會議進行中",
+      "turns": "已完成 {{count}} 段發言"
+    },
+    "turn": {
+      "failed": "未發言"
+    },
+    "boardSubtitle": "AI 圓桌會議",
+    "stage": {
+      "opening": "開場",
+      "position": "顧問立場",
+      "debate": "交鋒",
+      "synthesis": "綜合",
+      "decision": "拍板",
+      "draft": "起草",
+      "redteam": "紅隊",
+      "revise": "修訂",
+      "proposal": "提案",
+      "diverge": "發散",
+      "converge": "收斂"
+    },
+    "errors": {
+      "hostNoSpeech": "主持人未能完成開場，會議已暫停。請更換主持人／模型，或檢查該模型授權後重新開始。",
+      "advisorsNoSpeech": "參會顧問沒有返回有效發言，會議已暫停。請更換顧問使用的模型後重新開始。"
+    },
+    "deepDiscussion": {
+      "answerPlaceholder": "Enter your own view, or add detail after choosing…",
+      "confirmAnswer": "Confirm and continue",
+      "resume": "Continue this discussion",
+      "pause": "Pause and save",
+      "finish": "End discussion",
+      "notesTitle": "Discussion notes",
+      "openQuestions": "Open questions",
+      "openQuestionCount": "{{count}} questions still need exploration",
+      "turnCount": "{{count}} discussion turns recorded",
+      "resumeUnavailable": "The original participants cannot be restored. Check the host, advisors, models, and provider settings.",
+      "fallbackPrompt": "The host needs you to choose the next direction.",
+      "fallbackQuestion": "Which direction should we explore next?",
+      "fallbackOptions": {
+        "clarify": "Clarify goals and success criteria",
+        "risk": "Identify key risks and constraints",
+        "paths": "Compare possible paths",
+        "context": "I want to add more context"
+      },
+      "closeOptions": {
+        "continue": "Keep digging",
+        "shift": "Explore another angle",
+        "pause": "Pause and save",
+        "finish": "End and prepare notes"
+      },
+      "researchLabel": "Research",
+      "researchEmpty": "No relevant material was found.",
+      "researchFailed": "Research failed. The host will continue with the available information.",
+      "activity": {
+        "aligning": "Goal alignment",
+        "moderating": "Host assessment",
+        "consulting": "Advisor discussion",
+        "awaitingUser": "Waiting for your direction",
+        "researching": "Researching",
+        "pausing": "Saving",
+        "paused": "Paused",
+        "finishing": "Preparing notes",
+        "completed": "Discussion completed"
+      }
     }
   }
 }

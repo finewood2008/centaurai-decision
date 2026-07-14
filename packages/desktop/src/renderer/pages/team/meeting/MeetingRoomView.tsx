@@ -1,16 +1,16 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Button, Message, Popover, Spin } from '@arco-design/web-react';
+import { Button, Drawer, Input, Message, Popover, Radio, Spin } from '@arco-design/web-react';
 import {
   Checklist,
   Copy,
   Crown,
   Download,
+  Left,
   Notes,
   PeoplePlus,
   Plus,
-  RightOne,
   Scale,
   VideoConference,
 } from '@icon-park/react';
@@ -24,13 +24,196 @@ import MeetingPhaseBar from './MeetingPhaseBar';
 import MeetingControlBar from './MeetingControlBar';
 import MeetingResolutionCard from './MeetingResolutionCard';
 import MeetingGuestPanel from './MeetingGuestPanel';
+import styles from './MeetingRoomView.module.css';
 import { stripResolutionMarkers } from './meetingPrompts';
+import {
+  buildFullMeetingTranscriptMarkdown,
+  buildMeetingSummaryMarkdown,
+  meetingExportFileName,
+} from './meetingTranscriptExport';
 import { useMeetingOrchestrator } from './useMeetingOrchestrator';
-import type { MeetingTurn } from './meetingTypes';
+import type { MeetingQuestion, MeetingQuestionAnswer, MeetingTurn } from './meetingTypes';
 import { IS_DECISION } from '@/common/config/constants';
+import { downloadTextContent } from '@/renderer/utils/file/download';
 
 type Props = {
   team: TTeam;
+};
+
+export const MeetingQuestionCard: React.FC<{
+  question: MeetingQuestion;
+  onAnswer: (answer: MeetingQuestionAnswer) => void;
+}> = ({ question, onAnswer }) => {
+  const { t } = useTranslation();
+  const [selected, setSelected] = useState<string>();
+  const [selections, setSelections] = useState<Record<string, string>>({});
+  const [text, setText] = useState('');
+  const [activeQuestionIndex, setActiveQuestionIndex] = useState(0);
+  const batchItems = question.items?.slice(0, 3) ?? [];
+  const isBatch = batchItems.length > 0;
+  const allBatchQuestionsAnswered = isBatch && batchItems.every((item) => Boolean(selections[item.id]));
+
+  useEffect(() => {
+    setSelected(undefined);
+    setSelections({});
+    setText('');
+    setActiveQuestionIndex(0);
+  }, [question.id]);
+
+  const renderOption = (option: MeetingQuestion['options'][number]) => (
+    <Radio key={option.id} value={option.id} className={`w-full ${styles.questionOption}`}>
+      <span className='text-15px font-medium leading-[1.5] text-[color:var(--text-primary)]'>{option.label}</span>
+      {option.description && (
+        <span className='block ml-24px mt-3px text-13px leading-[1.5] text-[color:var(--text-secondary)]'>
+          {option.description}
+        </span>
+      )}
+    </Radio>
+  );
+
+  return (
+    <div
+      data-testid='meeting-question-card'
+      className={`mx-18px mb-14px border border-solid border-[color:var(--color-primary-light-3)] bg-[var(--color-primary-light-1)] p-16px ${styles.questionCard}`}
+    >
+      <div className='text-16px font-semibold leading-[1.55] text-[color:var(--text-primary)] mb-10px'>
+        {question.prompt}
+      </div>
+      {!isBatch && question.questions && question.questions.length > 0 && (
+        <ol className='m-0 mb-14px p-0 flex flex-col gap-8px list-none'>
+          {question.questions.map((item, index) => (
+            <li key={`${question.id}-item-${index}`} className='flex items-start gap-9px text-14px leading-[1.6]'>
+              <span className={styles.questionNumber}>{index + 1}</span>
+              <span className='text-[color:var(--text-primary)]'>{item}</span>
+            </li>
+          ))}
+        </ol>
+      )}
+      {isBatch ? (
+        <div className='flex flex-col'>
+          <div className={styles.questionStepper} aria-label='问题进度'>
+            {batchItems.map((item, index) => {
+              const answered = Boolean(selections[item.id]);
+              const active = index === activeQuestionIndex;
+              return (
+                <button
+                  key={item.id}
+                  type='button'
+                  className={`${styles.questionStep} ${active ? styles.questionStepActive : ''} ${answered ? styles.questionStepAnswered : ''}`}
+                  disabled={!active && !answered}
+                  onClick={() => setActiveQuestionIndex(index)}
+                  aria-label={`第 ${index + 1} 题${answered ? '，已选择' : ''}`}
+                  aria-current={active ? 'step' : undefined}
+                  data-testid={`meeting-question-step-${index + 1}`}
+                >
+                  {index + 1}
+                </button>
+              );
+            })}
+          </div>
+          {batchItems[activeQuestionIndex] && (
+            <section
+              key={batchItems[activeQuestionIndex].id}
+              className={styles.batchQuestionCard}
+              data-testid={`meeting-question-${batchItems[activeQuestionIndex].id}`}
+            >
+              <div className='mb-12px flex items-start gap-9px'>
+                <span className={styles.questionNumber}>{activeQuestionIndex + 1}</span>
+                <span className='text-16px font-semibold leading-[1.55] text-[color:var(--text-primary)]'>
+                  {batchItems[activeQuestionIndex].prompt}
+                </span>
+              </div>
+              <Radio.Group
+                value={selections[batchItems[activeQuestionIndex].id]}
+                onChange={(optionId) => {
+                  const item = batchItems[activeQuestionIndex];
+                  setSelections((current) => ({ ...current, [item.id]: optionId }));
+                  if (activeQuestionIndex < batchItems.length - 1) {
+                    setActiveQuestionIndex(activeQuestionIndex + 1);
+                  }
+                }}
+                className='w-full flex flex-col gap-9px'
+              >
+                {batchItems[activeQuestionIndex].options.map(renderOption)}
+              </Radio.Group>
+            </section>
+          )}
+          {activeQuestionIndex === batchItems.length - 1 && (
+            <>
+              <Input.TextArea
+                className='mt-12px'
+                value={text}
+                onChange={setText}
+                autoSize={{ minRows: 2, maxRows: 5 }}
+                placeholder={t('team.meeting.deepDiscussion.answerPlaceholder', {
+                  defaultValue: '可选：补充选项之外的信息…',
+                })}
+              />
+              <div className='mt-12px flex items-center justify-between gap-10px'>
+                <Button
+                  icon={<Left theme='outline' size='14' fill='currentColor' />}
+                  onClick={() => setActiveQuestionIndex(Math.max(0, activeQuestionIndex - 1))}
+                  disabled={activeQuestionIndex === 0}
+                  data-testid='meeting-question-back'
+                >
+                  上一题
+                </Button>
+                <Button
+                  type='primary'
+                  disabled={!allBatchQuestionsAnswered}
+                  onClick={() =>
+                    onAnswer({
+                      selections: batchItems.map((item) => ({ questionId: item.id, optionId: selections[item.id] })),
+                      text,
+                    })
+                  }
+                  data-testid='meeting-question-confirm'
+                >
+                  提交全部回答
+                </Button>
+              </div>
+            </>
+          )}
+          {activeQuestionIndex > 0 && activeQuestionIndex < batchItems.length - 1 && (
+            <div className='mt-12px'>
+              <Button
+                icon={<Left theme='outline' size='14' fill='currentColor' />}
+                onClick={() => setActiveQuestionIndex(activeQuestionIndex - 1)}
+                data-testid='meeting-question-back'
+              >
+                上一题
+              </Button>
+            </div>
+          )}
+        </div>
+      ) : (
+        <>
+          <Radio.Group value={selected} onChange={setSelected} className='w-full flex flex-col gap-9px'>
+            {question.options.map(renderOption)}
+          </Radio.Group>
+          <Input.TextArea
+            className='mt-10px'
+            value={text}
+            onChange={setText}
+            autoSize={{ minRows: 2, maxRows: 5 }}
+            placeholder={t('team.meeting.deepDiscussion.answerPlaceholder', {
+              defaultValue: '也可以直接输入你的想法，或在选择后补充…',
+            })}
+          />
+          <div className='mt-10px flex justify-end'>
+            <Button
+              type='primary'
+              disabled={!selected && !text.trim()}
+              onClick={() => onAnswer({ optionId: selected, text })}
+              data-testid='meeting-question-confirm'
+            >
+              {t('team.meeting.deepDiscussion.confirmAnswer', { defaultValue: '确认并继续' })}
+            </Button>
+          </div>
+        </>
+      )}
+    </div>
+  );
 };
 
 /**
@@ -55,10 +238,10 @@ const TurnAvatar: React.FC<{ icon?: string; agentType: string; name: string }> =
 };
 
 /**
- * Step-① 并行立场 presentation: the 专家墙 — panel experts answer at once, filling the
- * view as a dense grid of LIVE-streaming cards (each glowing while speaking), so the
+ * Legacy 并行立场 presentation: historical parallel turns still render as a dense
+ * grid of LIVE-streaming cards (each glowing while speaking), so the
  * boss can scan the expert field while the leader later summarizes the useful parts.
- * Only this first round is parallel; later rounds render one-by-one as full cards.
+ * old first round remains readable; current meetings render sequential full cards.
  */
 const ParallelTurnWall: React.FC<{ turns: MeetingTurn[] }> = ({ turns }) => {
   const { t } = useTranslation();
@@ -150,6 +333,8 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
   const rosterPanelists = useMemo(() => team.agents.filter((a) => a.role === 'teammate'), [team.agents]);
   const transcript = state.transcript;
   const [topicDraft, setTopicDraft] = useState('');
+  const [transcriptVisible, setTranscriptVisible] = useState(false);
+  const transcriptDrawerRef = useRef<HTMLDivElement>(null);
 
   // The 会议产出 list lives in the workspace sider (TeamPage). Clicking an entry
   // there emits this event; the room reopens that record's 方案书 here.
@@ -159,7 +344,12 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
     const handler = (payload: { teamId: string; recordId: string }) => {
       if (payload.teamId !== team.id) return;
       const rec = orchestratorRef.current.history.find((r) => r.id === payload.recordId);
-      if (rec) orchestratorRef.current.openRecord(rec);
+      if (!rec) return;
+      if (rec.id === orchestratorRef.current.state.activeRecordId) {
+        setTranscriptVisible(true);
+        return;
+      }
+      orchestratorRef.current.openRecord(rec);
     };
     emitter.on('meeting.open.record', handler);
     return () => {
@@ -194,6 +384,15 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
     });
   }, [transcript.length, streamLen]);
 
+  useEffect(() => {
+    if (!transcriptVisible) return;
+    const el = transcriptDrawerRef.current;
+    if (!el) return;
+    requestAnimationFrame(() => {
+      el.scrollTop = el.scrollHeight;
+    });
+  }, [transcriptVisible, transcript.length, streamLen]);
+
   // Distinct phaseLabels seen so far — drives the stage tracker's progress.
   const reachedLabels = useMemo(() => [...new Set(transcript.map((tn) => tn.phaseLabel))], [transcript]);
 
@@ -210,46 +409,63 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
   }, [transcript]);
 
   const renderTurnCard = (turn: MeetingTurn) =>
-    turn.text.trim() || turn.status === 'speaking' ? (
-      <div
-        key={turn.id}
-        data-testid={`meeting-turn-${turn.participantId}`}
-        className={`rd-16px border border-solid overflow-hidden transition-colors ${
-          turn.isModerator
-            ? 'border-[color:var(--color-primary-light-3)] bg-[color:var(--color-primary-light-1)]'
-            : 'border-[color:var(--border-light)] bg-[var(--bg-1)]'
-        }`}
-      >
-        <div className='flex items-center gap-8px px-16px h-44px'>
-          <TurnAvatar icon={turn.icon} agentType={turn.agent_type} name={turn.name} />
-          <span className='text-14px font-semibold text-[color:var(--text-primary)] truncate max-w-220px'>
-            {turn.name}
-          </span>
-          <span className='shrink-0 px-7px h-18px flex items-center rd-full text-11px leading-none bg-[var(--bg-2)] text-[color:var(--bg-6)]'>
-            {turn.isModerator ? t('team.meeting.role.moderator', { defaultValue: '主持人' }) : turn.phaseLabel}
-          </span>
-          <div className='flex-1' />
-          {turn.status === 'speaking' && <Spin loading size={13} className='shrink-0' />}
-          {turn.status === 'error' && (
-            <span className='shrink-0 text-11px text-[color:var(--danger)]'>
-              {t('team.meeting.turn.failed', { defaultValue: '未发言' })}
-            </span>
-          )}
-        </div>
-        {turn.text.trim() && (
-          <div className='px-18px pb-14px pt-2px text-14px leading-[1.75]'>
-            <MarkdownView>{stripResolutionMarkers(turn.text)}</MarkdownView>
-          </div>
-        )}
-      </div>
-    ) : null;
+    turn.text.trim() || turn.status === 'speaking'
+      ? (() => {
+          const protocolStart = turn.text.indexOf('@@');
+          const narrative = stripResolutionMarkers(protocolStart >= 0 ? turn.text.slice(0, protocolStart) : turn.text);
+          const transientProtocol = protocolStart >= 0 ? turn.text.slice(protocolStart) : '';
+          const showInsight = turn.isModerator && Boolean(turn.insightSummary?.trim());
+          return (
+            <div
+              key={turn.id}
+              data-testid={`meeting-turn-${turn.participantId}`}
+              className={`border border-solid overflow-hidden transition-colors ${styles.turnCard} ${
+                turn.isModerator
+                  ? `border-[color:var(--color-primary-light-3)] bg-[color:var(--color-primary-light-1)] ${styles.moderatorTurn}`
+                  : 'border-[color:var(--border-light)] bg-[var(--bg-1)]'
+              }`}
+            >
+              <div className='flex items-center gap-8px px-16px h-44px'>
+                <TurnAvatar icon={turn.icon} agentType={turn.agent_type} name={turn.name} />
+                <span className='text-14px font-semibold text-[color:var(--text-primary)] truncate max-w-220px'>
+                  {turn.name}
+                </span>
+                <span className='shrink-0 px-7px h-18px flex items-center rd-full text-11px leading-none bg-[var(--bg-2)] text-[color:var(--bg-6)]'>
+                  {turn.isModerator ? t('team.meeting.role.moderator', { defaultValue: '主持人' }) : turn.phaseLabel}
+                </span>
+                <div className='flex-1' />
+                {turn.status === 'speaking' && <Spin loading size={13} className='shrink-0' />}
+                {turn.status === 'error' && (
+                  <span className='shrink-0 text-11px text-[color:var(--danger)]'>
+                    {t('team.meeting.turn.failed', { defaultValue: '未发言' })}
+                  </span>
+                )}
+              </div>
+              {showInsight && (
+                <div className={styles.insightCallout}>
+                  <span className={styles.insightLabel}>核心研判</span>
+                  <span className='text-15px font-semibold leading-[1.65] text-[color:var(--text-primary)]'>
+                    {turn.insightSummary}
+                  </span>
+                </div>
+              )}
+              {(narrative.trim() || transientProtocol) && (
+                <div className='px-18px pb-16px pt-4px text-14px leading-[1.75]'>
+                  {narrative.trim() && <MarkdownView>{narrative}</MarkdownView>}
+                  {transientProtocol && <div className={styles.transientProtocol}>{transientProtocol}</div>}
+                </div>
+              )}
+            </div>
+          );
+        })()
+      : null;
 
   const isIdle = state.phase === 'idle';
   const isDecisionFocus = IS_DECISION && !isIdle;
   const atResolution = state.phase === 'resolution' || state.phase === 'decided';
-  const showPlan = atResolution && state.plan.trim().length > 0;
+  const showPlan = (atResolution || state.phase === 'completed') && state.plan.trim().length > 0;
   const showResolution = state.options.length > 0 && atResolution;
-  const statusKey = state.awaitingContinue && state.phase === 'running' ? 'awaiting' : state.phase;
+  const statusKey = state.pendingQuestion && state.phase === 'running' ? 'awaiting' : state.phase;
   const decisionStatus = t(`decision.room.status.${statusKey}`, {
     defaultValue:
       statusKey === 'idle'
@@ -260,9 +476,29 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
             ? '等待你的方向'
             : statusKey === 'resolution'
               ? '待拍板'
-              : '已拍板',
+              : statusKey === 'paused'
+                ? '已暂停'
+                : statusKey === 'completed'
+                  ? '讨论已完成'
+                  : '已拍板',
   });
   const advisorCount = (rosterModerator ? 1 : 0) + rosterPanelists.length + guests.length;
+  const exportMeetingRecord = (kind: 'full' | 'summary') => {
+    const dateLabel = new Date().toLocaleString('zh-CN');
+    const content =
+      kind === 'full'
+        ? buildFullMeetingTranscriptMarkdown({ topic: state.topic, transcript, dateLabel })
+        : buildMeetingSummaryMarkdown({
+            topic: state.topic,
+            transcript,
+            discussionState: state.discussionState,
+            plan: state.plan,
+            dateLabel,
+          });
+    const label = kind === 'full' ? '完整对话' : '会议摘要';
+    downloadTextContent(content, meetingExportFileName(state.topic, label), 'text/markdown;charset=utf-8');
+    Message.success(`已导出${label}`);
+  };
 
   const renderDecisionAuthorityCards = (compact = false) => {
     const items = [
@@ -287,12 +523,19 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
         key: 'verdict',
         icon: <Checklist theme='outline' size={compact ? '15' : '17'} fill='currentColor' />,
         iconClass: 'bg-[var(--accent-green-tint)] text-[color:var(--success)]',
-        title: t('decision.authority.verdictTitle', { defaultValue: '决策台' }),
-        desc: t('decision.authority.verdictDesc', {
-          count: state.options.length,
-          defaultValue:
-            state.options.length > 0 ? `${state.options.length} 个候选方案待拍板` : '等待主持人形成候选方案',
-        }),
+        title: atResolution
+          ? t('decision.authority.verdictTitle', { defaultValue: '决策台' })
+          : t('team.meeting.deepDiscussion.openQuestions', { defaultValue: '未决问题' }),
+        desc: atResolution
+          ? t('decision.authority.verdictDesc', {
+              count: state.options.length,
+              defaultValue:
+                state.options.length > 0 ? `${state.options.length} 个候选方案待拍板` : '等待主持人形成候选方案',
+            })
+          : t('team.meeting.deepDiscussion.openQuestionCount', {
+              count: state.discussionState.openQuestions.length,
+              defaultValue: `${state.discussionState.openQuestions.length} 个问题仍待深入`,
+            }),
       },
     ];
 
@@ -362,6 +605,7 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
           form={state.form}
           reachedLabels={reachedLabels}
           turnsCompleted={state.turnsCompleted}
+          activity={state.activity}
         />
       </div>
       {renderDecisionAuthorityCards(true)}
@@ -404,6 +648,16 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
               {t('decision.room.details', { defaultValue: '顾问席' })}
             </Button>
           </Popover>
+          <Button
+            size='small'
+            shape='round'
+            icon={<Notes theme='outline' size='13' fill='currentColor' />}
+            onClick={() => setTranscriptVisible(true)}
+            disabled={transcript.length === 0}
+            data-testid='meeting-transcript-btn'
+          >
+            会议记录
+          </Button>
           <Popover
             trigger='click'
             position='br'
@@ -459,6 +713,18 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
             </span>
           )}
           <div className='flex-1' />
+          {IS_DECISION && (
+            <Button
+              size='small'
+              shape='round'
+              icon={<Notes theme='outline' size='13' fill='currentColor' />}
+              onClick={() => setTranscriptVisible(true)}
+              disabled={transcript.length === 0}
+              data-testid='meeting-transcript-btn'
+            >
+              会议记录
+            </Button>
+          )}
           <Popover
             trigger='click'
             position='br'
@@ -538,8 +804,7 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
             </span>
             <span className='text-14px leading-relaxed max-w-420px text-[color:var(--text-secondary)]'>
               {t(IS_DECISION ? 'decision.emptyHint' : 'team.meeting.emptyHint', {
-                defaultValue:
-                  '让不同模型的 AI 专家围绕你的议题结构化研讨、互相博弈，最后合成一份比单个 AI 更高质量的《方案书》。',
+                defaultValue: '由主持人根据现场内容动态追问、调度顾问并与你持续互动，逐步把问题讨论到更深处。',
               })}
             </span>
             <div className='flex items-center gap-10px text-12px text-[color:var(--bg-6)] mt-2px'>
@@ -574,9 +839,11 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
                 <div className='flex items-center gap-8px px-20px h-52px border-b border-solid border-[color:var(--border-light)]'>
                   <Notes theme='outline' size='18' fill='var(--primary)' />
                   <span className='centaur-title centaur-title-md'>
-                    {t(IS_DECISION ? 'decision.room.planTitle' : 'team.meeting.planTitle', {
-                      defaultValue: '本场方案书',
-                    })}
+                    {state.phase === 'completed'
+                      ? t('team.meeting.deepDiscussion.notesTitle', { defaultValue: '本场讨论纪要' })
+                      : t(IS_DECISION ? 'decision.room.planTitle' : 'team.meeting.planTitle', {
+                          defaultValue: '本场方案书',
+                        })}
                   </span>
                   <div className='ml-auto flex items-center gap-8px'>
                     <Button
@@ -645,23 +912,8 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
                 onDecide={orchestrator.decide}
               />
             )}
-            {/* Between-round CTA lives INSIDE the conversation, right under the
-                moderator's recap, so the boss continues from where they're reading. */}
-            {state.awaitingContinue && state.phase === 'running' && (
-              <div className='flex justify-center py-6px'>
-                <Button
-                  type='primary'
-                  shape='round'
-                  size='large'
-                  icon={<RightOne theme='filled' size='15' fill='currentColor' />}
-                  onClick={orchestrator.continueMeeting}
-                  data-testid='meeting-continue'
-                >
-                  {t(IS_DECISION ? 'decision.room.continue' : 'team.meeting.continue', {
-                    defaultValue: '继续讨论 →',
-                  })}
-                </Button>
-              </div>
+            {state.pendingQuestion && state.phase === 'running' && (
+              <MeetingQuestionCard question={state.pendingQuestion} onAnswer={orchestrator.answerQuestion} />
             )}
           </div>
         )}
@@ -673,9 +925,89 @@ const MeetingRoomView: React.FC<Props> = ({ team }) => {
           form={state.form}
           reachedLabels={reachedLabels}
           turnsCompleted={state.turnsCompleted}
+          activity={state.activity}
         />
       )}
       <MeetingControlBar orchestrator={orchestrator} topic={topicDraft} onTopicChange={setTopicDraft} />
+      <Drawer
+        width={560}
+        title={
+          <div className='flex items-center gap-8px'>
+            <Notes theme='outline' size='17' fill='var(--primary)' />
+            <span>当前会议记录</span>
+            <span className='text-12px font-normal text-[color:var(--text-secondary)]'>实时更新</span>
+          </div>
+        }
+        visible={transcriptVisible}
+        footer={null}
+        onCancel={() => setTranscriptVisible(false)}
+        unmountOnExit={false}
+      >
+        <div ref={transcriptDrawerRef} className={styles.liveTranscript} data-testid='meeting-live-transcript'>
+          <div className={styles.transcriptToolbar}>
+            <Button
+              size='small'
+              icon={<Download theme='outline' size='14' fill='currentColor' />}
+              onClick={() => exportMeetingRecord('full')}
+              disabled={transcript.length === 0}
+              data-testid='meeting-export-full-transcript'
+            >
+              导出完整对话
+            </Button>
+            <Button
+              size='small'
+              icon={<Notes theme='outline' size='14' fill='currentColor' />}
+              onClick={() => exportMeetingRecord('summary')}
+              disabled={transcript.length === 0}
+              data-testid='meeting-export-summary'
+            >
+              导出会议摘要
+            </Button>
+          </div>
+          {transcript.length === 0 ? (
+            <div className='py-48px text-center text-14px text-[color:var(--text-secondary)]'>会议尚未产生记录</div>
+          ) : (
+            transcript.map((turn) => {
+              const protocolStart = turn.text.indexOf('@@');
+              const visibleText = stripResolutionMarkers(
+                protocolStart >= 0 ? turn.text.slice(0, protocolStart) : turn.text
+              );
+              return (
+                <article key={turn.id} className={styles.transcriptEntry} data-testid={`live-transcript-${turn.id}`}>
+                  <div className='flex items-center gap-8px mb-7px'>
+                    <TurnAvatar icon={turn.icon} agentType={turn.agent_type} name={turn.name} />
+                    <span className='text-14px font-semibold text-[color:var(--text-primary)]'>{turn.name}</span>
+                    <span className='text-11px text-[color:var(--text-secondary)]'>{turn.phaseLabel}</span>
+                    {turn.status === 'speaking' && <Spin loading size={12} className='ml-auto' />}
+                  </div>
+                  {visibleText.trim() ? (
+                    <div className='text-14px leading-[1.7]'>
+                      <MarkdownView>{visibleText}</MarkdownView>
+                    </div>
+                  ) : (
+                    turn.status === 'speaking' && (
+                      <span className='text-12px text-[color:var(--text-secondary)]'>正在整理观点…</span>
+                    )
+                  )}
+                  {turn.question && (
+                    <div className={styles.transcriptQuestion}>
+                      <span className='text-12px font-semibold text-[color:var(--primary)]'>等待你的回答</span>
+                      <span className='text-13px font-medium text-[color:var(--text-primary)]'>
+                        {turn.question.prompt}
+                      </span>
+                      {turn.question.items?.map((item, index) => (
+                        <span key={item.id} className='text-12px text-[color:var(--text-secondary)]'>
+                          {index + 1}. {item.prompt}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </article>
+              );
+            })
+          )}
+        </div>
+      </Drawer>
     </div>
   );
 };

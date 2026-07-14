@@ -15,6 +15,9 @@ export type AgentType = 'acp' | 'remote' | 'aionrs' | 'openclaw-gateway' | 'nano
 /** Source tier of an agent row, mirroring backend `agent_source` enum. */
 export type AgentSource = 'internal' | 'builtin' | 'extension' | 'custom';
 
+/** Diagnostics-first state returned by Core's agent management API. */
+export type AgentManagementStatus = 'missing' | 'online' | 'offline' | 'unchecked';
+
 /** Source-specific bookkeeping (how to probe, how to upgrade). */
 export type AgentSourceInfo = {
   binary_name?: string;
@@ -84,6 +87,10 @@ export type AgentMetadata = {
   agent_source_info?: AgentSourceInfo;
 
   enabled: boolean;
+  /** True iff Core resolved the required local command/runtime. */
+  installed?: boolean;
+  /** Core-owned runtime/diagnostic state. */
+  status?: AgentManagementStatus;
   /** True iff the backend resolved the spawn command on `$PATH` at hydrate time. */
   available: boolean;
   /** True when the agent supports team mode (MCP stdio capable). Computed by backend. */
@@ -102,19 +109,39 @@ export type AgentMetadata = {
    *  when the backend has no yolo equivalent. */
   yolo_id?: string;
 
+  sort_order?: number;
+  last_check_error_code?: string;
+  last_check_error_message?: string;
+  last_check_error_details?: unknown;
+  last_check_guidance?: string;
+  last_check_latency_ms?: number;
+  last_check_at?: number;
+  last_success_at?: number;
+  last_failure_at?: number;
+  has_command_override?: boolean;
+  env_override_key_count?: number;
+
   handshake?: AgentHandshake;
 };
+
+export function isLegacyOpenClawGateway(agent: AgentMetadata): boolean {
+  return agent.agent_source === 'builtin' && agent.agent_type === 'openclaw-gateway';
+}
+
+/** Hide only the superseded builtin gateway when the native ACP OpenClaw row is available. */
+export function filterSupersededHomepageAgents(agents: readonly AgentMetadata[]): AgentMetadata[] {
+  const hasAcpOpenClaw = agents.some(
+    (agent) => agent.agent_type === 'acp' && agent.backend?.toLowerCase() === 'openclaw'
+  );
+  return hasAcpOpenClaw ? agents.filter((agent) => !isLegacyOpenClawGateway(agent)) : [...agents];
+}
 
 export function getAgentDisplayName(
   agent: { agent_type?: string; backend?: string; name?: string } | undefined
 ): string {
   if (!agent) return '';
   const key = (agent.backend || agent.agent_type || '').toLowerCase();
-  if (key === 'aionrs' || key === 'aion-cli') {
-    return /^aion\s*cli$/i.test(agent.name || '') || /^aioncli$/i.test(agent.name || '')
-      ? 'CentaurAI'
-      : agent.name || 'CentaurAI';
-  }
+  if (key === 'aionrs' || key === 'aion-cli') return 'CentaurAI';
   if (/^aion\s*cli$/i.test(agent.name || '') || /^aioncli$/i.test(agent.name || '')) return 'CentaurAI';
   return agent.name || agent.backend || agent.agent_type || '';
 }

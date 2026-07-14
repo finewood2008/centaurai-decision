@@ -351,7 +351,7 @@ const RemoteAgentFormModal: React.FC<{
             <Input placeholder='wss://example.com/gateway' />
           </FormItem>
 
-          <FormItem label={t('settings.remoteAgent.auth_type')} field='auth_type' rules={[{ required: true }]}>
+          <FormItem label={t('settings.remoteAgent.authType')} field='auth_type' rules={[{ required: true }]}>
             <Select>
               <Select.Option value='none'>{t('settings.remoteAgent.authNone')}</Select.Option>
               <Select.Option value='bearer'>{t('settings.remoteAgent.authBearer')}</Select.Option>
@@ -362,7 +362,7 @@ const RemoteAgentFormModal: React.FC<{
             {(values: Record<string, unknown>) =>
               values.auth_type === 'bearer' ? (
                 <FormItem
-                  label={t('settings.remoteAgent.auth_token')}
+                  label={t('settings.remoteAgent.authToken')}
                   field='auth_token'
                   rules={[{ required: true, message: t('settings.remoteAgent.tokenRequired') }]}
                 >
@@ -376,7 +376,7 @@ const RemoteAgentFormModal: React.FC<{
             {(values: Record<string, unknown>) =>
               typeof values.url === 'string' && values.url.startsWith('wss://') ? (
                 <FormItem
-                  label={t('settings.remoteAgent.allow_insecure')}
+                  label={t('settings.remoteAgent.allowInsecure')}
                   field='allow_insecure'
                   triggerPropName='checked'
                   extra={

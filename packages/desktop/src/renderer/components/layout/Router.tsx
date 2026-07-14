@@ -6,7 +6,6 @@ import AppLoader from '@renderer/components/layout/AppLoader';
 import { useAuth } from '@renderer/hooks/context/AuthContext';
 import {
   TEAM_MODE_ENABLED,
-  IS_DECISION,
   IS_TEAM,
   WORKBENCH_ENABLED,
   MULTI_USER_ENABLED,
@@ -38,11 +37,9 @@ const AppStorePage = React.lazy(() => import('@renderer/pages/appstore'));
 const WorkbenchPage = React.lazy(() => import('@renderer/pages/workbench'));
 const AdvisorsPage = React.lazy(() => import('@renderer/pages/advisors/AdvisorsPage'));
 const ContentHubPage = React.lazy(() => import('@renderer/pages/contentHub'));
-const DecisionHome = React.lazy(() => import('@renderer/pages/decision/DecisionHome'));
 const BillingPage = React.lazy(() => import('@renderer/pages/billing'));
 
-// Edition-aware landing: Decision opens on the 决策作战室 home; Team on the guide page.
-const HOME_PATH = IS_DECISION ? '/decision' : '/guid';
+const HOME_PATH = '/guid';
 
 function isDynamicImportFetchError(error: Error): boolean {
   return /Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module/i.test(
@@ -166,11 +163,7 @@ const PanelRoute: React.FC<{ layout: React.ReactElement }> = ({ layout }) => {
         <Route element={<ProtectedLayout layout={layout} />}>
           <Route index element={<Navigate to={HOME_PATH} replace />} />
           <Route path='/guid' element={withRouteFallback(Guid)} />
-          {/* Decision edition landing (决策作战室 home). Team edition redirects to the guide. */}
-          <Route
-            path='/decision'
-            element={IS_DECISION ? withRouteFallback(DecisionHome) : <Navigate to='/guid' replace />}
-          />
+          <Route path='/decision' element={<Navigate to='/guid' replace />} />
           <Route path='/conversation/:id' element={withRouteFallback(Conversation)} />
           <Route
             path='/team/:id'

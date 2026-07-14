@@ -7,6 +7,19 @@
   "autoSwitchedAgent": "{{from}} is not available, switched to {{to}}",
   "promptExamplesHint": "試試這些可點擊的案例提示詞：",
   "selectAssistantHint": "選擇一位助手開始任務",
+  "directConnect": "直連大模型",
+  "greeting": {
+    "morning": "早安",
+    "afternoon": "午安",
+    "evening": "晚安",
+    "night": "夜深了"
+  },
+  "heroSubtitle": "今天想做點什麼？",
+  "recentFiles": {
+    "title": "最近產生的檔案",
+    "empty": "尚無產生的檔案",
+    "viewAll": "查看全部"
+  },
   "agentSwitcherLabel": "Agent",
   "switchedToAgent": "已切換到 {{agent}}",
   "workspace": {

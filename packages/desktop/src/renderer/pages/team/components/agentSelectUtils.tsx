@@ -32,9 +32,12 @@ export type TeamAgentOption = {
   isModelExpert?: boolean;
 };
 
-export function cliAgentToOption(agent: AgentMetadata): TeamAgentOption {
+export function cliAgentToOption(
+  agent: AgentMetadata,
+  assistant?: Pick<Assistant, 'id' | 'team_selectable'> | null
+): TeamAgentOption {
   return {
-    id: agent.id,
+    id: assistant?.id ?? agent.id,
     name: getAgentDisplayName(agent),
     backend: agent.backend || agent.agent_type,
     icon: agent.icon,
@@ -43,7 +46,10 @@ export function cliAgentToOption(agent: AgentMetadata): TeamAgentOption {
     // no MCP http/sse in their ACP handshake) report false here, while the
     // top-level `team_capable` stays true for everyone. Fall back to the
     // top-level flag only when the policy is absent (older/custom backends).
-    team_capable: agent.behavior_policy?.supports_team ?? agent.team_capable,
+    team_capable:
+      assistant === null
+        ? false
+        : (assistant?.team_selectable ?? agent.behavior_policy?.supports_team ?? agent.team_capable),
   };
 }
 

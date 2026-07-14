@@ -69,16 +69,10 @@ const ContextUsageIndicator: React.FC<ContextUsageIndicatorProps> = ({
     return 'rgb(var(--primary-6))';
   };
 
-  // 背景圆环颜色 - 适配深浅主题
-  const getTrackColor = () => {
-    return 'var(--color-fill-3)';
-  };
-
   const popoverContent = (
     <div className='p-8px min-w-160px'>
       <div className='text-14px font-medium text-t-primary'>
-        {percentage.toFixed(1)}% · {displayTotal} / {displayLimit}{' '}
-        {t('conversation.context_usage.contextUsed', 'context used')}
+        {percentage.toFixed(1)}% · {displayTotal} / {displayLimit} {t('conversation.contextUsage.contextUsed')}
       </div>
     </div>
   );
@@ -96,7 +90,7 @@ const ContextUsageIndicator: React.FC<ContextUsageIndicatorProps> = ({
             cy={size / 2}
             r={radius}
             fill='none'
-            stroke={getTrackColor()}
+            stroke='var(--color-fill-3)'
             strokeWidth={strokeWidth}
           />
           {/* 进度圆环 */}

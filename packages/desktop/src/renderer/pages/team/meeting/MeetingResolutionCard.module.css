@@ -26,8 +26,9 @@
     border-color 0.15s ease;
 }
 .card:hover:not(.selected):not(.dimmed) {
-  transform: translateY(-2px);
-  border-color: color-mix(in srgb, var(--primary) 45%, var(--border-base));
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--primary) 58%, var(--border-base));
+  box-shadow: 0 12px 28px -20px color-mix(in srgb, var(--primary) 72%, transparent);
 }
 .dimmed {
   opacity: 0.4;

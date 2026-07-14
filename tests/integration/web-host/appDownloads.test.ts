@@ -13,6 +13,7 @@ import {
   resolveAppInstallerDir,
   handleAppDownloadsList,
   handleAppDownloadGet,
+  handleAppstoreList,
 } from '../../../packages/web-host/src/app-downloads';
 
 const mockRes = () => {
@@ -60,6 +61,22 @@ describe('resolveAppInstallerDir', () => {
     expect(resolveAppInstallerDir('../client-installers')).toBeUndefined();
     expect(resolveAppInstallerDir('a/b')).toBeUndefined();
     expect(resolveAppInstallerDir('Foo')).toBeUndefined();
+  });
+});
+
+describe('handleAppstoreList', () => {
+  it('returns an empty catalog while the App Store has no published content', async () => {
+    const previous = process.env.AIONUI_APPSTORE_DIR;
+    try {
+      process.env.AIONUI_APPSTORE_DIR = path.resolve(process.cwd(), 'resources/appstore');
+      const r = mockRes();
+      await handleAppstoreList(req('/api/appstore/list'), r as unknown as ServerResponse);
+      expect(r.statusCode).toBe(200);
+      expect(json(r)).toEqual({ apps: [] });
+    } finally {
+      if (previous === undefined) delete process.env.AIONUI_APPSTORE_DIR;
+      else process.env.AIONUI_APPSTORE_DIR = previous;
+    }
   });
 });
 

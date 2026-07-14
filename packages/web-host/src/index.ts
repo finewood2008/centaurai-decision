@@ -7,6 +7,25 @@ export type { EntryGuard, EntryHealth, EntryHealthStatus } from './entry-html-gu
 export { createEntryGuard, isValidEntryHtml } from './entry-html-guard.js';
 export type { SharedFile, SharedCategory, SharedAddInput } from './shared-drive.js';
 export { sharedList, sharedCategories, sharedRemove, sharedBlobInfo, sharedAddFromPath } from './shared-drive.js';
+export type {
+  ContentAsset,
+  ContentAssetKind,
+  ContentAssetIndexOptions,
+  ContentAssetSaveInput,
+  ContentAssetStageInput,
+  ContentAssetStatusFlag,
+  ContentAssetStorageProvider,
+  ContentAssetVisibility,
+} from './content-assets.js';
+export {
+  contentAssetArchive,
+  contentAssetDiscardDraft,
+  contentAssetIndex,
+  contentAssetPromoteDraft,
+  contentAssetSaveFromPath,
+  contentAssetStageFromPath,
+  contentAssetsList,
+} from './content-assets.js';
 export type { NasEntry, NasListing, NasFileInfo, NasTrashEntry, NasWalkFile, NasIndexProgress } from './nas-drive.js';
 export {
   nasList,
@@ -78,6 +97,7 @@ export async function startWebHost(opts: WebHostOptions): Promise<WebHostHandle>
       allowRemote: opts.allowRemote ?? false,
       installerDir: opts.installerDir,
       sharedDriveDir: opts.sharedDriveDir,
+      contentAssetsDir: opts.contentAssetsDir,
       nasRootDir: opts.nasRootDir,
       knowledgeEndpoint: opts.knowledgeEndpoint,
       knowledgeToken: opts.knowledgeToken,

@@ -130,7 +130,7 @@ describe('httpBridge', () => {
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(fetchSpy.mock.calls[0][0]).toContain('/api/foo');
       expect(fetchSpy.mock.calls[0][1]?.method).toBe('GET');
-      expect(fetchSpy.mock.calls[0][1]?.credentials).toBe('include');
+      expect(fetchSpy.mock.calls[0][1]?.credentials).toBe('same-origin');
       expect(fetchSpy.mock.calls[0][1]?.body).toBeUndefined();
     });
   });
@@ -383,7 +383,7 @@ describe('httpBridge', () => {
       expect(fetchSpy).toHaveBeenCalledWith(expect.stringContaining('/api/test'), {
         method: 'GET',
         headers: {},
-        credentials: 'include',
+        credentials: 'same-origin',
         body: undefined,
       });
     });

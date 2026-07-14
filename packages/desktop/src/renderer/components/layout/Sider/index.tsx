@@ -15,13 +15,12 @@ import {
   SiderScheduledEntry,
   SiderFilesEntry,
   SiderBillingEntry,
-  SiderDecisionDashboardEntry,
   WorkbenchSiderSection,
 } from './SiderNav';
 import SiderFooter from './SiderFooter';
 import CronJobSiderSection from './CronJobSiderSection';
 import TeamSiderSection from './TeamSiderSection';
-import { BILLING_ENABLED, IS_DECISION, TEAM_MODE_ENABLED, WORKBENCH_ENABLED } from '@/common/config/constants';
+import { BILLING_ENABLED, TEAM_MODE_ENABLED, WORKBENCH_ENABLED } from '@/common/config/constants';
 import siderStyles from './Sider.module.css';
 
 const WorkspaceGroupedHistory = React.lazy(() => import('@renderer/pages/conversation/GroupedHistory'));
@@ -133,19 +132,6 @@ const Sider: React.FC<SiderProps> = ({ onSessionClick, collapsed = false }) => {
     }
   };
 
-  const handleDecisionDashboardClick = () => {
-    cleanupSiderTooltips();
-    blurActiveElement();
-    closePreview();
-    setIsBatchMode(false);
-    Promise.resolve(navigate('/decision')).catch((error) => {
-      console.error('Navigation failed:', error);
-    });
-    if (onSessionClick) {
-      onSessionClick();
-    }
-  };
-
   const handleQuickThemeToggle = () => {
     void setTheme(theme === 'dark' ? 'light' : 'dark');
   };
@@ -210,15 +196,6 @@ const Sider: React.FC<SiderProps> = ({ onSessionClick, collapsed = false }) => {
           </Suspense>
         ) : (
           <div className='size-full flex flex-col gap-2px'>
-            {IS_DECISION && (
-              <SiderDecisionDashboardEntry
-                isMobile={isMobile}
-                isActive={pathname === '/decision'}
-                collapsed={collapsed}
-                siderTooltipProps={siderTooltipProps}
-                onClick={handleDecisionDashboardClick}
-              />
-            )}
             <SiderToolbar
               isMobile={isMobile}
               isBatchMode={isBatchMode}

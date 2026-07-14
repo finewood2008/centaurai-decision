@@ -1208,8 +1208,8 @@
 .agentSegmentName {
   white-space: nowrap;
 }
-/* Domestic model quick-select row — sits snug beneath the agent icon bar. */
-.domesticModelRow {
+/* Provider model quick-select row — sits snug beneath the agent icon bar. */
+.providerModelRow {
   margin-top: -12px;
 }
 .agentSegmentAdd {

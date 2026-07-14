@@ -5,7 +5,7 @@
  */
 
 import { ipcBridge } from '@/common';
-import type { CreateAssistantRequest } from '@/common/types/agent/assistantTypes';
+import type { CreateAssistantRequest, UpdateAssistantRequest } from '@/common/types/agent/assistantTypes';
 import { existsSync, promises as fs } from 'fs';
 import path from 'path';
 import type { ProcessConfig as ProcessConfigType } from './initStorage';
@@ -30,7 +30,7 @@ import type { ProcessConfig as ProcessConfigType } from './initStorage';
  * when the bundled dataset changes to re-seed newly added experts.
  */
 
-const SEED_VERSION = 1;
+const SEED_VERSION = 3;
 const SEED_FLAG = 'migration.bundledExpertsSeeded';
 const RULE_LOCALES = ['zh-CN', 'en-US'] as const;
 
@@ -43,6 +43,7 @@ type ConfigAccessor = {
 
 /** A manifest row: the create-request fields plus the rule-file template. */
 type ExpertManifestEntry = CreateAssistantRequest & { rule_file?: string };
+type SeedAgent = { id: string; agent_type: string; backend?: string };
 
 /**
  * Locate the bundled experts directory. In production electron-builder copies
@@ -68,9 +69,58 @@ export function resolveExpertsDir(): string | null {
 }
 
 /** Strip the manifest-only `rule_file` field so the import payload matches the wire contract. */
-function toCreateRequest(entry: ExpertManifestEntry): CreateAssistantRequest {
-  const { rule_file: _ruleFile, ...request } = entry;
-  return request;
+function resolveAgentId(presetAgentType: string | undefined, agents: SeedAgent[]): string | undefined {
+  const preset = presetAgentType?.trim().toLowerCase();
+  if (!preset) return undefined;
+  return agents.find((agent) => agent.backend?.toLowerCase() === preset || agent.agent_type.toLowerCase() === preset)
+    ?.id;
+}
+
+function toCreateRequest(entry: ExpertManifestEntry, agents: SeedAgent[]): CreateAssistantRequest | null {
+  const { rule_file: _ruleFile, preset_agent_type: presetAgentType, ...request } = entry;
+  const agentId = entry.agent_id ?? resolveAgentId(presetAgentType, agents);
+  if (!agentId) return null;
+  return { ...request, agent_id: agentId };
+}
+
+function hasTranslations(value: Record<string, unknown> | undefined): boolean {
+  return value !== undefined && Object.keys(value).length > 0;
+}
+
+async function repairMissingExpertLocalizations(manifest: ExpertManifestEntry[]): Promise<number> {
+  const existing = await ipcBridge.assistants.list.invoke();
+  const byId = new Map(existing.map((assistant) => [assistant.id, assistant]));
+  const patches: UpdateAssistantRequest[] = [];
+
+  for (const entry of manifest) {
+    if (!entry.id) continue;
+    const assistant = byId.get(entry.id);
+    if (!assistant) continue;
+    const patch: UpdateAssistantRequest = { id: entry.id };
+    if (!hasTranslations(assistant.name_i18n) && hasTranslations(entry.name_i18n)) {
+      patch.name_i18n = entry.name_i18n;
+    }
+    const currentZhDescription = assistant.description_i18n?.['zh-CN'];
+    const bundledZhDescription = entry.description_i18n?.['zh-CN'];
+    if (!hasTranslations(assistant.description_i18n) && hasTranslations(entry.description_i18n)) {
+      patch.description_i18n = entry.description_i18n;
+    } else if (
+      currentZhDescription?.startsWith('Expert ') &&
+      bundledZhDescription &&
+      bundledZhDescription !== currentZhDescription
+    ) {
+      patch.description_i18n = { ...assistant.description_i18n, 'zh-CN': bundledZhDescription };
+    }
+    if (!hasTranslations(assistant.prompts_i18n) && hasTranslations(entry.prompts_i18n)) {
+      patch.prompts_i18n = entry.prompts_i18n;
+    }
+    if (Object.keys(patch).length > 1) patches.push(patch);
+  }
+
+  const outcomes = await Promise.allSettled(patches.map((patch) => ipcBridge.assistants.update.invoke(patch)));
+  const failed = outcomes.filter((outcome) => outcome.status === 'rejected').length;
+  if (failed > 0) throw new Error(`${failed}/${patches.length} expert localization updates failed`);
+  return patches.length;
 }
 
 /**
@@ -135,7 +185,16 @@ export async function seedBundledExperts(configFile: ConfigFile): Promise<boolea
 
   // Phase 1: import the catalog rows (insert-only).
   try {
-    const result = await ipcBridge.assistants.import.invoke({ assistants: manifest.map(toCreateRequest) });
+    const agents = await ipcBridge.acpConversation.getAvailableAgents.invoke();
+    const requests = manifest.map((entry) => toCreateRequest(entry, agents));
+    const unresolved = manifest.filter((_, index) => requests[index] === null).map((entry) => entry.id);
+    if (unresolved.length > 0) {
+      console.error(`[AionUi] Expert seed has no matching Core agent for: ${unresolved.join(', ')}`);
+      return false;
+    }
+    const result = await ipcBridge.assistants.import.invoke({
+      assistants: requests.filter((request): request is CreateAssistantRequest => request !== null),
+    });
     if (result.failed !== 0) {
       console.error(`[AionUi] Expert seed import partial: ${result.failed} failed`, result.errors);
       return false;
@@ -145,6 +204,18 @@ export async function seedBundledExperts(configFile: ConfigFile): Promise<boolea
     }
   } catch (error) {
     console.error('[AionUi] Expert seed import failed:', error);
+    return false;
+  }
+
+  // Core versions before the unified-definition i18n fix imported the legacy
+  // row correctly but projected empty locale maps. Repair only empty maps (and
+  // four historically mislabelled `Expert ...` zh-CN descriptions) so an
+  // existing user-edited translation is never overwritten.
+  try {
+    const repaired = await repairMissingExpertLocalizations(manifest);
+    if (repaired > 0) console.log(`[AionUi] Repaired localization for ${repaired} experts`);
+  } catch (error) {
+    console.error('[AionUi] Expert localization repair failed:', error);
     return false;
   }
 

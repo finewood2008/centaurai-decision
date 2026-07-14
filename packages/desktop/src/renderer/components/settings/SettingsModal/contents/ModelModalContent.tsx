@@ -6,6 +6,7 @@
 
 import { ipcBridge } from '@/common';
 import type { IProvider } from '@/common/config/storage';
+import { sanitizeProviderUpdate } from '@/common/types/provider/providerApi';
 import { Button, Divider, Message, Popconfirm, Collapse, Tag, Switch, Tooltip } from '@arco-design/web-react';
 import { DeleteFour, Info, Minus, Plus, Write, Heartbeat } from '@icon-park/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -65,7 +66,7 @@ const ModelModalContent: React.FC = () => {
   const persistPlatform = async (platform: IProvider) => {
     if ((data || []).some((x) => x.id === platform.id)) {
       const { id, ...body } = platform;
-      await ipcBridge.mode.updateProvider.invoke({ id, ...body });
+      await ipcBridge.mode.updateProvider.invoke({ id, ...sanitizeProviderUpdate(body) });
     } else await ipcBridge.mode.createProvider.invoke(platform);
   };
   const updatePlatform = (platform: IProvider, success: () => void) => {

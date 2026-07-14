@@ -1,88 +1,83 @@
-/**
- * useHubFiles — loads the current user's generated files and derives the
- * search / by-conversation / by-type views consumed by the Content Hub.
- *
- * Data source is reused verbatim from the homepage RecentFiles helpers so the
- * hub and the home rail always show the same visibility-scoped set.
- */
+/** Loads managed assets plus legacy files from explicitly temporary workspaces. */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ipcBridge } from '@/common';
+import type { ContentAssetDTO } from '@/common/adapter/ipcBridge';
+import { listContentAssets, migrateLegacyContentAssets } from '@/renderer/services/ContentAssetService';
 import { filterConversationsWithChannelScope } from '@/renderer/utils/user/conversationVisibility';
 import { useGeneratedFilesAutoRefresh } from '@/renderer/hooks/workspace/useGeneratedFilesAutoRefresh';
-import { fetchRecentFiles } from '@/renderer/pages/guid/components/RecentFiles';
-import { getContentTypeByExtension } from '@/renderer/pages/conversation/Preview/fileUtils';
-import type { FileEntry, HubConversationGroup, HubFileKind } from './types';
+import { fetchRecentFiles, type FileEntry } from '@/renderer/pages/guid/components/RecentFiles';
+import { classifyHubFile, isAssetInPersonalView } from './components/manage/hubState';
+import type { HubFileRecord, PersonalWorkspaceView } from './types';
 
-/** Map a fine-grained PreviewContentType to the coarse hub filter buckets. */
-export function classifyHubFile(name: string): Exclude<HubFileKind, 'all'> {
-  const type = getContentTypeByExtension(name);
-  if (type === 'image') return 'image';
-  if (type === 'pdf' || type === 'word' || type === 'excel' || type === 'ppt') return 'document';
-  if (type === 'code' || type === 'markdown' || type === 'html') return 'code';
-  return 'other';
-}
-
-export function useHubFiles(search: string) {
-  const [files, setFiles] = useState<FileEntry[]>([]);
+export function useHubFiles() {
+  const [assets, setAssets] = useState<ContentAssetDTO[]>([]);
+  const [temporaryFiles, setTemporaryFiles] = useState<FileEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [kind, setKind] = useState<HubFileKind>('all');
 
   const loadFiles = useCallback(async () => {
     setLoading(true);
     try {
-      const conversations = await ipcBridge.database.getUserConversations.invoke({ limit: 10000 });
-      const visibleConversations = await filterConversationsWithChannelScope(conversations.items ?? []);
-      setFiles(await fetchRecentFiles(visibleConversations));
-    } catch {
-      setFiles([]);
+      await migrateLegacyContentAssets();
+      const [nextAssets, conversations] = await Promise.all([
+        listContentAssets(),
+        ipcBridge.database.getUserConversations.invoke({ limit: 10000 }),
+      ]);
+      const visible = await filterConversationsWithChannelScope(conversations.items ?? []);
+      setAssets(nextAssets);
+      setTemporaryFiles(await fetchRecentFiles(visible));
+    } catch (error) {
+      console.warn('[PersonalWorkspace] Unable to refresh:', error);
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => {
-    void loadFiles();
-  }, [loadFiles]);
+  useEffect(() => void loadFiles(), [loadFiles]);
+  useGeneratedFilesAutoRefresh(loadFiles, 3000);
 
-  // Live-refresh while the hub is open: when any agent finishes writing files,
-  // re-enumerate (loadFiles re-fetches conversations too, so brand-new
-  // conversations' outputs surface without a manual reload).
-  useGeneratedFilesAutoRefresh(loadFiles);
+  const records = useMemo(() => {
+    const registeredPaths = new Set(assets.map((asset) => asset.sourceWorkspacePath.replace(/\\/g, '/')));
+    const assetRecords: HubFileRecord<ContentAssetDTO>[] = assets.map((asset) => ({
+      id: asset.id,
+      name: asset.title,
+      size: asset.size,
+      modifiedAt: asset.updatedAt,
+      kind: asset.kind,
+      source: 'mine',
+      raw: asset,
+      asset,
+      path: asset.storagePath,
+      subtitle: asset.category,
+    }));
+    const legacyRecords: HubFileRecord<FileEntry>[] = temporaryFiles
+      .filter((file) => !registeredPaths.has(file.path.replace(/\\/g, '/')))
+      .map((file) => ({
+        id: `legacy:${file.path}`,
+        name: file.name,
+        size: file.size,
+        modifiedAt: file.mtime,
+        kind: classifyHubFile(file.name),
+        source: 'mine',
+        raw: file,
+        path: file.path,
+        subtitle: file.conversation,
+      }));
+    return { assetRecords, legacyRecords };
+  }, [assets, temporaryFiles]);
 
-  // Files matching the search box, sorted newest-first.
-  const searched = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    const list = q ? files.filter((f) => f.name.toLowerCase().includes(q)) : files;
-    return [...list].toSorted((a, b) => b.mtime - a.mtime);
-  }, [files, search]);
+  const forView = useCallback(
+    (view: PersonalWorkspaceView): HubFileRecord[] => {
+      if (view === 'assets') {
+        return records.assetRecords.filter((record) => isAssetInPersonalView(record.raw.statusFlags, view));
+      }
+      if (view === 'knowledge') return [];
+      return [
+        ...records.assetRecords.filter((record) => isAssetInPersonalView(record.raw.statusFlags, 'drafts')),
+        ...records.legacyRecords,
+      ];
+    },
+    [records]
+  );
 
-  // Files for the 按类型 view: search + kind filter applied.
-  const byType = useMemo(() => {
-    if (kind === 'all') return searched;
-    return searched.filter((f) => classifyHubFile(f.name) === kind);
-  }, [searched, kind]);
-
-  // Files grouped by conversation for the 按会话 view.
-  const byConversation = useMemo<HubConversationGroup[]>(() => {
-    const map = new Map<string, FileEntry[]>();
-    for (const file of searched) {
-      const list = map.get(file.conversation) ?? [];
-      list.push(file);
-      map.set(file.conversation, list);
-    }
-    return [...map.entries()]
-      .map(([conversation, list]) => ({ conversation, files: list }))
-      .toSorted((a, b) => (b.files[0]?.mtime ?? 0) - (a.files[0]?.mtime ?? 0));
-  }, [searched]);
-
-  return {
-    loading,
-    total: files.length,
-    kind,
-    setKind,
-    searched,
-    byType,
-    byConversation,
-    reload: loadFiles,
-  };
+  return { loading, assets, forView, reload: loadFiles };
 }

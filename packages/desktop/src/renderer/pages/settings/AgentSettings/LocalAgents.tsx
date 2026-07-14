@@ -10,21 +10,14 @@ import { DETECTED_AGENTS_SWR_KEY } from '@/renderer/utils/model/agentTypes';
 import AionModal from '@/renderer/components/base/AionModal';
 import { useAgents } from '@/renderer/hooks/agent/useAgents';
 import { Button, Typography } from '@arco-design/web-react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useSWRConfig } from 'swr';
 import AgentCard from './AgentCard';
 import InlineAgentEditor, { type CustomAgentDraft } from './InlineAgentEditor';
 import { getAgentKey } from '@/renderer/pages/guid/hooks/agentSelectionUtils';
-import {
-  mergeSettingsAgentRows,
-  readDisabledAgentSnapshots,
-  reconcileDisabledAgentSnapshots,
-  removeDisabledAgentSnapshot,
-  upsertDisabledAgentSnapshot,
-  writeDisabledAgentSnapshots,
-} from './disabledAgentSnapshots';
+import { isLegacyOpenClawGateway } from '@/renderer/utils/model/agentTypes';
 
 const LocalAgents: React.FC = () => {
   const { t } = useTranslation();
@@ -33,13 +26,7 @@ const LocalAgents: React.FC = () => {
 
   // Single fetch for all agents; both detected and custom lists are derived from it.
   const { agents: allAgents } = useAgents();
-  const [disabledAgentSnapshots, setDisabledAgentSnapshots] = useState<AgentMetadata[]>(() =>
-    readDisabledAgentSnapshots()
-  );
-  const settingsAgents = useMemo(
-    () => mergeSettingsAgentRows(allAgents, disabledAgentSnapshots),
-    [allAgents, disabledAgentSnapshots]
-  );
+  const settingsAgents = useMemo(() => allAgents.filter((agent) => !isLegacyOpenClawGateway(agent)), [allAgents]);
 
   const detectedAgents = settingsAgents.filter((a) => a.agent_type !== 'remote' && a.agent_source !== 'custom');
 
@@ -47,20 +34,7 @@ const LocalAgents: React.FC = () => {
 
   const [editorVisible, setEditorVisible] = useState(false);
   const [editingAgent, setEditingAgent] = useState<AgentMetadata | null>(null);
-
-  const persistDisabledSnapshots = useCallback((snapshots: AgentMetadata[]) => {
-    setDisabledAgentSnapshots(snapshots);
-    writeDisabledAgentSnapshots(snapshots);
-  }, []);
-
-  useEffect(() => {
-    setDisabledAgentSnapshots((current) => {
-      const next = reconcileDisabledAgentSnapshots(current, allAgents);
-      if (next === current) return current;
-      writeDisabledAgentSnapshots(next);
-      return next;
-    });
-  }, [allAgents]);
+  const [checkingAgentId, setCheckingAgentId] = useState<string | null>(null);
 
   /** Optimistically update the SWR cache so the UI never flashes empty. */
   const mutateCache = useCallback(
@@ -94,13 +68,6 @@ const LocalAgents: React.FC = () => {
         } else {
           savedAgent = await ipcBridge.acpConversation.createCustomAgent.invoke(body);
         }
-        if (disabledAgentSnapshots.some((agent) => agent.id === savedAgent.id) || savedAgent.enabled === false) {
-          const nextSnapshots =
-            savedAgent.enabled === false
-              ? upsertDisabledAgentSnapshot(disabledAgentSnapshots, savedAgent)
-              : removeDisabledAgentSnapshot(disabledAgentSnapshots, savedAgent.id);
-          persistDisabledSnapshots(nextSnapshots);
-        }
         mutateCache((agents) => {
           if (agents.some((agent) => agent.id === savedAgent.id)) {
             return agents.map((agent) => (agent.id === savedAgent.id ? savedAgent : agent));
@@ -115,37 +82,27 @@ const LocalAgents: React.FC = () => {
         console.error('save custom agent failed:', err);
       }
     },
-    [disabledAgentSnapshots, editingAgent, mutate, mutateCache, persistDisabledSnapshots]
+    [editingAgent, mutate, mutateCache]
   );
 
   const handleDeleteCustomAgent = useCallback(
     async (agentId: string) => {
-      const previousSnapshots = disabledAgentSnapshots;
-      persistDisabledSnapshots(removeDisabledAgentSnapshot(previousSnapshots, agentId));
       try {
         await ipcBridge.acpConversation.deleteCustomAgent.invoke({ id: agentId });
         // Optimistic: remove from cache immediately
         mutateCache((agents) => agents.filter((a) => a.id !== agentId));
       } catch (err) {
         console.error('delete custom agent failed:', err);
-        persistDisabledSnapshots(previousSnapshots);
-        // Revert on failure
         await mutate(DETECTED_AGENTS_SWR_KEY);
       }
     },
-    [disabledAgentSnapshots, mutate, mutateCache, persistDisabledSnapshots]
+    [mutate, mutateCache]
   );
 
   const handleToggle = useCallback(
     async (agent: AgentMetadata, enabled: boolean) => {
       const agentId = agent.id;
       if (!agentId) return;
-      const previousSnapshots = disabledAgentSnapshots;
-      const optimisticSnapshots = enabled
-        ? removeDisabledAgentSnapshot(previousSnapshots, agentId)
-        : upsertDisabledAgentSnapshot(previousSnapshots, agent);
-
-      persistDisabledSnapshots(optimisticSnapshots);
       // Optimistic: update cache immediately so the UI never flickers.
       mutateCache((agents) => {
         const optimisticAgent = { ...agent, enabled };
@@ -155,13 +112,9 @@ const LocalAgents: React.FC = () => {
         return [...agents, optimisticAgent];
       });
       try {
-        const updatedAgent = await ipcBridge.acpConversation.setAgentEnabled.invoke({ id: agentId, enabled });
-        const nextSnapshots = enabled
-          ? removeDisabledAgentSnapshot(optimisticSnapshots, agentId)
-          : upsertDisabledAgentSnapshot(optimisticSnapshots, updatedAgent);
-        persistDisabledSnapshots(nextSnapshots);
+        await ipcBridge.acpConversation.setAgentEnabled.invoke({ id: agentId, enabled });
         mutateCache((agents) => {
-          const nextAgent = { ...updatedAgent, enabled };
+          const nextAgent = { ...agent, enabled, available: enabled ? agent.available : false };
           if (agents.some((a) => a.id === agentId)) {
             return agents.map((a) => (a.id === agentId ? nextAgent : a));
           }
@@ -171,12 +124,24 @@ const LocalAgents: React.FC = () => {
         await mutate(DETECTED_AGENTS_SWR_KEY);
       } catch (err) {
         console.error('toggle agent failed:', err);
-        persistDisabledSnapshots(previousSnapshots);
         // Revert on failure
         await mutate(DETECTED_AGENTS_SWR_KEY, allAgents, { revalidate: false });
       }
     },
-    [allAgents, disabledAgentSnapshots, mutate, mutateCache, persistDisabledSnapshots]
+    [allAgents, mutate, mutateCache]
+  );
+
+  const handleHealthCheck = useCallback(
+    async (agent: AgentMetadata) => {
+      setCheckingAgentId(agent.id);
+      try {
+        await ipcBridge.acpConversation.checkAgentHealth.invoke({ backend: agent.id });
+      } finally {
+        setCheckingAgentId(null);
+        await mutate(DETECTED_AGENTS_SWR_KEY);
+      }
+    },
+    [mutate]
   );
 
   // Keep the built-in direct model first, then sort enabled before disabled.
@@ -186,7 +151,7 @@ const LocalAgents: React.FC = () => {
     if (aIsAionrs !== bIsAionrs) return aIsAionrs ? -1 : 1;
     if (a.enabled !== false && b.enabled === false) return -1;
     if (a.enabled === false && b.enabled !== false) return 1;
-    return 0;
+    return (a.sort_order ?? Number.MAX_SAFE_INTEGER) - (b.sort_order ?? Number.MAX_SAFE_INTEGER);
   });
 
   const openCustomAgentEditor = useCallback(() => {
@@ -229,8 +194,9 @@ const LocalAgents: React.FC = () => {
               type='detected'
               agent={agent}
               onGoToChat={() => goToChatWithAgent(agent)}
-              enabled={agent.enabled !== false}
               onToggle={(enabled) => void handleToggle(agent, enabled)}
+              onHealthCheck={() => void handleHealthCheck(agent)}
+              checking={checkingAgentId === agent.id}
             />
           ))
         ) : (
@@ -296,6 +262,8 @@ const LocalAgents: React.FC = () => {
             }}
             onDelete={() => void handleDeleteCustomAgent(agent.id)}
             onToggle={(enabled) => void handleToggle(agent, enabled)}
+            onHealthCheck={() => void handleHealthCheck(agent)}
+            checking={checkingAgentId === agent.id}
           />
         ))}
       </div>

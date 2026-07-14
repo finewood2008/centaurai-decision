@@ -160,6 +160,8 @@ const WebuiModalContent: React.FC = () => {
               allowRemote: false,
               localUrl: `http://localhost:${WEBUI_DEFAULT_PORT}`,
               adminUsername: 'admin',
+              tailscale: { detected: false, ip: null, accessUrl: null },
+              primaryAccessUrl: null,
             }
         );
       }

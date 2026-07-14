@@ -19,6 +19,8 @@
   },
   "newAgent": "新成员",
   "noMessages": "暂无消息。",
+  "noAgents": "暂无成员",
+  "moreAgents": "还有 {{count}} 位",
   "agentNotConfigured": "Agent 尚未配置。",
   "sendBox": {
     "placeholder": "向调度 Agent 发消息..."
@@ -74,6 +76,11 @@
     "selectFolder": "选择项目文件夹",
     "recentLabel": "最近使用",
     "chooseDifferentFolder": "选择其他目录",
+    "needTeamCapable": "请至少选择一个支持团队的模型作为主持人（如 CentaurAI / Claude）。",
+    "nameLabel": "智囊团名称",
+    "searchPlaceholder": "搜索 Agent...",
+    "noSearchResults": "未找到结果",
+    "modelExpertTag": "直连模型",
     "error": "创建团队失败"
   },
   "removeAgent": {
@@ -89,6 +96,11 @@
     }
   },
   "meeting": {
+    "connecting": "连接中…",
+    "emptyHint": "让不同模型的 AI 专家围绕你的议题结构化研讨、互相博弈，最后合成一份高质量方案书。",
+    "parallelWall": "位 AI 顾问同时发言中，群策群力",
+    "pausedHint": "⏸ 主持人等你看完；可在下方补充想法，准备好后继续讨论。",
+    "thinking": "思考中…",
     "attachShared": "引用共享库",
     "boardTitle": "智囊团",
     "cancel": "取消会议",
@@ -113,6 +125,8 @@
     "interjectPlaceholder": "✋ 举手插话：随时补充想法或纠偏…",
     "export": {
       "archive": "导出归档",
+      "archiving": "主持人正在导出 Word/PPT，并归档到个人工作空间。",
+      "archivedToWorkspace": "已存入临时项目，并同步到个人工作空间",
       "copied": "已复制方案书",
       "copy": "复制",
       "copyFailed": "复制失败",
@@ -122,13 +136,14 @@
       "title": "加入更多专家（国产模型 / OpenClaw / Hermes 等）",
       "titleShort": "加入更多专家",
       "groupBackends": "其它后端",
-      "groupModels": "直连模型"
+      "groupModels": "直连模型",
+      "none": "没有可加入的其他专家（如 OpenClaw / Hermes）。"
     },
     "history": {
       "untitled": "未命名议题"
     },
     "outputs": {
-      "section": "会议产出"
+      "section": "会议记录"
     },
     "resolution": {
       "pick": "就选这个",
@@ -142,15 +157,60 @@
     "status": {
       "decided": "已拍板",
       "resolution": "讨论结束，请拍板",
-      "running": "会议进行中"
+      "running": "会议进行中",
+      "turns": "已完成 {{count}} 段发言"
     },
     "turn": {
       "failed": "未发言"
     },
+    "errors": {
+      "hostNoSpeech": "主持人未能完成开场，会议已暂停。请更换主持人/模型，或检查该模型授权后重新开始。",
+      "advisorsNoSpeech": "参会顾问没有返回有效发言，会议已暂停。请更换顾问背后的模型后重新开始。"
+    },
+    "deepDiscussion": {
+      "answerPlaceholder": "也可以直接输入你的想法，或在选择后补充…",
+      "confirmAnswer": "确认并继续",
+      "resume": "继续这场讨论",
+      "pause": "暂停保存",
+      "finish": "结束讨论",
+      "notesTitle": "本场讨论纪要",
+      "openQuestions": "未决问题",
+      "openQuestionCount": "还有 {{count}} 个问题待深入",
+      "turnCount": "已记录 {{count}} 段讨论",
+      "resumeUnavailable": "无法恢复原参会阵容，请检查主持人、顾问、模型和 Provider 配置。",
+      "fallbackPrompt": "### 核心判断\n当前信息仍有分歧，不宜把分析责任交还给你。\n\n### 判断依据\n先让不同视角交叉验证，能更快暴露关键假设。\n\n### 下一步\n我先组织相关顾问会商，再给出可判断的结论。",
+      "fallbackQuestion": "你希望接下来从哪个方向继续？",
+      "fallbackOptions": {
+        "clarify": "先澄清目标与成功标准",
+        "risk": "先识别关键风险和约束",
+        "paths": "先比较可能的路径",
+        "context": "我想补充更多背景"
+      },
+      "closeOptions": {
+        "continue": "继续深挖",
+        "shift": "换一个角度讨论",
+        "pause": "暂停并保存",
+        "finish": "结束并生成纪要"
+      },
+      "researchLabel": "资料调查",
+      "researchEmpty": "未检索到相关资料。",
+      "researchFailed": "资料检索失败，主持人将基于现有信息继续。",
+      "activity": {
+        "aligning": "目标对齐",
+        "moderating": "主持研判",
+        "consulting": "顾问讨论",
+        "awaitingUser": "等待你的方向",
+        "researching": "资料调查",
+        "pausing": "正在保存",
+        "paused": "已暂停",
+        "finishing": "整理纪要",
+        "completed": "讨论已完成"
+      }
+    },
     "boardSubtitle": "AI 圆桌会议",
     "stage": {
       "opening": "开场",
-      "position": "立论",
+      "position": "顾问立场",
       "debate": "交锋",
       "synthesis": "综合",
       "decision": "拍板",

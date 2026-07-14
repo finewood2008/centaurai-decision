@@ -8,6 +8,8 @@
   "send": "發送",
   "cancel": "取消",
   "save": "儲存",
+  "enabled": "已啟用",
+  "disabled": "已停用",
   "delete": "刪除",
   "confirm": "確認",
   "file": "檔案",
@@ -112,5 +114,9 @@
   "processing": "處理中...",
   "optional": "（選填）",
   "clear": "清除",
-  "fileAttach.countLabel": "{{count}} 個檔案"
+  "fileAttach.countLabel": "{{count}} 個檔案",
+  "unit": {
+    "minute_short": "分",
+    "second_short": "秒"
+  }
 }

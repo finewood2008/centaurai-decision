@@ -11,6 +11,9 @@ const aliases = {
   '@mcp/': path.resolve(__dirname, './packages/desktop/src/common') + '/',
 };
 
+const personalWorkspaceCoverageGlob =
+  '{packages/web-host/src/{content-assets,safe-preview}.ts,packages/desktop/src/renderer/{services/ContentAssetService.ts,utils/file/{generatedArtifacts,officePreview}.ts,hooks/file/useFileActions.ts,pages/contentHub/components/{manage/hubState.ts,view/clickIntent.ts}}}';
+
 export default defineConfig({
   resolve: {
     alias: aliases,
@@ -91,6 +94,14 @@ export default defineConfig({
         branches: 0,
         functions: 0,
         lines: 0,
+        // New personal-workspace core must not inherit the legacy repository's
+        // low baseline. This glob is checked as one cohesive subsystem.
+        [personalWorkspaceCoverageGlob]: {
+          statements: 80,
+          branches: 80,
+          functions: 80,
+          lines: 80,
+        },
       },
     },
   },

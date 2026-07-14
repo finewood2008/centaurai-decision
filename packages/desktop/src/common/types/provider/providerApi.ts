@@ -56,6 +56,31 @@ export interface UpdateProviderRequest {
   is_full_url?: boolean;
 }
 
+export const MASKED_PROVIDER_SECRET_PREFIX = 'masked:v1:';
+
+/** The API returns this placeholder instead of exposing a stored provider secret. */
+export const isMaskedProviderSecret = (value: unknown): value is string =>
+  typeof value === 'string' && value.startsWith(MASKED_PROVIDER_SECRET_PREFIX);
+
+/** Masked response values must never be echoed back to the provider update API. */
+export const sanitizeProviderUpdate = (request: UpdateProviderRequest): UpdateProviderRequest => {
+  if (!isMaskedProviderSecret(request.api_key)) return request;
+  const { api_key: _maskedApiKey, ...safeRequest } = request;
+  return safeRequest;
+};
+
+export type ProviderModelFetchStrategy = 'stored-provider' | 'anonymous' | 'none';
+
+export const getProviderModelFetchStrategy = (
+  apiKey: string | undefined,
+  providerId: string | undefined,
+  hasBedrockConfig = false
+): ProviderModelFetchStrategy => {
+  if (isMaskedProviderSecret(apiKey)) return providerId ? 'stored-provider' : 'none';
+  if (apiKey || hasBedrockConfig) return 'anonymous';
+  return providerId ? 'stored-provider' : 'none';
+};
+
 /**
  * Response for `POST /api/providers/:id/models` and
  * `POST /api/providers/fetch-models`.

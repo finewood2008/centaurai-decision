@@ -1,5 +1,5 @@
 import { Button, Checkbox, Input, Radio } from '@arco-design/web-react';
-import { CloseSmall, FolderClose, Redo, RightOne, Search } from '@icon-park/react';
+import { CheckOne, CloseSmall, FolderClose, PauseOne, Redo, RightOne, Search } from '@icon-park/react';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import SendBox from '@/renderer/components/chat/SendBox';
@@ -30,7 +30,7 @@ type Props = {
  */
 const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange }) => {
   const { t } = useTranslation();
-  const { state, canStart, startMeeting, interject, cancel, reset } = orchestrator;
+  const { state, canStart, startMeeting, interject, reset, pauseMeeting, finishMeeting, resumeMeeting } = orchestrator;
   const [interjection, setInterjection] = useState('');
   const [useKnowledgeBase, setUseKnowledgeBase] = useState(false);
   const [attachments, setAttachments] = useState<string[]>([]);
@@ -71,7 +71,7 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
     }
   };
 
-  const activeDecision = IS_DECISION && state.phase !== 'idle' && state.phase !== 'decided';
+  const activeDecision = IS_DECISION && (state.phase === 'running' || state.phase === 'resolution');
   const wrapperClass = activeDecision
     ? 'shrink-0 px-18px py-8px border-t border-solid border-[color:var(--border-light)] bg-[var(--bg-base)]'
     : 'shrink-0 px-24px pt-12px pb-16px border-t border-solid border-[color:var(--border-light)]';
@@ -276,9 +276,41 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
     );
   }
 
+  if (state.phase === 'paused') {
+    return (
+      <div data-testid='meeting-control-paused' className={wrapperClass}>
+        <div className='flex gap-8px'>
+          <Button
+            long
+            type='primary'
+            icon={<RightOne theme='filled' size='14' fill='currentColor' />}
+            disabled={!state.activeRecordId}
+            onClick={() => state.activeRecordId && resumeMeeting(state.activeRecordId)}
+            data-testid='meeting-resume'
+          >
+            {t('team.meeting.deepDiscussion.resume', { defaultValue: '继续这场讨论' })}
+          </Button>
+          <Button icon={<Redo theme='outline' size='14' fill='currentColor' />} onClick={reset}>
+            {t('team.meeting.newMeeting', { defaultValue: '开一场新会议' })}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (state.phase === 'completed') {
+    return (
+      <div data-testid='meeting-control-completed' className={wrapperClass}>
+        <Button long icon={<Redo theme='outline' size='14' fill='currentColor' />} onClick={reset}>
+          {t('team.meeting.newMeeting', { defaultValue: '开一场新会议' })}
+        </Button>
+      </div>
+    );
+  }
+
   const isResolution = state.phase === 'resolution';
   // Between-round pause: the moderator has recapped and is waiting for the boss.
-  const awaiting = state.awaitingContinue && state.phase === 'running';
+  const awaiting = Boolean(state.pendingQuestion) && state.phase === 'running';
   const hint = isResolution
     ? t(IS_DECISION ? 'decision.room.pickHint' : 'team.meeting.pickHint', {
         defaultValue: '请在上方选择一个方案拍板',
@@ -349,17 +381,33 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
               {t('team.meeting.searchKBCompact', { defaultValue: '查资料' })}
             </Button>
           )}
-          <Button
-            size='small'
-            type='text'
-            status='danger'
-            icon={<Redo theme='outline' size='14' fill='currentColor' />}
-            onClick={isResolution ? reset : cancel}
-            data-testid='meeting-cancel'
-            className='shrink-0'
-          >
-            {resetLabel}
-          </Button>
+          {isResolution ? (
+            <Button size='small' type='text' onClick={reset} data-testid='meeting-cancel'>
+              {resetLabel}
+            </Button>
+          ) : (
+            <>
+              <Button
+                size='small'
+                type='text'
+                icon={<PauseOne theme='outline' size='14' fill='currentColor' />}
+                onClick={pauseMeeting}
+                data-testid='meeting-pause'
+              >
+                {t('team.meeting.deepDiscussion.pause', { defaultValue: '暂停保存' })}
+              </Button>
+              <Button
+                size='small'
+                type='text'
+                status='danger'
+                icon={<CheckOne theme='outline' size='14' fill='currentColor' />}
+                onClick={finishMeeting}
+                data-testid='meeting-finish'
+              >
+                {t('team.meeting.deepDiscussion.finish', { defaultValue: '结束讨论' })}
+              </Button>
+            </>
+          )}
         </div>
       </div>
     );
@@ -387,16 +435,33 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
             {t('team.meeting.searchKBCompact', { defaultValue: '查资料' })}
           </Button>
         )}
-        <Button
-          size='small'
-          type='text'
-          status='danger'
-          icon={<Redo theme='outline' size='14' fill='currentColor' />}
-          onClick={isResolution ? reset : cancel}
-          data-testid='meeting-cancel'
-        >
-          {resetLabel}
-        </Button>
+        {isResolution ? (
+          <Button size='small' type='text' onClick={reset} data-testid='meeting-cancel'>
+            {resetLabel}
+          </Button>
+        ) : (
+          <>
+            <Button
+              size='small'
+              type='text'
+              icon={<PauseOne theme='outline' size='14' fill='currentColor' />}
+              onClick={pauseMeeting}
+              data-testid='meeting-pause'
+            >
+              {t('team.meeting.deepDiscussion.pause', { defaultValue: '暂停保存' })}
+            </Button>
+            <Button
+              size='small'
+              type='text'
+              status='danger'
+              icon={<CheckOne theme='outline' size='14' fill='currentColor' />}
+              onClick={finishMeeting}
+              data-testid='meeting-finish'
+            >
+              {t('team.meeting.deepDiscussion.finish', { defaultValue: '结束讨论' })}
+            </Button>
+          </>
+        )}
       </div>
       {!isResolution && (
         <SendBox

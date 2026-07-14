@@ -17,7 +17,8 @@ import type { TChatConversation } from '@/common/config/storage';
 import { getCurrentFrontendUserId } from '@/common/utils/frontendUserScope';
 import { filterConversationsWithChannelScope } from '@/renderer/utils/user/conversationVisibility';
 import { useGeneratedFilesAutoRefresh } from '@/renderer/hooks/workspace/useGeneratedFilesAutoRefresh';
-import { loadStandaloneGeneratedArtifactFiles } from '@/renderer/utils/file/generatedArtifacts';
+import { isUnsafeTemporaryWorkspacePath } from '@/renderer/utils/workspace/workspace';
+import { useFileActions } from '@/renderer/hooks/file/useFileActions';
 import styles from '../index.module.css';
 
 export interface FileEntry {
@@ -26,6 +27,14 @@ export interface FileEntry {
   size: number;
   mtime: number;
   conversation: string;
+  sourceConversationId?: string;
+  workspaceRoot?: string;
+  draftProvenance?:
+    | 'managed-temporary-workspace'
+    | 'registered-generated-artifact'
+    | 'meeting-output'
+    | 'uploaded-draft';
+  canDiscardDraft?: boolean;
 }
 
 export const FILE_ICONS: Record<string, string> = {
@@ -169,7 +178,16 @@ async function collectWorkspaceFiles(workspace: string, label: string, mtimeSec:
         const children = node.children && node.children.length > 0 ? node.children : await fetchDir(node.fullPath);
         await walk(children, depth + 1);
       } else if (node.isFile) {
-        out.push({ name: node.name, path: node.fullPath, size: 0, mtime: mtimeSec, conversation: label });
+        out.push({
+          name: node.name,
+          path: node.fullPath,
+          size: 0,
+          mtime: mtimeSec,
+          conversation: label,
+          workspaceRoot: workspace,
+          draftProvenance: 'managed-temporary-workspace',
+          canDiscardDraft: false,
+        });
       }
     }
   };
@@ -192,7 +210,9 @@ function collectConversationFiles(
   teamNames: Map<string, string>
 ): Promise<FileEntry[]> {
   const workspace = (conversation.extra as { workspace?: string } | undefined)?.workspace;
-  if (!workspace) return Promise.resolve([]);
+  const isTemporary =
+    (conversation.extra as { is_temporary_workspace?: boolean } | undefined)?.is_temporary_workspace === true;
+  if (!workspace || !isTemporary || isUnsafeTemporaryWorkspacePath(workspace)) return Promise.resolve([]);
   // modified_at is epoch ms; FileEntry.mtime is epoch seconds (see formatTime).
   const mtimeSec = toEpochSeconds(conversation.modified_at || conversation.created_at || 0);
   const teamId =
@@ -200,7 +220,9 @@ function collectConversationFiles(
     (conversation.extra as { team_id?: string } | undefined)?.team_id;
   const teamName = teamId ? teamNames.get(teamId) : undefined;
   const label = teamName ? `${teamName} · 圆桌会议` : conversation.name || workspace.split('/').pop() || '';
-  return collectWorkspaceFiles(workspace, label, mtimeSec);
+  return collectWorkspaceFiles(workspace, label, mtimeSec).then((files) =>
+    files.map((file) => ({ ...file, sourceConversationId: conversation.id }))
+  );
 }
 
 /** Fetch the current frontend user's teams (id → name), swallowing any error. */
@@ -223,14 +245,12 @@ async function fetchTeamNames(): Promise<Map<string, string>> {
  * (relabeled with the team name). Files come back newest-first.
  */
 export async function fetchRecentFiles(conversations: TChatConversation[]): Promise<FileEntry[]> {
-  const standalonePromise = loadStandaloneGeneratedArtifactFiles();
-  if (!conversations.length) return standalonePromise;
+  if (!conversations.length) return [];
   const teamNames = await fetchTeamNames();
-  const [standalone, perConversation] = await Promise.all([
-    standalonePromise,
-    Promise.all(conversations.map((conversation) => collectConversationFiles(conversation, teamNames))),
-  ]);
-  return [...perConversation.flat(), ...standalone].toSorted((a, b) => b.mtime - a.mtime);
+  const perConversation = await Promise.all(
+    conversations.map((conversation) => collectConversationFiles(conversation, teamNames))
+  );
+  return perConversation.flat().toSorted((a, b) => b.mtime - a.mtime);
 }
 
 interface RecentFilesProps {
@@ -248,6 +268,7 @@ const RecentFiles: React.FC<RecentFilesProps> = ({
   verticalLimit = 6,
 }) => {
   const { t } = useTranslation();
+  const fileActions = useFileActions();
   const [files, setFiles] = useState<FileEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [visibleConversations, setVisibleConversations] = useState<TChatConversation[] | null>(null);
@@ -294,9 +315,9 @@ const RecentFiles: React.FC<RecentFilesProps> = ({
 
   const handleOpen = async (path: string) => {
     try {
-      await ipcBridge.shell.openFile.invoke(path);
+      await fileActions.previewFile({ path, name: path.split(/[\\/]/).pop() || path });
     } catch {
-      Message.error('无法打开');
+      Message.error(t('contentHub.actions.openFailed'));
     }
   };
 
@@ -304,18 +325,18 @@ const RecentFiles: React.FC<RecentFilesProps> = ({
     e.stopPropagation();
     try {
       await navigator.clipboard.writeText(path);
-      Message.success('已复制');
+      Message.success(t('common.copySuccess'));
     } catch {
-      Message.error('复制失败');
+      Message.error(t('contentHub.toast.copyFailed'));
     }
   };
 
   const handleShowFolder = async (e: React.MouseEvent, path: string) => {
     e.stopPropagation();
     try {
-      await ipcBridge.shell.showItemInFolder.invoke(path);
+      await fileActions.revealFile({ path, name: path.split(/[\\/]/).pop() || path });
     } catch {
-      Message.error('无法打开');
+      Message.error(t('contentHub.actions.openFailed'));
     }
   };
 
@@ -350,13 +371,15 @@ const RecentFiles: React.FC<RecentFilesProps> = ({
               <span onClick={(e) => handleCopy(e, file.path)} className={styles.recentItemAction} title='Copy path'>
                 <Copy size='12' />
               </span>
-              <span
-                onClick={(e) => handleShowFolder(e, file.path)}
-                className={styles.recentItemAction}
-                title='Show in folder'
-              >
-                <FolderOpen size='12' />
-              </span>
+              {fileActions.canReveal && (
+                <span
+                  onClick={(e) => handleShowFolder(e, file.path)}
+                  className={styles.recentItemAction}
+                  title={t('contentHub.actions.reveal')}
+                >
+                  <FolderOpen size='12' />
+                </span>
+              )}
             </div>
           </div>
         ))}
@@ -399,12 +422,14 @@ const RecentFiles: React.FC<RecentFilesProps> = ({
               >
                 <Copy size='10' />
               </span>
-              <span
-                onClick={(e) => handleShowFolder(e, file.path)}
-                className='w-18px h-18px flex items-center justify-center rd-4px bg-[var(--color-bg-2)] text-t-secondary hover:text-t-primary cursor-pointer'
-              >
-                <FolderOpen size='10' />
-              </span>
+              {fileActions.canReveal && (
+                <span
+                  onClick={(e) => handleShowFolder(e, file.path)}
+                  className='w-18px h-18px flex items-center justify-center rd-4px bg-[var(--color-bg-2)] text-t-secondary hover:text-t-primary cursor-pointer'
+                >
+                  <FolderOpen size='10' />
+                </span>
+              )}
             </div>
             <span className='text-32px leading-none'>{getFileIcon(file.name)}</span>
             <span className='text-11px text-t-primary text-center w-full truncate leading-tight'>{file.name}</span>

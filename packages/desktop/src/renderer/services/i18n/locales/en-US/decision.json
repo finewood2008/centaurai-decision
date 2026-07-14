@@ -1,6 +1,7 @@
 {
   "subtitle": "Convene your advisory council in the Decision Meeting Room anytime — hear every angle, make the call.",
   "startMeeting": "Start a decision meeting",
+  "developmentBadge": "Development",
   "greeting": {
     "morning": "Good morning, Chief",
     "afternoon": "Good afternoon, Chief",
@@ -116,7 +117,7 @@
   "roomTitle": "Decision Chamber",
   "roomSubtitle": "AI advisors argue, you decide",
   "emptyTitle": "Decision Chamber · seat the council",
-  "emptyHint": "Put one decision on the table. The advisors will argue from different seats, surface real trade-offs, and hand the final call back to you.",
+  "emptyHint": "The host will question, route advisors, and keep checking direction with you so the discussion can reach the roots without forcing a conclusion.",
   "createTitle": "Convene a decision council",
   "createSubtitle": "Set the issue first, then seat AI advisors with different positions.",
   "createConfirm": "Seat the council",
@@ -147,6 +148,8 @@
   "deptDecide": "Decide",
   "room": {
     "status": {
+      "paused": "Paused",
+      "completed": "Discussion completed",
       "idle": "Awaiting issue",
       "running": "In debate",
       "awaiting": "Awaiting your direction",
@@ -188,6 +191,7 @@
   },
   "stage": {
     "parallel": "Opening positions",
+    "position": "Advisor positions",
     "debate": "Cross-examination",
     "redteamAttack": "Red-team assault",
     "crossreview": "Plan review",

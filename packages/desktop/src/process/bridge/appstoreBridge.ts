@@ -27,12 +27,12 @@ const APP_ENTRY: Record<string, string> = {
 };
 
 /**
- * Apps hidden from the App Store catalog. The image workbench is now embedded
- * inline under the 「AI工作台」 sider section (and served to LAN browsers over
- * /workbench/image/*), so it no longer appears as a download-gated store card.
- * Its manifest is kept for the inline proxy/agent wiring; it is just delisted.
+ * Apps hidden from the App Store catalog. The image workbench remains embedded
+ * inline for editions that expose it, while the video workbench is unpublished.
+ * Their manifests and bundles stay available for internal wiring and a future
+ * relaunch; the store intentionally renders its empty state for now.
  */
-const STORE_HIDDEN_APP_IDS = new Set<string>(['centaur-image-workbench']);
+const STORE_HIDDEN_APP_IDS = new Set<string>(['centaur-image-workbench', 'centaur-video-workbench']);
 
 /**
  * Locate an app's bundled payload (electron shell + dist), shipped in

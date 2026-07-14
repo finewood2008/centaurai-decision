@@ -394,6 +394,9 @@ const isTailscaleAddr = (addr: string): boolean => {
 /** Clash/mihomo TUN mode hijacks traffic via the 198.18.0.0/15 benchmark range. */
 const isClashTunAddr = (addr: string): boolean => /^198\.1[89]\./.test(addr);
 
+const TAILSCALE_LOOKUP_CACHE_MS = 5000;
+let tailscaleLookupCache: { ip: string | null; expiresAt: number } | null = null;
+
 /**
  * This host's Tailscale node IP (100.64/10), if it is on the tailnet. When the
  * WebUI is bound to 0.0.0.0 this address is reachable from ANY tailnet device —
@@ -413,6 +416,7 @@ const getTailscaleIP = (): string | null => {
       if (isIPv4 && !net.internal && isTailscaleAddr(net.address)) return net.address;
     }
   }
+  if (tailscaleLookupCache && tailscaleLookupCache.expiresAt > Date.now()) return tailscaleLookupCache.ip;
   // Fallback: userspace-networking mode — no TUN interface, parse tailscale CLI.
   try {
     const { execSync } = require('node:child_process');
@@ -427,12 +431,13 @@ const getTailscaleIP = (): string | null => {
     const status = JSON.parse(out.toString()) as {
       Self?: { TailscaleIPs?: string[] };
     };
-    console.log('[WebUI] Tailscale status JSON parsed, Self.TailscaleIPs:', ips);
     const ips = status.Self?.TailscaleIPs;
+    console.log('[WebUI] Tailscale status JSON parsed, Self.TailscaleIPs:', ips);
     if (ips && ips.length > 0) {
       for (const ip of ips) {
         if (isTailscaleAddr(ip)) {
           console.log('[WebUI] Found Tailscale IP:', ip);
+          tailscaleLookupCache = { ip, expiresAt: Date.now() + TAILSCALE_LOOKUP_CACHE_MS };
           return ip;
         }
       }
@@ -442,6 +447,7 @@ const getTailscaleIP = (): string | null => {
     console.error('[WebUI] Tailscale CLI query failed:', e);
     // tailscale CLI not available or not logged in — no Tailscale IP.
   }
+  tailscaleLookupCache = { ip: null, expiresAt: Date.now() + TAILSCALE_LOOKUP_CACHE_MS };
   return null;
 };
 
@@ -600,6 +606,7 @@ export async function startDesktopWebUI(opts: { port?: number; allowRemote?: boo
     installerDir: resolveInstallerDir(),
     // Enterprise LAN shared library, served at /api/shared-drive/*.
     sharedDriveDir: path.join(getDataPath(), 'sharedDrive'),
+    contentAssetsDir: path.join(getDataPath(), 'contentAssets'),
     // Enterprise LAN network drive (the company's large shared disk), browsed
     // read-only at /api/nas/*. Undefined when unconfigured → endpoints disabled.
     nasRootDir: await resolveNasRootDir(),
@@ -658,7 +665,7 @@ export async function stopDesktopWebUI(): Promise<void> {
 /** Compute tailscale info from the running handle (or live query). */
 const computeTailscaleInfo = (
   allowRemote: boolean,
-  port: number,
+  port: number
 ): { detected: boolean; ip: string | null; accessUrl: string | null } => {
   const tsIP = getTailscaleIP();
   const tsAccessUrl = allowRemote && tsIP ? `http://${tsIP}:${port}` : null;
@@ -666,9 +673,7 @@ const computeTailscaleInfo = (
 };
 
 /** Compute the primary access URL: Tailscale first if available, else LAN. */
-const computePrimaryAccessUrl = (
-  handle: { allowRemote: boolean; port: number; lanIP?: string },
-): string | null => {
+const computePrimaryAccessUrl = (handle: { allowRemote: boolean; port: number; lanIP?: string }): string | null => {
   const tsIP = getTailscaleIP();
   if (handle.allowRemote && tsIP) return `http://${tsIP}:${handle.port}`;
   if (handle.allowRemote && handle.lanIP) return `http://${handle.lanIP}:${handle.port}`;

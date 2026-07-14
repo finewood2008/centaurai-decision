@@ -23,11 +23,10 @@ import { handleDownloadGet, handleDownloadsList } from './downloads.js';
 const APP_ID_RE = /^[a-z0-9-]+$/;
 
 /**
- * Apps delisted from the App Store catalog. The image workbench is embedded
- * inline (served at /workbench/image/*), not a download-gated store card.
- * Mirror of STORE_HIDDEN_APP_IDS in the desktop appstoreBridge.
+ * Apps delisted from the App Store catalog. Keep this list synchronized with
+ * the desktop bridge so desktop and LAN/WebUI users see the same empty catalog.
  */
-const STORE_HIDDEN_APP_IDS = new Set<string>(['centaur-image-workbench']);
+const STORE_HIDDEN_APP_IDS = new Set<string>(['centaur-image-workbench', 'centaur-video-workbench']);
 
 /**
  * Locate the bundled App Store MANIFEST dir (resources/appstore). web-host runs
