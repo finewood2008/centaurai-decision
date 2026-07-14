@@ -4,6 +4,5 @@ export { default as SiderWorkbenchEntry } from './SiderWorkbenchEntry';
 export { default as WorkbenchSiderSection } from './WorkbenchSiderSection';
 export { default as SiderFilesEntry } from './SiderFilesEntry';
 export { default as SiderBillingEntry } from './SiderBillingEntry';
-export { default as SiderDecisionDashboardEntry } from './SiderDecisionDashboardEntry';
 export { default as SiderSearchEntry } from './SiderSearchEntry';
 export { default as SiderToolbar } from './SiderToolbar';
