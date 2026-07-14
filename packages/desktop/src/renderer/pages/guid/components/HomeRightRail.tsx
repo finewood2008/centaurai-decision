@@ -6,17 +6,15 @@
 
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { FolderOpen, Share } from '@icon-park/react';
+import { FolderOpen } from '@icon-park/react';
 import RecentFiles from './RecentFiles';
-import RecentSharedFiles from './RecentSharedFiles';
 import styles from '../index.module.css';
 
 interface HomeRightRailProps {
   onViewAllFiles: () => void;
-  onViewAllShared: () => void;
 }
 
-const HomeRightRail: React.FC<HomeRightRailProps> = ({ onViewAllFiles, onViewAllShared }) => {
+const HomeRightRail: React.FC<HomeRightRailProps> = ({ onViewAllFiles }) => {
   const { t } = useTranslation();
 
   return (
@@ -27,13 +25,6 @@ const HomeRightRail: React.FC<HomeRightRailProps> = ({ onViewAllFiles, onViewAll
           <span>{t('guid.recentFiles.title', { defaultValue: 'Recent files' })}</span>
         </header>
         <RecentFiles variant='vertical' onViewAll={onViewAllFiles} />
-      </div>
-      <div className={styles.homeRightRailSection}>
-        <header className={styles.homeRightRailHeader}>
-          <Share theme='outline' size={14} />
-          <span>{t('contentHub.tabs.shared')}</span>
-        </header>
-        <RecentSharedFiles onViewAll={onViewAllShared} />
       </div>
     </aside>
   );

@@ -731,6 +731,53 @@ export const sharedDriveLocal = {
   ),
 };
 
+export type ContentAssetKindDTO = 'image' | 'document' | 'code' | 'other';
+export type ContentAssetStatusFlagDTO =
+  | 'draft'
+  | 'saved'
+  | 'shared'
+  | 'stored_in_nas'
+  | 'indexed'
+  | 'archived'
+  | 'missing';
+export type ContentAssetDTO = {
+  id: string;
+  title: string;
+  kind: ContentAssetKindDTO;
+  ownerUserId: string;
+  visibility: 'private' | 'team' | 'public';
+  sourceConversationId?: string;
+  sourceWorkspacePath: string;
+  storageProvider: 'workspace' | 'personal_content' | 'nas' | 'shared_drive' | 'knowledge';
+  storagePath: string;
+  tags: string[];
+  category?: string;
+  statusFlags: ContentAssetStatusFlagDTO[];
+  createdAt: number;
+  updatedAt: number;
+  size: number;
+  draftProvenance?: 'registered-generated-artifact' | 'meeting-output' | 'uploaded-draft';
+};
+
+export type ContentAssetPathInput = {
+  sourcePath: string;
+  name: string;
+  sourceConversationId?: string;
+  category?: string;
+  kind?: ContentAssetKindDTO;
+  tags?: string[];
+  draftProvenance?: ContentAssetDTO['draftProvenance'];
+};
+
+export const contentAssetsLocal = {
+  list: bridge.buildProvider<ContentAssetDTO[], void>('content-assets.list'),
+  stageFromPath: bridge.buildProvider<ContentAssetDTO, ContentAssetPathInput>('content-assets.stage-from-path'),
+  saveFromPath: bridge.buildProvider<ContentAssetDTO, ContentAssetPathInput>('content-assets.save-from-path'),
+  promoteDraft: bridge.buildProvider<ContentAssetDTO | null, { id: string }>('content-assets.promote-draft'),
+  archive: bridge.buildProvider<ContentAssetDTO | null, { id: string }>('content-assets.archive'),
+  discardDraft: bridge.buildProvider<boolean, { id: string }>('content-assets.discard-draft'),
+};
+
 export type NasEntryDTO = {
   name: string;
   /** Path relative to the drive root, POSIX-separated. */

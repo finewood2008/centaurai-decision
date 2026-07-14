@@ -1,211 +1,292 @@
-/**
- * ContentHubPage — unified hub for generated content.
- *
- * Three top-level sections: 我的产物 (with 全部 / 按会话 / 按类型 sub-views),
- * 共享库, and a read-only 知识库 (vector DB). Preview, search, per-section
- * grid/waterfall + size controls and one-click share-to-team.
- */
-import React, { useState } from 'react';
-import { Message } from '@arco-design/web-react';
+/** Decision personal workspace: drafts, durable assets, and one-way archive. */
+import React, { useEffect, useMemo, useState } from 'react';
+import { Button, Message, Modal, Tooltip } from '@arco-design/web-react';
+import { Box, Copy, Delete, Download, FolderOpen, PreviewOpen, Save } from '@icon-park/react';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
-import HubHeader from './components/HubHeader';
-import HubTabBar from './components/HubTabBar';
-import MineSubTabs from './components/MineSubTabs';
-import TypeFilterBar from './components/TypeFilterBar';
-import FileGrid from './components/view/FileGrid';
-import ViewControls from './components/view/ViewControls';
-import ConversationGroup from './components/ConversationGroup';
+import { useSearchParams } from 'react-router-dom';
+import type { ContentAssetDTO } from '@/common/adapter/ipcBridge';
+import { useFileActions } from '@/renderer/hooks/file/useFileActions';
+import {
+  archiveContentAsset,
+  discardContentAssetDraft,
+  promoteContentAsset,
+  saveContentAsset,
+} from '@/renderer/services/ContentAssetService';
 import EmptyState from './components/EmptyState';
-import ShareToTeamModal from './components/ShareToTeamModal';
-import HubContextMenu, { type HubMenuState } from './components/HubContextMenu';
-import SharedLibraryPanel from './shared/SharedLibraryPanel';
-import NasPanel from './nas/NasPanel';
-import NasFolderPicker from './nas/NasFolderPicker';
-import KnowledgeBasePanel from './knowledge/KnowledgeBasePanel';
+import BatchActionBar, { type HubBatchAction } from './components/manage/BatchActionBar';
+import HubFileList from './components/manage/HubFileList';
+import HubRecordCards from './components/manage/HubRecordCards';
+import HubToolbar from './components/manage/HubToolbar';
+import PersonalWorkspaceSidebar from './components/manage/PersonalWorkspaceSidebar';
+import {
+  buildContentHubSearchParams,
+  clearHubSelection,
+  filterHubRecords,
+  parseContentHubQuery,
+  setHubSelectionForIds,
+  sortHubRecords,
+  toggleHubSelection,
+} from './components/manage/hubState';
 import { useHubFiles } from './useHubFiles';
-import { useHubPreview } from './useHubPreview';
-import { useHubFileActions } from './useHubFileActions';
 import { useHubViewPrefs } from './useHubViewPrefs';
-import { shareToTeam, SHARED_DRIVE_UNAVAILABLE } from '@/renderer/services/SharedDriveService';
-import { isNasAdmin, saveToNas } from '@/renderer/services/NasService';
-import { getCurrentFrontendUserId } from '@/common/utils/frontendUserScope';
-import type { FileEntry, HubMineView, HubSection } from './types';
+import type { HubFileRecord, HubSelectionState, HubUrlState, PersonalWorkspaceView } from './types';
 
-/** Map the legacy ?tab= deep-link onto the new section + mine-view model. */
-const parseInitialTab = (value: string | null): { section: HubSection; mineView: HubMineView } => {
-  if (value === 'shared') return { section: 'shared', mineView: 'all' };
-  if (value === 'nas') return { section: 'nas', mineView: 'all' };
-  if (value === 'knowledge') return { section: 'knowledge', mineView: 'all' };
-  if (value === 'byConversation') return { section: 'mine', mineView: 'byConversation' };
-  if (value === 'byType') return { section: 'mine', mineView: 'byType' };
-  return { section: 'mine', mineView: 'all' };
-};
+function assetOf(record: HubFileRecord): ContentAssetDTO | null {
+  if (record.id.startsWith('legacy:')) return null;
+  return record.raw as ContentAssetDTO;
+}
+
+const targetFor = (record: HubFileRecord) => ({ path: record.path || '', name: record.name });
 
 const ContentHubPage: React.FC = () => {
   const { t } = useTranslation();
-  const location = useLocation();
-  const initial = parseInitialTab(new URLSearchParams(location.search).get('tab'));
-  const [section, setSection] = useState<HubSection>(initial.section);
-  const [mineView, setMineView] = useState<HubMineView>(initial.mineView);
-  const [search, setSearch] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [state, setState] = useState<HubUrlState>(() => parseContentHubQuery(searchParams));
+  const [selection, setSelection] = useState<HubSelectionState>(() => clearHubSelection());
+  const [busy, setBusy] = useState(false);
+  const hub = useHubFiles();
+  const prefs = useHubViewPrefs();
+  const fileActions = useFileActions();
+  const view = state.mineView as PersonalWorkspaceView;
 
-  const hub = useHubFiles(search);
-  const preview = useHubPreview();
-  const actions = useHubFileActions();
-  const { view, size, setView, setSize } = useHubViewPrefs();
-  const [shareTarget, setShareTarget] = useState<FileEntry | null>(null);
-  const [sharing, setSharing] = useState(false);
-  const [menu, setMenu] = useState<HubMenuState>(null);
-  const [nasTarget, setNasTarget] = useState<FileEntry | null>(null);
-  const [savingToNas, setSavingToNas] = useState(false);
-  const nasAdmin = isNasAdmin();
+  useEffect(() => {
+    setSearchParams(buildContentHubSearchParams(state), { replace: true });
+  }, [setSearchParams, state]);
 
-  const handleSaveToNas = async (destRel: string) => {
-    if (!nasTarget) return;
-    setSavingToNas(true);
+  const allByView = useMemo(
+    () => ({ drafts: hub.forView('drafts'), assets: hub.forView('assets'), archived: hub.forView('archived') }),
+    [hub]
+  );
+  const visible = useMemo(
+    () =>
+      sortHubRecords(filterHubRecords(allByView[view], state.search, state.kind), state.sortKey, state.sortDirection),
+    [allByView, state.kind, state.search, state.sortDirection, state.sortKey, view]
+  );
+  const selected = visible.filter((record) => selection.selectedIds.has(record.id));
+
+  const changeView = (next: PersonalWorkspaceView) => {
+    setSelection(clearHubSelection());
+    setState((current) => ({ ...current, mineView: next }));
+  };
+
+  const reload = async () => {
+    await hub.reload();
+    setSelection(clearHubSelection());
+  };
+
+  const preview = async (record: HubFileRecord) => {
     try {
-      await saveToNas(nasTarget.path, destRel, nasTarget.name);
-      Message.success(t('contentHub.nas.savedToNas'));
-      setNasTarget(null);
+      await fileActions.previewFile(targetFor(record));
     } catch {
-      Message.error(t('contentHub.nas.saveToNasFailed'));
-    } finally {
-      setSavingToNas(false);
+      Message.error(t('contentHub.actions.previewFailed'));
     }
   };
 
-  const openMenu = (file: FileEntry, e: React.MouseEvent) => {
-    e.preventDefault();
-    setMenu({ x: e.clientX, y: e.clientY, file });
-  };
-
-  const handleShareConfirm = async (category: string) => {
-    if (!shareTarget) return;
-    setSharing(true);
+  const directOpen = async (record: HubFileRecord) => {
     try {
-      await shareToTeam({
-        path: shareTarget.path,
-        name: shareTarget.name,
-        category: category || undefined,
-        uploaderId: getCurrentFrontendUserId(),
-      });
-      Message.success(t('contentHub.share.success'));
-      setShareTarget(null);
-    } catch (err) {
-      const unavailable = err instanceof Error && err.message === SHARED_DRIVE_UNAVAILABLE;
-      Message.error(unavailable ? t('contentHub.shared.comingSoon') : t('contentHub.share.error'));
-    } finally {
-      setSharing(false);
+      await fileActions.openFile(targetFor(record));
+    } catch {
+      Message.error(t('contentHub.actions.openFailed'));
     }
   };
 
-  const empty = (
-    <EmptyState
-      loading={hub.loading}
-      loadingMessage={t('contentHub.empty.loading')}
-      message={search ? t('contentHub.empty.noMatch') : t('contentHub.empty.noFiles')}
-    />
-  );
+  const saveDraft = async (record: HubFileRecord) => {
+    const asset = assetOf(record);
+    if (asset) await promoteContentAsset(asset.id);
+    else await saveContentAsset({ sourcePath: record.path || '', name: record.name });
+  };
 
-  // 我的产物 toolbar: sub-view tabs (left) + optional type filter + view controls (right).
-  const mineToolbar = (
-    <div className='flex items-center gap-8px px-16px py-8px shrink-0'>
-      <MineSubTabs active={mineView} onChange={setMineView} />
-      {mineView === 'byType' && (
-        <>
-          <span className='w-1px h-16px bg-[var(--color-border-2)]' />
-          <TypeFilterBar value={hub.kind} onChange={hub.setKind} />
-        </>
-      )}
-      <div className='flex-1' />
-      <ViewControls view={view} size={size} onViewChange={setView} onSizeChange={setSize} />
-    </div>
-  );
-
-  const renderMine = () => {
-    if (mineView === 'byConversation') {
-      return (
-        <>
-          {mineToolbar}
-          {hub.loading || hub.byConversation.length === 0 ? (
-            empty
-          ) : (
-            <div className='flex-1 overflow-y-auto p-16px'>
-              {hub.byConversation.map((group) => (
-                <ConversationGroup
-                  key={group.conversation}
-                  conversation={group.conversation}
-                  files={group.files}
-                  view={view}
-                  size={size}
-                  onOpen={preview}
-                  onShare={setShareTarget}
-                  onContextMenu={openMenu}
-                />
-              ))}
-            </div>
-          )}
-        </>
-      );
-    }
-
-    const files = mineView === 'byType' ? hub.byType : hub.searched;
-    return (
-      <>
-        {mineToolbar}
-        {hub.loading || files.length === 0 ? (
-          empty
-        ) : (
-          <div className='flex-1 overflow-y-auto p-16px'>
-            <FileGrid
-              files={files}
-              view={view}
-              size={size}
-              onOpen={preview}
-              onShare={setShareTarget}
-              onContextMenu={openMenu}
-            />
-          </div>
-        )}
-      </>
+  const runMany = async (records: HubFileRecord[], operation: (record: HubFileRecord) => Promise<unknown>) => {
+    setBusy(true);
+    const results = await Promise.allSettled(records.map(operation));
+    setBusy(false);
+    await reload();
+    const failures = results.filter((result) => result.status === 'rejected').length;
+    Message[failures ? 'warning' : 'success'](
+      failures
+        ? t('contentHub.batch.partialFailure', { count: failures })
+        : t('contentHub.batch.completed', { count: records.length })
     );
   };
 
-  const renderBody = () => {
-    if (section === 'shared') return <SharedLibraryPanel search={search} />;
-    if (section === 'nas') return <NasPanel search={search} />;
-    if (section === 'knowledge') return <KnowledgeBasePanel search={search} />;
-    return renderMine();
+  const confirmDiscard = (records: HubFileRecord[]) => {
+    const managed = records.filter((record) => assetOf(record)?.statusFlags.includes('draft'));
+    if (!managed.length) return;
+    Modal.confirm({
+      title: t('contentHub.actions.discardDraft'),
+      content: t('contentHub.workspace.discardConfirm', { count: managed.length }),
+      okButtonProps: { status: 'danger' },
+      onOk: () => runMany(managed, (record) => discardContentAssetDraft(assetOf(record)!.id)),
+    });
   };
 
+  const archiveRecords = (records: HubFileRecord[]) =>
+    runMany(
+      records.filter((record) => assetOf(record)),
+      (record) => archiveContentAsset(assetOf(record)!.id)
+    );
+
+  const copyPath = async (record: HubFileRecord) => {
+    await navigator.clipboard.writeText(record.path || '');
+    Message.success(t('common.copySuccess'));
+  };
+
+  const download = async (record: HubFileRecord) => {
+    try {
+      await fileActions.downloadFile(targetFor(record));
+    } catch {
+      Message.error(t('contentHub.actions.downloadFailed'));
+    }
+  };
+
+  const renderActions = (record: HubFileRecord) => (
+    <>
+      <Tooltip content={t('contentHub.actions.preview')} mini>
+        <Button type='text' size='mini' icon={<PreviewOpen size={15} />} onClick={() => void preview(record)} />
+      </Tooltip>
+      {view === 'drafts' && (
+        <Tooltip content={t('contentHub.actions.saveAsset')} mini>
+          <Button type='text' size='mini' icon={<Save size={15} />} onClick={() => void runMany([record], saveDraft)} />
+        </Tooltip>
+      )}
+      {view === 'drafts' && assetOf(record) && (
+        <Tooltip content={t('contentHub.actions.discardDraft')} mini>
+          <Button
+            type='text'
+            status='danger'
+            size='mini'
+            icon={<Delete size={15} />}
+            onClick={() => confirmDiscard([record])}
+          />
+        </Tooltip>
+      )}
+      {view === 'assets' && (
+        <Tooltip content={t('contentHub.actions.archive')} mini>
+          <Button type='text' size='mini' icon={<Box size={15} />} onClick={() => void archiveRecords([record])} />
+        </Tooltip>
+      )}
+      {view !== 'drafts' && (
+        <Tooltip content={t('contentHub.actions.download')} mini>
+          <Button type='text' size='mini' icon={<Download size={15} />} onClick={() => void download(record)} />
+        </Tooltip>
+      )}
+      <Tooltip content={t('contentHub.actions.copyPath')} mini>
+        <Button type='text' size='mini' icon={<Copy size={15} />} onClick={() => void copyPath(record)} />
+      </Tooltip>
+      {view === 'assets' && fileActions.canReveal && (
+        <Tooltip content={t('contentHub.actions.reveal')} mini>
+          <Button
+            type='text'
+            size='mini'
+            icon={<FolderOpen size={15} />}
+            onClick={() => void fileActions.revealFile(targetFor(record))}
+          />
+        </Tooltip>
+      )}
+    </>
+  );
+
+  const batchActions: HubBatchAction[] =
+    view === 'drafts'
+      ? [
+          {
+            key: 'save',
+            label: t('contentHub.actions.saveAsset'),
+            loading: busy,
+            onClick: () => void runMany(selected, saveDraft),
+          },
+          {
+            key: 'discard',
+            label: t('contentHub.actions.discardDraft'),
+            status: 'danger',
+            disabled: !selected.some((record) => assetOf(record)),
+            onClick: () => confirmDiscard(selected),
+          },
+        ]
+      : view === 'assets'
+        ? [
+            {
+              key: 'archive',
+              label: t('contentHub.actions.archive'),
+              loading: busy,
+              onClick: () => void archiveRecords(selected),
+            },
+          ]
+        : [];
+
   return (
-    <div className='h-full flex flex-col bg-[var(--color-bg-1)]'>
-      <HubHeader count={hub.total} search={search} onSearchChange={setSearch} />
-      <HubTabBar active={section} onChange={setSection} />
-      {renderBody()}
-      <ShareToTeamModal
-        file={shareTarget}
-        loading={sharing}
-        onConfirm={handleShareConfirm}
-        onCancel={() => setShareTarget(null)}
+    <div className='h-full min-h-0 flex bg-[var(--color-bg-1)]'>
+      <PersonalWorkspaceSidebar
+        active={view}
+        counts={{
+          drafts: allByView.drafts.length,
+          assets: allByView.assets.length,
+          archived: allByView.archived.length,
+        }}
+        onChange={changeView}
       />
-      <HubContextMenu
-        state={menu}
-        onOpen={preview}
-        onShare={setShareTarget}
-        onSaveToNas={nasAdmin ? setNasTarget : undefined}
-        onCopyPath={(f) => void actions.copyPath(f)}
-        onDownload={(f) => void actions.download(f)}
-        onReveal={(f) => void actions.reveal(f)}
-        onClose={() => setMenu(null)}
-      />
-      <NasFolderPicker
-        visible={!!nasTarget}
-        loading={savingToNas}
-        onPick={(rel) => void handleSaveToNas(rel)}
-        onCancel={() => setNasTarget(null)}
-      />
+      <main className='flex-1 min-w-0 min-h-0 flex flex-col'>
+        <HubToolbar
+          search={state.search}
+          kind={state.kind}
+          sortKey={state.sortKey}
+          sortDirection={state.sortDirection}
+          view={state.view}
+          size={prefs.size}
+          onSearchChange={(search) => setState((current) => ({ ...current, search }))}
+          onKindChange={(kind) => setState((current) => ({ ...current, kind }))}
+          onSortKeyChange={(sortKey) => setState((current) => ({ ...current, sortKey }))}
+          onSortDirectionChange={(sortDirection) => setState((current) => ({ ...current, sortDirection }))}
+          onViewChange={(next) => {
+            prefs.setView(next);
+            setState((current) => ({ ...current, view: next }));
+          }}
+          onSizeChange={prefs.setSize}
+          onRefresh={() => void reload()}
+          refreshing={hub.loading}
+        />
+        <BatchActionBar
+          count={selected.length}
+          actions={batchActions}
+          onClear={() => setSelection(clearHubSelection())}
+        />
+        <div className='flex-1 min-h-0 overflow-auto p-18px'>
+          {hub.loading && !visible.length ? (
+            <EmptyState loading loadingMessage={t('contentHub.empty.loading')} message='' />
+          ) : !visible.length ? (
+            <EmptyState loading={false} loadingMessage='' message={t(`contentHub.workspace.${view}Empty`)} />
+          ) : state.view === 'list' ? (
+            <HubFileList
+              records={visible}
+              selectedIds={selection.selectedIds}
+              onToggleSelect={(id) => setSelection((current) => toggleHubSelection(current, id))}
+              onToggleAll={(checked) =>
+                setSelection((current) =>
+                  setHubSelectionForIds(
+                    current,
+                    visible.map((record) => record.id),
+                    checked
+                  )
+                )
+              }
+              onOpen={(record) => void preview(record)}
+              onDirectOpen={(record) => void directOpen(record)}
+              renderActions={renderActions}
+            />
+          ) : (
+            <HubRecordCards
+              records={visible}
+              view={state.view}
+              size={prefs.size}
+              selectedIds={selection.selectedIds}
+              onToggleSelect={(id) => setSelection((current) => toggleHubSelection(current, id))}
+              onOpen={(record) => void preview(record)}
+              onDirectOpen={(record) => void directOpen(record)}
+              renderActions={renderActions}
+            />
+          )}
+        </div>
+      </main>
     </div>
   );
 };

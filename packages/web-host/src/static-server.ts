@@ -30,6 +30,15 @@ import {
   handleSharedUpload,
 } from './shared-drive.js';
 import {
+  handleContentAssetArchive,
+  handleContentAssetDiscardDraft,
+  handleContentAssetDownload,
+  handleContentAssetPreview,
+  handleContentAssetPromoteDraft,
+  handleContentAssetsList,
+  handleContentAssetUpload,
+} from './content-assets.js';
+import {
   handleNasDownload,
   handleNasList,
   handleNasMkdir,
@@ -58,6 +67,8 @@ export type StaticServerOptions = {
    * /api/shared-drive/*. Omit to disable sharing (list returns []).
    */
   sharedDriveDir?: string;
+  /** Managed personal-workspace manifest and blob directory. */
+  contentAssetsDir?: string;
   /**
    * Root of the enterprise LAN network drive (the company's large shared disk),
    * browsed read-only at /api/nas/*. Omit to disable (list returns []).
@@ -856,6 +867,33 @@ export async function startStaticServer(opts: StaticServerOptions): Promise<Stat
           await handleSharedPreview(req, res, opts.sharedDriveDir);
         else if (req.url.startsWith('/api/shared-drive/remove') && req.method === 'DELETE')
           await handleSharedRemove(req, res, opts.sharedDriveDir);
+        else {
+          res.writeHead(404, { 'content-type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'NOT_FOUND' }));
+        }
+        return;
+      }
+
+      // Decision is single-user: bind every request to the server-owned user
+      // instead of trusting a caller-supplied owner query parameter.
+      if (req.url.startsWith('/api/content-assets/')) {
+        const ownerUserId = 'system_default_user';
+        if (req.url.startsWith('/api/content-assets/list') && req.method === 'GET')
+          await handleContentAssetsList(req, res, opts.contentAssetsDir, ownerUserId);
+        else if (req.url.startsWith('/api/content-assets/draft-upload') && req.method === 'POST')
+          await handleContentAssetUpload(req, res, opts.contentAssetsDir, ownerUserId, 'draft');
+        else if (req.url.startsWith('/api/content-assets/upload') && req.method === 'POST')
+          await handleContentAssetUpload(req, res, opts.contentAssetsDir, ownerUserId, 'saved');
+        else if (req.url.startsWith('/api/content-assets/promote') && req.method === 'POST')
+          await handleContentAssetPromoteDraft(req, res, opts.contentAssetsDir, ownerUserId);
+        else if (req.url.startsWith('/api/content-assets/archive') && req.method === 'POST')
+          await handleContentAssetArchive(req, res, opts.contentAssetsDir, ownerUserId);
+        else if (req.url.startsWith('/api/content-assets/discard') && req.method === 'DELETE')
+          await handleContentAssetDiscardDraft(req, res, opts.contentAssetsDir, ownerUserId);
+        else if (req.url.startsWith('/api/content-assets/download'))
+          await handleContentAssetDownload(req, res, opts.contentAssetsDir, ownerUserId);
+        else if (req.url.startsWith('/api/content-assets/preview'))
+          await handleContentAssetPreview(req, res, opts.contentAssetsDir, ownerUserId);
         else {
           res.writeHead(404, { 'content-type': 'application/json' });
           res.end(JSON.stringify({ success: false, error: 'NOT_FOUND' }));

@@ -8,13 +8,13 @@ import type { HubCardSize, HubViewMode } from './types';
 const VIEW_KEY = 'contentHub.viewMode';
 const SIZE_KEY = 'contentHub.cardSize';
 
-const isView = (v: string | null): v is HubViewMode => v === 'grid' || v === 'waterfall';
+const isView = (v: string | null): v is HubViewMode => v === 'list' || v === 'grid' || v === 'waterfall';
 const isSize = (v: string | null): v is HubCardSize => v === 'small' || v === 'medium' || v === 'large';
 
 export function useHubViewPrefs() {
   const [view, setViewState] = useState<HubViewMode>(() => {
     const saved = localStorage.getItem(VIEW_KEY);
-    return isView(saved) ? saved : 'grid';
+    return isView(saved) ? saved : 'list';
   });
   const [size, setSizeState] = useState<HubCardSize>(() => {
     const saved = localStorage.getItem(SIZE_KEY);

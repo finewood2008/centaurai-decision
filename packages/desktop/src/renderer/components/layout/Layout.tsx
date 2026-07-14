@@ -10,6 +10,7 @@ import PwaPullToRefresh from '@/renderer/components/layout/PwaPullToRefresh';
 import MobileTabBar from '@/renderer/components/layout/MobileTabBar';
 import Titlebar from '@/renderer/components/layout/Titlebar';
 import ToolboxPage from '@/renderer/pages/toolbox/ToolboxPage';
+import { PreviewHost } from '@/renderer/pages/conversation/Preview';
 import { Layout as ArcoLayout } from '@arco-design/web-react';
 import classNames from 'classnames';
 import React, { Suspense, useCallback, useEffect, useRef, useState } from 'react';
@@ -446,6 +447,7 @@ const Layout: React.FC<{
               {isMobile && <MobileTabBar />}
               {directorySelectionContextHolder}
               <PwaPullToRefresh />
+              <PreviewHost excludeConversationRoutes />
               <Suspense fallback={null}>
                 <UpdateModal />
               </Suspense>

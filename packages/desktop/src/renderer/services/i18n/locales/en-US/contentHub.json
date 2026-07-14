@@ -1,8 +1,18 @@
 {
   "nav": {
-    "title": "Content Hub"
+    "title": "Personal Workspace"
   },
-  "title": "Content Hub",
+  "title": "Personal Workspace",
+  "workspace": {
+    "title": "Personal Workspace",
+    "drafts": "To Organize",
+    "assets": "My Assets",
+    "archived": "Archived",
+    "draftsEmpty": "Nothing waiting to be organized",
+    "assetsEmpty": "No saved assets yet",
+    "archivedEmpty": "Archive is empty",
+    "discardConfirm": "Discard {{count}} managed draft(s)? Project originals will not be changed."
+  },
   "search": {
     "placeholder": "Search file name..."
   },
@@ -35,6 +45,7 @@
     "other": "Other"
   },
   "view": {
+    "list": "List",
     "grid": "Grid",
     "waterfall": "Waterfall",
     "sizeSmall": "S",
@@ -42,12 +53,35 @@
     "sizeLarge": "L"
   },
   "actions": {
+    "back": "Back",
+    "refresh": "Refresh",
+    "preview": "Preview",
+    "previewFailed": "Preview failed",
+    "openFailed": "Cannot open file",
+    "saveAsset": "Save as asset",
+    "discardDraft": "Discard draft",
+    "archive": "Archive",
+    "downloadFailed": "Download failed",
+    "reveal": "Show in folder",
     "open": "Open",
     "copyPath": "Copy path",
     "download": "Download",
     "showInFolder": "Show in folder",
     "shareToTeam": "Share to team",
     "saveToNas": "Save to network drive"
+  },
+  "sort": {
+    "modified": "Modified",
+    "name": "Name",
+    "size": "Size",
+    "directionAsc": "Ascending",
+    "directionDesc": "Descending"
+  },
+  "list": { "name": "Name", "size": "Size", "modified": "Modified" },
+  "selection": { "selected": "{{count}} selected", "clear": "Clear selection" },
+  "batch": {
+    "completed": "Completed for {{count}} item(s)",
+    "partialFailure": "{{count}} item(s) could not be processed"
   },
   "share": {
     "uploading": "Sharing...",

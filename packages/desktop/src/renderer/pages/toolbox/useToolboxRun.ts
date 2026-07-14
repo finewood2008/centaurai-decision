@@ -12,6 +12,7 @@ import { buildCliAgentParams } from '@/renderer/pages/conversation/utils/createC
 import type { AgentMetadata } from '@/renderer/utils/model/agentTypes';
 import { buildToolPrompt, collectUploadPaths } from './toolboxPrompt';
 import type { ToolDef, ToolFormValues, ToolImageResult, ToolRunResult } from './types';
+import { registerGeneratedArtifacts } from '@/renderer/utils/file/generatedArtifacts';
 
 /** Terminal wait for a run, in milliseconds. Image generation can be slow. */
 const RUN_TIMEOUT_MS = 6 * 60 * 1000;
@@ -107,6 +108,11 @@ export function useToolboxRun(): UseToolboxRun {
           )
         );
         const images = loaded.filter((item): item is ToolImageResult => item !== null);
+        await registerGeneratedArtifacts({
+          paths,
+          source: 'toolbox',
+          standaloneLabel: tool.titleText || tool.titleKey,
+        });
         setResult({ conversation_id: '', text: results.find((r) => r.text)?.text ?? '', images });
         setStatus('done');
         return;
@@ -163,6 +169,14 @@ export function useToolboxRun(): UseToolboxRun {
         )
       );
       const images: ToolImageResult[] = loaded.filter((item): item is ToolImageResult => item !== null);
+
+      await registerGeneratedArtifacts({
+        paths: newImagePaths,
+        workspace,
+        conversationId,
+        source: 'toolbox',
+        standaloneLabel: tool.titleText || tool.titleKey,
+      });
 
       setResult({ conversation_id: conversationId, text: finalText, images });
       setStatus('done');

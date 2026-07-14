@@ -4,7 +4,7 @@
  * "另存到网盘" to pick where an AI artifact should be copied.
  */
 import React, { useEffect, useState } from 'react';
-import { Button, Modal } from '@arco-design/web-react';
+import { Modal } from '@arco-design/web-react';
 import { FolderClose, Right } from '@icon-park/react';
 import { useTranslation } from 'react-i18next';
 import { listNas, type NasEntry } from '@/renderer/services/NasService';

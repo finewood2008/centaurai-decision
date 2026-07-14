@@ -1,8 +1,18 @@
 {
   "nav": {
-    "title": "内容中心"
+    "title": "个人工作空间"
   },
-  "title": "内容中心",
+  "title": "个人工作空间",
+  "workspace": {
+    "title": "个人工作空间",
+    "drafts": "待整理",
+    "assets": "我的资产",
+    "archived": "归档",
+    "draftsEmpty": "暂无待整理内容",
+    "assetsEmpty": "暂无已保存资产",
+    "archivedEmpty": "归档为空",
+    "discardConfirm": "丢弃 {{count}} 个受管草稿？项目目录中的原件不会受到影响。"
+  },
   "search": {
     "placeholder": "搜索文件名..."
   },
@@ -35,6 +45,7 @@
     "other": "其他"
   },
   "view": {
+    "list": "列表",
     "grid": "网格",
     "waterfall": "瀑布流",
     "sizeSmall": "小",
@@ -42,6 +53,16 @@
     "sizeLarge": "大"
   },
   "actions": {
+    "back": "返回",
+    "refresh": "刷新",
+    "preview": "预览",
+    "previewFailed": "预览失败",
+    "openFailed": "无法打开文件",
+    "saveAsset": "保存为个人资产",
+    "discardDraft": "丢弃草稿",
+    "archive": "归档",
+    "downloadFailed": "下载失败",
+    "reveal": "在文件夹中显示",
     "open": "打开",
     "copyPath": "复制路径",
     "download": "下载",
@@ -49,6 +70,16 @@
     "shareToTeam": "共享到团队",
     "saveToNas": "另存到网盘"
   },
+  "sort": {
+    "modified": "修改时间",
+    "name": "名称",
+    "size": "大小",
+    "directionAsc": "升序",
+    "directionDesc": "降序"
+  },
+  "list": { "name": "名称", "size": "大小", "modified": "修改时间" },
+  "selection": { "selected": "已选择 {{count}} 项", "clear": "清空选择" },
+  "batch": { "completed": "已处理 {{count}} 项", "partialFailure": "有 {{count}} 项处理失败" },
   "share": {
     "uploading": "正在共享...",
     "success": "已共享到团队",

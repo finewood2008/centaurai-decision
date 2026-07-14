@@ -211,6 +211,7 @@ async function runStart(flags: Map<string, string | true>): Promise<void> {
       allowRemote,
       dataDir,
       sharedDriveDir: path.join(dataDir, 'sharedDrive'),
+      contentAssetsDir: path.join(dataDir, 'contentAssets'),
       knowledgeEndpoint: process.env.CENTAURAI_KNOWLEDGE_ENDPOINT ?? 'http://127.0.0.1:8618',
       knowledgeToken: process.env.CENTAURAI_KNOWLEDGE_TOKEN ?? process.env.AIONUI_KNOWLEDGE_TOKEN,
       logDir,
