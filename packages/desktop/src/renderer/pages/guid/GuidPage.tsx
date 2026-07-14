@@ -18,7 +18,7 @@ import { AgentPillBarSkeleton } from './components/GuidSkeleton';
 import GuidActionRow from './components/GuidActionRow';
 import GuidInputCard from './components/GuidInputCard';
 import GuidModelSelector from './components/GuidModelSelector';
-import GuidDomesticModelRow from './components/GuidDomesticModelRow';
+import GuidProviderModelRow from './components/GuidProviderModelRow';
 import HomeRightRail from './components/HomeRightRail';
 import SpeechInputButton from '@/renderer/components/chat/SpeechInputButton';
 import MentionDropdown, { MentionSelectorBadge } from './components/MentionDropdown';
@@ -575,11 +575,9 @@ const GuidPage: React.FC = () => {
     ? agentSelection.currentEffectiveAgentInfo.agent_type
     : agentSelection.selectedAgent;
 
-  // Agents that use configured model providers instead of ACP probe-based models.
-  // Only aionrs now — Gemini runs as a regular ACP backend with ACP-cached models.
-  const PROVIDER_BASED_AGENTS = new Set(['aionrs']);
-  const isGeminiMode =
-    PROVIDER_BASED_AGENTS.has(effectiveAgentType) &&
+  // CentaurAI uses configured model providers instead of ACP probe-based models.
+  const isCentaurAIMode =
+    effectiveAgentType === 'aionrs' &&
     (!agentSelection.is_presetAgent || agentSelection.currentEffectiveAgentInfo.isAvailable);
 
   // Build the mention dropdown node
@@ -595,7 +593,7 @@ const GuidPage: React.FC = () => {
   // Build the model selector node
   const modelSelectorNode = (
     <GuidModelSelector
-      isGeminiMode={isGeminiMode}
+      isGeminiMode={isCentaurAIMode}
       modelList={modelSelection.modelList}
       current_model={modelSelection.current_model}
       setCurrentModel={modelSelection.setCurrentModel}
@@ -815,10 +813,8 @@ const GuidPage: React.FC = () => {
                 />
               ) : null}
 
-              {/* When CentaurAI (aionrs) is selected, surface a quick-select row of
-                  domestic model providers; shares state with the chat-box dropdown. */}
-              {isGeminiMode && (agentSelection.availableAgents?.length ?? 0) > 0 && (
-                <GuidDomesticModelRow
+              {isCentaurAIMode && (agentSelection.availableAgents?.length ?? 0) > 0 && (
+                <GuidProviderModelRow
                   modelList={modelSelection.modelList}
                   current_model={modelSelection.current_model}
                   setCurrentModel={modelSelection.setCurrentModel}
