@@ -7,10 +7,9 @@
     "title": "个人工作空间",
     "drafts": "待整理",
     "assets": "我的资产",
-    "archived": "归档",
+    "knowledge": "知识库",
     "draftsEmpty": "暂无待整理内容",
     "assetsEmpty": "暂无已保存资产",
-    "archivedEmpty": "归档为空",
     "discardConfirm": "丢弃 {{count}} 个受管草稿？项目目录中的原件不会受到影响。"
   },
   "search": {
@@ -31,7 +30,7 @@
   },
   "knowledge": {
     "chunks": "{{n}} 块",
-    "readonly": "知识库 · 共 {{n}} 个文件 · 只读",
+    "readonly": "知识库 · 共 {{n}} 个文件",
     "refresh": "刷新",
     "empty": "知识库为空",
     "unreachable": "无法连接向量库，请确认服务已启动",
@@ -60,7 +59,7 @@
     "openFailed": "无法打开文件",
     "saveAsset": "保存为个人资产",
     "discardDraft": "丢弃草稿",
-    "archive": "归档",
+    "indexKnowledge": "转入知识库",
     "downloadFailed": "下载失败",
     "reveal": "在文件夹中显示",
     "open": "打开",

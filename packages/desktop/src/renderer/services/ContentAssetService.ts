@@ -2,6 +2,7 @@
 import { ipcBridge } from '@/common';
 import type { ContentAssetDTO, ContentAssetPathInput } from '@/common/adapter/ipcBridge';
 import { getBaseUrl } from '@/common/adapter/httpBridge';
+import { configService } from '@/common/config/configService';
 
 type Win = Window & { __backendPort?: number; __backendHost?: string };
 
@@ -82,6 +83,11 @@ export function promoteContentAsset(id: string): Promise<ContentAssetDTO | null>
 
 export function archiveContentAsset(id: string): Promise<ContentAssetDTO | null> {
   return isAdminElectron() ? ipcBridge.contentAssetsLocal.archive.invoke({ id }) : mutate('archive', id);
+}
+
+export function indexContentAsset(id: string): Promise<ContentAssetDTO | null> {
+  const endpoint = (configService.get('vectorDB.endpoint') ?? 'http://127.0.0.1:8618').replace(/\/+$/, '');
+  return isAdminElectron() ? ipcBridge.contentAssetsLocal.index.invoke({ id, endpoint }) : mutate('index', id);
 }
 
 export function discardContentAssetDraft(id: string): Promise<boolean> {

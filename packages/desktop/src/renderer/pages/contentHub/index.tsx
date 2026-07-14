@@ -1,14 +1,14 @@
-/** Decision personal workspace: drafts, durable assets, and one-way archive. */
+/** Decision personal workspace: drafts, durable assets, and personal vector knowledge. */
 import React, { useEffect, useMemo, useState } from 'react';
 import { Button, Message, Modal, Tooltip } from '@arco-design/web-react';
-import { Box, Copy, Delete, Download, FolderOpen, PreviewOpen, Save } from '@icon-park/react';
+import { Book, Copy, Delete, Download, FolderOpen, PreviewOpen, Save } from '@icon-park/react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import type { ContentAssetDTO } from '@/common/adapter/ipcBridge';
 import { useFileActions } from '@/renderer/hooks/file/useFileActions';
 import {
-  archiveContentAsset,
   discardContentAssetDraft,
+  indexContentAsset,
   promoteContentAsset,
   saveContentAsset,
 } from '@/renderer/services/ContentAssetService';
@@ -18,6 +18,8 @@ import HubFileList from './components/manage/HubFileList';
 import HubRecordCards from './components/manage/HubRecordCards';
 import HubToolbar from './components/manage/HubToolbar';
 import PersonalWorkspaceSidebar from './components/manage/PersonalWorkspaceSidebar';
+import KnowledgeBasePanel from './knowledge/KnowledgeBasePanel';
+import { useKnowledgeBase } from './knowledge/useKnowledgeBase';
 import {
   buildContentHubSearchParams,
   clearHubSelection,
@@ -45,6 +47,7 @@ const ContentHubPage: React.FC = () => {
   const [selection, setSelection] = useState<HubSelectionState>(() => clearHubSelection());
   const [busy, setBusy] = useState(false);
   const hub = useHubFiles();
+  const knowledge = useKnowledgeBase();
   const prefs = useHubViewPrefs();
   const fileActions = useFileActions();
   const view = state.mineView as PersonalWorkspaceView;
@@ -53,13 +56,16 @@ const ContentHubPage: React.FC = () => {
     setSearchParams(buildContentHubSearchParams(state), { replace: true });
   }, [setSearchParams, state]);
 
-  const allByView = useMemo(
-    () => ({ drafts: hub.forView('drafts'), assets: hub.forView('assets'), archived: hub.forView('archived') }),
-    [hub]
-  );
+  const allByView = useMemo(() => ({ drafts: hub.forView('drafts'), assets: hub.forView('assets') }), [hub]);
   const visible = useMemo(
     () =>
-      sortHubRecords(filterHubRecords(allByView[view], state.search, state.kind), state.sortKey, state.sortDirection),
+      view === 'knowledge'
+        ? []
+        : sortHubRecords(
+            filterHubRecords(allByView[view], state.search, state.kind),
+            state.sortKey,
+            state.sortDirection
+          ),
     [allByView, state.kind, state.search, state.sortDirection, state.sortKey, view]
   );
   const selected = visible.filter((record) => selection.selectedIds.has(record.id));
@@ -107,6 +113,7 @@ const ContentHubPage: React.FC = () => {
         ? t('contentHub.batch.partialFailure', { count: failures })
         : t('contentHub.batch.completed', { count: records.length })
     );
+    return failures;
   };
 
   const confirmDiscard = (records: HubFileRecord[]) => {
@@ -120,11 +127,13 @@ const ContentHubPage: React.FC = () => {
     });
   };
 
-  const archiveRecords = (records: HubFileRecord[]) =>
-    runMany(
-      records.filter((record) => assetOf(record)),
-      (record) => archiveContentAsset(assetOf(record)!.id)
-    );
+  const indexRecords = async (records: HubFileRecord[]) => {
+    const managed = records.filter((record) => assetOf(record));
+    if (!managed.length) return;
+    const failures = await runMany(managed, (record) => indexContentAsset(assetOf(record)!.id));
+    knowledge.reload();
+    if (!failures) changeView('knowledge');
+  };
 
   const copyPath = async (record: HubFileRecord) => {
     await navigator.clipboard.writeText(record.path || '');
@@ -161,8 +170,8 @@ const ContentHubPage: React.FC = () => {
         </Tooltip>
       )}
       {view === 'assets' && (
-        <Tooltip content={t('contentHub.actions.archive')} mini>
-          <Button type='text' size='mini' icon={<Box size={15} />} onClick={() => void archiveRecords([record])} />
+        <Tooltip content={t('contentHub.actions.indexKnowledge')} mini>
+          <Button type='text' size='mini' icon={<Book size={15} />} onClick={() => void indexRecords([record])} />
         </Tooltip>
       )}
       {view !== 'drafts' && (
@@ -206,10 +215,10 @@ const ContentHubPage: React.FC = () => {
       : view === 'assets'
         ? [
             {
-              key: 'archive',
-              label: t('contentHub.actions.archive'),
+              key: 'index-knowledge',
+              label: t('contentHub.actions.indexKnowledge'),
               loading: busy,
-              onClick: () => void archiveRecords(selected),
+              onClick: () => void indexRecords(selected),
             },
           ]
         : [];
@@ -221,7 +230,7 @@ const ContentHubPage: React.FC = () => {
         counts={{
           drafts: allByView.drafts.length,
           assets: allByView.assets.length,
-          archived: allByView.archived.length,
+          knowledge: knowledge.total,
         }}
         onChange={changeView}
       />
@@ -242,50 +251,57 @@ const ContentHubPage: React.FC = () => {
             setState((current) => ({ ...current, view: next }));
           }}
           onSizeChange={prefs.setSize}
-          onRefresh={() => void reload()}
-          refreshing={hub.loading}
+          onRefresh={() => (view === 'knowledge' ? knowledge.reload() : void reload())}
+          refreshing={view === 'knowledge' ? knowledge.loading : hub.loading}
+          simple={view === 'knowledge'}
         />
-        <BatchActionBar
-          count={selected.length}
-          actions={batchActions}
-          onClear={() => setSelection(clearHubSelection())}
-        />
-        <div className='flex-1 min-h-0 overflow-auto p-18px'>
-          {hub.loading && !visible.length ? (
-            <EmptyState loading loadingMessage={t('contentHub.empty.loading')} message='' />
-          ) : !visible.length ? (
-            <EmptyState loading={false} loadingMessage='' message={t(`contentHub.workspace.${view}Empty`)} />
-          ) : state.view === 'list' ? (
-            <HubFileList
-              records={visible}
-              selectedIds={selection.selectedIds}
-              onToggleSelect={(id) => setSelection((current) => toggleHubSelection(current, id))}
-              onToggleAll={(checked) =>
-                setSelection((current) =>
-                  setHubSelectionForIds(
-                    current,
-                    visible.map((record) => record.id),
-                    checked
-                  )
-                )
-              }
-              onOpen={(record) => void preview(record)}
-              onDirectOpen={(record) => void directOpen(record)}
-              renderActions={renderActions}
+        {view === 'knowledge' ? (
+          <KnowledgeBasePanel search={state.search} state={knowledge} view={state.view} size={prefs.size} />
+        ) : (
+          <>
+            <BatchActionBar
+              count={selected.length}
+              actions={batchActions}
+              onClear={() => setSelection(clearHubSelection())}
             />
-          ) : (
-            <HubRecordCards
-              records={visible}
-              view={state.view}
-              size={prefs.size}
-              selectedIds={selection.selectedIds}
-              onToggleSelect={(id) => setSelection((current) => toggleHubSelection(current, id))}
-              onOpen={(record) => void preview(record)}
-              onDirectOpen={(record) => void directOpen(record)}
-              renderActions={renderActions}
-            />
-          )}
-        </div>
+            <div className='flex-1 min-h-0 overflow-auto p-18px'>
+              {hub.loading && !visible.length ? (
+                <EmptyState loading loadingMessage={t('contentHub.empty.loading')} message='' />
+              ) : !visible.length ? (
+                <EmptyState loading={false} loadingMessage='' message={t(`contentHub.workspace.${view}Empty`)} />
+              ) : state.view === 'list' ? (
+                <HubFileList
+                  records={visible}
+                  selectedIds={selection.selectedIds}
+                  onToggleSelect={(id) => setSelection((current) => toggleHubSelection(current, id))}
+                  onToggleAll={(checked) =>
+                    setSelection((current) =>
+                      setHubSelectionForIds(
+                        current,
+                        visible.map((record) => record.id),
+                        checked
+                      )
+                    )
+                  }
+                  onOpen={(record) => void preview(record)}
+                  onDirectOpen={(record) => void directOpen(record)}
+                  renderActions={renderActions}
+                />
+              ) : (
+                <HubRecordCards
+                  records={visible}
+                  view={state.view}
+                  size={prefs.size}
+                  selectedIds={selection.selectedIds}
+                  onToggleSelect={(id) => setSelection((current) => toggleHubSelection(current, id))}
+                  onOpen={(record) => void preview(record)}
+                  onDirectOpen={(record) => void directOpen(record)}
+                  renderActions={renderActions}
+                />
+              )}
+            </div>
+          </>
+        )}
       </main>
     </div>
   );

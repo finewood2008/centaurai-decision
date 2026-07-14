@@ -14,6 +14,7 @@ import type { AcpSessionModes } from '@/common/types/platform/acpTypes';
 import type { AcpModelInfo, AvailableAgent, EffectiveAgentInfo } from '../types';
 import {
   DETECTED_AGENTS_SWR_KEY,
+  filterSupersededHomepageAgents,
   fetchDetectedAgents,
   type AgentMetadata,
   type AgentSource,
@@ -301,7 +302,7 @@ export const useGuidAgentSelection = ({
     // tokens / preset resolver). Custom-row `icon` is a user-picked emoji,
     // exposed as `avatar` so AgentPillBar renders the glyph directly
     // instead of mistaking it for a logo URL.
-    const normalisedDetected: AvailableAgent[] = availableAgentsData
+    const normalisedDetected: AvailableAgent[] = filterSupersededHomepageAgents(availableAgentsData as AgentMetadata[])
       .filter((a) => (a as AgentMetadata).enabled !== false)
       .map((a) => {
         const asAgent = a as AgentMetadata;

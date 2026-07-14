@@ -27,6 +27,7 @@ type HubToolbarProps = {
   refreshing?: boolean;
   start?: React.ReactNode;
   end?: React.ReactNode;
+  simple?: boolean;
 };
 
 const TYPE_OPTIONS: { key: HubFileKind; labelKey: string }[] = [
@@ -60,6 +61,7 @@ const HubToolbar: React.FC<HubToolbarProps> = ({
   refreshing,
   start,
   end,
+  simple = false,
 }) => {
   const { t } = useTranslation();
   const directionTip = sortDirection === 'asc' ? t('contentHub.sort.directionAsc') : t('contentHub.sort.directionDesc');
@@ -76,37 +78,41 @@ const HubToolbar: React.FC<HubToolbarProps> = ({
         className='w-280px max-w-full'
         allowClear
       />
-      <Select size='small' value={kind} onChange={onKindChange} className='w-112px'>
-        {TYPE_OPTIONS.map((option) => (
-          <Select.Option key={option.key} value={option.key}>
-            {t(option.labelKey)}
-          </Select.Option>
-        ))}
-      </Select>
-      <Select
-        size='small'
-        value={sortKey}
-        onChange={(value) => {
-          const nextKey = value as HubSortKey;
-          onSortKeyChange(nextKey);
-          onSortDirectionChange(defaultSortDirection(nextKey));
-        }}
-        className='w-132px'
-      >
-        {SORT_OPTIONS.map((option) => (
-          <Select.Option key={option.key} value={option.key}>
-            {t(option.labelKey)}
-          </Select.Option>
-        ))}
-      </Select>
-      <Tooltip content={directionTip} mini>
-        <Button
-          size='mini'
-          icon={sortDirection === 'asc' ? <ArrowUp size='14' /> : <ArrowDown size='14' />}
-          onClick={() => onSortDirectionChange(sortDirection === 'asc' ? 'desc' : 'asc')}
-          aria-label={directionTip}
-        />
-      </Tooltip>
+      {!simple && (
+        <>
+          <Select size='small' value={kind} onChange={onKindChange} className='w-112px'>
+            {TYPE_OPTIONS.map((option) => (
+              <Select.Option key={option.key} value={option.key}>
+                {t(option.labelKey)}
+              </Select.Option>
+            ))}
+          </Select>
+          <Select
+            size='small'
+            value={sortKey}
+            onChange={(value) => {
+              const nextKey = value as HubSortKey;
+              onSortKeyChange(nextKey);
+              onSortDirectionChange(defaultSortDirection(nextKey));
+            }}
+            className='w-132px'
+          >
+            {SORT_OPTIONS.map((option) => (
+              <Select.Option key={option.key} value={option.key}>
+                {t(option.labelKey)}
+              </Select.Option>
+            ))}
+          </Select>
+          <Tooltip content={directionTip} mini>
+            <Button
+              size='mini'
+              icon={sortDirection === 'asc' ? <ArrowUp size='14' /> : <ArrowDown size='14' />}
+              onClick={() => onSortDirectionChange(sortDirection === 'asc' ? 'desc' : 'asc')}
+              aria-label={directionTip}
+            />
+          </Tooltip>
+        </>
+      )}
       {onRefresh && (
         <Tooltip content={t('contentHub.actions.refresh')} mini>
           <Button

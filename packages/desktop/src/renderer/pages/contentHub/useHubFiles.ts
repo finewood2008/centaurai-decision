@@ -6,7 +6,7 @@ import { listContentAssets, migrateLegacyContentAssets } from '@/renderer/servic
 import { filterConversationsWithChannelScope } from '@/renderer/utils/user/conversationVisibility';
 import { useGeneratedFilesAutoRefresh } from '@/renderer/hooks/workspace/useGeneratedFilesAutoRefresh';
 import { fetchRecentFiles, type FileEntry } from '@/renderer/pages/guid/components/RecentFiles';
-import { classifyHubFile } from './components/manage/hubState';
+import { classifyHubFile, isAssetInPersonalView } from './components/manage/hubState';
 import type { HubFileRecord, PersonalWorkspaceView } from './types';
 
 export function useHubFiles() {
@@ -68,15 +68,11 @@ export function useHubFiles() {
   const forView = useCallback(
     (view: PersonalWorkspaceView): HubFileRecord[] => {
       if (view === 'assets') {
-        return records.assetRecords.filter(
-          (record) => record.raw.statusFlags.includes('saved') && !record.raw.statusFlags.includes('archived')
-        );
+        return records.assetRecords.filter((record) => isAssetInPersonalView(record.raw.statusFlags, view));
       }
-      if (view === 'archived') {
-        return records.assetRecords.filter((record) => record.raw.statusFlags.includes('archived'));
-      }
+      if (view === 'knowledge') return [];
       return [
-        ...records.assetRecords.filter((record) => record.raw.statusFlags.includes('draft')),
+        ...records.assetRecords.filter((record) => isAssetInPersonalView(record.raw.statusFlags, 'drafts')),
         ...records.legacyRecords,
       ];
     },

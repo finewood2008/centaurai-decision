@@ -10,6 +10,7 @@ export { sharedList, sharedCategories, sharedRemove, sharedBlobInfo, sharedAddFr
 export type {
   ContentAsset,
   ContentAssetKind,
+  ContentAssetIndexOptions,
   ContentAssetSaveInput,
   ContentAssetStageInput,
   ContentAssetStatusFlag,
@@ -19,6 +20,7 @@ export type {
 export {
   contentAssetArchive,
   contentAssetDiscardDraft,
+  contentAssetIndex,
   contentAssetPromoteDraft,
   contentAssetSaveFromPath,
   contentAssetStageFromPath,

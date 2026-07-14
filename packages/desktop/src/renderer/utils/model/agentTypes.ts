@@ -128,6 +128,14 @@ export function isLegacyOpenClawGateway(agent: AgentMetadata): boolean {
   return agent.agent_source === 'builtin' && agent.agent_type === 'openclaw-gateway';
 }
 
+/** Hide only the superseded builtin gateway when the native ACP OpenClaw row is available. */
+export function filterSupersededHomepageAgents(agents: readonly AgentMetadata[]): AgentMetadata[] {
+  const hasAcpOpenClaw = agents.some(
+    (agent) => agent.agent_type === 'acp' && agent.backend?.toLowerCase() === 'openclaw'
+  );
+  return hasAcpOpenClaw ? agents.filter((agent) => !isLegacyOpenClawGateway(agent)) : [...agents];
+}
+
 export function getAgentDisplayName(
   agent: { agent_type?: string; backend?: string; name?: string } | undefined
 ): string {

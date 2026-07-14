@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   save: vi.fn(),
   promote: vi.fn(),
   archive: vi.fn(),
+  index: vi.fn(),
   discard: vi.fn(),
   readFileBuffer: vi.fn(),
   getStatus: vi.fn(),
@@ -21,6 +22,7 @@ vi.mock('@/common', () => ({
       saveFromPath: { invoke: mocks.save },
       promoteDraft: { invoke: mocks.promote },
       archive: { invoke: mocks.archive },
+      index: { invoke: mocks.index },
       discardDraft: { invoke: mocks.discard },
     },
     fs: { readFileBuffer: { invoke: mocks.readFileBuffer } },
@@ -28,11 +30,15 @@ vi.mock('@/common', () => ({
   },
 }));
 vi.mock('@/common/adapter/httpBridge', () => ({ getBaseUrl: mocks.getBaseUrl }));
+vi.mock('@/common/config/configService', () => ({
+  configService: { get: vi.fn(() => 'http://127.0.0.1:8618/') },
+}));
 
 import {
   archiveContentAsset,
   contentAssetUrl,
   discardContentAssetDraft,
+  indexContentAsset,
   listContentAssets,
   migrateLegacyContentAssets,
   promoteContentAsset,
@@ -78,6 +84,7 @@ beforeEach(() => {
   mocks.save.mockResolvedValue(asset());
   mocks.promote.mockResolvedValue(asset());
   mocks.archive.mockResolvedValue(asset({ statusFlags: ['archived'] }));
+  mocks.index.mockResolvedValue(asset({ statusFlags: ['saved', 'indexed'] }));
   mocks.discard.mockResolvedValue(true);
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({ success: true, data: asset() })));
 });
@@ -91,11 +98,13 @@ describe('ContentAssetService desktop transport', () => {
     await saveContentAsset(input);
     await promoteContentAsset('asset 1');
     await archiveContentAsset('asset 1');
+    await indexContentAsset('asset 1');
     await discardContentAssetDraft('asset 1');
     expect(mocks.stage).toHaveBeenCalledWith(input);
     expect(mocks.save).toHaveBeenCalledWith(input);
     expect(mocks.promote).toHaveBeenCalledWith({ id: 'asset 1' });
     expect(mocks.archive).toHaveBeenCalledWith({ id: 'asset 1' });
+    expect(mocks.index).toHaveBeenCalledWith({ id: 'asset 1', endpoint: 'http://127.0.0.1:8618' });
     expect(mocks.discard).toHaveBeenCalledWith({ id: 'asset 1' });
     expect(fetch).not.toHaveBeenCalled();
   });
@@ -150,10 +159,12 @@ describe('ContentAssetService WebUI transport', () => {
     vi.mocked(fetch)
       .mockResolvedValueOnce(jsonResponse({ success: true, data: asset() }))
       .mockResolvedValueOnce(jsonResponse({ success: true, data: asset({ statusFlags: ['archived'] }) }))
+      .mockResolvedValueOnce(jsonResponse({ success: true, data: asset({ statusFlags: ['saved', 'indexed'] }) }))
       .mockResolvedValueOnce(jsonResponse({ success: true, data: true }))
       .mockResolvedValueOnce(jsonResponse({ success: false, error: 'NOT_FOUND' }, { status: 404 }));
     await promoteContentAsset('a/b');
     await archiveContentAsset('a/b');
+    await indexContentAsset('a/b');
     await discardContentAssetDraft('a/b');
     await expect(listContentAssets()).rejects.toThrow('NOT_FOUND');
     expect(fetch).toHaveBeenCalledWith('/api/content-assets/discard?id=a%2Fb', {

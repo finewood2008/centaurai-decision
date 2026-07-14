@@ -774,6 +774,7 @@ export const contentAssetsLocal = {
   stageFromPath: bridge.buildProvider<ContentAssetDTO, ContentAssetPathInput>('content-assets.stage-from-path'),
   saveFromPath: bridge.buildProvider<ContentAssetDTO, ContentAssetPathInput>('content-assets.save-from-path'),
   promoteDraft: bridge.buildProvider<ContentAssetDTO | null, { id: string }>('content-assets.promote-draft'),
+  index: bridge.buildProvider<ContentAssetDTO | null, { id: string; endpoint: string }>('content-assets.index'),
   archive: bridge.buildProvider<ContentAssetDTO | null, { id: string }>('content-assets.archive'),
   discardDraft: bridge.buildProvider<boolean, { id: string }>('content-assets.discard-draft'),
 };

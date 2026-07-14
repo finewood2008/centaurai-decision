@@ -7,10 +7,9 @@
     "title": "Personal Workspace",
     "drafts": "To Organize",
     "assets": "My Assets",
-    "archived": "Archived",
+    "knowledge": "Knowledge Base",
     "draftsEmpty": "Nothing waiting to be organized",
     "assetsEmpty": "No saved assets yet",
-    "archivedEmpty": "Archive is empty",
     "discardConfirm": "Discard {{count}} managed draft(s)? Project originals will not be changed."
   },
   "search": {
@@ -31,7 +30,7 @@
   },
   "knowledge": {
     "chunks": "{{n}} chunks",
-    "readonly": "Knowledge Base · {{n}} files · read-only",
+    "readonly": "Knowledge Base · {{n}} files",
     "refresh": "Refresh",
     "empty": "Knowledge base is empty",
     "unreachable": "Cannot reach the vector DB — make sure the service is running",
@@ -60,7 +59,7 @@
     "openFailed": "Cannot open file",
     "saveAsset": "Save as asset",
     "discardDraft": "Discard draft",
-    "archive": "Archive",
+    "indexKnowledge": "Move to knowledge base",
     "downloadFailed": "Download failed",
     "reveal": "Show in folder",
     "open": "Open",

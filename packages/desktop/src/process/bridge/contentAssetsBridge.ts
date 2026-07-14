@@ -8,6 +8,7 @@ import path from 'node:path';
 import {
   contentAssetArchive,
   contentAssetDiscardDraft,
+  contentAssetIndex,
   contentAssetPromoteDraft,
   contentAssetSaveFromPath,
   contentAssetStageFromPath,
@@ -32,6 +33,9 @@ export function initContentAssetsBridge(): void {
   );
   ipcBridge.contentAssetsLocal.promoteDraft.provider(async ({ id }) =>
     contentAssetPromoteDraft(assetsDir(), id, OWNER_USER_ID)
+  );
+  ipcBridge.contentAssetsLocal.index.provider(async ({ id, endpoint }) =>
+    contentAssetIndex(assetsDir(), id, OWNER_USER_ID, { endpoint })
   );
   ipcBridge.contentAssetsLocal.archive.provider(async ({ id }) => contentAssetArchive(assetsDir(), id, OWNER_USER_ID));
   ipcBridge.contentAssetsLocal.discardDraft.provider(async ({ id }) =>

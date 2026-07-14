@@ -7,6 +7,7 @@ import {
   defaultSortDirection,
   filterHubRecords,
   getHubSelectionSummary,
+  isAssetInPersonalView,
   parseHubTab,
   parseContentHubQuery,
   setHubSelectionForIds,
@@ -21,8 +22,13 @@ const records: HubFileRecord[] = [
 ];
 
 describe('personal workspace URL state', () => {
-  it.each(['shared', 'nas', 'knowledge', null])('falls legacy tab %s back to drafts', (tab) => {
+  it.each(['shared', 'nas', null])('falls legacy tab %s back to drafts', (tab) => {
     expect(parseContentHubQuery(tab ? `tab=${tab}` : '').mineView).toBe('drafts');
+  });
+
+  it('opens the live knowledge view and recovers the removed archive view into assets', () => {
+    expect(parseContentHubQuery('tab=knowledge').mineView).toBe('knowledge');
+    expect(parseContentHubQuery('tab=archived').mineView).toBe('assets');
   });
 
   it.each(['all', 'byConversation', 'byType'])('maps legacy mine tab %s to assets', (tab) => {
@@ -30,9 +36,9 @@ describe('personal workspace URL state', () => {
   });
 
   it('round-trips supported query controls', () => {
-    const state = parseContentHubQuery('tab=archived&q=plan&filter=document&sort=size&dir=asc&view=grid');
+    const state = parseContentHubQuery('tab=knowledge&q=plan&filter=document&sort=size&dir=asc&view=grid');
     expect(buildContentHubSearchParams(state).toString()).toBe(
-      'tab=archived&q=plan&filter=document&sort=size&dir=asc&view=grid'
+      'tab=knowledge&q=plan&filter=document&sort=size&dir=asc&view=grid'
     );
   });
 
@@ -46,7 +52,7 @@ describe('personal workspace URL state', () => {
       sortDirection: 'desc',
       view: 'list',
     });
-    expect(parseHubTab('archived')).toBe('archived');
+    expect(parseHubTab('archived')).toBe('assets');
     expect(defaultSortDirection('name')).toBe('asc');
     expect(defaultSortDirection('size')).toBe('desc');
   });
@@ -63,6 +69,14 @@ describe('personal workspace URL state', () => {
 });
 
 describe('personal workspace record controls', () => {
+  it('moves indexed assets out of personal assets and recovers legacy archived assets', () => {
+    expect(isAssetInPersonalView(['saved'], 'assets')).toBe(true);
+    expect(isAssetInPersonalView(['archived'], 'assets')).toBe(true);
+    expect(isAssetInPersonalView(['saved', 'indexed'], 'assets')).toBe(false);
+    expect(isAssetInPersonalView(['draft'], 'drafts')).toBe(true);
+    expect(isAssetInPersonalView(['saved'], 'knowledge')).toBe(false);
+  });
+
   it('filters by search and kind together', () => {
     expect(filterHubRecords(records, 'alpha', 'document').map((record) => record.id)).toEqual(['a']);
   });

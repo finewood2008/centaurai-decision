@@ -5,10 +5,11 @@ import { EventEmitter } from 'node:events';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { Readable, Writable } from 'node:stream';
 import { finished } from 'node:stream/promises';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   contentAssetArchive,
   contentAssetDiscardDraft,
+  contentAssetIndex,
   contentAssetPromoteDraft,
   contentAssetSaveFromPath,
   contentAssetStageFromPath,
@@ -16,6 +17,7 @@ import {
   handleContentAssetArchive,
   handleContentAssetDiscardDraft,
   handleContentAssetDownload,
+  handleContentAssetIndex,
   handleContentAssetPreview,
   handleContentAssetPromoteDraft,
   handleContentAssetUpload,
@@ -70,6 +72,7 @@ function response() {
 }
 
 afterEach(async () => {
+  vi.restoreAllMocks();
   await Promise.all(roots.splice(0).map((root) => fs.promises.rm(root, { recursive: true, force: true })));
 });
 
@@ -162,6 +165,91 @@ describe('personal asset lifecycle', () => {
     const archived = await contentAssetArchive(managed, saved.id, 'alice');
     expect(archived?.statusFlags).toEqual(['archived']);
     expect(await fs.promises.readFile(archived!.storagePath, 'utf8')).toBe('project original');
+  });
+
+  it('moves a saved asset into knowledge once while retaining its source copy', async () => {
+    const { managed, source } = await fixture();
+    const saved = await contentAssetSaveFromPath(managed, {
+      sourcePath: source,
+      name: 'plan.md',
+      ownerUserId: 'alice',
+    });
+    const fetchMock = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(new Response(JSON.stringify({ success: true, doc_id: '/knowledge/plan.md' })));
+
+    const indexed = await contentAssetIndex(managed, saved.id, 'alice', { endpoint: 'http://127.0.0.1:8618/' });
+    const repeated = await contentAssetIndex(managed, saved.id, 'alice', { endpoint: 'http://127.0.0.1:8618' });
+
+    expect(indexed?.statusFlags).toEqual(['saved', 'indexed']);
+    expect(repeated?.statusFlags).toEqual(['saved', 'indexed']);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(await fs.promises.readFile(saved.storagePath, 'utf8')).toBe('project original');
+  });
+
+  it('keeps an asset in personal storage when vector indexing fails', async () => {
+    const { managed, source } = await fixture();
+    const saved = await contentAssetSaveFromPath(managed, {
+      sourcePath: source,
+      name: 'plan.md',
+      ownerUserId: 'alice',
+    });
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('model unavailable', { status: 503 }));
+
+    await expect(contentAssetIndex(managed, saved.id, 'alice', { endpoint: 'http://127.0.0.1:8618' })).rejects.toThrow(
+      'model unavailable'
+    );
+    expect((await contentAssetsList(managed, 'alice'))[0].statusFlags).toEqual(['saved']);
+  });
+
+  it('waits for queued media indexing before moving the asset out of personal storage', async () => {
+    const { managed, source } = await fixture();
+    const saved = await contentAssetSaveFromPath(managed, {
+      sourcePath: source,
+      name: 'meeting.mp4',
+      ownerUserId: 'alice',
+    });
+    const fetchMock = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ success: true, queued: true, doc_id: '/knowledge/meeting.mp4' }))
+      )
+      .mockResolvedValueOnce(new Response(JSON.stringify({ state: 'processing' })))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ state: 'done' })));
+
+    const indexed = await contentAssetIndex(managed, saved.id, 'alice', {
+      endpoint: 'http://127.0.0.1:8618',
+      pollIntervalMs: 0,
+    });
+
+    expect(indexed?.statusFlags).toEqual(['saved', 'indexed']);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      'http://127.0.0.1:8618/api/jobs/%2Fknowledge%2Fmeeting.mp4',
+      expect.objectContaining({ headers: expect.objectContaining({ 'X-Requested-By': 'centaur-vdb' }) })
+    );
+  });
+
+  it('keeps queued media in personal storage when background indexing fails', async () => {
+    const { managed, source } = await fixture();
+    const saved = await contentAssetSaveFromPath(managed, {
+      sourcePath: source,
+      name: 'meeting.mp4',
+      ownerUserId: 'alice',
+    });
+    vi.spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ success: true, queued: true, doc_id: '/knowledge/meeting.mp4' }))
+      )
+      .mockResolvedValueOnce(new Response(JSON.stringify({ state: 'failed', error: 'transcription failed' })));
+
+    await expect(
+      contentAssetIndex(managed, saved.id, 'alice', {
+        endpoint: 'http://127.0.0.1:8618',
+        pollIntervalMs: 0,
+      })
+    ).rejects.toThrow('transcription failed');
+    expect((await contentAssetsList(managed, 'alice'))[0].statusFlags).toEqual(['saved']);
   });
 
   it('isolates list and lifecycle operations by server-bound owner', async () => {
@@ -291,6 +379,53 @@ describe('personal asset WebUI handlers', () => {
     await handler(request(`/api/content-assets/${route}?id=any&owner=attacker`), output.res, '/tmp/assets', 'alice');
     await finished(output.res);
     expect(output.status()).toBe(403);
+  });
+
+  it('indexes through the owner-scoped WebUI handler', async () => {
+    const { managed, source } = await fixture();
+    const saved = await contentAssetSaveFromPath(managed, {
+      sourcePath: source,
+      name: 'plan.md',
+      ownerUserId: 'alice',
+    });
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify({ success: true })));
+    const output = response();
+
+    await handleContentAssetIndex(request(`/api/content-assets/index?id=${saved.id}`), output.res, managed, 'alice', {
+      endpoint: 'http://127.0.0.1:8618',
+      token: 'worker-secret',
+    });
+    await finished(output.res);
+
+    expect(output.status()).toBe(200);
+    expect(output.json().data.statusFlags).toEqual(['saved', 'indexed']);
+    expect(fetchMock).toHaveBeenCalledWith(
+      'http://127.0.0.1:8618/api/upload',
+      expect.objectContaining({
+        method: 'POST',
+        headers: expect.objectContaining({ 'x-centaurai-knowledge-token': 'worker-secret' }),
+      })
+    );
+  });
+
+  it('keeps WebUI assets available when knowledge indexing is unavailable', async () => {
+    const { managed, source } = await fixture();
+    const saved = await contentAssetSaveFromPath(managed, {
+      sourcePath: source,
+      name: 'plan.md',
+      ownerUserId: 'alice',
+    });
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('vector worker unavailable', { status: 503 }));
+    const output = response();
+
+    await handleContentAssetIndex(request(`/api/content-assets/index?id=${saved.id}`), output.res, managed, 'alice', {
+      endpoint: 'http://127.0.0.1:8618',
+    });
+    await finished(output.res);
+
+    expect(output.status()).toBe(502);
+    expect(output.json().error).toBe('vector worker unavailable');
+    expect((await contentAssetsList(managed, 'alice'))[0].statusFlags).toEqual(['saved']);
   });
 
   it('handles draft upload, promote, archive and failed discard transitions', async () => {

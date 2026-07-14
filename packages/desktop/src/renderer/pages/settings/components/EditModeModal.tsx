@@ -46,7 +46,8 @@ const EditModeModal = ModalHOC<{ data?: IProvider; onChange(data: IProvider): vo
       isFullUrl ? '' : data?.base_url,
       isFullUrl ? '' : data?.api_key,
       true,
-      undefined
+      undefined,
+      data?.id
     );
 
     useEffect(() => {

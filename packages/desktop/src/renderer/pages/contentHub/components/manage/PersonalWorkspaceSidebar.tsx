@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '@arco-design/web-react';
-import { Box, Inbox, Local, ArrowLeft } from '@icon-park/react';
+import { Book, Inbox, Local, ArrowLeft } from '@icon-park/react';
 import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -15,7 +15,7 @@ type Props = {
 const ITEMS: Array<{ key: PersonalWorkspaceView; icon: React.ReactNode }> = [
   { key: 'drafts', icon: <Inbox size={17} /> },
   { key: 'assets', icon: <Local size={17} /> },
-  { key: 'archived', icon: <Box size={17} /> },
+  { key: 'knowledge', icon: <Book size={17} /> },
 ];
 
 const PersonalWorkspaceSidebar: React.FC<Props> = ({ active, counts, onChange }) => {

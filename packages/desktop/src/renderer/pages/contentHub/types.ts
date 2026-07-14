@@ -7,10 +7,10 @@ import type { FileEntry } from '@/renderer/pages/guid/components/RecentFiles';
 export type HubSection = 'mine' | 'shared' | 'nas' | 'knowledge';
 
 /** Sub-views within the 我的产物 (mine) section. */
-export type HubMineView = 'drafts' | 'assets' | 'archived' | 'all' | 'byConversation' | 'byType';
+export type HubMineView = 'drafts' | 'assets' | 'knowledge' | 'archived' | 'all' | 'byConversation' | 'byType';
 
 /** Decision personal-workspace sections. */
-export type PersonalWorkspaceView = 'drafts' | 'assets' | 'archived';
+export type PersonalWorkspaceView = 'drafts' | 'assets' | 'knowledge';
 
 /** How files are laid out: uniform grid vs. masonry waterfall. */
 export type HubViewMode = 'list' | 'grid' | 'waterfall';

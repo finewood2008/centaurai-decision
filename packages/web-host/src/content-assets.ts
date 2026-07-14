@@ -58,9 +58,20 @@ export type ContentAssetSaveInput = {
 
 export type ContentAssetStageInput = ContentAssetSaveInput;
 
+export type ContentAssetIndexOptions = {
+  endpoint: string;
+  token?: string;
+  /** Poll cadence for asynchronous media indexing. Primarily overridden by tests. */
+  pollIntervalMs?: number;
+  /** Maximum time to wait for the vector worker to finish an asynchronous job. */
+  pollTimeoutMs?: number;
+};
+
 const MAX_UPLOAD_BYTES = 1024 * 1024 * 1024;
 const MAX_PREVIEW_BYTES = 100 * 1024 * 1024;
 const MAX_NAS_SEGMENT_BYTES = 180;
+const DEFAULT_INDEX_POLL_INTERVAL_MS = 1_000;
+const DEFAULT_INDEX_POLL_TIMEOUT_MS = 30 * 60 * 1_000;
 const MANIFEST_FILE = 'manifest.json';
 const UNSAFE_NAME_CHARS = /[/\\:*?"<>|]/g;
 const UNSAFE_SEGMENT_CHARS = /[/\\:*?"<>|]+/g;
@@ -219,6 +230,57 @@ async function writeManifest(dir: string, assets: ContentAsset[]): Promise<void>
 }
 
 const writeChains = new Map<string, Promise<unknown>>();
+const indexChains = new Map<string, Promise<ContentAsset | null>>();
+
+type KnowledgeUploadResponse = {
+  success?: boolean;
+  queued?: boolean;
+  doc_id?: string;
+};
+
+type KnowledgeJobResponse = {
+  state?: string;
+  error?: string;
+};
+
+function knowledgeHeaders(token?: string): Record<string, string> {
+  return {
+    'X-Requested-By': 'centaur-vdb',
+    ...(token
+      ? {
+          authorization: `Bearer ${token}`,
+          'x-centaurai-knowledge-token': token,
+        }
+      : {}),
+  };
+}
+
+async function responseError(response: Response, fallback: string): Promise<Error> {
+  const detail = await response.text().catch(() => '');
+  return new Error(detail || fallback);
+}
+
+async function waitForKnowledgeJob(endpoint: string, docId: string, options: ContentAssetIndexOptions): Promise<void> {
+  const interval = Math.max(0, options.pollIntervalMs ?? DEFAULT_INDEX_POLL_INTERVAL_MS);
+  const timeout = Math.max(1, options.pollTimeoutMs ?? DEFAULT_INDEX_POLL_TIMEOUT_MS);
+  const deadline = Date.now() + timeout;
+
+  /* eslint-disable no-await-in-loop -- job states must be polled sequentially */
+  while (Date.now() < deadline) {
+    if (interval > 0) await new Promise((resolve) => setTimeout(resolve, interval));
+    const response = await fetch(`${endpoint}/api/jobs/${encodeURIComponent(docId)}`, {
+      headers: knowledgeHeaders(options.token),
+    });
+    if (!response.ok) throw await responseError(response, `KNOWLEDGE_INDEX_JOB_HTTP_${response.status}`);
+    const job = (await response.json()) as KnowledgeJobResponse;
+    if (job.state === 'done') return;
+    if (job.state === 'failed') throw new Error(job.error || 'KNOWLEDGE_INDEX_FAILED');
+    if (job.state === 'unknown') throw new Error('KNOWLEDGE_INDEX_JOB_UNKNOWN');
+  }
+  /* eslint-enable no-await-in-loop */
+
+  throw new Error('KNOWLEDGE_INDEX_TIMEOUT');
+}
 
 function withManifestLock<T>(dir: string, fn: () => Promise<T>): Promise<T> {
   const prev = writeChains.get(dir) ?? Promise.resolve();
@@ -384,6 +446,70 @@ export async function contentAssetArchive(dir: string, id: string, ownerUserId?:
     await writeManifest(dir, [updated, ...assets.filter((item) => item.id !== id)]);
     return updated;
   });
+}
+
+/**
+ * Copy a saved personal asset into the configured vector knowledge base and
+ * remember the successful hand-off. The managed personal copy is retained so
+ * a vector-index rebuild never destroys the user's source asset.
+ */
+export function contentAssetIndex(
+  dir: string,
+  id: string,
+  ownerUserId: string,
+  options: ContentAssetIndexOptions
+): Promise<ContentAsset | null> {
+  const key = `${dir}\n${ownerUserId}\n${id}`;
+  const running = indexChains.get(key);
+  if (running) return running;
+
+  const task = (async () => {
+    const asset = await findAsset(dir, id, ownerUserId);
+    if (!asset || (!asset.statusFlags.includes('saved') && !asset.statusFlags.includes('archived'))) return null;
+    if (asset.statusFlags.includes('indexed')) return asset;
+
+    const endpoint = options.endpoint.trim().replace(/\/+$/, '');
+    const parsed = new URL(endpoint);
+    if (!['http:', 'https:'].includes(parsed.protocol)) throw new Error('INVALID_KNOWLEDGE_ENDPOINT');
+
+    const data = await fs.promises.readFile(asset.storagePath);
+    const form = new FormData();
+    form.append('file', new Blob([data]), asset.title);
+    const response = await fetch(`${endpoint}/api/upload`, {
+      method: 'POST',
+      headers: knowledgeHeaders(options.token),
+      body: form,
+    });
+    if (!response.ok) throw await responseError(response, `KNOWLEDGE_INDEX_HTTP_${response.status}`);
+    const upload = (await response.json()) as KnowledgeUploadResponse;
+    if (upload.success === false) throw new Error('KNOWLEDGE_INDEX_FAILED');
+    if (upload.queued) {
+      if (!upload.doc_id) throw new Error('KNOWLEDGE_INDEX_INVALID_RESPONSE');
+      await waitForKnowledgeJob(endpoint, upload.doc_id, options);
+    }
+
+    return withManifestLock(dir, async () => {
+      const assets = await readManifest(dir);
+      const current = assets.find((item) => item.id === id && item.ownerUserId === ownerUserId);
+      if (!current) return null;
+      const updated: ContentAsset = {
+        ...current,
+        statusFlags: [
+          ...current.statusFlags.filter(
+            (flag) => flag !== 'archived' && flag !== 'draft' && flag !== 'saved' && flag !== 'indexed'
+          ),
+          'saved',
+          'indexed',
+        ],
+        updatedAt: now(),
+      };
+      await writeManifest(dir, [updated, ...assets.filter((item) => item.id !== id)]);
+      return updated;
+    });
+  })().finally(() => indexChains.delete(key));
+
+  indexChains.set(key, task);
+  return task;
 }
 
 async function findAsset(dir: string | undefined, id: string, ownerUserId: string): Promise<ContentAsset | null> {
@@ -554,6 +680,28 @@ export async function handleContentAssetArchive(
     return;
   }
   sendJson(res, 200, { success: true, data: asset });
+}
+
+export async function handleContentAssetIndex(
+  req: IncomingMessage,
+  res: ServerResponse,
+  dir: string | undefined,
+  ownerUserId: string,
+  options: ContentAssetIndexOptions
+): Promise<void> {
+  if (!dir) return sendJson(res, 404, { success: false, error: 'NOT_FOUND' });
+  const url = new URL(req.url || '/', 'http://localhost');
+  if (rejectForgedOwner(url, res, ownerUserId)) return;
+  try {
+    const asset = await contentAssetIndex(dir, url.searchParams.get('id') || '', ownerUserId, options);
+    if (!asset) return sendJson(res, 404, { success: false, error: 'NOT_FOUND' });
+    sendJson(res, 200, { success: true, data: asset });
+  } catch (error) {
+    sendJson(res, 502, {
+      success: false,
+      error: error instanceof Error ? error.message : 'KNOWLEDGE_INDEX_FAILED',
+    });
+  }
 }
 
 export async function handleContentAssetPromoteDraft(

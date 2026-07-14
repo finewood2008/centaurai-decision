@@ -28,6 +28,11 @@ export function vectorEndpoint(): string {
 
 type RawDoc = { id: string; chunk_count?: number; metadata?: Record<string, unknown> };
 
+/** The vector worker prefixes uploaded files with 8 random hex characters. */
+export function displayKnowledgeName(name: string): string {
+  return name.replace(/^[a-f\d]{8}_/i, '');
+}
+
 const num = (v: unknown): number => {
   const n = Number(v);
   return Number.isFinite(n) ? n : 0;
@@ -35,9 +40,10 @@ const num = (v: unknown): number => {
 
 function normalize(raw: RawDoc): KnowledgeDoc {
   const m = raw.metadata ?? {};
+  const rawName = String(m.file_name ?? raw.id.split(/[\\/]/).pop() ?? raw.id);
   return {
     id: raw.id,
-    name: String(m.file_name ?? raw.id.split(/[\\/]/).pop() ?? raw.id),
+    name: displayKnowledgeName(rawName),
     path: String(m.source_path ?? m.file_path ?? raw.id),
     fileType: String(m.file_type ?? ''),
     size: num(m.file_size),
@@ -59,6 +65,33 @@ export async function fetchKnowledgeDocs(limit = 300, offset = 0): Promise<{ tot
   const data = await resp.json();
   const items: RawDoc[] = Array.isArray(data.items) ? data.items : [];
   return { total: num(data.total) || items.length, docs: items.map(normalize) };
+}
+
+type KnowledgePageFetcher = (limit: number, offset: number) => Promise<{ total: number; docs: KnowledgeDoc[] }>;
+
+/** Collect every page without relying on a fixed knowledge-base size. */
+export async function collectKnowledgeDocs(
+  fetchPage: KnowledgePageFetcher,
+  pageSize = 500
+): Promise<{ total: number; docs: KnowledgeDoc[] }> {
+  const docs: KnowledgeDoc[] = [];
+  let total = 0;
+
+  /* eslint-disable no-await-in-loop -- each offset depends on the preceding page size */
+  do {
+    const page = await fetchPage(pageSize, docs.length);
+    total = page.total;
+    docs.push(...page.docs);
+    if (page.docs.length === 0) break;
+  } while (docs.length < total);
+  /* eslint-enable no-await-in-loop */
+
+  return { total, docs };
+}
+
+/** Load every document page so counts, search, and all view modes cover the full knowledge base. */
+export function fetchAllKnowledgeDocs(pageSize = 500): Promise<{ total: number; docs: KnowledgeDoc[] }> {
+  return collectKnowledgeDocs(fetchKnowledgeDocs, pageSize);
 }
 
 function imageUrl(path: string): string {

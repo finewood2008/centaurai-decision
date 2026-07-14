@@ -2,7 +2,7 @@
  * useKnowledgeBase — loads the read-only document list from the local vector DB.
  */
 import { useCallback, useEffect, useState } from 'react';
-import { fetchKnowledgeDocs, type KnowledgeDoc } from './knowledgeApi';
+import { fetchAllKnowledgeDocs, type KnowledgeDoc } from './knowledgeApi';
 
 export type KnowledgeState = {
   docs: KnowledgeDoc[];
@@ -25,7 +25,7 @@ export function useKnowledgeBase(): KnowledgeState {
     let cancelled = false;
     setLoading(true);
     setError(false);
-    fetchKnowledgeDocs()
+    fetchAllKnowledgeDocs()
       .then(({ total: t, docs: d }) => {
         if (cancelled) return;
         setDocs(d);

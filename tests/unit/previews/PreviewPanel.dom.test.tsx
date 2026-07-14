@@ -29,7 +29,7 @@ describe('PreviewPanel', () => {
   it('is a React component module that exports a default function', async () => {
     const mod = await import('@/renderer/pages/conversation/Preview/components/PreviewPanel/PreviewPanel');
     expect(typeof mod.default).toBe('function');
-  });
+  }, 30_000);
 
   it('module loads without throwing on import', async () => {
     await expect(

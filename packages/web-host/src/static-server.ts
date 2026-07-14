@@ -33,6 +33,7 @@ import {
   handleContentAssetArchive,
   handleContentAssetDiscardDraft,
   handleContentAssetDownload,
+  handleContentAssetIndex,
   handleContentAssetPreview,
   handleContentAssetPromoteDraft,
   handleContentAssetsList,
@@ -886,6 +887,11 @@ export async function startStaticServer(opts: StaticServerOptions): Promise<Stat
           await handleContentAssetUpload(req, res, opts.contentAssetsDir, ownerUserId, 'saved');
         else if (req.url.startsWith('/api/content-assets/promote') && req.method === 'POST')
           await handleContentAssetPromoteDraft(req, res, opts.contentAssetsDir, ownerUserId);
+        else if (req.url.startsWith('/api/content-assets/index') && req.method === 'POST')
+          await handleContentAssetIndex(req, res, opts.contentAssetsDir, ownerUserId, {
+            endpoint: remoteKnowledgeEndpoint || '',
+            token: knowledgeToken,
+          });
         else if (req.url.startsWith('/api/content-assets/archive') && req.method === 'POST')
           await handleContentAssetArchive(req, res, opts.contentAssetsDir, ownerUserId);
         else if (req.url.startsWith('/api/content-assets/discard') && req.method === 'DELETE')

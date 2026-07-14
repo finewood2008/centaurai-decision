@@ -7,10 +7,9 @@
     "title": "個人工作空間",
     "drafts": "待整理",
     "assets": "我的資產",
-    "archived": "封存",
+    "knowledge": "知識庫",
     "draftsEmpty": "暫無待整理內容",
     "assetsEmpty": "暫無已儲存資產",
-    "archivedEmpty": "封存區是空的",
     "discardConfirm": "丟棄 {{count}} 個受管草稿？專案資料夾中的原始檔不會受到影響。"
   },
   "search": {
@@ -39,7 +38,7 @@
     "openFailed": "無法開啟檔案",
     "saveAsset": "儲存為個人資產",
     "discardDraft": "丟棄草稿",
-    "archive": "封存",
+    "indexKnowledge": "轉入知識庫",
     "downloadFailed": "下載失敗",
     "reveal": "在資料夾中顯示",
     "open": "開啟",
@@ -101,7 +100,7 @@
   "batch": { "completed": "已處理 {{count}} 項", "partialFailure": "有 {{count}} 項處理失敗" },
   "knowledge": {
     "chunks": "{{n}} 塊",
-    "readonly": "知識庫 · 共 {{n}} 個檔案 · 唯讀",
+    "readonly": "知識庫 · 共 {{n}} 個檔案",
     "refresh": "重新整理",
     "empty": "知識庫為空",
     "unreachable": "無法連線向量庫，請確認服務已啟動",

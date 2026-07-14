@@ -1,5 +1,6 @@
 /** Pure personal-workspace URL, filtering, sorting, and selection helpers. */
 import { getContentTypeByExtension } from '@/renderer/pages/conversation/Preview/fileUtils';
+import type { ContentAssetStatusFlagDTO } from '@/common/adapter/ipcBridge';
 import type {
   HubFileKind,
   HubFileRecord,
@@ -11,7 +12,7 @@ import type {
   PersonalWorkspaceView,
 } from '../../types';
 
-const VIEWS = new Set<PersonalWorkspaceView>(['drafts', 'assets', 'archived']);
+const VIEWS = new Set<PersonalWorkspaceView>(['drafts', 'assets', 'knowledge']);
 const KINDS = new Set<HubFileKind>(['all', 'image', 'document', 'code', 'other']);
 const SORTS = new Set<HubSortKey>(['modified', 'name', 'size']);
 const DIRECTIONS = new Set<HubSortDirection>(['asc', 'desc']);
@@ -53,7 +54,7 @@ export const DEFAULT_HUB_URL_STATE: HubUrlState = {
 
 export function parseHubTab(value: string | null): PersonalWorkspaceView {
   if (VIEWS.has(value as PersonalWorkspaceView)) return value as PersonalWorkspaceView;
-  if (value === 'all' || value === 'byConversation' || value === 'byType') return 'assets';
+  if (value === 'archived' || value === 'all' || value === 'byConversation' || value === 'byType') return 'assets';
   return 'drafts';
 }
 
@@ -96,6 +97,17 @@ export function classifyHubFile(name: string): Exclude<HubFileKind, 'all'> {
   if (type === 'pdf' || type === 'word' || type === 'excel' || type === 'ppt') return 'document';
   if (type === 'markdown' || type === 'html' || type === 'diff' || CODE_EXTENSIONS.has(extension)) return 'code';
   return 'other';
+}
+
+export function isAssetInPersonalView(
+  statusFlags: readonly ContentAssetStatusFlagDTO[],
+  view: PersonalWorkspaceView
+): boolean {
+  if (view === 'assets') {
+    return (statusFlags.includes('saved') || statusFlags.includes('archived')) && !statusFlags.includes('indexed');
+  }
+  if (view === 'drafts') return statusFlags.includes('draft');
+  return false;
 }
 
 export function filterHubRecords<T extends HubFileRecord>(
