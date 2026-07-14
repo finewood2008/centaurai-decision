@@ -1,5 +1,30 @@
 # Changelog
 
+## [2.6.0](https://github.com/finewood2008/centaurai-decision/compare/v2.5.1...v2.6.0) (2026-07-14)
+
+### Desktop
+
+#### Features
+
+- **workspace:** add a managed personal workspace with safer previews and generated-file collection
+- **meeting:** complete the multi-advisor decision flow, deep discussion loop and meeting exports
+- **models:** restore model settings and provider/model selection
+- **guid:** promote the standard workbench to the home page and remove the Decision Hall dashboard
+- **webui:** improve remote access diagnostics and generated-artifact handling
+
+#### Bug Fixes
+
+- **appstore:** publish an intentionally empty application catalog
+- **release:** use stable ASCII artifact names and remove the development version suffix
+- **webui:** cache failed Tailscale discovery to keep connectivity checks responsive
+- **artifacts:** preserve safe generated-file extraction while staging files into managed storage
+
+### Core ([v0.2.2](https://github.com/finewood2008/centaurai-core/releases/tag/v0.2.2))
+
+- Ship the pinned CentaurAI Core v0.2.2 runtime used by the validated development build.
+
+---
+
 ## [2.1.14](https://github.com/iOfficeAI/AionUi/compare/v2.1.13...v2.1.14) (2026-06-08)
 
 ### Desktop
