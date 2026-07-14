@@ -7,7 +7,11 @@
 import useSWR from 'swr';
 import { ipcBridge } from '@/common';
 import type { Assistant } from '@/common/types/agent/assistantTypes';
-import { DETECTED_AGENTS_SWR_KEY, fetchDetectedAgents } from '@/renderer/utils/model/agentTypes';
+import {
+  DETECTED_AGENTS_SWR_KEY,
+  fetchDetectedAgents,
+  filterSupersededHomepageAgents,
+} from '@/renderer/utils/model/agentTypes';
 import type { AgentMetadata } from '@/renderer/utils/model/agentTypes';
 
 export type UseConversationAgentsResult = {
@@ -52,7 +56,7 @@ export const useConversationAgents = (): UseConversationAgentsResult => {
   };
 
   return {
-    cliAgents: (cliAgents || []).filter((a) => a.enabled !== false),
+    cliAgents: filterSupersededHomepageAgents((cliAgents || []).filter((a) => a.enabled !== false)),
     presetAssistants: presetAssistants || [],
     isLoading: isLoadingAgents || isLoadingPresets,
     refresh,

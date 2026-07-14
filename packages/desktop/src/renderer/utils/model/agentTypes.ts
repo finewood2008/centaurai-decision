@@ -141,7 +141,7 @@ export function getAgentDisplayName(
 ): string {
   if (!agent) return '';
   const key = (agent.backend || agent.agent_type || '').toLowerCase();
-  if (key === 'aionrs' || key === 'aion-cli') return 'CentaurAI';
+  if (key === 'aion-cli') return 'CentaurAI';
   if (/^aion\s*cli$/i.test(agent.name || '') || /^aioncli$/i.test(agent.name || '')) return 'CentaurAI';
   return agent.name || agent.backend || agent.agent_type || '';
 }
