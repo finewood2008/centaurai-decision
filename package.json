@@ -1,6 +1,6 @@
 {
   "name": "centaurai-aistation",
-  "version": "2.6.0",
+  "version": "2.6.1",
   "private": true,
   "description": "半人马AI-超级参谋团 — 老板的AI超级参谋团，内置多Agent协作、专家顾问团和局域网分布式客户端。基于 AionUi (Apache-2.0)。",
   "keywords": [],
