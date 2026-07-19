@@ -154,6 +154,10 @@
   "saveUploadToWorkspace": "上传文件保存到项目文件夹",
   "autoPreviewOfficeFiles": "自动预览新建 Office 文件",
   "autoPreviewOfficeFilesDesc": "自动打开当前项目中新创建的 Word、Excel 和 PowerPoint 文件，并忽略 Office 临时锁定文件。",
+  "personalMemory": {
+    "title": "个人记忆库",
+    "description": "让不同 AI 调用同一份属于你的个人记忆，启用后将自动检索相关内容作为对话上下文。"
+  },
   "startOnBoot": "开机启动",
   "startOnBootDesc": "登录 macOS 或 Windows 后自动启动 CentaurAI。",
   "startOnBootUnsupported": "仅在打包后的 macOS 和 Windows 客户端中可用。",

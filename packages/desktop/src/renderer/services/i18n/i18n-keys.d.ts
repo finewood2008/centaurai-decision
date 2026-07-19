@@ -2073,6 +2073,8 @@ export type I18nKey =
   | 'settings.pdfToPptAssistantName'
   | 'settings.pending'
   | 'settings.personalAuth'
+  | 'settings.personalMemory.description'
+  | 'settings.personalMemory.title'
   | 'settings.platformBedrock'
   | 'settings.platformCustom'
   | 'settings.platformName'

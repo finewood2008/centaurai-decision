@@ -417,8 +417,8 @@ const SystemModalContent: React.FC = () => {
     },
     {
       key: 'vectorDB',
-      label: '向量数据库',
-      description: '启用后半人马AI自动检索本地知识库作为对话上下文',
+      label: t('settings.personalMemory.title'),
+      description: t('settings.personalMemory.description'),
       component: <Switch checked={vectorDBEnabled} onChange={handleVectorDBEnabledChange} />,
     },
     ...(vectorDBEnabled
