@@ -28,6 +28,9 @@ describe('knowledge document pagination', () => {
         size: 1,
         mtime: 1,
         chunkCount: 1,
+        status: 'indexed',
+        indexed: true,
+        onDisk: true,
       })
     );
     const fetchPage = vi

@@ -1166,9 +1166,19 @@ class MeetingEngine {
         if (opts?.useKnowledgeBase) {
           try {
             knowledgeContext = (await retrieveKnowledgeContext(trimmed)).context;
-            if (!knowledgeContext) Message.info('知识库中未找到相关内容，已按原始议题开会');
+            if (!knowledgeContext) {
+              Message.info(
+                i18n.t('messages.knowledgeRetrieval.noResultsMeeting', {
+                  defaultValue: '知识库与记忆中未找到相关内容，已按原始议题开会',
+                })
+              );
+            }
           } catch {
-            Message.warning('知识库检索失败，请确认向量库服务已启动');
+            Message.warning(
+              i18n.t('messages.knowledgeRetrieval.failed', {
+                defaultValue: '知识库与记忆检索失败，请确认私有记忆库服务已启动',
+              })
+            );
           }
         }
         if (this.runSeq !== myRun) return;
@@ -1371,7 +1381,11 @@ class MeetingEngine {
     void retrieveKnowledgeContext(topic)
       .then((result) => {
         if (!result.context) {
-          Message.info('知识库中未找到相关内容');
+          Message.info(
+            i18n.t('messages.knowledgeRetrieval.noResultsShort', {
+              defaultValue: '知识库与记忆中未找到相关内容',
+            })
+          );
           return;
         }
         const id = `t-${this.state.transcript.length}-system-kb`;
@@ -1383,21 +1397,33 @@ class MeetingEngine {
             {
               id,
               participantId: 'system-kb',
-              name: '知识库',
+              name: i18n.t('messages.knowledgeRetrieval.sourceName', { defaultValue: '知识库与记忆' }),
               icon: '📚',
               agent_type: 'system',
               isModerator: false,
-              phaseLabel: '参考资料',
+              phaseLabel: i18n.t('messages.knowledgeRetrieval.reference', { defaultValue: '参考资料' }),
               parallel: false,
-              text: `📚 **知识库检索结果（${result.count} 条）**\n\n${result.context}`,
+              text: `📚 **${i18n.t('messages.knowledgeRetrieval.resultCount', {
+                count: result.count,
+                defaultValue: `知识库与记忆检索结果（${result.count} 条）`,
+              })}**\n\n${result.context}`,
               status: 'done',
             },
           ],
         });
-        Message.success(`已注入 ${result.count} 条知识库参考资料`);
+        Message.success(
+          i18n.t('messages.knowledgeRetrieval.injected', {
+            count: result.count,
+            defaultValue: `已注入 ${result.count} 条私有资料`,
+          })
+        );
       })
       .catch(() => {
-        Message.warning('知识库检索失败，请确认向量库服务已启动');
+        Message.warning(
+          i18n.t('messages.knowledgeRetrieval.failed', {
+            defaultValue: '知识库与记忆检索失败，请确认私有记忆库服务已启动',
+          })
+        );
       });
   };
 

@@ -6,7 +6,7 @@
 
 import { ipcBridge } from '@/common';
 import type { IMcpServer, TProviderWithModel } from '@/common/config/storage';
-import { retrieveKnowledgeContext } from '@/renderer/services/knowledgeBaseSearch';
+import { attachKnowledgeContext, retrieveKnowledge } from '@/renderer/services/knowledgeBaseSearch';
 import { buildAgentConversationParams } from '@/common/utils/buildAgentConversationParams';
 import { toSessionMcpServer } from '@/renderer/hooks/mcp/catalog';
 import { emitter } from '@/renderer/utils/emitter';
@@ -125,23 +125,31 @@ export const useGuidSend = (deps: GuidSendDeps): GuidSendResult => {
     const isCustomWorkspace = !!dir;
     const finalWorkspace = dir || '';
 
-    // Knowledge base: retrieve only when enabled (shared with TeamBrain via retrieveKnowledgeContext).
+    // Private knowledge + memory: retrieve only when the user explicitly enables it.
     // `enrichedInput` is only used as the message content sent to the model; the conversation title (`name`)
     // should always use the original `input` to avoid polluting titles with the retrieval prefix.
     let enrichedInput = input;
     if (searchKnowledgeBase && input.trim()) {
       try {
-        const { context, count } = await retrieveKnowledgeContext(input);
-        if (count > 0 && context) {
-          enrichedInput = `【知识库检索结果】\n${context}\n\n---\n用户问题：${input}`;
+        const result = await retrieveKnowledge({ query: input, scope: 'all' });
+        if (result.count > 0) {
+          enrichedInput = attachKnowledgeContext(input, result);
         } else {
-          Message.info('知识库中未找到相关内容，已按原始问题发送');
+          Message.info(
+            t('messages.knowledgeRetrieval.noResults', {
+              defaultValue: '知识库与记忆中未找到相关内容，已按原始问题发送',
+            })
+          );
         }
       } catch (error) {
         // Surface the failure instead of silently sending without context, so the
         // user knows retrieval did not happen (was previously swallowed).
         console.error('[KnowledgeBase] retrieval failed:', error);
-        Message.warning('知识库检索失败，请确认向量库服务已启动');
+        Message.warning(
+          t('messages.knowledgeRetrieval.failed', {
+            defaultValue: '知识库与记忆检索失败，请确认私有记忆库服务已启动',
+          })
+        );
       }
     }
 

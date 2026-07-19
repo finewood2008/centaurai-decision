@@ -31,10 +31,43 @@
   "knowledge": {
     "chunks": "{{n}} chunks",
     "readonly": "Knowledge Base · {{n}} files",
+    "summary": "Personal Memory · {{n}} files",
     "refresh": "Refresh",
+    "import": "Import files",
     "empty": "Knowledge base is empty",
     "unreachable": "Cannot reach the vector DB — make sure the service is running",
-    "openDesktopOnly": "Opening source files is desktop-only"
+    "openDesktopOnly": "Opening source files is desktop-only",
+    "fileMissing": "The source file is no longer available",
+    "retry": "Retry indexing",
+    "retrySuccess": "Indexing completed",
+    "retryFailed": "Indexing failed",
+    "delete": "Move to Recycle Bin",
+    "deleteTitle": "Remove from personal memory",
+    "deleteConfirm": "Move “{{name}}” to the Recycle Bin? It can be restored by the desktop administrator.",
+    "deleteSuccess": "Moved to Recycle Bin",
+    "deleteFailed": "Could not move the file to the Recycle Bin",
+    "trash": "Recycle Bin",
+    "trashTitle": "Personal Memory Recycle Bin",
+    "trashEmpty": "The Recycle Bin is empty",
+    "trashLoadFailed": "Could not load the Recycle Bin",
+    "restore": "Restore",
+    "restoreSuccess": "File restored",
+    "restoreFailed": "Could not restore the file",
+    "status": {
+      "indexed": "Indexed",
+      "queued": "Queued",
+      "processing": "Indexing",
+      "failed": "Failed",
+      "unindexed": "Not indexed",
+      "missing": "Missing"
+    },
+    "uploadPhase": {
+      "queued": "Waiting",
+      "uploading": "Uploading",
+      "indexing": "Indexing",
+      "done": "Complete",
+      "error": "Failed"
+    }
   },
   "type": {
     "all": "All",

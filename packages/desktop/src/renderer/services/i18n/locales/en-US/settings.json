@@ -154,6 +154,10 @@
   "saveUploadToWorkspace": "Save Uploads to Project Folder",
   "autoPreviewOfficeFiles": "Auto Preview New Office Files",
   "autoPreviewOfficeFilesDesc": "Automatically open newly created Word, Excel, and PowerPoint files in the current project. Office temporary lock files are ignored.",
+  "personalMemory": {
+    "title": "Personal Memory Library",
+    "description": "Let different AIs use the same personal memory. When enabled, relevant content is automatically retrieved as conversation context."
+  },
   "startOnBoot": "Start on Boot",
   "startOnBootDesc": "Launch CentaurAI automatically when you sign in to macOS or Windows.",
   "startOnBootUnsupported": "Available only in packaged macOS and Windows apps.",

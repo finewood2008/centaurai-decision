@@ -14,6 +14,7 @@ import { Copy } from '@icon-park/react';
 import classNames from 'classnames';
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { copyText } from '@/renderer/utils/ui/clipboard';
 import CollapsibleContent from '@renderer/components/chat/CollapsibleContent';
 import FilePreview from '@renderer/components/media/FilePreview';
@@ -94,7 +95,11 @@ const useFormatContent = (content: string) => {
   }, [content]);
 };
 
-const LOCAL_VECTOR_DB_DISPLAY_MARK = '【local-vector-db 检索结果】';
+const LOCAL_VECTOR_DB_DISPLAY_MARKS = [
+  '【CentaurAI 检索上下文】',
+  '【local-vector-db 检索结果】',
+  '【知识库检索结果】',
+] as const;
 
 type LocalVectorDbDisplay = {
   question: string;
@@ -136,6 +141,8 @@ const localVectorPreview = (value: string): string =>
       (line) =>
         line &&
         !/^检索模式[：:]/.test(line) &&
+        !line.startsWith('以下内容来自本地资料') &&
+        !/^<\/?retrieved_context>$/.test(line) &&
         !/^[-—]{3,}$/.test(line) &&
         !/^用户问题[：:]/.test(line) &&
         !/^##\s*/.test(line) &&
@@ -150,23 +157,33 @@ const clampLocalVectorText = (value: string): string => {
   return text.length > 520 ? `${text.slice(0, 520)}…` : text;
 };
 
-const parseLocalVectorDisplay = (content: string): LocalVectorDbDisplay | null => {
+const parseLocalVectorDisplay = (content: string, defaultMode: string): LocalVectorDbDisplay | null => {
   const text = String(content || '');
-  if (!text.startsWith(LOCAL_VECTOR_DB_DISPLAY_MARK)) return null;
+  const displayMark = LOCAL_VECTOR_DB_DISPLAY_MARKS.find((mark) => text.startsWith(mark));
+  if (!displayMark) return null;
 
-  const questionMatch = text.match(/\n---\n(?:#{1,6}\s*)?用户问题(?:[：:]?\s*\n|[：:]\s*)([\s\S]*)$/);
+  const questionMatch = text.match(
+    /\n---\n(?:#{1,6}\s*)?(?:用户问题|使用者問題|User question)(?:[：:]?\s*\n|[：:]\s*)([\s\S]*)$/i
+  );
   const question = questionMatch ? questionMatch[1].trim() : '';
-  const body = text.slice(LOCAL_VECTOR_DB_DISPLAY_MARK.length, questionMatch?.index ?? text.length).trim();
-  const mode = ((body.match(/(?:检索模式|模式)[：:]\s*([^·\n<]+)/) || [])[1] || '本地检索').trim();
+  const body = text.slice(displayMark.length, questionMatch?.index ?? text.length).trim();
+  const mode = (
+    (body.match(/(?:检索模式|檢索模式|Retrieval mode|模式)[：:]\s*([^·\n<]+)/i) || [])[1] || defaultMode
+  ).trim();
+  const retrievedBody = (body.match(/<retrieved_context>([\s\S]*?)<\/retrieved_context>/i) || [])[1] || body;
 
   let sources: string[] = [];
-  for (const match of body.matchAll(/local-vector-db-source-name[^>]*>([\s\S]*?)<\/span>/g)) {
+  for (const match of retrievedBody.matchAll(/local-vector-db-source-name[^>]*>([\s\S]*?)<\/span>/g)) {
     sources.push(cleanLocalVectorText(match[1]));
   }
-  for (const match of body.matchAll(/^\[(\d+)\]\s*([^\n]+)/gm)) {
-    sources.push(cleanLocalVectorText(match[2]).replace(/\s*·\s*score.*$/, ''));
+  for (const match of retrievedBody.matchAll(/^\[(\d+)\]\s*([^\n]+)/gm)) {
+    sources.push(
+      cleanLocalVectorText(match[2])
+        .replace(/^\[(document|wiki|memory|image)\]\s*/i, '')
+        .replace(/\s*·\s*score.*$/, '')
+    );
   }
-  for (const match of body.matchAll(/^##\s+(.+)$/gm)) {
+  for (const match of retrievedBody.matchAll(/^##\s+(.+)$/gm)) {
     const source = cleanLocalVectorText(match[1])
       .replace(/（\d+\s*条）$/, '')
       .trim();
@@ -177,14 +194,17 @@ const parseLocalVectorDisplay = (content: string): LocalVectorDbDisplay | null =
   sources = [...new Set(sources.map((source) => source.trim()).filter(Boolean))].slice(0, 6);
 
   const count = ((body.match(/(\d+)\s*条/) || [])[1] || sources.length || '').toString();
-  const snippet = cleanLocalVectorText(body).slice(0, 2200);
-  const preview = clampLocalVectorText(localVectorPreview(body) || snippet);
+  const snippet = cleanLocalVectorText(retrievedBody).slice(0, 2200);
+  const preview = clampLocalVectorText(localVectorPreview(retrievedBody) || snippet);
 
   return { question: question || text, mode, count, sources, snippet, preview };
 };
 
-const renderLocalVectorUserMessage = (content: string): React.ReactNode => {
-  const result = parseLocalVectorDisplay(content);
+const renderLocalVectorUserMessage = (content: string, t: TFunction): React.ReactNode => {
+  const result = parseLocalVectorDisplay(
+    content,
+    t('messages.knowledgeRetrieval.defaultMode', { defaultValue: '本地检索' })
+  );
 
   if (!result) {
     return (
@@ -194,7 +214,12 @@ const renderLocalVectorUserMessage = (content: string): React.ReactNode => {
     );
   }
 
-  const sourceCount = result.count ? ` · ${result.count} 条来源` : '';
+  const sourceCount = result.count
+    ? ` · ${t('messages.knowledgeRetrieval.sourceCount', {
+        count: Number(result.count),
+        defaultValue: `${result.count} 条来源`,
+      })}`
+    : '';
 
   return (
     <div className='flex flex-col gap-8px' data-testid='message-text-content'>
@@ -233,8 +258,14 @@ const renderLocalVectorUserMessage = (content: string): React.ReactNode => {
               KB
             </span>
             <div className='min-w-0'>
-              <div className='text-13px font-700 text-t-primary truncate'>本地知识库检索</div>
-              <div className='text-11px text-t-secondary mt-1px'>已选取相关片段作为回答依据</div>
+              <div className='text-13px font-700 text-t-primary truncate'>
+                {t('messages.knowledgeRetrieval.cardTitle', { defaultValue: '私有知识与记忆检索' })}
+              </div>
+              <div className='text-11px text-t-secondary mt-1px'>
+                {t('messages.knowledgeRetrieval.cardDescription', {
+                  defaultValue: '已选取相关片段作为回答依据',
+                })}
+              </div>
             </div>
           </div>
           <span
@@ -255,7 +286,7 @@ const renderLocalVectorUserMessage = (content: string): React.ReactNode => {
         {result.preview && (
           <div className='mt-10px' style={{ borderTop: '1px solid var(--aou-3, #ddccb4)', paddingTop: 9 }}>
             <div className='text-11px font-600 mb-5px' style={{ color: 'var(--color-text-2,#4e5969)' }}>
-              检索内容预览
+              {t('messages.knowledgeRetrieval.preview', { defaultValue: '检索内容预览' })}
             </div>
             <div
               className='whitespace-pre-wrap break-words'
@@ -299,7 +330,7 @@ const renderLocalVectorUserMessage = (content: string): React.ReactNode => {
               className='text-12px cursor-pointer select-none'
               style={{ color: 'var(--brand)', outline: 'none' }}
             >
-              展开完整检索片段
+              {t('messages.knowledgeRetrieval.expand', { defaultValue: '展开完整检索片段' })}
             </summary>
             <pre
               className='mt-7px mb-0 whitespace-pre-wrap break-words'
@@ -439,7 +470,7 @@ const MessageText: React.FC<{ message: IMessageText }> = ({ message }) => {
         >
           {/* JSON 内容使用折叠组件 Use CollapsibleContent for JSON content */}
           {shouldRenderPlainText ? (
-            renderLocalVectorUserMessage(text)
+            renderLocalVectorUserMessage(text, t)
           ) : json ? (
             <CollapsibleContent maxHeight={200} defaultCollapsed={true}>
               <div data-testid='message-text-content'>

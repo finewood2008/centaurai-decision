@@ -576,6 +576,50 @@ async function handleVectorSearch(
   }
 }
 
+/**
+ * Stable application-facing retrieval proxy. The upstream endpoint and token
+ * always come from the Web Host; client-supplied connection details are ignored.
+ */
+async function handleVectorRetrieve(
+  req: IncomingMessage,
+  res: ServerResponse,
+  endpoint: string | undefined,
+  token: string | undefined
+): Promise<void> {
+  const sendJson = (status: number, body: unknown): void => {
+    res.writeHead(status, { 'content-type': 'application/json' });
+    res.end(JSON.stringify(body));
+  };
+  try {
+    const body = await readJsonBody(req);
+    const query = typeof body.query === 'string' ? body.query.trim() : '';
+    if (!endpoint) {
+      sendJson(503, { error: 'KNOWLEDGE_UNAVAILABLE' });
+      return;
+    }
+    if (!query) {
+      sendJson(400, { error: 'EMPTY_QUERY' });
+      return;
+    }
+
+    const scope = body.scope === 'knowledge' || body.scope === 'memory' ? body.scope : 'all';
+    const requestedLimit = typeof body.limit === 'number' && Number.isFinite(body.limit) ? body.limit : 6;
+    const limit = Math.max(1, Math.min(Math.trunc(requestedLimit), 20));
+    const mode = body.mode === 'visual' || body.mode === 'hybrid' ? body.mode : 'text';
+
+    const upstream = await fetch(`${endpoint}/api/retrieve`, {
+      method: 'POST',
+      headers: knowledgeHeaders(token, true),
+      body: JSON.stringify({ query, scope, limit, mode }),
+    });
+    const text = await upstream.text();
+    res.writeHead(upstream.status, { 'content-type': 'application/json' });
+    res.end(text);
+  } catch {
+    sendJson(502, { error: 'VECTOR_DB_UNREACHABLE' });
+  }
+}
+
 /** Proxy a read-only knowledge-base document list to the local vector DB. */
 async function handleVectorDocuments(
   req: IncomingMessage,
@@ -644,6 +688,7 @@ async function handleVectorImage(
 
 function knowledgeHeaders(token: string | undefined, json = false): Record<string, string> {
   return {
+    'x-requested-by': 'centaur-vdb',
     ...(json ? { 'content-type': 'application/json' } : {}),
     ...(token
       ? {
@@ -652,6 +697,163 @@ function knowledgeHeaders(token: string | undefined, json = false): Record<strin
         }
       : {}),
   };
+}
+
+const HOP_BY_HOP_HEADERS = new Set([
+  'connection',
+  'keep-alive',
+  'proxy-authenticate',
+  'proxy-authorization',
+  'te',
+  'trailer',
+  'transfer-encoding',
+  'upgrade',
+]);
+
+/**
+ * Stream a request and response through the authenticated WebUI host without
+ * buffering large knowledge files in memory. Only content framing headers from
+ * the browser are forwarded; credentials and the upstream origin stay server-owned.
+ */
+function proxyKnowledgeStream(
+  req: IncomingMessage,
+  res: ServerResponse,
+  endpoint: string | undefined,
+  token: string | undefined,
+  upstreamPath: string,
+  options: { method?: string; pipeBody?: boolean } = {}
+): void {
+  if (!endpoint) {
+    res.writeHead(503, { 'content-type': 'application/json' });
+    res.end(JSON.stringify({ error: 'KNOWLEDGE_UNAVAILABLE' }));
+    return;
+  }
+
+  const target = new URL(upstreamPath, `${endpoint}/`);
+  const headers: http.OutgoingHttpHeaders = {
+    ...knowledgeHeaders(token),
+    ...(req.headers['content-type'] ? { 'content-type': req.headers['content-type'] } : {}),
+    ...(req.headers['content-length'] ? { 'content-length': req.headers['content-length'] } : {}),
+  };
+  const proxy = (target.protocol === 'https:' ? https.request : http.request)(
+    target,
+    { method: options.method ?? req.method, headers },
+    (upstream) => {
+      const responseHeaders: http.OutgoingHttpHeaders = {};
+      for (const [name, value] of Object.entries(upstream.headers)) {
+        if (!HOP_BY_HOP_HEADERS.has(name) && value !== undefined) responseHeaders[name] = value;
+      }
+      res.writeHead(upstream.statusCode ?? 502, responseHeaders);
+      upstream.pipe(res);
+    }
+  );
+  proxy.on('error', () => {
+    if (!res.headersSent) {
+      res.writeHead(502, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ error: 'VECTOR_DB_UNREACHABLE' }));
+    } else {
+      res.destroy();
+    }
+  });
+  if (options.pipeBody === false) proxy.end();
+  else req.pipe(proxy);
+}
+
+function handleVectorUpload(
+  req: IncomingMessage,
+  res: ServerResponse,
+  endpoint: string | undefined,
+  token: string | undefined
+): void {
+  if (
+    !String(req.headers['content-type'] || '')
+      .toLowerCase()
+      .startsWith('multipart/form-data;')
+  ) {
+    res.writeHead(400, { 'content-type': 'application/json' });
+    res.end(JSON.stringify({ error: 'MULTIPART_REQUIRED' }));
+    return;
+  }
+  proxyKnowledgeStream(req, res, endpoint, token, '/api/upload', { method: 'POST' });
+}
+
+function handleVectorJob(
+  req: IncomingMessage,
+  res: ServerResponse,
+  endpoint: string | undefined,
+  token: string | undefined
+): void {
+  const url = new URL(req.url || '/', 'http://localhost');
+  const docId = url.searchParams.get('doc_id')?.trim() || '';
+  if (!docId) {
+    res.writeHead(400, { 'content-type': 'application/json' });
+    res.end(JSON.stringify({ error: 'MISSING_DOC_ID' }));
+    return;
+  }
+  proxyKnowledgeStream(req, res, endpoint, token, `/api/jobs/${encodeURIComponent(docId)}`, {
+    method: 'GET',
+    pipeBody: false,
+  });
+}
+
+async function handleVectorReindex(
+  req: IncomingMessage,
+  res: ServerResponse,
+  endpoint: string | undefined,
+  token: string | undefined
+): Promise<void> {
+  const sendJson = (status: number, body: unknown): void => {
+    res.writeHead(status, { 'content-type': 'application/json' });
+    res.end(JSON.stringify(body));
+  };
+  try {
+    const body = await readJsonBody(req);
+    const sourcePaths = Array.isArray(body.source_paths)
+      ? body.source_paths.filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
+      : [];
+    if (!sourcePaths.length || sourcePaths.length > 100) {
+      sendJson(400, { error: 'INVALID_SOURCE_PATHS' });
+      return;
+    }
+    if (!endpoint) {
+      sendJson(503, { error: 'KNOWLEDGE_UNAVAILABLE' });
+      return;
+    }
+    const upstream = await fetch(`${endpoint}/api/documents/reindex`, {
+      method: 'POST',
+      headers: knowledgeHeaders(token, true),
+      body: JSON.stringify({ source_paths: sourcePaths, force: true }),
+    });
+    const text = await upstream.text();
+    res.writeHead(upstream.status, { 'content-type': upstream.headers.get('content-type') || 'application/json' });
+    res.end(text);
+  } catch {
+    sendJson(502, { error: 'VECTOR_DB_UNREACHABLE' });
+  }
+}
+
+function handleVectorFile(
+  req: IncomingMessage,
+  res: ServerResponse,
+  endpoint: string | undefined,
+  token: string | undefined
+): void {
+  const url = new URL(req.url || '/', 'http://localhost');
+  const sourcePath = url.searchParams.get('path')?.trim() || '';
+  const disposition = url.searchParams.get('disposition') === 'attachment' ? 'attachment' : 'inline';
+  if (!sourcePath) {
+    res.writeHead(400, { 'content-type': 'application/json' });
+    res.end(JSON.stringify({ error: 'MISSING_PATH' }));
+    return;
+  }
+  proxyKnowledgeStream(
+    req,
+    res,
+    endpoint,
+    token,
+    `/api/file?path=${encodeURIComponent(sourcePath)}&disposition=${disposition}`,
+    { method: 'GET', pipeBody: false }
+  );
 }
 
 function normalizeKnowledgeEndpoint(raw: string | undefined): string | undefined {
@@ -737,7 +939,9 @@ export async function startStaticServer(opts: StaticServerOptions): Promise<Stat
   const gate = createAuthGate();
   const knowledgeEndpoint = normalizeKnowledgeEndpoint(opts.knowledgeEndpoint);
   const knowledgeToken = opts.knowledgeToken?.trim() || undefined;
-  const remoteKnowledgeEndpoint = allowRemote && !knowledgeToken ? undefined : knowledgeEndpoint;
+  // The WebUI auth gate is the LAN trust boundary. The optional worker token is
+  // defense-in-depth, not an enablement requirement for a loopback-only worker.
+  const remoteKnowledgeEndpoint = knowledgeEndpoint;
 
   // The image workbench SPA dist lives under the served static dir by default
   // (the desktop build copies it to out/renderer/centaur-image-workbench).
@@ -928,7 +1132,14 @@ export async function startStaticServer(opts: StaticServerOptions): Promise<Stat
         return;
       }
 
-      // /api/vector-search — knowledge-base search proxied LOCALLY to the vector
+      // /api/vector-retrieve — stable structured retrieval for local, LAN and
+      // distributed desktop clients. Must precede the generic /api/* proxy.
+      if (req.url.startsWith('/api/vector-retrieve') && req.method === 'POST') {
+        await handleVectorRetrieve(req, res, remoteKnowledgeEndpoint, knowledgeToken);
+        return;
+      }
+
+      // /api/vector-search — legacy knowledge-base search proxied LOCALLY to the vector
       // DB (NOT aioncore). The browser can't reach the loopback-bound vector DB
       // on the server host, so we forward on its behalf. Must come before the
       // generic /api/* proxy below.
@@ -948,6 +1159,26 @@ export async function startStaticServer(opts: StaticServerOptions): Promise<Stat
       // DB's /api/image. Endpoint + path come as query params.
       if (req.url.startsWith('/api/vector-image') && req.method === 'GET') {
         await handleVectorImage(req, res, remoteKnowledgeEndpoint, knowledgeToken);
+        return;
+      }
+
+      if (req.url.startsWith('/api/vector-upload') && req.method === 'POST') {
+        handleVectorUpload(req, res, remoteKnowledgeEndpoint, knowledgeToken);
+        return;
+      }
+
+      if (req.url.startsWith('/api/vector-jobs') && req.method === 'GET') {
+        handleVectorJob(req, res, remoteKnowledgeEndpoint, knowledgeToken);
+        return;
+      }
+
+      if (req.url.startsWith('/api/vector-reindex') && req.method === 'POST') {
+        await handleVectorReindex(req, res, remoteKnowledgeEndpoint, knowledgeToken);
+        return;
+      }
+
+      if (req.url.startsWith('/api/vector-file') && req.method === 'GET') {
+        handleVectorFile(req, res, remoteKnowledgeEndpoint, knowledgeToken);
         return;
       }
 

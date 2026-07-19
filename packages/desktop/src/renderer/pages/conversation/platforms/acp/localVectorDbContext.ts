@@ -1,5 +1,11 @@
-const LOCAL_VECTOR_DB_MARK = '【local-vector-db 检索结果】';
-const LOCAL_VECTOR_DB_BASE = 'http://127.0.0.1:8618';
+import {
+  attachKnowledgeContext,
+  hasKnowledgeContext,
+  retrieveKnowledge,
+  type KnowledgeRetrievalScope,
+} from '@/renderer/services/knowledgeBaseSearch';
+import i18n from '@/renderer/services/i18n';
+
 const CHOICE_TIMEOUT_MS = 45_000;
 
 const PROFILE_QUERY_RE =
@@ -20,30 +26,6 @@ type LocalVectorChoice = {
   query: string;
 };
 
-type LocalVectorSearchItem = {
-  text?: string;
-  content?: string;
-  chunk?: string;
-  snippet?: string;
-  preview?: string;
-  document?: string;
-  page_content?: string;
-  rel_path?: string;
-  source_path?: string;
-  path?: string;
-  title?: string;
-  doc_id?: string;
-  id?: string;
-  score?: number;
-  vector_score?: number;
-  metadata?: {
-    file_name?: string;
-    source_path?: string;
-    path?: string;
-    score?: number;
-  };
-};
-
 const normalizeQuery = (value: string): string =>
   String(value || '')
     .toLowerCase()
@@ -62,206 +44,50 @@ const escapeHtml = (value: string): string =>
     return '&quot;';
   });
 
-const getJson = async <T>(path: string): Promise<T> => {
-  const response = await fetch(`${LOCAL_VECTOR_DB_BASE}${path}`, { cache: 'no-store' });
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`);
-  }
-  return response.json() as Promise<T>;
-};
-
-const postJson = async <T>(path: string, body: unknown): Promise<T> => {
-  const response = await fetch(`${LOCAL_VECTOR_DB_BASE}${path}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-    cache: 'no-store',
-  });
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`);
-  }
-  return response.json() as Promise<T>;
-};
-
-const itemText = (item: LocalVectorSearchItem): string =>
-  item.text || item.content || item.chunk || item.snippet || item.preview || item.document || item.page_content || '';
-
-const itemSource = (item: LocalVectorSearchItem): string => {
-  const metadata = item.metadata || {};
-  return (
-    metadata.file_name ||
-    metadata.source_path ||
-    metadata.path ||
-    item.rel_path ||
-    item.source_path ||
-    item.path ||
-    item.title ||
-    item.doc_id ||
-    item.id ||
-    'unknown'
-  );
-};
-
-const itemScore = (item: LocalVectorSearchItem): string => {
-  const score =
-    typeof item.score === 'number'
-      ? item.score
-      : typeof item.vector_score === 'number'
-        ? item.vector_score
-        : typeof item.metadata?.score === 'number'
-          ? item.metadata.score
-          : null;
-  return typeof score === 'number' && Number.isFinite(score) ? score.toFixed(3) : '';
-};
-
-const cleanItems = (items: LocalVectorSearchItem[]): LocalVectorSearchItem[] =>
-  items.filter((item) => {
-    const text = itemText(item).trim();
-    return text && text !== '---' && text !== '#' && text.length > 2;
-  });
-
-const formatItems = (items: LocalVectorSearchItem[], title: string, snippetLength: number): string => {
-  const formatted = cleanItems(items)
-    .map((item, index) => {
-      const source = clipText(itemSource(item), 96);
-      const score = itemScore(item);
-      const snippet = clipText(itemText(item).replace(/\s+/g, ' '), snippetLength);
-      return `[${index + 1}] ${source}${score ? ` · score ${score}` : ''}\n${snippet}`;
-    })
-    .filter(Boolean);
-
-  return formatted.length ? `## ${title}（${formatted.length} 条）\n${formatted.join('\n\n')}` : '';
-};
-
-const wrapRetrievedContext = (question: string, modeLabel: string, sections: string[]): string => {
-  const body = sections.filter(Boolean).join('\n\n').trim();
-  return body ? `${LOCAL_VECTOR_DB_MARK}\n检索模式：${modeLabel}\n\n${body}\n\n---\n用户问题：${question}` : question;
-};
-
-const readMemoryFile = async (filePath: string, maxLength: number): Promise<string> => {
-  try {
-    const data = await getJson<{ content?: string }>(
-      `/api/memory/files/${filePath.split('/').map(encodeURIComponent).join('/')}`
-    );
-    return data.content ? `## ${filePath}\n\n${clipText(data.content, maxLength)}` : '';
-  } catch {
-    return '';
-  }
-};
-
-const readRecentJournal = async (count: number): Promise<string> => {
-  try {
-    const data = await getJson<{ journals?: Array<{ date: string }> }>('/api/memory/journal');
-    const sections: string[] = [];
-    for (const journal of (data.journals || []).slice(0, count)) {
-      try {
-        const item = await getJson<{ content?: string }>(`/api/memory/journal/${encodeURIComponent(journal.date)}`);
-        if (item.content) {
-          sections.push(`## journal/${journal.date}.md\n\n${clipText(item.content, 500)}`);
-        }
-      } catch {
-        // Ignore individual journal read failures so retrieval can still continue.
-      }
-    }
-    return sections.join('\n\n');
-  } catch {
-    return '';
-  }
-};
-
 const retrieveLocalVectorContext = async (question: string, mode: LocalVectorMode, query: string): Promise<string> => {
   const searchQuery = String(query || question);
 
   if (mode === 'direct') return question;
-  if (mode === 'profile') {
-    return wrapRetrievedContext(question, '用户画像', [await readMemoryFile('USER.md', 1100)]);
-  }
-  if (mode === 'rules') {
-    return wrapRetrievedContext(question, 'Agent 规则', [await readMemoryFile('AGENTS.md', 1100)]);
-  }
-  if (mode === 'journal') {
-    return wrapRetrievedContext(question, '最近日记', [await readRecentJournal(3)]);
-  }
-  if (mode === 'memory') {
-    let results: LocalVectorSearchItem[] = [];
-    try {
-      results =
-        (
-          await postJson<{ results?: LocalVectorSearchItem[] }>('/api/memory/search', {
-            query: searchQuery,
-            n_results: 5,
-          })
-        ).results || [];
-    } catch {}
-    return wrapRetrievedContext(question, '最近记忆', [formatItems(results, '记忆检索', 360)]);
-  }
-  if (mode === 'kb') {
-    let results: LocalVectorSearchItem[] = [];
-    try {
-      results =
-        (
-          await postJson<{ results?: LocalVectorSearchItem[] }>('/api/search', {
-            query: searchQuery,
-            n_results: 5,
-            mode: 'hybrid',
-          })
-        ).results || [];
-    } catch {}
-    return wrapRetrievedContext(question, '知识库轻检索', [formatItems(results, '知识库检索', 420)]);
-  }
-  if (mode === 'deep') {
-    let memoryResults: LocalVectorSearchItem[] = [];
-    let kbResults: LocalVectorSearchItem[] = [];
-    try {
-      memoryResults =
-        (
-          await postJson<{ results?: LocalVectorSearchItem[] }>('/api/memory/search', {
-            query: searchQuery,
-            n_results: 7,
-          })
-        ).results || [];
-    } catch {}
-    try {
-      kbResults =
-        (
-          await postJson<{ results?: LocalVectorSearchItem[] }>('/api/search', {
-            query: searchQuery,
-            n_results: 7,
-            mode: 'hybrid',
-          })
-        ).results || [];
-    } catch {}
-    return wrapRetrievedContext(question, '深度检索', [
-      formatItems(memoryResults, '记忆检索', 380),
-      formatItems(kbResults, '知识库检索', 440),
-    ]);
-  }
-
-  let memoryResults: LocalVectorSearchItem[] = [];
-  let kbResults: LocalVectorSearchItem[] = [];
-  try {
-    memoryResults =
-      (
-        await postJson<{ results?: LocalVectorSearchItem[] }>('/api/memory/search', {
-          query: searchQuery,
-          n_results: 3,
-        })
-      ).results || [];
-  } catch {}
-  try {
-    kbResults =
-      (
-        await postJson<{ results?: LocalVectorSearchItem[] }>('/api/search', {
-          query: searchQuery,
-          n_results: 3,
-          mode: 'hybrid',
-        })
-      ).results || [];
-  } catch {}
-  return wrapRetrievedContext(question, '智能轻检索', [
-    formatItems(memoryResults, '记忆检索', 320),
-    formatItems(kbResults, '知识库检索', 360),
-  ]);
+  const options: Record<
+    Exclude<LocalVectorMode, 'direct'>,
+    {
+      scope: KnowledgeRetrievalScope;
+      limit: number;
+      label: string;
+      querySuffix?: string;
+    }
+  > = {
+    profile: {
+      scope: 'memory',
+      limit: 5,
+      label: i18n.t('messages.knowledgeRetrieval.modes.profile'),
+      querySuffix: 'USER.md 用户画像 个人资料 偏好',
+    },
+    rules: {
+      scope: 'memory',
+      limit: 5,
+      label: i18n.t('messages.knowledgeRetrieval.modes.rules'),
+      querySuffix: 'AGENTS.md Agent 行为规则 工作规则',
+    },
+    journal: {
+      scope: 'memory',
+      limit: 6,
+      label: i18n.t('messages.knowledgeRetrieval.modes.journal'),
+      querySuffix: 'journal 最近日记 工作日志',
+    },
+    memory: { scope: 'memory', limit: 5, label: i18n.t('messages.knowledgeRetrieval.modes.memory') },
+    kb: { scope: 'knowledge', limit: 5, label: i18n.t('messages.knowledgeRetrieval.modes.knowledge') },
+    deep: { scope: 'all', limit: 10, label: i18n.t('messages.knowledgeRetrieval.modes.deep') },
+    smart: { scope: 'all', limit: 6, label: i18n.t('messages.knowledgeRetrieval.modes.smart') },
+  };
+  const selected = options[mode];
+  const result = await retrieveKnowledge({
+    query: selected.querySuffix ? `${searchQuery}\n${selected.querySuffix}` : searchQuery,
+    scope: selected.scope,
+    limit: selected.limit,
+    mode: 'text',
+  });
+  return attachKnowledgeContext(question, result, { modeLabel: selected.label });
 };
 
 const shouldOfferLocalVectorChoice = (question: string): boolean => {
@@ -296,10 +122,8 @@ const showLocalVectorChoice = (question: string): Promise<LocalVectorChoice> =>
 
     const wrapper = document.createElement('div');
     wrapper.className = 'local-vector-db-choice-wrap';
-    wrapper.innerHTML =
-      '<div class="local-vector-db-choice-card"><div class="local-vector-db-choice-head"><div><div class="local-vector-db-choice-title">需要从本地知识库检索吗？</div><p class="local-vector-db-choice-desc">请选择检索范围，必要时改一下检索词。系统只会注入少量相关片段，不会导入整个知识库。</p></div><button class="local-vector-db-choice-close" data-mode="direct" title="不检索">×</button></div><div class="local-vector-db-choice-query"><label>检索词</label><input value="' +
-      escapeHtml(clipText(question, 120)) +
-      '" /></div><div class="local-vector-db-choice-grid"><button class="local-vector-db-choice-option" data-mode="smart"><strong>智能轻检索</strong><span>推荐，记忆+知识库少量片段</span></button><button class="local-vector-db-choice-option" data-mode="memory"><strong>查最近记忆</strong><span>适合“之前/上次/说过”</span></button><button class="local-vector-db-choice-option" data-mode="kb"><strong>查知识库</strong><span>适合文档、资料、文件</span></button><button class="local-vector-db-choice-option" data-mode="journal"><strong>查最近日记</strong><span>只看最近日期摘要</span></button><button class="local-vector-db-choice-option" data-mode="deep"><strong>深度检索</strong><span>更全面，token 较高</span></button><button class="local-vector-db-choice-option" data-mode="direct"><strong>不查，直接回答</strong><span>不增加检索上下文</span></button></div><div class="local-vector-db-choice-foot"><span>45 秒未选择将使用智能轻检索</span><span>local-vector-db</span></div></div>';
+    const tr = (key: string): string => escapeHtml(String(i18n.t(key)));
+    wrapper.innerHTML = `<div class="local-vector-db-choice-card"><div class="local-vector-db-choice-head"><div><div class="local-vector-db-choice-title">${tr('messages.knowledgeRetrieval.choice.title')}</div><p class="local-vector-db-choice-desc">${tr('messages.knowledgeRetrieval.choice.description')}</p></div><button class="local-vector-db-choice-close" data-mode="direct" title="${tr('messages.knowledgeRetrieval.choice.close')}">×</button></div><div class="local-vector-db-choice-query"><label>${tr('messages.knowledgeRetrieval.choice.query')}</label><input value="${escapeHtml(clipText(question, 120))}" /></div><div class="local-vector-db-choice-grid"><button class="local-vector-db-choice-option" data-mode="smart"><strong>${tr('messages.knowledgeRetrieval.choice.smart')}</strong><span>${tr('messages.knowledgeRetrieval.choice.smartHint')}</span></button><button class="local-vector-db-choice-option" data-mode="memory"><strong>${tr('messages.knowledgeRetrieval.choice.memory')}</strong><span>${tr('messages.knowledgeRetrieval.choice.memoryHint')}</span></button><button class="local-vector-db-choice-option" data-mode="kb"><strong>${tr('messages.knowledgeRetrieval.choice.knowledge')}</strong><span>${tr('messages.knowledgeRetrieval.choice.knowledgeHint')}</span></button><button class="local-vector-db-choice-option" data-mode="journal"><strong>${tr('messages.knowledgeRetrieval.choice.journal')}</strong><span>${tr('messages.knowledgeRetrieval.choice.journalHint')}</span></button><button class="local-vector-db-choice-option" data-mode="deep"><strong>${tr('messages.knowledgeRetrieval.choice.deep')}</strong><span>${tr('messages.knowledgeRetrieval.choice.deepHint')}</span></button><button class="local-vector-db-choice-option" data-mode="direct"><strong>${tr('messages.knowledgeRetrieval.choice.direct')}</strong><span>${tr('messages.knowledgeRetrieval.choice.directHint')}</span></button></div><div class="local-vector-db-choice-foot"><span>${tr('messages.knowledgeRetrieval.choice.timeout')}</span><span>CentaurAI</span></div></div>`;
 
     document.body.appendChild(wrapper);
 
@@ -330,10 +154,10 @@ const showLocalVectorChoice = (question: string): Promise<LocalVectorChoice> =>
       busy.className = 'local-vector-db-choice-busy';
       busy.textContent =
         mode === 'direct'
-          ? '将直接发送…'
+          ? i18n.t('messages.knowledgeRetrieval.choice.sending')
           : timedOut
-            ? '已默认使用智能轻检索，正在压缩上下文…'
-            : '正在检索并压缩上下文…';
+            ? i18n.t('messages.knowledgeRetrieval.choice.timedOut')
+            : i18n.t('messages.knowledgeRetrieval.choice.searching');
       wrapper.querySelector('.local-vector-db-choice-card')?.appendChild(busy);
 
       window.setTimeout(() => wrapper.remove(), 280);
@@ -361,7 +185,7 @@ const showLocalVectorChoice = (question: string): Promise<LocalVectorChoice> =>
 
 export const maybeAttachLocalVectorContext = async (question: string, backend?: string): Promise<string> => {
   try {
-    if (typeof question !== 'string' || !question.trim() || question.includes(LOCAL_VECTOR_DB_MARK)) {
+    if (typeof question !== 'string' || !question.trim() || hasKnowledgeContext(question)) {
       return question;
     }
 
