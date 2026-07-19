@@ -31,10 +31,43 @@
   "knowledge": {
     "chunks": "{{n}} 块",
     "readonly": "知识库 · 共 {{n}} 个文件",
+    "summary": "个人记忆库 · 共 {{n}} 个文件",
     "refresh": "刷新",
+    "import": "导入文件",
     "empty": "知识库为空",
     "unreachable": "无法连接向量库，请确认服务已启动",
-    "openDesktopOnly": "仅桌面端可打开源文件"
+    "openDesktopOnly": "仅桌面端可打开源文件",
+    "fileMissing": "源文件已不存在",
+    "retry": "重试索引",
+    "retrySuccess": "索引已完成",
+    "retryFailed": "索引失败",
+    "delete": "移入回收站",
+    "deleteTitle": "从个人记忆库移除",
+    "deleteConfirm": "将“{{name}}”移入回收站？桌面管理员可以恢复。",
+    "deleteSuccess": "已移入回收站",
+    "deleteFailed": "无法移入回收站",
+    "trash": "回收站",
+    "trashTitle": "个人记忆库回收站",
+    "trashEmpty": "回收站为空",
+    "trashLoadFailed": "无法加载回收站",
+    "restore": "恢复",
+    "restoreSuccess": "文件已恢复",
+    "restoreFailed": "文件恢复失败",
+    "status": {
+      "indexed": "已索引",
+      "queued": "等待中",
+      "processing": "索引中",
+      "failed": "失败",
+      "unindexed": "未索引",
+      "missing": "文件缺失"
+    },
+    "uploadPhase": {
+      "queued": "等待中",
+      "uploading": "上传中",
+      "indexing": "索引中",
+      "done": "已完成",
+      "error": "失败"
+    }
   },
   "type": {
     "all": "全部",

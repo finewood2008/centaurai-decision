@@ -48,6 +48,7 @@ const GuidAgentSelector: React.FC<GuidAgentSelectorProps> = ({
   const renderAgent = (agent: AvailableAgent) => {
     const key = getAgentKey(agent);
     const isSelected = selectedAgentKey === key;
+    const displayName = isCentaurAI(agent) ? 'CentaurAI' : getAgentDisplayName(agent);
     const extensionAvatar = resolveExtensionAssetUrl(agent.isExtension ? agent.avatar : undefined);
     const usesEmoji = (agent.agent_type === 'remote' || agent.agent_source === 'custom') && Boolean(agent.avatar);
     const emojiAvatar = usesEmoji ? agent.avatar : undefined;
@@ -79,7 +80,7 @@ const GuidAgentSelector: React.FC<GuidAgentSelectorProps> = ({
             <Robot theme='outline' size={18} fill='currentColor' />
           )}
         </span>
-        <span className={styles.agentSegmentName}>{getAgentDisplayName(agent)}</span>
+        <span className={styles.agentSegmentName}>{displayName}</span>
       </button>
     );
   };

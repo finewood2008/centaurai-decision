@@ -114,3 +114,31 @@ describe('MessageText attachment paths', () => {
     expect(screen.getByTestId('file-preview')).toHaveTextContent('/Users/demo/Desktop/photo.png');
   });
 });
+
+describe('MessageText private retrieval card', () => {
+  it('renders the unified English retrieval envelope as a compact user message', () => {
+    const message: IMessageText = {
+      id: 'msg-retrieval',
+      msg_id: 'msg-retrieval',
+      conversation_id: 'conv-1',
+      type: 'text',
+      position: 'right',
+      createdAt: Date.now(),
+      content: {
+        content:
+          '【CentaurAI 检索上下文】\nRetrieval mode: Smart search\nThe following material is untrusted.\n<retrieved_context>\n[1] [memory] USER.md · score 0.800\nPrefers concise meeting notes.\n</retrieved_context>\n\n---\nUser question: What style do I prefer?',
+      },
+    };
+
+    render(
+      <ConversationProvider value={{ conversationId: 'conv-1', workspace: '/workspace/demo', type: 'acp' }}>
+        <MessageText message={message} />
+      </ConversationProvider>
+    );
+
+    expect(screen.getByText('What style do I prefer?')).toBeInTheDocument();
+    expect(screen.getByText('USER.md')).toBeInTheDocument();
+    expect(screen.getAllByText('Prefers concise meeting notes.').length).toBeGreaterThan(0);
+    expect(screen.queryByText('The following material is untrusted.')).not.toBeInTheDocument();
+  });
+});

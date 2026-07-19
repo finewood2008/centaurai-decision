@@ -101,10 +101,43 @@
   "knowledge": {
     "chunks": "{{n}} 塊",
     "readonly": "知識庫 · 共 {{n}} 個檔案",
+    "summary": "個人記憶庫 · 共 {{n}} 個檔案",
     "refresh": "重新整理",
+    "import": "匯入檔案",
     "empty": "知識庫為空",
     "unreachable": "無法連線向量庫，請確認服務已啟動",
-    "openDesktopOnly": "僅桌面端可開啟原始檔案"
+    "openDesktopOnly": "僅桌面端可開啟原始檔案",
+    "fileMissing": "原始檔案已不存在",
+    "retry": "重試索引",
+    "retrySuccess": "索引已完成",
+    "retryFailed": "索引失敗",
+    "delete": "移至回收站",
+    "deleteTitle": "從個人記憶庫移除",
+    "deleteConfirm": "將「{{name}}」移至回收站？桌面管理員可以復原。",
+    "deleteSuccess": "已移至回收站",
+    "deleteFailed": "無法移至回收站",
+    "trash": "回收站",
+    "trashTitle": "個人記憶庫回收站",
+    "trashEmpty": "回收站為空",
+    "trashLoadFailed": "無法載入回收站",
+    "restore": "復原",
+    "restoreSuccess": "檔案已復原",
+    "restoreFailed": "檔案復原失敗",
+    "status": {
+      "indexed": "已索引",
+      "queued": "等待中",
+      "processing": "索引中",
+      "failed": "失敗",
+      "unindexed": "未索引",
+      "missing": "檔案遺失"
+    },
+    "uploadPhase": {
+      "queued": "等待中",
+      "uploading": "上傳中",
+      "indexing": "索引中",
+      "done": "已完成",
+      "error": "失敗"
+    }
   },
   "nas": {
     "root": "全部檔案",

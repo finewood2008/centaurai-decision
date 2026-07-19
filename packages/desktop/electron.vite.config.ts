@@ -38,7 +38,11 @@ function verifyRendererEntryPlugin() {
     html.trim().length >= 20 && /<!doctype html|<html|<head|<body|<title|id=["']root["']/i.test(html);
   return {
     name: 'vite-plugin-verify-renderer-entry',
-    closeBundle() {
+    // Rollup's closeBundle hook can run before Vite writes generated HTML.
+    // writeBundle is the first lifecycle point where the emitted entry is
+    // guaranteed to be on disk, so the guard validates the current build
+    // instead of a stale/empty file left by a preceding build.
+    writeBundle() {
       const entryPath = resolve('out/renderer/index.html');
       let html = '';
       try {

@@ -484,6 +484,53 @@ describe('static-server', () => {
     await vectorDb.close();
   });
 
+  it('POST /api/vector-retrieve sanitizes the contract and uses server-owned credentials', async () => {
+    const backend = await startMockBackend((_req, res) => res.end('nope'));
+    stopBackend = backend.close;
+
+    let seenBody: unknown = null;
+    let seenRequestedBy = '';
+    let seenToken = '';
+    const vectorDb = await startMockBackend((req, res) => {
+      if (req.method !== 'POST' || req.url !== '/api/retrieve') return void res.writeHead(404).end();
+      seenRequestedBy = String(req.headers['x-requested-by'] || '');
+      seenToken = String(req.headers['x-centaurai-knowledge-token'] || '');
+      const chunks: Buffer[] = [];
+      req.on('data', (chunk) => chunks.push(chunk as Buffer));
+      req.on('end', () => {
+        seenBody = JSON.parse(Buffer.concat(chunks).toString('utf-8'));
+        res.writeHead(200, { 'content-type': 'application/json' });
+        res.end(JSON.stringify({ query: 'hello', scope: 'memory', mode: 'hybrid', hits: [], total: 0 }));
+      });
+    });
+
+    handle = await startStaticServer({
+      staticDir,
+      backendPort: backend.port,
+      port: 0,
+      knowledgeEndpoint: `http://127.0.0.1:${vectorDb.port}`,
+      knowledgeToken: 'server-secret',
+    });
+    const response = await fetch(`${handle.localUrl}/api/vector-retrieve`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        endpoint: 'http://169.254.169.254',
+        token: 'client-secret',
+        query: '  hello  ',
+        scope: 'memory',
+        limit: 999,
+        mode: 'hybrid',
+      }),
+    });
+
+    expect(response.status).toBe(200);
+    expect(seenBody).toEqual({ query: 'hello', scope: 'memory', limit: 20, mode: 'hybrid' });
+    expect(seenRequestedBy).toBe('centaur-vdb');
+    expect(seenToken).toBe('server-secret');
+    await vectorDb.close();
+  });
+
   it('POST /api/vector-search fails closed without a server-owned endpoint', async () => {
     const backend = await startMockBackend((_req, res) => res.end('nope'));
     stopBackend = backend.close;
@@ -494,6 +541,136 @@ describe('static-server', () => {
       body: JSON.stringify({ endpoint: 'file:///etc/passwd', query: 'x' }),
     });
     expect(r.status).toBe(503);
+  });
+
+  it('streams multipart knowledge uploads with server-owned security headers', async () => {
+    const backend = await startMockBackend((_req, res) => res.end('nope'));
+    stopBackend = backend.close;
+    let seenBody = '';
+    let seenContentType = '';
+    let seenRequestedBy = '';
+    const vectorDb = await startMockBackend((req, res) => {
+      if (req.method !== 'POST' || req.url !== '/api/upload') return void res.writeHead(404).end();
+      seenContentType = String(req.headers['content-type'] || '');
+      seenRequestedBy = String(req.headers['x-requested-by'] || '');
+      const chunks: Buffer[] = [];
+      req.on('data', (chunk) => chunks.push(chunk as Buffer));
+      req.on('end', () => {
+        seenBody = Buffer.concat(chunks).toString('utf8');
+        res.writeHead(200, { 'content-type': 'application/json' });
+        res.end(JSON.stringify({ success: true, doc_id: '/watch/notes.md' }));
+      });
+    });
+    handle = await startStaticServer({
+      staticDir,
+      backendPort: backend.port,
+      port: 0,
+      knowledgeEndpoint: `http://127.0.0.1:${vectorDb.port}`,
+    });
+    const form = new FormData();
+    form.append('file', new Blob(['private-memory-marker']), 'notes.md');
+
+    const response = await fetch(`${handle.localUrl}/api/vector-upload`, { method: 'POST', body: form });
+
+    expect(response.status).toBe(200);
+    expect(seenContentType).toMatch(/^multipart\/form-data; boundary=/);
+    expect(seenRequestedBy).toBe('centaur-vdb');
+    expect(seenBody).toContain('private-memory-marker');
+    await vectorDb.close();
+  });
+
+  it('rejects knowledge uploads that are not multipart', async () => {
+    const backend = await startMockBackend((_req, res) => res.end('nope'));
+    stopBackend = backend.close;
+    handle = await startStaticServer({ staticDir, backendPort: backend.port, port: 0 });
+
+    const response = await fetch(`${handle.localUrl}/api/vector-upload`, { method: 'POST', body: 'not-a-file' });
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({ error: 'MULTIPART_REQUIRED' });
+  });
+
+  it('keeps authenticated LAN knowledge access enabled without an extra worker token', async () => {
+    const backend = await startMockBackend((req, res) => {
+      if (req.method === 'POST' && req.url === '/login') {
+        res.writeHead(200, { 'content-type': 'application/json' });
+        res.end(JSON.stringify({ success: true }));
+        return;
+      }
+      res.writeHead(404).end();
+    });
+    stopBackend = backend.close;
+    let seenJobPath = '';
+    const vectorDb = await startMockBackend((req, res) => {
+      seenJobPath = req.url || '';
+      res.writeHead(200, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ state: 'done' }));
+    });
+    handle = await startStaticServer({
+      staticDir,
+      backendPort: backend.port,
+      port: 0,
+      allowRemote: true,
+      knowledgeEndpoint: `http://127.0.0.1:${vectorDb.port}`,
+    });
+    const login = await fetch(`${handle.localUrl}/login`, { method: 'POST', body: '{}' });
+    const gateToken = login.headers.get('x-webui-gate-token') || '';
+
+    const response = await fetch(
+      `${handle.localUrl}/api/vector-jobs?doc_id=${encodeURIComponent('/watch/meeting.mp4')}`,
+      { headers: { 'x-webui-gate-token': gateToken } }
+    );
+
+    expect(response.status).toBe(200);
+    expect(seenJobPath).toBe('/api/jobs/%2Fwatch%2Fmeeting.mp4');
+    await vectorDb.close();
+  });
+
+  it('sanitizes reindex requests and streams knowledge files', async () => {
+    const backend = await startMockBackend((_req, res) => res.end('nope'));
+    stopBackend = backend.close;
+    let reindexBody: unknown = null;
+    let filePath = '';
+    const vectorDb = await startMockBackend((req, res) => {
+      if (req.method === 'POST' && req.url === '/api/documents/reindex') {
+        const chunks: Buffer[] = [];
+        req.on('data', (chunk) => chunks.push(chunk as Buffer));
+        req.on('end', () => {
+          reindexBody = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+          res.writeHead(200, { 'content-type': 'application/json' });
+          res.end(JSON.stringify({ success: true, queued: 1 }));
+        });
+        return;
+      }
+      if (req.method === 'GET' && req.url?.startsWith('/api/file?')) {
+        filePath = req.url;
+        res.writeHead(200, { 'content-type': 'text/markdown', 'content-disposition': 'inline' });
+        res.end('knowledge-file');
+        return;
+      }
+      res.writeHead(404).end();
+    });
+    handle = await startStaticServer({
+      staticDir,
+      backendPort: backend.port,
+      port: 0,
+      knowledgeEndpoint: `http://127.0.0.1:${vectorDb.port}`,
+    });
+
+    const reindex = await fetch(`${handle.localUrl}/api/vector-reindex`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ source_paths: ['/watch/a.md'], force: false, endpoint: 'http://attacker' }),
+    });
+    const file = await fetch(
+      `${handle.localUrl}/api/vector-file?path=${encodeURIComponent('/watch/a.md')}&disposition=inline`
+    );
+
+    expect(reindex.status).toBe(200);
+    expect(reindexBody).toEqual({ source_paths: ['/watch/a.md'], force: true });
+    expect(filePath).toBe('/api/file?path=%2Fwatch%2Fa.md&disposition=inline');
+    expect(await file.text()).toBe('knowledge-file');
+    await vectorDb.close();
   });
 
   it('self-heals a 0-byte index.html: LAN users still get the real page', async () => {

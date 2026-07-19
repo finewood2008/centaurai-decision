@@ -17,9 +17,10 @@ type KnowledgeCardProps = {
   view: HubViewMode;
   size: HubCardSize;
   onOpen: (doc: KnowledgeDoc) => void;
+  actions?: React.ReactNode;
 };
 
-const KnowledgeCard: React.FC<KnowledgeCardProps> = ({ doc, view, size, onOpen }) => {
+const KnowledgeCard: React.FC<KnowledgeCardProps> = ({ doc, view, size, onOpen, actions }) => {
   const { t } = useTranslation();
   const loadImage = useCallback(() => loadKnowledgeImage(doc.path), [doc.path]);
   const chunks = t('contentHub.knowledge.chunks', { n: doc.chunkCount });
@@ -40,6 +41,14 @@ const KnowledgeCard: React.FC<KnowledgeCardProps> = ({ doc, view, size, onOpen }
         title={title}
       >
         {badge}
+        {actions && (
+          <span
+            className='absolute top-6px right-6px z-2 flex gap-2px opacity-0 group-hover:opacity-100 transition-opacity'
+            onClick={(event) => event.stopPropagation()}
+          >
+            {actions}
+          </span>
+        )}
         <FileThumb name={doc.name} loadImage={loadImage} variant='natural' emojiClass={WATERFALL_EMOJI[size]} />
         <div className='px-8px py-8px'>
           <div className='text-12px text-t-primary truncate leading-tight'>{doc.name}</div>
@@ -58,6 +67,14 @@ const KnowledgeCard: React.FC<KnowledgeCardProps> = ({ doc, view, size, onOpen }
       title={title}
     >
       {badge}
+      {actions && (
+        <span
+          className='absolute top-4px right-4px z-2 flex gap-2px opacity-0 group-hover:opacity-100 transition-opacity'
+          onClick={(event) => event.stopPropagation()}
+        >
+          {actions}
+        </span>
+      )}
       <FileThumb name={doc.name} loadImage={loadImage} variant='cover' heightClass={dim.thumb} emojiClass={dim.emoji} />
       <span className={`${dim.name} text-t-primary text-center w-full truncate leading-tight`}>{doc.name}</span>
       <span className='text-10px text-t-secondary text-center leading-tight'>{chunks}</span>

@@ -35,6 +35,10 @@ vi.mock('@/common', () => ({
   },
 }));
 
+vi.mock('@/renderer/services/i18n', () => ({
+  default: { t: (key: string) => key },
+}));
+
 vi.mock('@/renderer/components/chat/SendBox', () => ({
   default: ({ onSend }: { onSend: (message: string) => Promise<void> }) => (
     <button

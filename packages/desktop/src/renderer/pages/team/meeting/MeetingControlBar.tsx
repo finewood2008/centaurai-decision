@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import SendBox from '@/renderer/components/chat/SendBox';
 import SharedLibraryPicker from '@/renderer/components/media/SharedLibraryPicker';
-import { retrieveKnowledgeContext } from '@/renderer/services/knowledgeBaseSearch';
+import { retrieveKnowledge } from '@/renderer/services/knowledgeBaseSearch';
 import { IS_DECISION } from '@/common/config/constants';
 import type { MeetingOrchestrator } from './useMeetingOrchestrator';
 import { MEETING_FORMS } from './meetingPrompts';
@@ -49,23 +49,19 @@ const MeetingControlBar: React.FC<Props> = ({ orchestrator, topic, onTopicChange
     setKbLoading(true);
     setKbError('');
     try {
-      const result = await retrieveKnowledgeContext(q);
-      if (!result.context) {
+      const result = await retrieveKnowledge({ query: q, scope: 'all' });
+      if (!result.hits.length) {
         setKbHits([]);
         return;
       }
-      // Parse individual hits from the formatted context block
-      const hits = (result.context || '')
-        .split('\n\n')
-        .filter(Boolean)
-        .map((block) => {
-          const m = block.match(/^\[知识库 \d+\] (.+):\n([\s\S]*)/);
-          return m ? { fileName: m[1], text: m[2].trim() } : { fileName: '未知', text: block.trim() };
-        });
-      setKbHits(hits);
+      setKbHits(result.hits.map((hit) => ({ fileName: hit.title, text: hit.text })));
       setKbPreviewOpen(true);
-    } catch (e) {
-      setKbError('检索失败，请确认向量库服务已启动');
+    } catch {
+      setKbError(
+        t('messages.knowledgeRetrieval.failed', {
+          defaultValue: '知识库与记忆检索失败，请确认私有记忆库服务已启动',
+        })
+      );
     } finally {
       setKbLoading(false);
     }
